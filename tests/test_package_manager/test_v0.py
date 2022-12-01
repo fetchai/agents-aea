@@ -27,6 +27,7 @@ from pathlib import Path
 from unittest import mock
 
 from aea.package_manager.v0 import PackageManagerV0
+from aea.protocols.generator.common import INIT_FILE_NAME
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from tests.test_package_manager.test_base import (
@@ -130,16 +131,23 @@ class TestVerifyFailure(BaseAEATestCase):
         pm = PackageManagerV0.from_dir(self.packages_dir_path)
         assert pm.verify() == 0
 
-        packages[EXAMPLE_PACKAGE_ID.to_uri_path] = DUMMY_PACKAGE_HASH
-        packages_json_file.write_text(json.dumps(obj=packages))
+        # updating the `packages/open_aea/protocols/signing/__init__.py` file
+        init_file = (
+            pm.package_path_from_package_id(package_id=EXAMPLE_PACKAGE_ID)
+            / INIT_FILE_NAME
+        )
+        init_file.write_text("")
 
-        with caplog.at_level(logging.ERROR):
+        with caplog.at_level(logging.ERROR), mock.patch(
+            "aea.package_manager.v0.check_fingerprint",
+            return_value=True,
+        ):
             pm = PackageManagerV0.from_dir(self.packages_dir_path)
 
             assert pm.verify() == 1
             assert f"Hash does not match for {EXAMPLE_PACKAGE_ID}" in caplog.text
             assert (
-                f"Dependency check failed; Hash does not match for {EXAMPLE_PACKAGE_ID}"
+                f"Dependency check failed\nHash does not match for {EXAMPLE_PACKAGE_ID}"
                 in caplog.text
             )
 
