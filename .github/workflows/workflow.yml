@@ -236,11 +236,11 @@ jobs:
     if: github.base_ref == 'main'
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -288,11 +288,11 @@ jobs:
     # limited tests set for quick checking primary functionality of the AEA
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -338,11 +338,11 @@ jobs:
     if: github.base_ref == 'main'
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -373,11 +373,11 @@ jobs:
   aea-tests:
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -451,11 +451,11 @@ jobs:
     if: github.base_ref == 'main'
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -478,11 +478,11 @@ jobs:
   aea-extras-tests:
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -553,11 +553,11 @@ jobs:
     if: github.base_ref == 'main'
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
-      - plugins_install_check
+      - plugins_install
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -628,7 +628,7 @@ jobs:
   golang_tests:
     continue-on-error: True
     needs:
-      - go_code_checks
+      - go_checks
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -695,12 +695,12 @@ jobs:
   coverage_checks:
     continue-on-error: True
     needs:
-      - python_code_quality_checks
-      - go_code_checks
+      - python_checks
+      - go_checks
       - misc_checks
       - misc_checks_extra
       - docs_check
-      - plugins_install_check
+      - plugins_install
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
