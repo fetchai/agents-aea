@@ -62,7 +62,7 @@ class PackageManagerV0(BasePackageManager):
     def get_package_hash(self, package_id: PackageId) -> Optional[str]:
         """Get package hash."""
 
-        return self._packages.get(package_id)
+        return self._packages.get(package_id.without_hash())
 
     def sync(
         self,
