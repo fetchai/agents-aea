@@ -148,10 +148,14 @@ class PackageManagerV0(BasePackageManager):
                     package_id=package_id
                 )
                 if calculated_hash != expected_hash:
-                    failed = True
+                    # this update is required for further dependency checks for
+                    # packages where this package is a dependency
+                    self._packages[package_id] = calculated_hash
                     self._logger.error(
                         f"\nHash does not match for {package_id}\n\tCalculated hash: {calculated_hash}\n\tExpected hash: {expected_hash}"
                     )
+                    failed = True
+                    continue
 
                 dependencies_with_mismatched_hashes = self.check_dependencies(
                     configuration=configuration_obj,
@@ -167,7 +171,7 @@ class PackageManagerV0(BasePackageManager):
 
                         if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
                             self._logger.error(
-                                f"Dependency check failed; Hash does not match for {dep.without_hash()} in {package_id} configuration."
+                                f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
                             )
                             continue
                     failed = True
