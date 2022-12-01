@@ -1,19 +1,19 @@
 name: fipa
 author: fetchai
-version: 1.1.5
+version: 1.1.6
 protocol_specification_id: fetchai/fipa:1.0.0
 type: protocol
 description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmT6zRci695q8cLzjxLvKVL4yteXQHFLn6n5UR3aeW4JUz
+  README.md: QmYkcFE9JsK9imfMe84om7UbU8qi8nDtCoxFWBEkqgAKpQ
   __init__.py: QmYuEPAeBxGoQ5CkX5ZrmBeaUZu83unAcqDuDv5M6kNys6
   custom_types.py: QmaYgpGGoEiVRyjaSK7JCUj8bveA7azyCQeK2E4R7e86ZG
   dialogues.py: QmVLKtuTwgCLK9jMWvHdJEnprd5nkdM4GAs5mowNkxL7r4
   fipa.proto: QmS7aXZ2JoG3oyMHWiPYoP9RJ7iChsoTC9KQLsj6vi3ejR
   fipa_pb2.py: QmT6CxDiwyz3ucsNxZSxtNZXE9NThshV68zvXEYtiWjEUP
-  message.py: Qme5JuNWGxRv3xoY6qXKu3XvqMCV8AWKTgMKR5X1K2J8vq
+  message.py: QmPDbDh494b1jdUhp7Wv11mkDDVwKTNwAPKJg8mwG5pVEh
   serialization.py: QmYyKaeVdQMt1Tq3RKX7VQY52yAF5eo2neitZB1dyVSDmn
 fingerprint_ignore_patterns: []
 dependencies:

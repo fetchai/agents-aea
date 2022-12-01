@@ -10,7 +10,7 @@ This is a protocol for communication between two AEAs for registration.
 ---
 name: register
 author: fetchai
-version: 1.1.5
+version: 1.1.6
 description: A protocol for communication between two AEAs for registration.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

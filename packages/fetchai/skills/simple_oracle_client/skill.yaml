@@ -1,6 +1,6 @@
 name: simple_oracle_client
 author: fetchai
-version: 0.13.3
+version: 0.13.4
 type: skill
 description: This skill deploys a Fetch oracle client contract and calls this contract
   to request an oracle value
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRqzw2aTE6rsUnoB8XvvWoF4sg4ZUpvgQwStZpAVG5sUj
-  __init__.py: QmaxArozcZdj4CPSumgPMDu2JAZpRv22VSy6iB6PfBVJhR
+  __init__.py: QmdTG5HFPocmo7BDNkNk9mhmAoDw8u7ifunt7x4bBKAtex
   behaviours.py: QmQNPAdfDjZKCsXhS3tWgeXN3gbNNdhZuxRAgdRnMvaLu5
   dialogues.py: QmbbaQXAXr8cUc9YB927pnZYdx6SqFfxc4LQV1iWyFUvGX
   handlers.py: QmcHGeTueHdNaB18QB65sso3AMtVQ3EaG2fggf6fd1r23d
@@ -18,10 +18,10 @@ contracts:
 - fetchai/fet_erc20:0.9.1
 - fetchai/oracle_client:0.11.2
 protocols:
-- fetchai/contract_api:1.1.5
-- fetchai/default:1.1.5
-- fetchai/ledger_api:1.1.5
-- fetchai/signing:1.1.5
+- fetchai/contract_api:1.1.6
+- fetchai/default:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/signing:1.1.6
 skills: []
 behaviours:
   simple_oracle_client_behaviour:

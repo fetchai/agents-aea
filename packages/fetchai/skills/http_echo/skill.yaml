@@ -1,6 +1,6 @@
 name: http_echo
 author: fetchai
-version: 0.21.4
+version: 0.21.5
 type: skill
 description: The http echo skill prints out the content of received http messages
   and responds with success.
@@ -8,15 +8,15 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmYC2Y95Mg327LyHzQ3WbxZA8g1NfSHasmDTRcvrGCXmiR
-  __init__.py: QmVC5ePi11nsu4asR2ggJN6opDRZzfGEmR2dz2KSyGBwAu
+  __init__.py: QmXF3BqJVHhci6YT6GQbCQTPzTKxjPezn2W5iLFudMr8q4
   dialogues.py: QmUSbxe3nGmPYWsV2uL4KXSFFiMyHdr96UhDwTyJn88wWm
   handlers.py: QmRmvkeEAUPDESDsPT1rhU5kRH3QqPdSyMc8vqeU43zZwi
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.23.4
+- fetchai/http_server:0.23.5
 contracts: []
 protocols:
-- fetchai/http:1.1.5
+- fetchai/http:1.1.6
 skills: []
 behaviours: {}
 handlers:

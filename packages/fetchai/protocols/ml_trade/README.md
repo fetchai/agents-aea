@@ -10,7 +10,7 @@ This is a protocol for trading data for training and prediction purposes.
 ---
 name: ml_trade
 author: fetchai
-version: 1.1.5
+version: 1.1.6
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

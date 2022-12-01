@@ -1,19 +1,19 @@
 name: error
 author: fetchai
-version: 0.18.4
+version: 0.18.5
 type: skill
 description: The error skill implements basic error handling required by all AEAs.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmXqqMwZhZWcrUFxQ4S9FsFsUw5RmMaDQwR9LcKUrRTpH7
-  __init__.py: Qmdyu9gY2GJkKV5X5uzekogt8WAcgrHQPwnj9UHTJDuysw
+  __init__.py: QmbZzvvHCjbFg5rA7LRSTAiX1nhgEU77bHrBfmYibRYurQ
   handlers.py: QmbP1n9SQCxv47ZYYUugysCsWx1hj5LA1R9z7a1envwfZ2
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.5
+- fetchai/default:1.1.6
 skills: []
 behaviours: {}
 handlers:

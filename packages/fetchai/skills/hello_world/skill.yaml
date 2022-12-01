@@ -1,13 +1,13 @@
 name: hello_world
 author: fetchai
-version: 0.1.3
+version: 0.1.4
 type: skill
 description: This skill prints `Hello World!` on the screen. The message can be configured
   to be any different string.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmXyDmKjPdJKyw9LTckrHWatF3VCLzMbuzPenQgtejEY7b
+  __init__.py: QmbqCTQ8pqsFdS9NTRj66ew6Z63D2spQYqaBPTjBad7F18
   behaviours.py: QmS7yRdXj1Y31GXHL8wJEugF2NaHmosBsAobksQqDSH8aW
 fingerprint_ignore_patterns: []
 connections: []
