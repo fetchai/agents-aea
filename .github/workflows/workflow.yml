@@ -233,7 +233,7 @@ jobs:
           make protolint
 
   integration_checks:
-    if: startsWith(github.ref_name, 'release')
+    if: github.base_ref == 'main'
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -335,7 +335,7 @@ jobs:
         run: tox -e py3.8 -- tests/test_aea_core_packages/
 
   integration_checks_ledger:
-    if: startsWith(github.ref_name, 'release')
+    if: github.base_ref == 'main'
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -448,7 +448,7 @@ jobs:
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
   aea-examples-tests:
-    if: startsWith(github.ref_name, 'release')
+    if: github.base_ref == 'main'
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -593,7 +593,7 @@ jobs:
           tox -e py${{ matrix.python_version }} -- ./tests/test_aea_extra
 
   packages-tests:
-    if: startsWith(github.ref_name, 'release')
+    if: github.base_ref == 'main'
     continue-on-error: True
     needs:
       - python_code_quality_checks
