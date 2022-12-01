@@ -516,7 +516,7 @@ jobs:
           protolint version
       - name: Unit tests
         run: |
-          tox -e py${{ matrix.python_version }} -- ./tests/test_examples
+          tox -e py3.8 -- ./tests/test_examples
 
   aea-extras-tests:
     continue-on-error: True
