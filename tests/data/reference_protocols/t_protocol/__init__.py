@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the t_protocol protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.3`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.4`.
 """
 
 from tests.data.generator.t_protocol.message import TProtocolMessage

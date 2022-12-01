@@ -7,15 +7,15 @@ description: The oef connection provides a wrapper around the OEF SDK for connec
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZ4CgMcH61R9zMx9zt9xGNdE5exSQ5RAMZzcmcNcfgbbP
+  README.md: QmVGGWaHbGruXwLUmjurUyyVRn3qrU8mpvK5JYnk957Cci
   __init__.py: Qmd6emotQtJCuiN5P6peqzyhNJx9ZzHcqBXmkrLXy4BdBX
   connection.py: QmdfirtrPipbbWjYMKwCdubJfLKL5Ti2hWEhock5kppoYm
   object_translator.py: QmYab37Q97PFHtq6tJViEq1jYbdLZ2fDYSqrDfjZMLCrvR
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/oef_search:1.1.4
+- fetchai/default:1.1.5
+- fetchai/oef_search:1.1.5
 class_name: OEFConnection
 config:
   addr: 127.0.0.1

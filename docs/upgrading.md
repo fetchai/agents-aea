@@ -10,7 +10,7 @@ Ensure you update the plugins to their latest version (all plugins are changed i
 
 Update the packages to the latest versions (especially protocols).
 
-Update development envidonment
+Update development environment
 
 ## `v1.2.0` to `v1.2.2`
 

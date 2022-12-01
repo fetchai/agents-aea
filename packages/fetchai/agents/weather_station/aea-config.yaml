@@ -12,12 +12,12 @@ connections:
 - fetchai/soef:0.27.4
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/fipa:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/state_update:1.1.4
+- fetchai/default:1.1.5
+- fetchai/fipa:1.1.5
+- fetchai/ledger_api:1.1.5
+- fetchai/oef_search:1.1.5
+- fetchai/signing:1.1.5
+- fetchai/state_update:1.1.5
 skills:
 - fetchai/generic_seller:0.28.4
 - fetchai/weather_station:0.27.4
@@ -30,8 +30,8 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/ledger_api:1.1.4: fetchai/ledger:0.21.3
-  fetchai/oef_search:1.1.4: fetchai/soef:0.27.4
+  fetchai/ledger_api:1.1.5: fetchai/ledger:0.21.3
+  fetchai/oef_search:1.1.5: fetchai/soef:0.27.4
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:

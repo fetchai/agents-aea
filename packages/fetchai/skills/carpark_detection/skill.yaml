@@ -19,10 +19,10 @@ fingerprint_ignore_patterns:
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/fipa:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
+- fetchai/default:1.1.5
+- fetchai/fipa:1.1.5
+- fetchai/ledger_api:1.1.5
+- fetchai/oef_search:1.1.5
 skills:
 - fetchai/generic_seller:0.28.4
 behaviours:

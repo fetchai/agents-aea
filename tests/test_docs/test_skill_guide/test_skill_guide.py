@@ -99,7 +99,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         self.set_config(setting_path, FetchAICrypto.identifier)
 
         default_routing = {
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         # replace location

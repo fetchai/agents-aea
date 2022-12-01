@@ -10,7 +10,7 @@ This is a protocol for ACN (agent communication network) envelope delivery.
 ---
 name: acn
 author: fetchai
-version: 1.1.4
+version: 1.1.5
 description: The protocol used for envelope delivery on the ACN.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

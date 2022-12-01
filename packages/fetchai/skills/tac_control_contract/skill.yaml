@@ -21,12 +21,12 @@ connections:
 contracts:
 - fetchai/erc1155:0.23.2
 protocols:
-- fetchai/contract_api:1.1.4
-- fetchai/default:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/tac:1.1.4
+- fetchai/contract_api:1.1.5
+- fetchai/default:1.1.5
+- fetchai/ledger_api:1.1.5
+- fetchai/oef_search:1.1.5
+- fetchai/signing:1.1.5
+- fetchai/tac:1.1.5
 skills:
 - fetchai/tac_control:0.25.4
 behaviours:

@@ -54,7 +54,7 @@ connections:
 - fetchai/local:0.21.4
 contracts: []
 protocols:
-- fetchai/default:1.1.4
+- fetchai/default:1.1.5
 skills:
 - dummy_author/dummy:0.1.0
 - fetchai/error:0.18.4

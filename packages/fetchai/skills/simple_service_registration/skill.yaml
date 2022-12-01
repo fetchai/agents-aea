@@ -16,7 +16,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.4
+- fetchai/oef_search:1.1.5
 skills: []
 behaviours:
   service:

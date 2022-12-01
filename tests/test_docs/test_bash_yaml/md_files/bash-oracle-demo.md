@@ -31,9 +31,9 @@ aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_v
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-"fetchai/http:1.1.4": "fetchai/http_client:0.24.4",
-"fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3"
+"fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+"fetchai/http:1.1.5": "fetchai/http_client:0.24.4",
+"fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3"
 }'
 ```
 ``` bash
@@ -84,9 +84,9 @@ aea install
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-"fetchai/http:1.1.4": "fetchai/http_client:0.24.4",
-"fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3"
+"fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+"fetchai/http:1.1.5": "fetchai/http_client:0.24.4",
+"fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3"
 }'
 ```
 ``` bash

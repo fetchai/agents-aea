@@ -9,8 +9,8 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/p2p_libp2p:0.27.3
 protocols:
-- fetchai/fipa:1.1.4
-- fetchai/signing:1.1.4
+- fetchai/fipa:1.1.5
+- fetchai/signing:1.1.5
 skills:
 - fetchai/fipa_dummy_buyer:0.3.4
 default_connection: fetchai/p2p_libp2p:0.27.3

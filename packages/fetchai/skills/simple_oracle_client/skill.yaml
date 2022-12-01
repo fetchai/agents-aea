@@ -18,10 +18,10 @@ contracts:
 - fetchai/fet_erc20:0.9.1
 - fetchai/oracle_client:0.11.2
 protocols:
-- fetchai/contract_api:1.1.4
-- fetchai/default:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/signing:1.1.4
+- fetchai/contract_api:1.1.5
+- fetchai/default:1.1.5
+- fetchai/ledger_api:1.1.5
+- fetchai/signing:1.1.5
 skills: []
 behaviours:
   simple_oracle_client_behaviour:

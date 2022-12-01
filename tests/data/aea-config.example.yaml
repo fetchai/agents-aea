@@ -10,10 +10,10 @@ connections:
 - fetchai/oef:0.22.4
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.4
-- fetchai/default:1.1.4
-- fetchai/tac:1.1.4
-- fetchai/fipa:1.1.4
+- fetchai/oef_search:1.1.5
+- fetchai/default:1.1.5
+- fetchai/tac:1.1.5
+- fetchai/fipa:1.1.5
 skills:
 - fetchai/echo:0.20.4
 default_connection: fetchai/oef:0.22.4

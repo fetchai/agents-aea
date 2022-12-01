@@ -11,11 +11,11 @@ connections:
 - fetchai/soef:0.27.4
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/fipa:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/state_update:1.1.4
+- fetchai/default:1.1.5
+- fetchai/fipa:1.1.5
+- fetchai/oef_search:1.1.5
+- fetchai/signing:1.1.5
+- fetchai/state_update:1.1.5
 skills:
 - fetchai/simple_service_registration:0.23.4
 default_connection: fetchai/p2p_libp2p:0.27.3
@@ -27,7 +27,7 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/oef_search:1.1.4: fetchai/soef:0.27.4
+  fetchai/oef_search:1.1.5: fetchai/soef:0.27.4
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:

@@ -133,9 +133,9 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier fetchai_v
 aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -190,9 +190,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -225,9 +225,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -393,9 +393,9 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -450,9 +450,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -485,9 +485,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
