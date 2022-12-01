@@ -3,7 +3,7 @@
 ## 1.25.0 (2022-12-01)
 
 AEA:
-- Fixes the mechanism to convert the `json` path the environment variable string
+- Fixes the mechanism to convert the `json` path to environment variable string
 - Updates the process of agent subprocess termination to make sure we properly terminate agents across the various operating systems
 - Introduces `reraise_as_click_exception` to re-raise exceptions as `click.ClickExceptions` on command definitions
 - Extends `CliRunner` to allow usage of `capfd` to capture test output
@@ -13,7 +13,7 @@ AEA:
   - Update the hashes for third party packages with a warning
   - Update the dependency hashes when locking packages
   - Verifying the dependency hashes when verifying packages
-- Adds deprecation warning for `aea hash all` command
+- Adds deprecation warning for `aea hash all` command since the same functionality is now being provided by `aea packages lock` command
 
 Tests:
 - Updates `libp2p` tests to use `capsys` to read `stdout` instead of patching `sys.stdout`

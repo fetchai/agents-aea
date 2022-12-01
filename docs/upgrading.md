@@ -15,6 +15,8 @@ No backwards incompatible changes.
 
 Plugins from previous versions are not compatible anymore.
 
+The usage of `aea hash all` command has been deprecated and will be removed on `v2.0.0`, use `aea packages lock` command to perform hash updates for package dependencies.
+
 ## `v1.23.0` to `v1.24.0`
 
 No backwards incompatible changes.
