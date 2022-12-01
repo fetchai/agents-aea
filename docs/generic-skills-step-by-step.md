@@ -11,16 +11,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.29.3
+aea fetch fetchai/generic_seller:0.29.4
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.28.4
+aea eject skill fetchai/generic_seller:0.28.5
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.3
+aea fetch fetchai/generic_buyer:0.30.4
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.27.4
+aea eject skill fetchai/generic_buyer:0.27.5
 cd ..
 ```
 
@@ -1419,13 +1419,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.3
+- fetchai/ledger:0.21.4
 contracts: []
 protocols:
-- fetchai/default:1.1.5
-- fetchai/fipa:1.1.5
-- fetchai/ledger_api:1.1.5
-- fetchai/oef_search:1.1.5
+- fetchai/default:1.1.6
+- fetchai/fipa:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/oef_search:1.1.6
 skills: []
 behaviours:
   service_registration:
@@ -3080,14 +3080,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.3
+- fetchai/ledger:0.21.4
 contracts: []
 protocols:
-- fetchai/default:1.1.5
-- fetchai/fipa:1.1.5
-- fetchai/ledger_api:1.1.5
-- fetchai/oef_search:1.1.5
-- fetchai/signing:1.1.5
+- fetchai/default:1.1.6
+- fetchai/fipa:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/oef_search:1.1.6
+- fetchai/signing:1.1.6
 skills: []
 behaviours:
   search:
@@ -3186,8 +3186,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
+  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
 }'
 ```
 
@@ -3204,13 +3204,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.3
-aea add connection fetchai/soef:0.27.4
-aea add connection fetchai/ledger:0.21.3
-aea add protocol fetchai/fipa:1.1.5
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/ledger:0.21.4
+aea add protocol fetchai/fipa:1.1.6
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 aea run
 ```
 
@@ -3221,14 +3221,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.3
-aea add connection fetchai/soef:0.27.4
-aea add connection fetchai/ledger:0.21.3
-aea add protocol fetchai/fipa:1.1.5
-aea add protocol fetchai/signing:1.1.5
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/ledger:0.21.4
+aea add protocol fetchai/fipa:1.1.6
+aea add protocol fetchai/signing:1.1.6
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:
