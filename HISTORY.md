@@ -7,7 +7,7 @@ AEA:
 - Updates the process of agent subprocess termination to make sure we properly terminate agents across the various operating systems
 - Introduces `reraise_as_click_exception` to re-raise exceptions as `click.ClickExceptions` on command definitions
 - Extends `CliRunner` to allow usage of `capfd` to capture test output
-- Introduce `generate_env_vars_recursively` method to auto generate the environment variable names for component overrides
+- Introduces `generate_env_vars_recursively` method to auto generate the environment variable names for component overrides
 - Extends `aea generate-key` to support creating multiple keys
 - Extends the package manager API to
   - Update the hashes for third party packages with a warning
