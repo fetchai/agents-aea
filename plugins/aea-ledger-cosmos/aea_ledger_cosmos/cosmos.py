@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from Crypto.Cipher import AES  # nosec
 from Crypto.Protocol.KDF import scrypt  # nosec
 from Crypto.Random import get_random_bytes  # nosec
+from aea_ledger_cosmos.hashfuncs import ripemd160, sha256
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
     bech32_encode,
@@ -339,8 +340,8 @@ class CosmosHelper(Helper):
         :return: str
         """
         public_key_bytes = bytes.fromhex(public_key)
-        s = hashlib.new("sha256", public_key_bytes).digest()
-        r = hashlib.new("ripemd160", s).digest()
+        s = sha256(public_key_bytes)
+        r = ripemd160(s)
         five_bit_r = convertbits(r, 8, 5)
         if five_bit_r is None:  # pragma: nocover
             raise AEAEnforceError("Unsuccessful bech32.convertbits call")

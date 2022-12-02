@@ -31,6 +31,10 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+from aea_ledger_fetchai.hashfuncs import sha256
+
+from aea_ledger_fetchai.hashfuncs import ripemd160
+
 from Crypto.Cipher import AES  # nosec
 from Crypto.Protocol.KDF import scrypt  # nosec
 from Crypto.Random import get_random_bytes  # nosec
@@ -339,8 +343,8 @@ class CosmosHelper(Helper):
         :return: str
         """
         public_key_bytes = bytes.fromhex(public_key)
-        s = hashlib.new("sha256", public_key_bytes).digest()
-        r = hashlib.new("ripemd160", s).digest()
+        s = sha256(public_key_bytes)
+        r = ripemd160(s)
         five_bit_r = convertbits(r, 8, 5)
         if five_bit_r is None:  # pragma: nocover
             raise AEAEnforceError("Unsuccessful bech32.convertbits call")
