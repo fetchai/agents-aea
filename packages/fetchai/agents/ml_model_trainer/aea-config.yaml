@@ -1,27 +1,27 @@
 agent_name: ml_model_trainer
 author: fetchai
-version: 0.33.3
+version: 0.33.4
 description: An agent buying data and training a model from it.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.3
-- fetchai/p2p_libp2p:0.27.3
-- fetchai/soef:0.27.4
+- fetchai/ledger:0.21.4
+- fetchai/p2p_libp2p:0.27.4
+- fetchai/soef:0.27.5
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/ml_trade:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/state_update:1.1.4
+- fetchai/default:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/ml_trade:1.1.6
+- fetchai/oef_search:1.1.6
+- fetchai/signing:1.1.6
+- fetchai/state_update:1.1.6
 skills:
-- fetchai/generic_buyer:0.27.4
-- fetchai/ml_train:0.29.4
-default_connection: fetchai/p2p_libp2p:0.27.3
+- fetchai/generic_buyer:0.27.5
+- fetchai/ml_train:0.29.5
+default_connection: fetchai/p2p_libp2p:0.27.4
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -30,8 +30,8 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/ledger_api:1.1.4: fetchai/ledger:0.21.3
-  fetchai/oef_search:1.1.4: fetchai/soef:0.27.4
+  fetchai/ledger_api:1.1.6: fetchai/ledger:0.21.4
+  fetchai/oef_search:1.1.6: fetchai/soef:0.27.5
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:

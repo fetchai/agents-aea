@@ -1,6 +1,6 @@
 agent_name: confirmation_aea_aw2
 author: fetchai
-version: 0.18.4
+version: 0.18.5
 description: This agent purchases information from other agents as specified in its
   configuration. It acts as the confirmation AEA in Agent World 2.
 license: Apache-2.0
@@ -8,26 +8,26 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.3
-- fetchai/p2p_libp2p:0.27.3
-- fetchai/soef:0.27.4
+- fetchai/ledger:0.21.4
+- fetchai/p2p_libp2p:0.27.4
+- fetchai/soef:0.27.5
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/state_update:1.1.4
+- fetchai/default:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/oef_search:1.1.6
+- fetchai/signing:1.1.6
+- fetchai/state_update:1.1.6
 skills:
-- fetchai/confirmation_aw2:0.13.4
-- fetchai/generic_buyer:0.27.4
-default_connection: fetchai/p2p_libp2p:0.27.3
+- fetchai/confirmation_aw2:0.13.5
+- fetchai/generic_buyer:0.27.5
+default_connection: fetchai/p2p_libp2p:0.27.4
 default_ledger: fetchai
 required_ledgers:
 - fetchai
 default_routing:
-  fetchai/ledger_api:1.1.4: fetchai/ledger:0.21.3
-  fetchai/oef_search:1.1.4: fetchai/soef:0.27.4
+  fetchai/ledger_api:1.1.6: fetchai/ledger:0.21.4
+  fetchai/oef_search:1.1.6: fetchai/soef:0.27.5
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -67,7 +67,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/p2p_libp2p:0.27.3
+public_id: fetchai/p2p_libp2p:0.27.4
 type: connection
 config:
   delegate_uri: null
@@ -75,13 +75,13 @@ config:
   entry_peers:
   - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
-public_id: fetchai/soef:0.27.4
+public_id: fetchai/soef:0.27.5
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
   token_storage_path: /data/soef_key.txt
 ---
-public_id: fetchai/ledger:0.21.3
+public_id: fetchai/ledger:0.21.4
 type: connection
 config:
   ledger_apis:
@@ -91,7 +91,7 @@ config:
       address: https://rest-dorado.fetch.ai:443
       chain_id: dorado-1
 ---
-public_id: fetchai/confirmation_aw2:0.13.4
+public_id: fetchai/confirmation_aw2:0.13.5
 type: skill
 behaviours:
   search:

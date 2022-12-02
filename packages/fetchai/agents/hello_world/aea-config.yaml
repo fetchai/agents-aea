@@ -1,6 +1,6 @@
 agent_name: hello_world
 author: fetchai
-version: 0.1.0
+version: 0.1.6
 license: Apache-2.0
 description: A hello world agent. An agent that prints a message on the screen.
 aea_version: '>=1.2.0, <2.0.0'
@@ -8,9 +8,10 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
-protocols: []
+protocols:
+- fetchai/signing:1.1.6
 skills:
-- fetchai/hello_world:0.1.0
+- fetchai/hello_world:0.1.4
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -24,7 +25,7 @@ dependencies:
   aea-ledger-fetchai: {}
 default_connection: null
 ---
-public_id: fetchai/hello_world:0.1.0
+public_id: fetchai/hello_world:0.1.4
 type: skill
 behaviours:
   hello_world:

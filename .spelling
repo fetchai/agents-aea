@@ -241,6 +241,19 @@ golang
 basecontracttesttool
 linter
 stargateworld
+faq
+fetchai
+agents-aea
+ci
+perf
+scipy
+numpy
+scikit-image
+hello_world
+pis
+prebuilt
+jsonschema
+tox
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -301,3 +314,6 @@ dorado-1
 ACA-Py
 ACA-Py-based
 prover
+ - CODE_OF_CONDUCT.md
+color
+behavior

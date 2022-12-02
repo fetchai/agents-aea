@@ -39,7 +39,7 @@ DEFAULT_BODY_SIZE = 4
 class AcnMessage(Message):
     """The protocol used for envelope delivery on the ACN."""
 
-    protocol_id = PublicId.from_str("fetchai/acn:1.1.4")
+    protocol_id = PublicId.from_str("fetchai/acn:1.1.6")
     protocol_specification_id = PublicId.from_str("aea/acn:1.0.0")
 
     AgentRecord = CustomAgentRecord

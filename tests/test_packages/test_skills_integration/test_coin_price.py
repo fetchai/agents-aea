@@ -49,15 +49,15 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/http_client:0.24.4")
-        self.add_item("connection", "fetchai/http_server:0.23.4")
-        self.add_item("connection", "fetchai/prometheus:0.9.4")
-        self.add_item("skill", "fetchai/advanced_data_request:0.7.4")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.23.4")
+        self.add_item("connection", "fetchai/http_client:0.24.5")
+        self.add_item("connection", "fetchai/http_server:0.23.5")
+        self.add_item("connection", "fetchai/prometheus:0.9.5")
+        self.add_item("skill", "fetchai/advanced_data_request:0.7.5")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.23.5")
 
         default_routing = {
-            "fetchai/http:1.1.4": "fetchai/http_client:0.24.4",
-            "fetchai/prometheus:1.1.4": "fetchai/prometheus:0.9.4",
+            "fetchai/http:1.1.6": "fetchai/http_client:0.24.5",
+            "fetchai/prometheus:1.1.6": "fetchai/prometheus:0.9.5",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -69,7 +69,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
-            "fetchai/advanced_data_request:0.7.4",
+            "fetchai/advanced_data_request:0.7.5",
         )
         self.set_config(
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",
@@ -88,7 +88,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.15.3", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.15.4", coin_price_feed_aea_name
         )
         assert (
             diff == []
@@ -110,7 +110,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
             return "price" in coin_price
 
         wait_for_condition(
-            wait, timeout=10, period=1, error_msg="Response does not contain 'price'"
+            wait, timeout=10, period=0.1, error_msg="Response does not contain 'price'"
         )
 
         response = requests.get("http://127.0.0.1:8000")

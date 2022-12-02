@@ -13,7 +13,7 @@ After receiving, A signs the transaction, adds its signature to the list of sign
 ---
 name: cosm_trade
 author: fetchai
-version: 0.2.4
+version: 0.2.6
 description: A protocol for preparing an atomic swap bilateral transaction for cosmos-based ledgers, including fetchai's.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
