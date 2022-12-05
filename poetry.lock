@@ -339,7 +339,7 @@ testing = ["flake8 (<5)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-chec
 
 [[package]]
 name = "cosmpy"
-version = "0.6.1"
+version = "0.6.2"
 description = "A library for interacting with the cosmos networks"
 category = "dev"
 optional = false
@@ -2789,7 +2789,7 @@ cli = ["click"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "981b41e8f995123f2e94b4cf5ec885ceb21d1d9f42e000d49a85a893755cf201"
+content-hash = "0fa0e680ea7baa02cff30d4c4d7659b3ab4f4efdd5d12a115763b4eafa75c79d"
 
 [metadata.files]
 absl-py = [
@@ -3220,8 +3220,8 @@ configparser = [
     {file = "configparser-5.3.0.tar.gz", hash = "sha256:8be267824b541c09b08db124917f48ab525a6c3e837011f3130781a224c57090"},
 ]
 cosmpy = [
-    {file = "cosmpy-0.6.1-py3-none-any.whl", hash = "sha256:496a6dbd9ff8f96661d83880412020f7cfd62678f7ccfd48bf867b1a1ff428c7"},
-    {file = "cosmpy-0.6.1.tar.gz", hash = "sha256:98e2a939e1ee671c462fe86b2e8b85091bb85f4c19c87617b30e7d588069d462"},
+    {file = "cosmpy-0.6.2-py3-none-any.whl", hash = "sha256:537a262df4d72346e751c97480b122cbcbcc66be32ef321a1a95c2b1d8628ff1"},
+    {file = "cosmpy-0.6.2.tar.gz", hash = "sha256:a7c92b13a34bfa4b5287e56c3d4c7cb85cc3e8d008965da3fb18711c46c18ab6"},
 ]
 coverage = [
     {file = "coverage-6.5.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ef8674b0ee8cc11e2d574e3e2998aea5df5ab242e012286824ea3c6970580e53"},
