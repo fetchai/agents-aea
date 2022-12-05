@@ -148,7 +148,7 @@ class CliRunner(ClickCliRunner):
 
 
 class CliTest:
-    """Test `autonomy analyse abci` command."""
+    """Test cli commands."""
 
     t: Path
     cwd: Path
