@@ -33,14 +33,23 @@ Links:
 
 """
 
+import os
 import shlex
+import shutil
+import subprocess  # nosec
 import sys
+import tempfile
 from contextlib import nullcontext, redirect_stderr
-from typing import ContextManager, Optional, cast
+from pathlib import Path
+from typing import Any, ContextManager, Dict, Optional, Tuple, cast
 
+import click.core
+import pytest
 from _pytest.capture import CaptureFixture  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
+
+from aea.cli import cli
 
 
 class CliRunner(ClickCliRunner):
@@ -57,7 +66,7 @@ class CliRunner(ClickCliRunner):
         env=None,
         catch_exceptions=True,
         color=False,
-        **extra
+        **extra,
     ) -> Result:
         """Call a cli command with click.testing.CliRunner.invoke."""
         exc_info = None
@@ -133,3 +142,62 @@ class CliRunner(ClickCliRunner):
             exc_info=exc_info,  # type: ignore
             return_value=None,
         )
+
+
+class BaseCliTest:
+    """Test `autonomy analyse abci` command."""
+
+    t: Path
+    cwd: Path
+    cli_runner: CliRunner
+    cli_options: Tuple[str, ...]
+    cli: click.core.Group = cli
+
+    @pytest.fixture(autouse=True)
+    def set_capfd_on_cli_runner(self, capfd: CaptureFixture) -> None:
+        """Set pytest capfd on CLI runner"""
+        self.cli_runner.capfd = capfd
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Setup test class."""
+        cls.cli_runner = CliRunner()
+        cls.cwd = Path.cwd().absolute()
+
+    def setup(self) -> None:
+        """Setup test."""
+        self.t = Path(tempfile.mkdtemp())
+
+    def run_cli(self, *commands: str, **kwargs: Dict[str, Any]) -> Result:
+        """Run CLI."""
+
+        args = (*self.cli_options, *commands)
+        return self.cli_runner.invoke(cli=self.cli, args=args, kwargs=kwargs)
+
+    def run_cli_subprocess(
+        self, *commands: str, timeout: float = 60.0
+    ) -> Tuple[int, str, str]:
+        """Run CLI using subprocess."""
+
+        process = subprocess.Popen(  # nosec
+            [sys.executable, "-m", f"{self.cli.name}.cli"]
+            + list(self.cli_options)
+            + list(commands),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
+        stdout, stderr = stdout_bytes.decode(), stderr_bytes.decode()
+
+        # for Windows
+        if sys.platform == "win32":
+            stdout = stdout.replace("\r", "")
+            stderr = stderr.replace("\r", "")
+
+        return process.returncode, stdout, stderr
+
+    def teardown(self) -> None:
+        """Teardown method."""
+
+        os.chdir(self.cwd)
+        shutil.rmtree(str(self.t))
