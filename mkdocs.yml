@@ -13,7 +13,8 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+      - Benefits of adopting the AEA Framework: 'introduction/benefits-of-adopting-the-aea-framework.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
