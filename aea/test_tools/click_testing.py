@@ -190,7 +190,7 @@ class CliTest:
         """Run CLI."""
 
         args = (*self.cli_options, *commands)
-        return self.cli_runner.invoke(cli=self.cli, args=args, kwargs=kwargs)
+        return self.cli_runner.invoke(cli=self.cli, args=args, **kwargs)
 
     def run_cli_subprocess(
         self, *commands: str, timeout: float = 60.0
