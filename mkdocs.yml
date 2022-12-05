@@ -13,7 +13,8 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+    - What is the AEA Framework: 'introduction/what-is-the-aea-framework.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
@@ -32,7 +33,7 @@ nav:
     - Gym skill: 'gym-skill.md'
     - ML skills: 'ml-skills.md'
     - Oracle skills: 'oracle-demo.md'
-    - Aggegation skill: 'aggregation-demo.md'
+    - Aggregation skill: 'aggregation-demo.md'
     - TAC skills: 'tac-skills.md'
     - TAC skills ledger-based: 'tac-skills-contract.md'
     - TAC external app: 'tac.md'
