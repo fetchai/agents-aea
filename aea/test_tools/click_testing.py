@@ -52,7 +52,7 @@ from _pytest.capture import CaptureFixture  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
-from aea.cli import cli
+from aea.cli import cli as aea_cli
 
 
 class CliRunner(ClickCliRunner):
@@ -147,29 +147,44 @@ class CliRunner(ClickCliRunner):
         )
 
 
-class BaseCliTest:
+class CliTest:
     """Test `autonomy analyse abci` command."""
 
     t: Path
     cwd: Path
     cli_runner: CliRunner
     cli_options: Tuple[str, ...]
-    cli: click.core.Group = cli
+    cli: click.core.Group = aea_cli
 
     @pytest.fixture(autouse=True)
     def set_capfd_on_cli_runner(self, capfd: CaptureFixture) -> None:
         """Set pytest capfd on CLI runner"""
+
         self.cli_runner.capfd = capfd
 
     @classmethod
     def setup_class(cls) -> None:
         """Setup test class."""
+
         cls.cli_runner = CliRunner()
         cls.cwd = Path.cwd().absolute()
 
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown test class."""
+
+        os.chdir(cls.cwd)
+
     def setup(self) -> None:
         """Setup test."""
+
         self.t = Path(tempfile.mkdtemp())
+
+    def teardown(self) -> None:
+        """Teardown test."""
+
+        os.chdir(self.cwd)
+        shutil.rmtree(str(self.t))
 
     def run_cli(self, *commands: str, **kwargs: Dict[str, Any]) -> Result:
         """Run CLI."""
@@ -183,7 +198,7 @@ class BaseCliTest:
         """Run CLI using subprocess."""
 
         process = subprocess.Popen(  # nosec
-            [sys.executable, "-m", f"{self.cli.name}.cli"]
+            [sys.executable, "-m", f"{self.cli.name}.cli"]  # pylint: disable=no-member
             + list(self.cli_options)
             + list(commands),
             stdout=subprocess.PIPE,
@@ -198,9 +213,3 @@ class BaseCliTest:
             stderr = stderr.replace("\r", "")
 
         return process.returncode, stdout, stderr
-
-    def teardown(self) -> None:
-        """Teardown method."""
-
-        os.chdir(self.cwd)
-        shutil.rmtree(str(self.t))
