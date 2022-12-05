@@ -21,16 +21,19 @@
 """
 This module contains an adaptation of click.testing.CliRunner.
 
-In particular, it fixes an issue in
-CliRunner.invoke, in the 'finally' clause. More precisely, before reading from
-the testing outstream, it checks whether it has been already closed.
+In particular, it fixes two issues with CliRunner.invoke
 
-Links:
+1. in the 'finally' clause. More precisely, before reading from
+   the testing outstream, it checks whether it has been already closed.
 
-    https://github.com/pallets/click/issues/824
-    https://github.com/valory-xyz/open-aea/issues/171
-    https://github.com/valory-xyz/open-aea/issues/353
+    Links:
+    - https://github.com/pallets/click/issues/824
 
+2. it allows for optional usage of pytest capfd, which more reliably captures byte streams
+
+    Links:
+    - https://github.com/valory-xyz/open-aea/issues/171
+    - https://github.com/valory-xyz/open-aea/issues/353
 """
 
 import os
