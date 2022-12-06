@@ -56,6 +56,28 @@ Get the IPFS hash for a single file.
 
 the ipfs hash
 
+<a id="aea.helpers.ipfs.base.IPFSHashOnly.hash_bytes"></a>
+
+#### hash`_`bytes
+
+```python
+@classmethod
+def hash_bytes(cls, data: bytes, wrap: bool = True, cid_v1: bool = True, file_name_if_wrap: Optional[str] = None) -> str
+```
+
+Get the IPFS hash for a single file.
+
+**Arguments**:
+
+- `data`: bytes
+- `wrap`: whether to wrap the content in wrapper node or not
+- `cid_v1`: whether to use CID v1 hashes
+- `file_name_if_wrap`: optional str with filename applied if wrap is True
+
+**Returns**:
+
+the ipfs hash
+
 <a id="aea.helpers.ipfs.base.IPFSHashOnly.hash_directory"></a>
 
 #### hash`_`directory

@@ -191,6 +191,26 @@ def all_pins(recursive_only: bool = True) -> Set[str]
 
 Returns a list of all pins.
 
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.add_bytes"></a>
+
+#### add`_`bytes
+
+```python
+def add_bytes(data: bytes, **kwargs) -> str
+```
+
+Add bytes data to ipfs.
+
+**Arguments**:
+
+
+- `data`: bytes
+- `kwargs`: options passed to request library
+
+**Returns**:
+
+hash
+
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.add"></a>
 
 #### add
