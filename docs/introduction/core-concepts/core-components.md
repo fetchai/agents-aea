@@ -1,8 +1,9 @@
-The AEA framework consists of several core components, some required to run an AEA and others optional.
+The AEA framework consists of several core components.
 
 The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
 
-## Envelope
+
+### Envelope
 
 <a href="../api/aea#aea-objects">`AEA`</a> objects communicate asynchronously via <a href="../api/mail/base#envelope-objects">`Envelopes`</a>.
 
@@ -20,7 +21,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 <a href="../api/protocols/base#message-objects">`Messages`</a>  must adhere to a `Protocol`.
 
-## Protocol
+### Protocol
 
 <a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent-to-agent as well as component-to-component interactions within AEAs. As such, they include:
 
@@ -36,7 +37,7 @@ Additional `Protocols`, for new types of interactions, can be added as packages.
 
 Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to other agents, agent components and services via `Connections`.
 
-## Connection
+### Connection
 
 A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to networks, ledgers or other services. Where necessary, a `Connection` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
 
@@ -46,7 +47,7 @@ Additional `Connections` can be added as packages. For more details on `Connecti
 
 An AEA runs and manages `Connections` via a `Multiplexer`.
 
-## Multiplexer
+### Multiplexer
 
 The <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> is responsible for maintaining (potentially multiple) `Connections`.
 
@@ -81,13 +82,13 @@ The <a href="../api/agent_loop#baseagentloop-objects">`AgentLoop`</a> performs a
 
 The <a href="../api/agent_loop#baseagentloop-objects">`AgentLoop`</a> and <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> are decoupled via the <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, and both are maintained by the <a href="../api/runtime#baseruntime-objects">`Runtime`</a>.
 
-## Decision Maker
+### Decision Maker
 
 The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of as a `Wallet` manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component with access to the `Wallet`'s private keys.
 
 You can learn more about the decision maker <a href="../decision-maker">here</a>. In its simplest form, the decision maker acts like a `Wallet` with `Handler` to react to messages it receives from the skills.
 
-## Wallet
+### Wallet
 
 The <a href="../api/crypto/wallet#wallet-objects">`Wallet`</a> contains the private-public key pairs used by the AEA. Skills do not have access to the wallet, only the decision maker does.
 
@@ -102,16 +103,20 @@ The agent has two sets of private keys, as configured in the `aea-config.yaml`:
 
 Private keys can be encrypted at rest. The CLI commands used for interacting with the wallet allow specifying a password for encryption/decryption. 
 
-## Identity
+### Identity
 
 The <a href="../api/identity/base#identity-objects">`Identity`</a> is an abstraction that represents the identity of an AEA in the Open Economic Framework, backed by public-key cryptography. It contains the AEA's addresses as well as its name.
 
 The identity can be accessed in a `Skill` via the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>.
 
-## Contracts
+### Contracts
 
 <a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the `Skills`.
 
 `Contracts` usually contain the logic to create contract transactions and make contract calls.
 
 `Contracts` can be added as packages. For more details on `Contracts` also read the `Contract` guide <a href="../contract">here</a>.
+
+!!! note
+
+    Contracts are an optional element of the Framework.
