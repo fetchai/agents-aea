@@ -13,7 +13,9 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+      - AEA Framework core concepts:
+          - Core components: 'introduction/core-concepts/core-components.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
