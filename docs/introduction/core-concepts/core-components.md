@@ -1,12 +1,8 @@
-The AEA framework consists of several core components, some required to run an AEA and others optional.
+The AEA framework consists of several core components.
 
 The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
 
-## The elements each AEA uses
-
 ### Envelope
-
-<img src="../assets/envelope.jpg" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 <a href="../api/aea#aea-objects">`AEA`</a> objects communicate asynchronously via <a href="../api/mail/base#envelope-objects">`Envelopes`</a>.
 
@@ -36,7 +32,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 The framework provides one default `Protocol`, called `default` (current version `fetchai/default:1.1.6`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
-Additional `Protocols`, for new types of interactions, can be added as packages. For more details on `Protocols` you can read the <a href="../protocol">protocol guide</a>. To learn how you can easily automate protocol definition, head to the guide for the <a href="../protocol-generator">protocol generator</a>.
+Additional `Protocols`, for new types of interactions, can be added as packages. For more details on `Protocols` you can read the <a href="../protocol">protocol guide</a>. To learn how you can easily automate protocol definition, head to the guide for the <a href="../protocol-generator">protocol generator</a>. [ADD LINK]
 
 Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to other agents, agent components and services via `Connections`.
 
@@ -46,21 +42,17 @@ A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an
 
 The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.21.2`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
 
-Additional `Connections` can be added as packages. For more details on `Connections` read the <a href="../connection"> `Connection` guide </a>.
+Additional `Connections` can be added as packages. For more details on `Connections` read the <a href="../connection"> `Connection` guide </a>. [ADD LINK]
 
 An AEA runs and manages `Connections` via a `Multiplexer`.
 
 ### Multiplexer
-
-<img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 The <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> is responsible for maintaining (potentially multiple) `Connections`.
 
 It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, which are, respectively, queues for incoming and outgoing `Envelopes` from the perspective of `Skills`.
 
 ### Skill
-
-<img src="../assets/skills.jpg" alt="Skills of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 <a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
@@ -77,7 +69,7 @@ For instance, an AEA which is trading goods, could subscribe to more than one `S
 
 The framework places no limits on the complexity of `Skills`. They can implement simple (e.g. `if-this-then-that`) logic or be complex (e.g. a deep learning model or reinforcement learning agent).
 
-The framework provides one default `Skill`, called `error`. Additional `Skills` can be added as packages. For more details on `Skills` head over to the <a href="../skill"> `Skill` guide </a>.
+The framework provides one default `Skill`, called `error`. Additional `Skills` can be added as packages. For more details on `Skills` head over to the <a href="../skill"> `Skill` guide </a>. [ADD LINK]
 
 ### Agent loop
 
@@ -89,29 +81,41 @@ The <a href="../api/agent_loop#baseagentloop-objects">`AgentLoop`</a> performs a
 
 The <a href="../api/agent_loop#baseagentloop-objects">`AgentLoop`</a> and <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> are decoupled via the <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, and both are maintained by the <a href="../api/runtime#baseruntime-objects">`Runtime`</a>.
 
-## Next steps
+### Decision Maker
 
-### Recommended
+The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of as a `Wallet` manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component with access to the `Wallet`'s private keys.
 
-We recommend you continue with the next step in the 'Getting Started' series:
+You can learn more about the decision maker <a href="../decision-maker">here</a>. In its simplest form, the decision maker acts like a `Wallet` with `Handler` to react to messages it receives from the skills.
 
-- <a href="../aea-vs-mvc">AEA and web frameworks</a>
+### Wallet
 
-### Relevant deep-dives
+The <a href="../api/crypto/wallet#wallet-objects">`Wallet`</a> contains the private-public key pairs used by the AEA. Skills do not have access to the wallet, only the decision maker does.
 
-Most AEA development focuses on developing the `Skills` and `Protocols` necessary for an AEA to deliver against its economic objectives.
+The agent has two sets of private keys, as configured in the `aea-config.yaml`:
 
-Understanding `Protocols` is core to developing your own agent. You can learn more about the `Protocols` agents use to communicate with each other and how they are created in the following section:
+- `private_key_paths`: This is a dictionary mapping identifiers to the file paths of private keys used in the AEA. For each identifier, e.g. `fetchai`, the AEA can have one private key. The private keys listed here are available in the `Decision Maker` and the associated public keys and addresses are available in all skills. The AEA uses these keys to sign transactions and messages. These keys usually hold the AEAs funds.
+- `connection_private_key_paths`: This is a dictionary mapping identifiers to the file paths of private keys used in connections. For each identifier, e.g. `fetchai`, the `Multiplexer` can have one private key. The private keys listed here are available in the connections. The connections use these keys to secure message transport, for instance.
 
-- <a href="../protocol">Protocols</a>
+!!! warning
 
-Most of an AEA developer's time is spent on `Skill` development. `Skills` are the core business logic components of an AEA. Check out the following guide to learn more:
+    It is the responsibility of the AEA's user to safeguard the keys used and ensure that keys are only used in a single AEA. Using the same key across different AEAs will lead to various failure modes.
 
-- <a href="../skill">Skills</a>
+Private keys can be encrypted at rest. The CLI commands used for interacting with the wallet allow specifying a password for encryption/decryption. 
 
-In most cases, one of the available `Connection` packages can be used. Occasionally, you might develop your own `Connection`:
+### Identity
 
-- <a href="../connection">Connections</a>
+The <a href="../api/identity/base#identity-objects">`Identity`</a> is an abstraction that represents the identity of an AEA in the Open Economic Framework, backed by public-key cryptography. It contains the AEA's addresses as well as its name.
 
-<br />
+The identity can be accessed in a `Skill` via the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>.
 
+### Contracts
+
+<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the `Skills`.
+
+`Contracts` usually contain the logic to create contract transactions and make contract calls.
+
+`Contracts` can be added as packages. For more details on `Contracts` also read the `Contract` guide <a href="../contract">here</a>.
+
+!!! note
+
+    Contracts are an optional element of the Framework.
