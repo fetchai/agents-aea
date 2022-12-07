@@ -13,7 +13,9 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+      - AEA Framework core concepts:
+          - Identity: 'identity.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
@@ -22,7 +24,6 @@ nav:
     - Vision: 'vision.md'
     - Application areas: 'app-areas.md'
     - Relation to OEF and Ledger: 'oef-ledger.md'
-    - Identity: 'identity.md'
     - Trust minimisation: 'trust.md'
   - Demos:
     - Demos: 'demos.md'
