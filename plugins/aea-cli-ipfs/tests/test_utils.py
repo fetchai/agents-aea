@@ -32,3 +32,19 @@ def test_init_tool() -> None:
 
     tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
     assert tool.is_remote is False
+
+
+def test_hash_bytes() -> None:
+    """Test hash bytes."""
+    tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
+
+    tool.daemon.start()
+    try:
+        assert tool.is_remote is False
+        some_bytes = b"there is some bytes"
+        ipfs_hash = tool.add_bytes(some_bytes)
+        assert (
+            ipfs_hash == "QmPPFcK8uynDmceTDkDjHuDbR7gnqBfaMCTifs6oFKHn4E"
+        )  # precalculated
+    finally:
+        tool.daemon.stop()

@@ -242,6 +242,18 @@ class IPFSTool:
         )
         return set(pinned_hashes["Keys"])
 
+    def add_bytes(self, data: bytes, **kwargs) -> str:
+        """
+        Add bytes data to ipfs.
+
+        :param data: bytes
+        :param kwargs: options passed to request library
+
+        :return: hash
+        """
+        response = self.client.add_bytes(data, **kwargs)
+        return response
+
     def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
         """
         Add directory to ipfs.
