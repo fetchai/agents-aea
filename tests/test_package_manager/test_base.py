@@ -34,6 +34,7 @@ from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import ComponentId, PackageId, PackageType, PublicId
 from aea.package_manager.base import (
     BasePackageManager,
+    ConfigLoaderCallableType,
     DepedencyMismatchErrors,
     PackageUpdateError,
 )
@@ -87,10 +88,12 @@ class DummyPackageManager(BasePackageManager):
         self.packages = packages
 
     @classmethod
-    def from_dir(cls, packages_dir: Path) -> "BasePackageManager":
+    def from_dir(
+        cls, packages_dir: Path, config_loader: ConfigLoaderCallableType
+    ) -> "BasePackageManager":
         """Load from dir."""
 
-        return cls(path=packages_dir, packages={})
+        return cls(path=packages_dir, packages={}, config_loader=config_loader)
 
     def get_package_hash(self, package_id: PackageId) -> Optional[str]:
         """Return package hash."""

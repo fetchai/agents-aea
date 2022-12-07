@@ -332,7 +332,11 @@ class BasePackageManager(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dir(cls, packages_dir: Path) -> "BasePackageManager":
+    def from_dir(
+        cls,
+        packages_dir: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> "BasePackageManager":
         """Initialize from packages directory."""
 
 
