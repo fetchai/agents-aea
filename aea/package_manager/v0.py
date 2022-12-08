@@ -23,15 +23,15 @@ import json
 import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 from typing import OrderedDict as OrderedDictType
 
-from aea.configurations.base import PackageConfiguration
-from aea.configurations.data_types import PackageId, PackageType
+from aea.configurations.data_types import PackageId
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
 from aea.package_manager.base import (
     BasePackageManager,
+    ConfigLoaderCallableType,
     DepedencyMismatchErrors,
     PACKAGES_FILE,
     PackageIdToHashMapping,
@@ -44,10 +44,15 @@ class PackageManagerV0(BasePackageManager):
 
     _packages: OrderedDictType[PackageId, str]
 
-    def __init__(self, path: Path, packages: PackageIdToHashMapping) -> None:
+    def __init__(
+        self,
+        path: Path,
+        packages: Optional[PackageIdToHashMapping] = None,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> None:
         """Initialize object."""
 
-        super().__init__(path)
+        super().__init__(path=path, config_loader=config_loader)
 
         self._packages = packages or OrderedDict()
 
@@ -105,6 +110,7 @@ class PackageManagerV0(BasePackageManager):
         """Update packages.json file."""
 
         for package_id in self.iter_dependency_tree():
+            self.update_fingerprints(package_id=package_id)
             self.update_dependencies(package_id=package_id)
             package_hash = self.calculate_hash_from_package_id(
                 package_id=package_id,
@@ -115,9 +121,6 @@ class PackageManagerV0(BasePackageManager):
 
     def verify(
         self,
-        config_loader: Callable[
-            [PackageType, Path], PackageConfiguration
-        ] = load_configuration,
     ) -> int:
         """Verify fingerprints and outer hash of all available packages."""
 
@@ -125,7 +128,7 @@ class PackageManagerV0(BasePackageManager):
         try:
             for package_id in self.iter_dependency_tree():
                 package_path = self.package_path_from_package_id(package_id)
-                configuration_obj = config_loader(
+                configuration_obj = self.config_loader(
                     package_id.package_type,
                     package_path,
                 )
@@ -191,7 +194,11 @@ class PackageManagerV0(BasePackageManager):
         return data
 
     @classmethod
-    def from_dir(cls, packages_dir: Path) -> "PackageManagerV0":
+    def from_dir(
+        cls,
+        packages_dir: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> "PackageManagerV0":
         """Initialize from packages directory."""
 
         packages_file = packages_dir / PACKAGES_FILE
@@ -202,4 +209,8 @@ class PackageManagerV0(BasePackageManager):
         for package_id, package_hash in _packages.items():
             packages[PackageId.from_uri_path(package_id)] = package_hash
 
-        return cls(packages_dir, packages)
+        return cls(
+            path=packages_dir,
+            packages=packages,
+            config_loader=config_loader,
+        )
