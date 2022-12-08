@@ -22,14 +22,21 @@
 
 import json
 import logging
+import os
+import shutil
+import tempfile
 from collections import OrderedDict
 from pathlib import Path
 from unittest import mock
 
+from aea.configurations.constants import PACKAGES
+from aea.configurations.data_types import PackageId
+from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.v0 import PackageManagerV0
 from aea.protocols.generator.common import INIT_FILE_NAME
 from aea.test_tools.test_cases import BaseAEATestCase
 
+from tests.conftest import ROOT_DIR
 from tests.test_package_manager.test_base import (
     DUMMY_PACKAGE_HASH,
     DUMMY_PACKAGE_ID,
@@ -84,6 +91,42 @@ class TestPackageManagerV0(BaseAEATestCase):
         with mock.patch.object(pm, "add_package") as update_patch:
             pm.sync()
             update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
+
+    def test_update_fingerprints(self, caplog) -> None:
+        """Test update fingerprints."""
+
+        package_id = PackageId.from_uri_path("protocol/open_aea/signing/1.0.0")
+        package_dir_rel = Path(
+            PACKAGES,
+            package_id.author,
+            package_id.package_type.to_plural(),
+            package_id.name,
+        )
+        original_package = ROOT_DIR / package_dir_rel
+        package_hash = IPFSHashOnly.get(original_package)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            packages_dir = Path(temp_dir, PACKAGES)
+            temp_package = Path(temp_dir, *package_dir_rel.parts)
+
+            os.makedirs(temp_package.parent)
+
+            shutil.copytree(original_package, temp_package)
+            pm = PackageManagerV0(
+                path=packages_dir, packages={package_id: package_hash}
+            )
+
+            (temp_package / "__init__.py").write_text("")
+
+            with caplog.at_level(logging.ERROR):
+                assert pm.verify() == 1
+                assert (
+                    "Fingerprints does not match for (protocol, open_aea/signing:1.0.0)"
+                    in caplog.text
+                )
+
+            pm.update_package_hashes()
+            assert pm.verify() == 0
 
 
 class TestHashUpdate(BaseAEATestCase):
