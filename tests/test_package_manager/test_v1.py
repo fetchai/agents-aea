@@ -117,7 +117,7 @@ class TestPackageManagerV1(BaseAEATestCase):
             package_id.name,
         )
         original_package = ROOT_DIR / package_dir_rel
-        package_hash = IPFSHashOnly.get(original_package)
+        package_hash = IPFSHashOnly.get(str(original_package))
 
         with tempfile.TemporaryDirectory() as temp_dir:
             packages_dir = Path(temp_dir, PACKAGES)
@@ -127,7 +127,8 @@ class TestPackageManagerV1(BaseAEATestCase):
 
             shutil.copytree(original_package, temp_package)
             pm = PackageManagerV1(
-                path=packages_dir, dev_packages={package_id: package_hash}
+                path=packages_dir,
+                dev_packages=OrderedDict({package_id: package_hash}),
             )
 
             (temp_package / "__init__.py").write_text("")

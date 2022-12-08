@@ -23,7 +23,7 @@
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Dict, Optional
 from typing import OrderedDict as OrderedDictType
 from unittest import mock
 
@@ -37,6 +37,7 @@ from aea.package_manager.base import (
     ConfigLoaderCallableType,
     DepedencyMismatchErrors,
     PackageUpdateError,
+    load_configuration,
 )
 from aea.test_tools.test_cases import BaseAEATestCase
 
@@ -81,15 +82,23 @@ def _fetch_ipfs_mock(_, __, dest: str) -> None:
 class DummyPackageManager(BasePackageManager):
     """Dummy package manager."""
 
-    def __init__(self, path: Path, packages: Dict[PackageId, str]) -> None:
+    def __init__(
+        self,
+        path: Path,
+        packages: Dict[PackageId, str],
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> None:
         """Package hashes."""
 
         self.path = path
         self.packages = packages
+        self.config_loader = config_loader
 
     @classmethod
     def from_dir(
-        cls, packages_dir: Path, config_loader: ConfigLoaderCallableType
+        cls,
+        packages_dir: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration,
     ) -> "BasePackageManager":
         """Load from dir."""
 
@@ -114,19 +123,11 @@ class DummyPackageManager(BasePackageManager):
     ) -> "BasePackageManager":
         """Perorm sync."""
 
-    def update_package_hashes(
-        self,
-        config_loader: Callable[
-            [PackageType, Path], PackageConfiguration
-        ] = _dummy_loader,
-    ) -> "BasePackageManager":
+    def update_package_hashes(self) -> "BasePackageManager":
         """Update package hashes."""
 
     def verify(
         self,
-        config_loader: Callable[
-            [PackageType, Path], PackageConfiguration
-        ] = _dummy_loader,
     ) -> int:
         """Verify hashes."""
 
