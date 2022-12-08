@@ -152,21 +152,22 @@ class CliTest:
 
     t: Path
     cwd: Path
-    cli_runner: CliRunner
     cli_options: Tuple[str, ...]
-    cli: click.core.Group = aea_cli
+
+    __cli: click.core.Group = aea_cli
+    __cli_runner: CliRunner
 
     @pytest.fixture(autouse=True)
     def set_capfd_on_cli_runner(self, capfd: CaptureFixture) -> None:
         """Set pytest capfd on CLI runner"""
 
-        self.cli_runner.capfd = capfd
+        self.__cli_runner.capfd = capfd
 
     @classmethod
     def setup_class(cls) -> None:
         """Setup test class."""
 
-        cls.cli_runner = CliRunner()
+        cls.__cli_runner = CliRunner()
         cls.cwd = Path.cwd().absolute()
 
     @classmethod
@@ -183,14 +184,13 @@ class CliTest:
     def teardown(self) -> None:
         """Teardown test."""
 
-        os.chdir(self.cwd)
         shutil.rmtree(str(self.t))
 
     def run_cli(self, *commands: str, **kwargs: Dict[str, Any]) -> Result:
         """Run CLI."""
 
         args = (*self.cli_options, *commands)
-        return self.cli_runner.invoke(cli=self.cli, args=args, **kwargs)
+        return self.__cli_runner.invoke(cli=self.__cli, args=args, **kwargs)
 
     def run_cli_subprocess(
         self, *commands: str, timeout: float = 60.0
@@ -198,7 +198,7 @@ class CliTest:
         """Run CLI using subprocess."""
 
         process = subprocess.Popen(  # nosec
-            [sys.executable, "-m", f"{self.cli.name}.cli"]  # pylint: disable=no-member
+            [sys.executable, "-m", f"{self.__cli.name}.cli"]  # pylint: disable=no-member
             + list(self.cli_options)
             + list(commands),
             stdout=subprocess.PIPE,
