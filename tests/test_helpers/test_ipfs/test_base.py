@@ -185,3 +185,12 @@ class TestDirectoryHashing:
             assert (
                 hash_daemon == hash_local
             ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}"
+
+    def test_hash_bytes(self):
+        """Test hash bytes."""
+        some_bytes = b"there is some bytes"
+        local_hash = self.hash_tool.hash_bytes(
+            some_bytes, wrap=False, file_name_if_wrap="some", cid_v1=False
+        )
+        ipfs_hash = self.ipfs_tool.add_bytes(some_bytes)
+        assert local_hash == ipfs_hash

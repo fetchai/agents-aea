@@ -36,6 +36,7 @@ from aea.configurations.constants import AGENT, PACKAGE_TYPE_TO_CONFIG_FILE
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.configurations.loader import load_configuration_object
 from aea.helpers.dependency_tree import DependencyTree, dump_yaml, load_yaml
+from aea.helpers.fingerprint import update_fingerprint
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -50,6 +51,7 @@ except (ImportError, ModuleNotFoundError):
 PACKAGES_FILE = "packages.json"
 
 PackageIdToHashMapping = OrderedDictType[PackageId, str]
+ConfigLoaderCallableType = Callable[[PackageType, Path], PackageConfiguration]
 
 
 def load_configuration(
@@ -82,10 +84,12 @@ class BasePackageManager(ABC):
     def __init__(
         self,
         path: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration,
     ) -> None:
         """Initialize object."""
 
         self.path = path
+        self.config_loader = config_loader
         self._packages_file = path / PACKAGES_FILE
 
         self._logger = logging.getLogger(name="PackageManager")
@@ -228,6 +232,19 @@ class BasePackageManager(ABC):
             extra_data=extra,
         )
 
+    def update_fingerprints(
+        self,
+        package_id: PackageId,
+    ) -> None:
+        """Update fingerprints for a package."""
+
+        package_configuration = self.config_loader(
+            package_id.package_type,
+            self.package_path_from_package_id(package_id=package_id),
+        )
+
+        update_fingerprint(configuration=package_configuration)
+
     def add_package(self, package_id: PackageId) -> "BasePackageManager":
         """Add packages."""
 
@@ -297,12 +314,7 @@ class BasePackageManager(ABC):
         """Update package.json file."""
 
     @abstractmethod
-    def verify(
-        self,
-        config_loader: Callable[
-            [PackageType, Path], PackageConfiguration
-        ] = load_configuration,
-    ) -> int:
+    def verify(self) -> int:
         """Verify fingerprints and outer hash of all available packages."""
 
     @property
@@ -320,7 +332,11 @@ class BasePackageManager(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dir(cls, packages_dir: Path) -> "BasePackageManager":
+    def from_dir(
+        cls,
+        packages_dir: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> "BasePackageManager":
         """Initialize from packages directory."""
 
 

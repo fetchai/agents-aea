@@ -48,7 +48,7 @@ AEA package manager
 #### `__`init`__`
 
 ```python
-def __init__(path: Path) -> None
+def __init__(path: Path, config_loader: ConfigLoaderCallableType = load_configuration) -> None
 ```
 
 Initialize object.
@@ -92,6 +92,16 @@ def update_dependencies(package_id: PackageId) -> None
 ```
 
 Update dependency hashes to latest for a package.
+
+<a id="aea.package_manager.base.BasePackageManager.update_fingerprints"></a>
+
+#### update`_`fingerprints
+
+```python
+def update_fingerprints(package_id: PackageId) -> None
+```
+
+Update fingerprints for a package.
 
 <a id="aea.package_manager.base.BasePackageManager.add_package"></a>
 
@@ -172,9 +182,7 @@ Update package.json file.
 
 ```python
 @abstractmethod
-def verify(config_loader: Callable[
-            [PackageType, Path], PackageConfiguration
-        ] = load_configuration) -> int
+def verify() -> int
 ```
 
 Verify fingerprints and outer hash of all available packages.
@@ -208,7 +216,7 @@ Dump package data to file.
 ```python
 @classmethod
 @abstractmethod
-def from_dir(cls, packages_dir: Path) -> "BasePackageManager"
+def from_dir(cls, packages_dir: Path, config_loader: ConfigLoaderCallableType = load_configuration) -> "BasePackageManager"
 ```
 
 Initialize from packages directory.
