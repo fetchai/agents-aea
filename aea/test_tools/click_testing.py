@@ -152,7 +152,7 @@ class CliTest:
 
     t: Path
     cwd: Path
-    cli_options: Tuple[str, ...]
+    cli_options: Tuple[str, ...] = ()
 
     __cli: click.core.Group = aea_cli
     __cli_runner: CliRunner
