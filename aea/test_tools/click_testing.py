@@ -192,9 +192,7 @@ class CliTest:
         args = (*self.cli_options, *commands)
         return self.__cli_runner.invoke(cli=self.__cli, args=args, **kwargs)
 
-    def run_cli_subprocess(
-        self, *commands: str, timeout: float = 60.0
-    ) -> Tuple[int, str, str]:
+    def run_cli_subprocess(self, *commands: str, timeout: float = 60.0) -> Result:
         """Run CLI using subprocess."""
 
         process = subprocess.Popen(  # nosec
@@ -204,12 +202,15 @@ class CliTest:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+
         stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
-        stdout, stderr = stdout_bytes.decode(), stderr_bytes.decode()
 
-        # for Windows
-        if sys.platform == "win32":
-            stdout = stdout.replace("\r", "")
-            stderr = stderr.replace("\r", "")
-
-        return process.returncode, stdout, stderr
+        return Result(
+            runner=self.__cli_runner,
+            stdout_bytes=stdout_bytes,
+            stderr_bytes=stderr_bytes,
+            exit_code=process.returncode,
+            exception=None,
+            exc_info=None,
+            return_value=None,
+        )
