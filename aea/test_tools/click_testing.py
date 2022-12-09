@@ -44,7 +44,7 @@ import sys
 import tempfile
 from contextlib import nullcontext, redirect_stderr
 from pathlib import Path
-from typing import Any, ContextManager, Dict, Optional, Tuple, cast
+from typing import Any, ContextManager, Dict, Optional, Sequence, cast
 
 import click.core
 import pytest
@@ -152,7 +152,7 @@ class CliTest:
 
     t: Path
     cwd: Path
-    cli_options: Tuple[str, ...] = ()
+    cli_options: Sequence[str] = ()
 
     __cli: click.core.Group = aea_cli
     __cli_runner: CliRunner
