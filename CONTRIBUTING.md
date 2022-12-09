@@ -1,8 +1,6 @@
 # Contributing
 
-Contributions to the framework, plugins, related tools and packages are welcome! Every little helps and credit will always be given.
-
-As a contributor, here are the guidelines we would like you to follow:
+Contributions to the framework, plugins, packages and related tools are welcome. As a contributor, here are the guidelines we would like you to follow:
 
 - [Code of Conduct](#coc)
 - [Question or Problem?](#question)
@@ -11,7 +9,6 @@ As a contributor, here are the guidelines we would like you to follow:
 - [Submission Guidelines](#submit)
 - [Coding Rules](#rules)
 - [Commit Message Guidelines](#commit)
-- [Development Guidelines](#dev)
 
 ## <a name="coc"></a> Code of Conduct
 
@@ -19,16 +16,14 @@ Please read and follow our [Code of Conduct][coc].
 
 ## <a name="question"></a> Question or Problem?
 
-Use [Github Discussions][ghdiscussion] to ask support-related questions. This is because:
+Please use [Github Discussions][ghdiscussion] for support related questions and general discussions. Do NOT open issues as they are for bug reports and feature requests. This is because:
 
 - Questions and answers stay available for public viewing so your question/answer might help someone else.
 - Github Discussions voting system ensures the best answers are prominently visible.
 
-Do not open issues for general support questions; they are used for bug reports and feature requests. 
-
 ## <a name="issue"></a> Found a Bug?
 
-If you find a bug in the source code, [submit a bug report issue](#submit-issue) to our [GitHub repository][github].
+If you find a bug in the source code [submit a bug report issue](#submit-issue) to our [GitHub repository][github].
 Even better, you can [submit a Pull Request](#submit-pr) with a fix.
 
 ## <a name="feature"></a> Missing a Feature?
@@ -57,13 +52,13 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 2. Search [Existing PRs](https://github.com/fetchai/agents-aea/pulls) for an open or closed PR that relates to your submission.
    You don't want to duplicate existing efforts.
 
-3. Be sure that an issue describes the problem you're fixing, or the design for the feature you'd like to add.
+3. Be sure that an issue exists describing the problem you're fixing, or the design for the feature you'd like to add.
 
-4. [Fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) the fetchai/agents-aea repo.
+4. [Fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) the [repository][github].
 
 5. In your forked repository, make your changes in a new git branch created from the `develop` branch.
 
-6. Make your changes, **including appropriate test cases**.
+6. Make your changes, **including test cases** and updating documentation where appropriate.
 
 7. Follow our [coding rules](#rules).
 
@@ -107,11 +102,7 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 
 ## <a name="commit"></a> Commit Message Format
 
-Please follow the [Conventional Commits v1.0.0][convcommit]. 
-
-##### Types
-
-The commit types (see [Conventional Commits v1.0.0][convcommit]) must be one of the following:
+Please follow the [Conventional Commits v1.0.0][convcommit]. The commit types must be one of the following:
 
 * **build**: Changes that affect the build system or external dependencies
 * **ci**: Changes to our CI configuration files and scripts
@@ -121,56 +112,6 @@ The commit types (see [Conventional Commits v1.0.0][convcommit]) must be one of 
 * **perf**: A code change that improves performance
 * **refactor**: A code change that neither fixes a bug nor adds a feature
 * **test**: Adding missing tests or correcting existing tests
-
-## <a name="dev"></a> Development Guide
-
-### To set up
-
-First, set up your environment by either using the `develop-image` or by following these steps:
-
-- Install Python (version `3.8`, `3.9` or `3.10`) and `poetry`. Then run:
-
-      make new-env
-      poetry shell
-
-- The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
-
-### During development
-
-We have various commands which are helpful during development.
-
-- For linting and static analysis use:
-
-      make lint
-      make mypy
-      make pylint
-      make security
-
-- For checking packages integrity:
-
-      make package-checks
-
-- To run tests: `make test`.
-
-- For testing `aea.{SUBMODULE}` with `tests/test_{TESTMODULE}` use:
-
-      make dir={SUBMODULE} tdir={TESTMODULE} test-sub
-
-  e.g.
-
-      make dir=cli tdir=cli test-sub
-
-- When making changes to one of the `packages`, then use `python scripts/generate_ipfs_hashes.py` to generate the latest hashes.
-
-#### Go Development
-
-- The `fetchai/p2p_libp2p` package is partially developed in Go.
-
-- To install Go visit the [Golang site](https://golang.org/doc/install).
-
-- We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
-
-- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
 
 [coc]: https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md
 [ghdiscussion]: https://github.com/fetchai/agents-aea/discussions
