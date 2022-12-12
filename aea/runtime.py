@@ -346,7 +346,7 @@ class AsyncRuntime(BaseRuntime):
         """Run runtime which means start agent loop, multiplexer and storage."""
         self._state.set(RuntimeStates.starting)
         await asyncio.gather(
-            self._start_multiplexer(), self._start_agent_loop(), self._start_storage()
+            self._start_agent_loop(), self._start_multiplexer(), self._start_storage()
         )
 
     async def _start_storage(self) -> None:
@@ -389,12 +389,8 @@ class AsyncRuntime(BaseRuntime):
         )
 
         self._state.set(RuntimeStates.running)
-        try:
-            await self.agent_loop.wait_completed()
-        except asyncio.CancelledError:
-            self.agent_loop.stop()
-            await self.agent_loop.wait_completed()
-            raise
+        # loop will be stopped in wait completed
+        await self.agent_loop.wait_completed()
 
 
 class ThreadedRuntime(AsyncRuntime):
