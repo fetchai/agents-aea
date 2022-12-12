@@ -31,7 +31,8 @@ from tests.common.utils import wait_for_condition
 
 
 if platform.system() == "Windows":  # pragma: nocover
-    import win32timezone  # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import
+    # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import
+    import win32timezone
 
     _ = win32timezone
 
@@ -112,11 +113,14 @@ def test_basic_profiling():
     result, types_to_track = "", [Message]
     p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
+    m = Message()
+    del m
     wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
     try:
         wait_for_condition(lambda: result, timeout=TIMEOUT)
         assert "Profiling details" in result
+        assert p.object_counts[Message] == [1, 1]
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=TIMEOUT)

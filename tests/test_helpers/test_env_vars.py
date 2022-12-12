@@ -24,10 +24,12 @@ import pytest
 
 from aea.helpers.env_vars import (
     apply_env_variables,
+    apply_env_variables_on_agent_config,
     convert_value_str_to_type,
     export_path_to_env_var_string,
     generate_env_vars_recursively,
     is_env_variable,
+    is_strict_list,
     replace_with_env_var,
 )
 
@@ -195,3 +197,19 @@ def test_match_export_parse_consistency(export_data, template) -> None:
     parsed_data = apply_env_variables(template, env_variables=env_vars)
 
     assert parsed_data == export_data
+
+
+def test_apply_env_variables_on_agent_config():
+    """Test apply_env_variables_on_agent_config function."""
+    result = apply_env_variables_on_agent_config(
+        [{"arg": "${VAR}"}, {"public_id": "fetchai/test:0.1.0", "arg": "${VAR}"}],
+        {"VAR": 12},
+    )
+    assert result == [{"arg": 12}, {"arg": 12, "public_id": "fetchai/test:0.1.0"}]
+
+
+def test_is_strict_list():
+    assert is_strict_list([1, 2, 3])
+    assert is_strict_list([1, 2, 3, [1, 2, 3]])
+    assert not is_strict_list([1, 2, {}])
+    assert not is_strict_list([1, 2, [[{}]]])
