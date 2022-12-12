@@ -31,7 +31,7 @@ from unittest import mock
 import pytest
 
 from aea.configurations.constants import PACKAGES
-from aea.configurations.data_types import PackageId
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.v1 import PackageManagerV1
 from aea.protocols.generator.common import INIT_FILE_NAME
@@ -280,3 +280,39 @@ class TestVerifyFailure(BaseAEATestCase):
 
             assert pm.verify() == 1
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
+
+
+def test_package_manager_add_item_dependency_support():
+    """Check PackageManager.add_packages works with dependencies."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(tmpdir)
+        package_manager.add_package(
+            PackageId(
+                package_type=PackageType.SKILL,
+                public_id=PublicId.from_str(
+                    "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+                ),
+            )
+        )
+        assert len(package_manager.dev_packages) == 1
+        package_manager.dump()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(tmpdir)
+        package_manager.add_package(
+            PackageId(
+                package_type=PackageType.SKILL,
+                public_id=PublicId.from_str(
+                    "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+                ),
+            ),
+            with_dependencies=True,
+        )
+        assert len(package_manager.dev_packages) > 1
+
+        str_packages = str(package_manager.dev_packages)
+        # check some  deps
+        assert "protocol, valory/abci" in str_packages
+        assert "skill, valory/abstract_round_abci" in str_packages
+        assert "protocol, valory/tendermint" in str_packages
+        package_manager.dump()

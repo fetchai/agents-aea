@@ -181,6 +181,27 @@ class BasePackageManager(ABC):
                 )
         return mismatches
 
+    def _get_package_configuration(self, package_id: PackageId) -> PackageConfiguration:
+        """Get package configuration by package_id."""
+        package_path = self.package_path_from_package_id(package_id)
+        configuration_obj = self.config_loader(
+            package_id.package_type,
+            package_path,
+        )
+        return configuration_obj
+
+    def get_package_dependencies(self, package_id: PackageId) -> List[PackageId]:
+        """Get package dependencies by package_id."""
+        configuration = self._get_package_configuration(package_id)
+        dependencies: List[PackageId] = []
+        for component_id in configuration.package_dependencies:
+            package_id = PackageId(
+                package_type=str(component_id.component_type),
+                public_id=component_id.public_id,
+            )
+            dependencies.append(package_id)
+        return dependencies
+
     def update_public_id_hash(
         self,
         public_id_str: str,
@@ -206,12 +227,7 @@ class BasePackageManager(ABC):
     ) -> None:
         """Update dependency hashes to latest for a package."""
 
-        package_path = self.package_path_from_package_id(
-            package_id=package_id,
-        )
-        config_file = (
-            package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_id.package_type.value]
-        )
+        config_file = self.get_package_config_file(package_id)
         package_config, extra = load_yaml(file_path=config_file)
         for component_type in PACKAGE_TYPE_TO_CONFIG_FILE:
             if component_type == AGENT:
@@ -232,6 +248,16 @@ class BasePackageManager(ABC):
             extra_data=extra,
         )
 
+    def get_package_config_file(self, package_id: PackageId) -> Path:
+        """Get package config file path."""
+        package_path = self.package_path_from_package_id(
+            package_id=package_id,
+        )
+        config_file = (
+            package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_id.package_type.value]
+        )
+        return config_file
+
     def update_fingerprints(
         self,
         package_id: PackageId,
@@ -245,9 +271,10 @@ class BasePackageManager(ABC):
 
         update_fingerprint(configuration=package_configuration)
 
-    def add_package(self, package_id: PackageId) -> "BasePackageManager":
-        """Add packages."""
-
+    def add_package(
+        self, package_id: PackageId, with_dependencies: bool = False
+    ) -> "BasePackageManager":
+        """Add package."""
         author_repo = self.path / package_id.author
         if not author_repo.exists():
             author_repo.mkdir()
@@ -263,6 +290,16 @@ class BasePackageManager(ABC):
             str(package_id.package_type), package_id.public_id, dest=str(download_path)
         )
 
+        if with_dependencies:
+            for dependency_package_id in self.get_package_dependencies(
+                package_id=package_id
+            ):
+                if self.get_package_config_file(dependency_package_id).exists():
+                    config = self._get_package_configuration(package_id=package_id)
+                    if config.package_id != dependency_package_id:
+                        self.update_package(dependency_package_id)
+                    continue
+                self.add_package(dependency_package_id, with_dependencies=True)
         return self
 
     def package_path_from_package_id(self, package_id: PackageId) -> Path:

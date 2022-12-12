@@ -25,6 +25,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Optional
 from typing import OrderedDict as OrderedDictType
+from typing import Union
 
 from aea.configurations.data_types import PackageId
 from aea.helpers.fingerprint import check_fingerprint
@@ -50,13 +51,13 @@ class PackageManagerV1(BasePackageManager):
 
     def __init__(
         self,
-        path: Path,
+        path: Union[Path, str],
         dev_packages: Optional[PackageIdToHashMapping] = None,
         third_party_packages: Optional[PackageIdToHashMapping] = None,
         config_loader: ConfigLoaderCallableType = load_configuration,
     ) -> None:
         """Initialize object."""
-
+        path = Path(path)
         super().__init__(path=path, config_loader=config_loader)
 
         self._dev_packages = dev_packages or OrderedDict()
@@ -94,6 +95,14 @@ class PackageManagerV1(BasePackageManager):
         """Check if a package is third party package."""
 
         return self._dev_packages.get(package_id) is not None
+
+    def add_package(
+        self, package_id: PackageId, with_dependencies: bool = False
+    ) -> "PackageManagerV1":
+        """Add package."""
+        super().add_package(package_id=package_id, with_dependencies=with_dependencies)
+        self._dev_packages[package_id] = self.calculate_hash_from_package_id(package_id)
+        return self
 
     def sync(
         self,
@@ -215,9 +224,8 @@ class PackageManagerV1(BasePackageManager):
             for package_id in self.iter_dependency_tree():
                 self._logger.info(f"Verifying {package_id}")
                 package_path = self.package_path_from_package_id(package_id)
-                configuration_obj = self.config_loader(
-                    package_id.package_type,
-                    package_path,
+                configuration_obj = self._get_package_configuration(
+                    package_id=package_id
                 )
                 calculated_hash = IPFSHashOnly.get(str(package_path))
 
@@ -304,11 +312,11 @@ class PackageManagerV1(BasePackageManager):
     @classmethod
     def from_dir(
         cls,
-        packages_dir: Path,
+        packages_dir: Union[Path, str],
         config_loader: ConfigLoaderCallableType = load_configuration,
     ) -> "PackageManagerV1":
         """Initialize from packages directory."""
-
+        packages_dir = Path(packages_dir)
         packages_file = packages_dir / PACKAGES_FILE
         with open_file(packages_file, "r") as fp:
             _packages = json.load(fp)
