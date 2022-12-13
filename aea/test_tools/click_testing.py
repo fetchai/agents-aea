@@ -184,7 +184,7 @@ class CliTest:
     def teardown(self) -> None:
         """Teardown test."""
 
-        shutil.rmtree(str(self.t))
+        shutil.rmtree(str(self.t), ignore_errors=True)
 
     def run_cli(
         self,
