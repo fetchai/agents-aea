@@ -221,3 +221,11 @@ class TestCliTest:
         result = test_instance.run_cli("non-existent-command")
         assert result.exit_code == 2
         assert "No such command 'non-existent-command'" in result.stdout
+
+    def test_run_cli_subprocess_failure(self) -> None:
+        """Test run_cli_subprocess"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli_subprocess("non-existent-command")
+        assert result.exit_code == 2
+        assert "No such command 'non-existent-command'" in result.stderr
