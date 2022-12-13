@@ -21,6 +21,7 @@
 
 from unittest.mock import patch
 
+from pathlib import Path
 from typing import cast
 
 import click
@@ -169,3 +170,14 @@ class TestCliTest:
         test_instance = self.test_cls()  # type: ignore
         test_instance.setup()
         return test_instance
+
+    def test_setup_cls_and_setup(self) -> None:
+
+        self.test_cls.setup_class()
+        assert isinstance(self.test_cls._CliTest__cli_runner, CliRunner)  # type: ignore
+        assert self.test_cls._CliTest__cli.name == "aea"  # type: ignore
+        assert not hasattr(self.test_cls, "t")
+
+        test_instance = self.test_cls()  # type: ignore
+        test_instance.setup()
+        assert isinstance(test_instance.t, Path)
