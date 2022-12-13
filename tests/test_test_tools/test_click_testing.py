@@ -21,12 +21,15 @@
 
 from unittest.mock import patch
 
+from typing import cast
+
 import click
 import pytest
 from _pytest.capture import CaptureFixture  # type: ignore
 
 from aea.cli.core import cli
-from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.utils import copy_class
+from aea.test_tools.click_testing import CliRunner, CliTest
 
 
 def test_invoke():
@@ -147,3 +150,22 @@ def test_cli_runner_invoke_raises(kwargs, capfd: CaptureFixture):
         match="Cannot use capfd in conjunction with `input`, `env` or `color`.",
     ):
         cli_runner.invoke(cli, ["--help"], standalone_mode=False, **kwargs)
+
+
+class TestCliTest:
+    """Test CliTest"""
+
+    cli_test: CliTest
+
+    def setup(self) -> None:
+        """Setup test"""
+        # `copy` the class to avoid test interference
+        self.test_cls = cast(CliTest, copy_class(CliTest))
+
+    def setup_test(self) -> CliTest:
+        """Setup test"""
+
+        self.test_cls.setup_class()
+        test_instance = self.test_cls()  # type: ignore
+        test_instance.setup()
+        return test_instance
