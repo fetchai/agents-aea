@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains a test for aea.test_tools."""
 
+import os
 from unittest.mock import patch
 
 from pathlib import Path
@@ -181,3 +182,17 @@ class TestCliTest:
         test_instance = self.test_cls()  # type: ignore
         test_instance.setup()
         assert isinstance(test_instance.t, Path)
+
+    def test_teardown_and_teardown_cls(self) -> None:
+
+        test_instance = self.setup_test()
+        cwd = Path.cwd()
+
+        assert not test_instance.t == cwd
+        os.chdir(test_instance.t)
+        assert test_instance.t == Path.cwd()
+        test_instance.teardown()
+        assert not hasattr(self.test_cls, "t")
+
+        test_instance.teardown_class()
+        assert Path.cwd() == cwd
