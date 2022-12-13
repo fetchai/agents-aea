@@ -29,6 +29,7 @@ import click
 import pytest
 from _pytest.capture import CaptureFixture  # type: ignore
 
+import aea
 from aea.cli.core import cli
 from aea.test_tools.utils import copy_class
 from aea.test_tools.click_testing import CliRunner, CliTest
@@ -196,3 +197,11 @@ class TestCliTest:
 
         test_instance.teardown_class()
         assert Path.cwd() == cwd
+
+    def test_run_cli(self) -> None:
+        """Test run_cli"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout
