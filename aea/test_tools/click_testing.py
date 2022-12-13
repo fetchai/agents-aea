@@ -186,19 +186,20 @@ class CliTest:
 
         shutil.rmtree(str(self.t))
 
-    def run_cli(self, *commands: str, **kwargs: Dict[str, Any]) -> Result:
+    def run_cli(self, *commands: str, **kwargs: Any) -> Result:
         """Run CLI."""
 
         args = (*self.cli_options, *commands)
         return self.__cli_runner.invoke(cli=self.__cli, args=args, **kwargs)
 
-    def run_cli_subprocess(self, *commands: str, timeout: float = 60.0) -> Result:
+    def run_cli_subprocess(self, *commands: str, timeout: float = 60.0, **kwargs: Any) -> Result:
         """Run CLI using subprocess."""
 
         base = [sys.executable, "-m", f"{self.__cli.name}.cli"]  # pylint: disable=no-member
         args = (*self.cli_options, *commands)
         process = subprocess.Popen(  # nosec
             [*base, *args],
+            **kwargs,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
