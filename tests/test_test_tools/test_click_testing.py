@@ -213,3 +213,11 @@ class TestCliTest:
         result = test_instance.run_cli_subprocess("--version")
         assert result.exit_code == 0
         assert f"aea, version {aea.__version__}" in result.stdout
+
+    def test_run_cli_failure(self) -> None:
+        """Test run_cli"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli("non-existent-command")
+        assert result.exit_code == 2
+        assert "No such command 'non-existent-command'" in result.stdout
