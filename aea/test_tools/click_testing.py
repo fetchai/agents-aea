@@ -164,10 +164,10 @@ class CliTest:
         self.__cli_runner.capfd = capfd
 
     @classmethod
-    def setup_class(cls) -> None:
+    def setup_class(cls, mix_stderr: bool = True) -> None:
         """Setup test class."""
 
-        cls.__cli_runner = CliRunner()
+        cls.__cli_runner = CliRunner(mix_stderr=mix_stderr)
         cls.__cwd = Path.cwd().absolute()
 
     @classmethod
@@ -206,11 +206,12 @@ class CliTest:
 
         cli_name = f"{self.__cli.name}.cli"  # pylint: disable=no-member
         args = (*self.cli_options, *commands)
+        stderr = subprocess.STDOUT if self.__cli_runner.mix_stderr else subprocess.PIPE
         process = subprocess.Popen(  # nosec
             [sys.executable, "-m", cli_name, *args],
             **kwargs,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=stderr,
         )
 
         stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
