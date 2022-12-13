@@ -169,7 +169,7 @@ jobs:
         run: tox -e check-copyright
 
   common_checks_5:
-    continue-on-error: False
+    continue-on-error: True
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.base_ref == 'main'
