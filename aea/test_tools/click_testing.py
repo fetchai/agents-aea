@@ -195,10 +195,10 @@ class CliTest:
     def run_cli_subprocess(self, *commands: str, timeout: float = 60.0) -> Result:
         """Run CLI using subprocess."""
 
+        base = [sys.executable, "-m", f"{self.__cli.name}.cli"]  # pylint: disable=no-member
+        args = (*self.cli_options, *commands)
         process = subprocess.Popen(  # nosec
-            [sys.executable, "-m", f"{self.__cli.name}.cli"]  # pylint: disable=no-member
-            + list(self.cli_options)
-            + list(commands),
+            [*base, *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
