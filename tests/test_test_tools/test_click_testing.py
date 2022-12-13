@@ -20,10 +20,9 @@
 """This module contains a test for aea.test_tools."""
 
 import os
-from unittest.mock import patch
-
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 import click
 import pytest
@@ -31,8 +30,8 @@ from _pytest.capture import CaptureFixture  # type: ignore
 
 import aea
 from aea.cli.core import cli
-from aea.test_tools.utils import copy_class
 from aea.test_tools.click_testing import CliRunner, CliTest
+from aea.test_tools.utils import copy_class
 
 
 def test_invoke():
@@ -174,6 +173,7 @@ class TestCliTest:
         return test_instance
 
     def test_setup_cls_and_setup(self) -> None:
+        """Test setup_class and setup"""
 
         self.test_cls.setup_class()
         assert isinstance(self.test_cls._CliTest__cli_runner, CliRunner)  # type: ignore
@@ -185,6 +185,7 @@ class TestCliTest:
         assert isinstance(test_instance.t, Path)
 
     def test_teardown_and_teardown_cls(self) -> None:
+        """Test teardown and teardown_class"""
 
         test_instance = self.setup_test()
         cwd = Path.cwd()
