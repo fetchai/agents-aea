@@ -205,3 +205,11 @@ class TestCliTest:
         result = test_instance.run_cli("--version")
         assert result.exit_code == 0
         assert f"aea, version {aea.__version__}" in result.stdout
+
+    def test_run_cli_subprocess(self) -> None:
+        """Test run_cli_subprocess"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli_subprocess("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout
