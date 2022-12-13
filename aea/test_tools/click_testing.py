@@ -44,7 +44,7 @@ import sys
 import tempfile
 from contextlib import nullcontext, redirect_stderr
 from pathlib import Path
-from typing import Any, ContextManager, Dict, Optional, Sequence, cast
+from typing import Any, ContextManager, Optional, Sequence, cast
 
 import click.core
 import pytest
@@ -186,19 +186,28 @@ class CliTest:
 
         shutil.rmtree(str(self.t))
 
-    def run_cli(self, *commands: str, **kwargs: Any) -> Result:
+    def run_cli(
+        self,
+        *commands: str,
+        **kwargs: Any,
+    ) -> Result:
         """Run CLI."""
 
         args = (*self.cli_options, *commands)
         return self.__cli_runner.invoke(cli=self.__cli, args=args, **kwargs)
 
-    def run_cli_subprocess(self, *commands: str, timeout: float = 60.0, **kwargs: Any) -> Result:
+    def run_cli_subprocess(
+        self,
+        *commands: str,
+        timeout: float = 60.0,
+        **kwargs: Any,
+    ) -> Result:
         """Run CLI using subprocess."""
 
-        base = [sys.executable, "-m", f"{self.__cli.name}.cli"]  # pylint: disable=no-member
+        cli_name = f"{self.__cli.name}.cli"  # pylint: disable=no-member
         args = (*self.cli_options, *commands)
         process = subprocess.Popen(  # nosec
-            [*base, *args],
+            [sys.executable, "-m", cli_name, *args],
             **kwargs,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
