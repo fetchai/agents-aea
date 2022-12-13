@@ -151,9 +151,9 @@ class CliTest:
     """Test cli commands."""
 
     t: Path
-    cwd: Path
     cli_options: Sequence[str] = ()
 
+    __cwd: Path
     __cli: click.core.Group = aea_cli
     __cli_runner: CliRunner
 
@@ -168,13 +168,13 @@ class CliTest:
         """Setup test class."""
 
         cls.__cli_runner = CliRunner()
-        cls.cwd = Path.cwd().absolute()
+        cls.__cwd = Path.cwd().absolute()
 
     @classmethod
     def teardown_class(cls) -> None:
         """Teardown test class."""
 
-        os.chdir(cls.cwd)
+        os.chdir(cls.__cwd)
 
     def setup(self) -> None:
         """Setup test."""
