@@ -13,7 +13,22 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+    - AEA Framework core concepts:
+      - How do AEAs create value?:
+        - Open Economic Framework (OEF): 'introduction/core-concepts/how-do-aeas-create-value/oef.md'
+        - Agent Communication Network (ACN): 'introduction/core-concepts/how-do-aeas-create-value/acn.md'
+          - ACN Internals: 'acn-internals.md'
+        - Search and Discovery (SOEF): 'introduction/core-concepts/how-do-aeas-create-value/search-and-discovery.md'
+          - Simple OEF: 'simple-oef.md'
+          - Defining Data Models: 'defining-data-models.md'
+          - The Query Language: 'query-language.md'
+          - SOEF Connection: 'simple-oef-usage.md'
+        - Ledgers: 'introduction/core-concepts/how-do-aeas-create-value/ledger.md'
+          - Ledger & Crypto APIs: 'ledger-integration.md'
+        - Interactions between AEAs: 'interaction-protocol.md'
+        - AEA and web frameworks: 'aea-vs-mvc.md'
+          - Relationship with the Twelve-Factor App methodology: '12-factor.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
@@ -21,7 +36,6 @@ nav:
     - Agent-oriented development: 'agent-oriented-development.md'
     - Vision: 'vision.md'
     - Application areas: 'app-areas.md'
-    - Relation to OEF and Ledger: 'oef-ledger.md'
     - Identity: 'identity.md'
     - Trust minimisation: 'trust.md'
   - Demos:
@@ -41,10 +55,8 @@ nav:
   - Development - Beginner:
     - AEA quick start: 'quickstart.md'
     - Core components - Part 1: 'core-components-1.md'
-    - AEA and web frameworks: 'aea-vs-mvc.md'
     - Build your first skill - search & discovery: 'skill-guide.md'
     - Core components - Part 2: 'core-components-2.md'
-    - How AEAs talk to each other - interaction protocols: 'interaction-protocol.md'
     - Trade between two AEAs: 'generic-skills-step-by-step.md'
     - Development setup: 'development-setup.md'
   - Development - Advanced:
@@ -59,7 +71,6 @@ nav:
       - Create decision-maker transaction: 'decision-maker-transaction.md'
       - Testing Skills: 'skill-testing.md'
       - Deployment: 'deployment.md'
-      - 12-Factor app and AEAs: '12-factor.md'
       - Prometheus monitoring: 'prometheus.md'
       - Known limitations: 'known-limits.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
@@ -80,18 +91,9 @@ nav:
       - Skills: 'skill.md'
       - Contracts: 'contract.md'
       - Decision Maker: 'decision-maker.md'
-      - Ledger & Crypto APIs: 'ledger-integration.md'
       - Message routing: 'message-routing.md'
       - Configurations: 'config.md'
       - Limitations of v1: 'limits.md'
-    - Agent Communication:
-      - Agent Communication Network: 'acn.md'
-      - ACN Internals: 'acn-internals.md'
-    - Search & Discovery:
-      - Simple OEF: 'simple-oef.md'
-      - Defining Data Models: 'defining-data-models.md'
-      - The Query Language: 'query-language.md'
-      - SOEF Connection: 'simple-oef-usage.md'
     - Developer Interfaces:
       - CLI:
         - Installation: 'cli-how-to.md'

@@ -1,7 +1,17 @@
+## Agent Communication Network (ACN)
 
-The agent communication network (ACN) provides a system for agents to find each other and communicate, solely based on their wallet addresses. It addresses the message delivery problem.
+ACN is a <a href="../acn">peer-to-peer communication network for agents</a>. It allows AEAs to send and receive envelopes between each other.
+
+The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
+
+Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a> for an example).
+
+!!! note 
+    
+    Hence, the agent communication network (ACN) provides a system for agents to find each other and communicate, solely based on their wallet addresses. It addresses the message delivery problem.
 
 ## Message delivery problem
+
 Agents need to contact each others. Given the wallet address of a target agent, how can the originator agent deliver a message to it whilst guaranteeing certain properties?
 
 The properties we would like to have are:
@@ -33,7 +43,6 @@ At its core, the ACN implements a distributed hash table (DHT). A DHT is similar
 <img src="../assets/dht.jpg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 For the ACN, we use the DHT to store and maintain association between an agent address and the (network) location of its peer.
-
 
 ## N-tier architecture
 
