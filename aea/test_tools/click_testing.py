@@ -38,7 +38,6 @@ In particular, it fixes two issues with CliRunner.invoke
 
 import os
 import shlex
-import shutil
 import subprocess  # nosec
 import sys
 import tempfile
@@ -52,8 +51,8 @@ from _pytest.capture import CaptureFixture  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
-from aea.test_tools.utils import remove_test_directory
 from aea.cli import cli as aea_cli
+from aea.test_tools.utils import remove_test_directory
 
 
 class CliRunner(ClickCliRunner):
