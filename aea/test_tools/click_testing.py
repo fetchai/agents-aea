@@ -180,7 +180,7 @@ class CliTest:
     def setup(self) -> None:
         """Setup test."""
 
-        self.t = Path(tempfile.mkdtemp())
+        self.t = Path(tempfile.mkdtemp()).resolve()
 
     def teardown(self) -> None:
         """Teardown test."""
