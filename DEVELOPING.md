@@ -13,11 +13,11 @@
 
 ## <a name="setup"></a> Setting up a new development environment:
 
-- Ensure you have Python (version `3.8`, `3.9` or `3.10`) and [`poetry`][poetry].
--      make new-env
-  This will create a new virtual environment using poetry with the project and all the development dependencies installed. 
--      poetry shell
-  To enter the virtual environment. 
+1. Ensure you have Python (version `3.8`, `3.9` or `3.10`) and [`poetry`][poetry]. 
+2.     make new-env
+   This will create a new virtual environment using poetry with the project and all the development dependencies installed. 
+3.     poetry shell
+    To enter the virtual environment. 
 
 Depending on what you want to do you might need extra tools on your system:
 
