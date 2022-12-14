@@ -19,14 +19,19 @@
 # ------------------------------------------------------------------------------
 """This module contains a test for aea.test_tools."""
 
+import os
+from pathlib import Path
+from typing import cast
 from unittest.mock import patch
 
 import click
 import pytest
 from _pytest.capture import CaptureFixture  # type: ignore
 
+import aea
 from aea.cli.core import cli
-from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.click_testing import CliRunner, CliTest
+from aea.test_tools.utils import copy_class
 
 
 def test_invoke():
@@ -147,3 +152,79 @@ def test_cli_runner_invoke_raises(kwargs, capfd: CaptureFixture):
         match="Cannot use capfd in conjunction with `input`, `env` or `color`.",
     ):
         cli_runner.invoke(cli, ["--help"], standalone_mode=False, **kwargs)
+
+
+class TestCliTest:
+    """Test CliTest"""
+
+    def setup(self) -> None:
+        """Setup test"""
+        # `copy` the class to avoid test interference
+        self.test_cls = cast(CliTest, copy_class(CliTest))
+
+    def setup_test(self) -> CliTest:
+        """Setup test"""
+
+        self.test_cls.setup_class()
+        test_instance = self.test_cls()  # type: ignore
+        test_instance.setup()
+        return test_instance
+
+    def test_setup_cls_and_setup(self) -> None:
+        """Test setup_class and setup"""
+
+        self.test_cls.setup_class()
+        assert isinstance(self.test_cls._CliTest__cli_runner, CliRunner)  # type: ignore
+        assert self.test_cls._CliTest__cli.name == "aea"  # type: ignore
+        assert not hasattr(self.test_cls, "t")
+
+        test_instance = self.test_cls()  # type: ignore
+        test_instance.setup()
+        assert isinstance(test_instance.t, Path)
+
+    def test_teardown_and_teardown_cls(self) -> None:
+        """Test teardown and teardown_class"""
+
+        test_instance = self.setup_test()
+        cwd = Path.cwd()
+
+        assert not test_instance.t == cwd
+        os.chdir(test_instance.t)
+        assert test_instance.t == Path.cwd()
+        test_instance.teardown()
+        assert not hasattr(self.test_cls, "t")
+
+        test_instance.teardown_class()
+        assert Path.cwd() == cwd
+
+    def test_run_cli(self) -> None:
+        """Test run_cli"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout
+
+    def test_run_cli_subprocess(self) -> None:
+        """Test run_cli_subprocess"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli_subprocess("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout
+
+    def test_run_cli_failure(self) -> None:
+        """Test run_cli failure"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli("non-existent-command")
+        assert result.exit_code == 2
+        assert "No such command 'non-existent-command'" in result.stdout
+
+    def test_run_cli_subprocess_failure(self) -> None:
+        """Test run_cli_subprocess failure"""
+
+        test_instance = self.setup_test()
+        result = test_instance.run_cli_subprocess("non-existent-command")
+        assert result.exit_code == 2
+        assert "No such command 'non-existent-command'" in result.output
