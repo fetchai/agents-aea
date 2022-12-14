@@ -38,7 +38,6 @@ In particular, it fixes two issues with CliRunner.invoke
 
 import os
 import shlex
-import shutil
 import subprocess  # nosec
 import sys
 import tempfile
@@ -53,6 +52,7 @@ from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
 from aea.cli import cli as aea_cli
+from aea.test_tools.utils import remove_test_directory
 
 
 class CliRunner(ClickCliRunner):
@@ -164,10 +164,10 @@ class CliTest:
         self.__cli_runner.capfd = capfd
 
     @classmethod
-    def setup_class(cls) -> None:
+    def setup_class(cls, mix_stderr: bool = True) -> None:
         """Setup test class."""
 
-        cls.__cli_runner = CliRunner()
+        cls.__cli_runner = CliRunner(mix_stderr=mix_stderr)
         cls.__cwd = Path.cwd().absolute()
 
     @classmethod
@@ -179,12 +179,12 @@ class CliTest:
     def setup(self) -> None:
         """Setup test."""
 
-        self.t = Path(tempfile.mkdtemp())
+        self.t = Path(tempfile.mkdtemp()).resolve()
 
     def teardown(self) -> None:
         """Teardown test."""
 
-        shutil.rmtree(str(self.t))
+        remove_test_directory(self.t)
 
     def run_cli(
         self,
@@ -206,11 +206,12 @@ class CliTest:
 
         cli_name = f"{self.__cli.name}.cli"  # pylint: disable=no-member
         args = (*self.cli_options, *commands)
+        stderr = subprocess.STDOUT if self.__cli_runner.mix_stderr else subprocess.PIPE
         process = subprocess.Popen(  # nosec
             [sys.executable, "-m", cli_name, *args],
             **kwargs,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=stderr,
         )
 
         stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
