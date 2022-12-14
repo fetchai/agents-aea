@@ -272,35 +272,85 @@ class BasePackageManager(ABC):
         update_fingerprint(configuration=package_configuration)
 
     def add_package(
-        self, package_id: PackageId, with_dependencies: bool = False
+        self,
+        package_id: PackageId,
+        with_dependencies: bool = False,
+        allow_update: bool = False,
     ) -> "BasePackageManager":
         """Add package."""
-        author_repo = self.path / package_id.author
-        if not author_repo.exists():
-            author_repo.mkdir()
-            (author_repo / "__init__.py").touch()
-
-        package_type_collection = author_repo / package_id.package_type.to_plural()
-        if not package_type_collection.exists():
-            package_type_collection.mkdir()
-            (package_type_collection / "__init__.py").touch()
-
-        download_path = package_type_collection / package_id.name
-        fetch_ipfs(
-            str(package_id.package_type), package_id.public_id, dest=str(download_path)
+        # check already added
+        actual_package_id = (
+            self.get_package_version_with_hash(package_id)
+            if self.is_package_files_exist(package_id)
+            else None
         )
 
+        is_update_needed = bool(actual_package_id) and (
+            actual_package_id != package_id
+            or actual_package_id.package_hash != package_id.package_hash
+        )
+
+        if not actual_package_id:
+            # no package on fs, download one
+            author_repo = self.path / package_id.author
+            if not author_repo.exists():
+                author_repo.mkdir()
+                (author_repo / "__init__.py").touch()
+
+            package_type_collection = author_repo / package_id.package_type.to_plural()
+            if not package_type_collection.exists():
+                package_type_collection.mkdir()
+                (package_type_collection / "__init__.py").touch()
+
+            download_path = package_type_collection / package_id.name
+            fetch_ipfs(
+                str(package_id.package_type),
+                package_id.public_id,
+                dest=str(download_path),
+            )
+        elif not is_update_needed:
+            # actual version already, nothing to do
+            pass
+        elif is_update_needed and not allow_update:
+            raise ValueError(
+                f"Required package and package in the registry does not match: {package_id} vs {actual_package_id}"
+            )
+        else:
+            self.update_package(package_id)
+
         if with_dependencies:
-            for dependency_package_id in self.get_package_dependencies(
-                package_id=package_id
-            ):
-                if self.get_package_config_file(dependency_package_id).exists():
-                    config = self._get_package_configuration(package_id=package_id)
-                    if config.package_id != dependency_package_id:
-                        self.update_package(dependency_package_id)
-                    continue
-                self.add_package(dependency_package_id, with_dependencies=True)
+            self.add_dependencies_for_package(package_id, allow_update=allow_update)
+
         return self
+
+    def add_dependencies_for_package(
+        self, package_id: PackageId, allow_update: bool = False
+    ) -> None:
+        """Add dependencies for the package specified."""
+        for dependency_package_id in self.get_package_dependencies(
+            package_id=package_id
+        ):
+            self.add_package(
+                dependency_package_id, with_dependencies=True, allow_update=allow_update
+            )
+
+    def get_package_version_with_hash(self, package_id: PackageId) -> PackageId:
+        """Add package_id with hash for the package presents in registry."""
+        config = self._get_package_configuration(package_id=package_id)
+        actual_package_id = PackageId(
+            package_type=config.package_id.package_type,
+            public_id=PublicId(
+                author=config.package_id.public_id.author,
+                name=config.package_id.public_id.name,
+                version=config.package_id.public_id.version,
+                package_hash=self.calculate_hash_from_package_id(package_id),
+            ),
+        )
+        return actual_package_id
+
+    def is_package_files_exist(self, package_id: PackageId) -> bool:
+        """Check package exists in the filesystem by checking it's config file exists."""
+        return self.get_package_config_file(package_id).exists()
 
     def package_path_from_package_id(self, package_id: PackageId) -> Path:
         """Get package path from the package id."""

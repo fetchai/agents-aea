@@ -119,6 +119,17 @@ class PackageManagerV0(BasePackageManager):
 
         return self
 
+    def add_package(
+        self,
+        package_id: PackageId,
+        with_dependencies: bool = False,
+        allow_update: bool = False,
+    ) -> "BasePackageManager":
+        """Add package."""
+        super().add_package(package_id, with_dependencies, allow_update)
+        self._packages[package_id] = self.calculate_hash_from_package_id(package_id)
+        return self
+
     def verify(
         self,
     ) -> int:
