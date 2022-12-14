@@ -52,6 +52,7 @@ from _pytest.capture import CaptureFixture  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
+from aea.test_tools.utils import remove_test_directory
 from aea.cli import cli as aea_cli
 
 
@@ -184,7 +185,7 @@ class CliTest:
     def teardown(self) -> None:
         """Teardown test."""
 
-        shutil.rmtree(str(self.t), ignore_errors=True)
+        remove_test_directory(self.t)
 
     def run_cli(
         self,
