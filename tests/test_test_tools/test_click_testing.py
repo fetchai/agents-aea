@@ -157,8 +157,6 @@ def test_cli_runner_invoke_raises(kwargs, capfd: CaptureFixture):
 class TestCliTest:
     """Test CliTest"""
 
-    cli_test: CliTest
-
     def setup(self) -> None:
         """Setup test"""
         # `copy` the class to avoid test interference
@@ -216,7 +214,7 @@ class TestCliTest:
         assert f"aea, version {aea.__version__}" in result.stdout
 
     def test_run_cli_failure(self) -> None:
-        """Test run_cli"""
+        """Test run_cli failure"""
 
         test_instance = self.setup_test()
         result = test_instance.run_cli("non-existent-command")
@@ -224,7 +222,7 @@ class TestCliTest:
         assert "No such command 'non-existent-command'" in result.stdout
 
     def test_run_cli_subprocess_failure(self) -> None:
-        """Test run_cli_subprocess"""
+        """Test run_cli_subprocess failure"""
 
         test_instance = self.setup_test()
         result = test_instance.run_cli_subprocess("non-existent-command")
