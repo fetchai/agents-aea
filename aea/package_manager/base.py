@@ -292,36 +292,54 @@ class BasePackageManager(ABC):
 
         if not actual_package_id:
             # no package on fs, download one
-            author_repo = self.path / package_id.author
-            if not author_repo.exists():
-                author_repo.mkdir()
-                (author_repo / "__init__.py").touch()
-
-            package_type_collection = author_repo / package_id.package_type.to_plural()
-            if not package_type_collection.exists():
-                package_type_collection.mkdir()
-                (package_type_collection / "__init__.py").touch()
-
-            download_path = package_type_collection / package_id.name
-            fetch_ipfs(
-                str(package_id.package_type),
-                package_id.public_id,
-                dest=str(download_path),
-            )
+            self._fetch_package(package_id)
         elif not is_update_needed:
             # actual version already, nothing to do
-            pass
+            return self
         elif is_update_needed and not allow_update:
             raise ValueError(
                 f"Required package and package in the registry does not match: {package_id} vs {actual_package_id}"
             )
         else:
-            self.update_package(package_id)
+            self._update_package(package_id)
 
         if with_dependencies:
             self.add_dependencies_for_package(package_id, allow_update=allow_update)
 
         return self
+
+    def _update_package(self, package_id: PackageId) -> None:
+        """Remove package directory from the filesystem and download new package."""
+        try:
+            self._remove_package_dir(package_id)
+        except (OSError, PermissionError) as e:
+            raise PackageUpdateError(f"Cannot update {package_id}") from e
+        self._fetch_package(package_id)
+
+    def _remove_package_dir(self, package_id: PackageId) -> None:
+        """Remove package directory from the filesystem"""
+        package_path = self.package_path_from_package_id(package_id=package_id)
+        shutil.rmtree(str(package_path))
+
+    def _fetch_package(self, package_id: PackageId) -> None:
+        """Fetch package from ipfs to the filesystem."""
+        author_repo = self.path / package_id.author
+        if not author_repo.exists():
+            author_repo.mkdir()
+            (author_repo / "__init__.py").touch()
+
+        package_type_collection = author_repo / package_id.package_type.to_plural()
+        if not package_type_collection.exists():
+            package_type_collection.mkdir()
+            (package_type_collection / "__init__.py").touch()
+
+        download_path = package_type_collection / package_id.name
+
+        fetch_ipfs(
+            str(package_id.package_type),
+            package_id.public_id,
+            dest=str(download_path),
+        )
 
     def add_dependencies_for_package(
         self, package_id: PackageId, allow_update: bool = False
@@ -372,14 +390,7 @@ class BasePackageManager(ABC):
         package_id: PackageId,
     ) -> "BasePackageManager":
         """Update package."""
-
-        package_path = self.package_path_from_package_id(package_id=package_id)
-        try:
-            shutil.rmtree(str(package_path))
-        except (OSError, PermissionError) as e:
-            raise PackageUpdateError(f"Cannot update {package_id}") from e
-
-        self.add_package(package_id)
+        self._update_package(package_id)
         return self
 
     @abstractmethod

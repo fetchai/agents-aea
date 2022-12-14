@@ -396,14 +396,14 @@ def test_package_manager_add_package_can_be_updated(fetch_mock: mock.Mock):
         ), mock.patch.object(
             package_manager, "calculate_hash_from_package_id"
         ), mock.patch.object(
-            package_manager, "update_package"
-        ) as update_mock:
+            package_manager, "_remove_package_dir"
+        ) as remove_mock:
             with pytest.raises(
                 ValueError,
-                match="equired package and package in the registry does not match",
+                match="Required package and package in the registry does not match",
             ):
                 package_manager.add_package(TEST_SKILL_ID)
             fetch_mock.assert_not_called()
 
             package_manager.add_package(TEST_SKILL_ID, allow_update=True)
-            update_mock.assert_called_once_with(TEST_SKILL_ID)
+            remove_mock.assert_called_once_with(TEST_SKILL_ID)
