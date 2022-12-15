@@ -1,9 +1,6 @@
 <h1 align="center">
-    <b>AEA Framework</b>
+    <b>AEA Framework - Develope Autonomous Economic Agents</b>
 </h1>
-<p align="center">
-<b>For developing Autonomous Economic Agents (AEAs)</b>
-</p>
 
 <div align="center">
  <ul align="left">
