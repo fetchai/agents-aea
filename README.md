@@ -2,14 +2,6 @@
     <b>AEA Framework - Develop Autonomous Economic Agents</b>
 </h1>
 
-<div align="center">
- <ul align="left">
- <li>An <b>Agent</b> is an entity that represents something (e.g. an individual, family, object, or an organisation), looks after their interests and has their preferences in mind when acting on their behalf.</li>
- <li>AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.</li>
- <li>AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owner.</li>
- </ul>
-</div>
-
 <p align="center">
   <a href="https://pypi.org/project/aea/">
     <img alt="PyPI" src="https://img.shields.io/pypi/v/aea">
@@ -36,21 +28,36 @@
   </a>
 </p>
 
+<div align="center">
+ <ul align="left">
+ <li>An <b>Agent</b> is an entity that represents something (e.g. an individual, family, object, or an organisation), looks after their interests and has their preferences in mind when acting on their behalf.</li>
+ <li>AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.</li>
+ <li>AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owners.</li>
+ </ul>
+</div>
+
 <p align="center">
   <a href="https://www.youtube.com/embed/xpJA4IT5X88">
     <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
   </a>
 </p>
 
-## Resources
+[//]: # (## Resources)
 
-- [Installation](#-install)
-- [Documentation][docs]
-- [Code of Conduct][coc]
-- [Contribution guidelines](#-contributing)
-- [Development guidelines][developing]
-- [Questions and Discussions][discussion]
-- [Bug Reports or Feature Requests][issues]
+[//]: # ()
+[//]: # (- [Installation]&#40;#install&#41;)
+
+[//]: # (- [Documentation][docs])
+
+[//]: # (- [Code of Conduct][coc])
+
+[//]: # (- [Contribution guidelines][contributing])
+
+[//]: # (- [Development guidelines][developing])
+
+[//]: # (- [Questions and Discussions][discussion])
+
+[//]: # (- [Bug Reports or Feature Requests][issues])
 
 ## To install
 
