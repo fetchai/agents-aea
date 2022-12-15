@@ -15,21 +15,20 @@
   <a href="https://pypi.org/project/aea/">
     <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
   </a>
-</p>
-<p align="center">
+  <br />
   <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
     <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
   </a>
-<a href="https://discord.gg/hy8SyhNnXf">
+  <a href="https://discord.gg/hy8SyhNnXf">
     <img src="https://img.shields.io/discord/441214316524339210.svg?logo=discord&logoColor=fff&label=Discord&color=7389d8" alt="Discord conversation" />
   </a>
 </p>
 
 <div align="center">
- <ul align="left">
+ <ul style="text-align:left;">
  <li>An <b>Agent</b> is an entity that represents something (e.g. an individual, family, object, or an organisation), looks after their interests and has their preferences in mind when acting on their behalf.</li>
  <li>AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.</li>
  <li>AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owners.</li>
