@@ -32,7 +32,6 @@ from aea.helpers.io import open_file
 from aea.package_manager.base import (
     BasePackageManager,
     ConfigLoaderCallableType,
-    DepedencyMismatchErrors,
     PACKAGES_FILE,
     PackageIdToHashMapping,
     load_configuration,
@@ -171,24 +170,9 @@ class PackageManagerV0(BasePackageManager):
                     failed = True
                     continue
 
-                dependencies_with_mismatched_hashes = self.check_dependencies(
-                    configuration=configuration_obj,
-                )
-                if len(dependencies_with_mismatched_hashes) > 0:
-                    for dep, failure in dependencies_with_mismatched_hashes:
-                        if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
-                            self._logger.error(
-                                f"Package contains a dependency that is not defined in the `packages.json`"
-                                f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
-                            )
-                            continue
-
-                        if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
-                            self._logger.error(
-                                f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
-                            )
-                            continue
+                if not self.is_dependencies_hashes_match(package_id, configuration_obj):
                     failed = True
+
         except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             failed = True

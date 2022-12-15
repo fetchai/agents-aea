@@ -23,17 +23,16 @@ import json
 import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 from typing import OrderedDict as OrderedDictType
+from typing import cast
 
 from aea.configurations.data_types import PackageId
 from aea.helpers.fingerprint import check_fingerprint
-from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.base import (
     BasePackageManager,
     ConfigLoaderCallableType,
-    DepedencyMismatchErrors,
     PACKAGES_FILE,
     PackageFileNotValid,
     PackageIdToHashMapping,
@@ -219,6 +218,11 @@ class PackageManagerV1(BasePackageManager):
 
         return self
 
+    @staticmethod
+    def _calculate_hash(package_path: str) -> str:
+        """Calculate hash for path."""
+        return IPFSHashOnly.get(str(package_path))
+
     def verify(
         self,
     ) -> int:
@@ -232,9 +236,10 @@ class PackageManagerV1(BasePackageManager):
                 configuration_obj = self._get_package_configuration(
                     package_id=package_id
                 )
-                calculated_hash = IPFSHashOnly.get(str(package_path))
 
+                calculated_hash = self._calculate_hash(str(package_path))
                 fingerprint_check = check_fingerprint(configuration_obj)
+
                 if not fingerprint_check:
                     failed = True
                     self._logger.error(
@@ -251,7 +256,6 @@ class PackageManagerV1(BasePackageManager):
                     failed = True
                     self._logger.error(f"Cannot find hash for {package_id}")
                     continue
-
                 if calculated_hash != expected_hash:
                     # this update is required for further dependency checks for
                     # packages where this package is a dependency
@@ -265,29 +269,7 @@ class PackageManagerV1(BasePackageManager):
                     failed = True
                     continue
 
-                dependencies_with_mismatched_hashes = self.check_dependencies(
-                    configuration_obj
-                )
-                if len(dependencies_with_mismatched_hashes) > 0:
-                    package_type = (
-                        "Third party"
-                        if self.is_third_party_package(package_id)
-                        else "Dev"
-                    )
-                    for dep, failure in dependencies_with_mismatched_hashes:
-                        if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
-                            self._logger.error(
-                                f"{package_type} package contains a dependency that is not defined in the `packages.json`"
-                                f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
-                            )
-                            continue
-
-                        if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
-                            self._logger.error(
-                                f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
-                            )
-                            continue
-
+                if not self.is_dependencies_hashes_match(package_id, configuration_obj):
                     failed = True
 
         except Exception:  # pylint: disable=broad-except
@@ -314,6 +296,11 @@ class PackageManagerV1(BasePackageManager):
 
         return data
 
+    @staticmethod
+    def _load_packages(packages_file: Path) -> Dict:
+        """Load packages json file."""
+        return cast(Dict, json.loads(packages_file.read_text()))
+
     @classmethod
     def from_dir(
         cls,
@@ -322,8 +309,7 @@ class PackageManagerV1(BasePackageManager):
     ) -> "PackageManagerV1":
         """Initialize from packages directory."""
         packages_file = packages_dir / PACKAGES_FILE
-        with open_file(packages_file, "r") as fp:
-            _packages = json.load(fp)
+        _packages = cls._load_packages(packages_file)
 
         if "dev" not in _packages or "third_party" not in _packages:
             raise PackageFileNotValid("Package file not valid.")
