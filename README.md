@@ -1,5 +1,5 @@
 <h1 align="center">
-    <b>AEA Framework - Develope Autonomous Economic Agents</b>
+    <b>AEA Framework - Develop Autonomous Economic Agents</b>
 </h1>
 
 <div align="center">
@@ -9,12 +9,6 @@
  <li>AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owner.</li>
  </ul>
 </div>
-
-<p align="center">
-  <a href="https://www.youtube.com/embed/xpJA4IT5X88">
-    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
-  </a>
-</p>
 
 <p align="center">
   <a href="https://pypi.org/project/aea/">
@@ -39,6 +33,12 @@
   </a>
 <a href="https://discord.gg/hy8SyhNnXf">
     <img src="https://img.shields.io/discord/441214316524339210.svg?logo=discord&logoColor=fff&label=Discord&color=7389d8" alt="Discord conversation" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.youtube.com/embed/xpJA4IT5X88">
+    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
   </a>
 </p>
 
