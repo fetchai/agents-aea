@@ -27,7 +27,7 @@
   </a>
 </p>
 
-<div>
+<div style="margin-right:80px; margin-left:80px;">
  <ul style="text-align: left;">
  <li>An <b>Agent</b> is an entity that represents something (e.g. an individual, family, object, or an organisation), looks after their interests and has their preferences in mind when acting on their behalf.</li>
  <li>AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.</li>
