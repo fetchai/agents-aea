@@ -9,6 +9,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
+## `v1.25.0` to `v1.26.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.24.0` to `v1.25.0`
 
 No backwards incompatible changes.
