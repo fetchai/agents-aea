@@ -1,5 +1,22 @@
 # Release History - open AEA
 
+## 1.26.0 (2022-12-15)
+
+AEA:
+- Adds support for hashing byte strings on `IPFSHashOnly` tool
+- Introduces `CliTest` tool to help with the `CLI` testing
+- Extends aea packages lock command to update fingerprints
+- Adds support for appending test coverage with previous runs on `aea test` command and fixes the coverage on `aea test packages` command
+- Updates the `BasePackageManager.add_package` to fetch packages recursively
+
+Plugins:
+- Updates the `cosmos` and `fetchai` ledger plugins to use `PyCryptodome` for `ripemd160` hash generation
+- Adds support for publishing byte strings directly to IPFS daemons without intermediate file storage on the `IPFS` plugin
+
+Chores:
+- Pins `tox` version using `tomte` in the CI to maintain version consistency
+- Pins `go` version to `v1.17.7` on the CI
+
 ## 1.25.0 (2022-12-01)
 
 AEA:
