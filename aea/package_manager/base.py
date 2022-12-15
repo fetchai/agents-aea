@@ -181,6 +181,27 @@ class BasePackageManager(ABC):
                 )
         return mismatches
 
+    def _get_package_configuration(self, package_id: PackageId) -> PackageConfiguration:
+        """Get package configuration by package_id."""
+        package_path = self.package_path_from_package_id(package_id)
+        configuration_obj = self.config_loader(
+            package_id.package_type,
+            package_path,
+        )
+        return configuration_obj
+
+    def get_package_dependencies(self, package_id: PackageId) -> List[PackageId]:
+        """Get package dependencies by package_id."""
+        configuration = self._get_package_configuration(package_id)
+        dependencies: List[PackageId] = []
+        for component_id in configuration.package_dependencies:
+            package_id = PackageId(
+                package_type=str(component_id.component_type),
+                public_id=component_id.public_id,
+            )
+            dependencies.append(package_id)
+        return dependencies
+
     def update_public_id_hash(
         self,
         public_id_str: str,
@@ -206,12 +227,7 @@ class BasePackageManager(ABC):
     ) -> None:
         """Update dependency hashes to latest for a package."""
 
-        package_path = self.package_path_from_package_id(
-            package_id=package_id,
-        )
-        config_file = (
-            package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_id.package_type.value]
-        )
+        config_file = self.get_package_config_file(package_id)
         package_config, extra = load_yaml(file_path=config_file)
         for component_type in PACKAGE_TYPE_TO_CONFIG_FILE:
             if component_type == AGENT:
@@ -232,6 +248,16 @@ class BasePackageManager(ABC):
             extra_data=extra,
         )
 
+    def get_package_config_file(self, package_id: PackageId) -> Path:
+        """Get package config file path."""
+        package_path = self.package_path_from_package_id(
+            package_id=package_id,
+        )
+        config_file = (
+            package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_id.package_type.value]
+        )
+        return config_file
+
     def update_fingerprints(
         self,
         package_id: PackageId,
@@ -245,9 +271,58 @@ class BasePackageManager(ABC):
 
         update_fingerprint(configuration=package_configuration)
 
-    def add_package(self, package_id: PackageId) -> "BasePackageManager":
-        """Add packages."""
+    def add_package(
+        self,
+        package_id: PackageId,
+        with_dependencies: bool = False,
+        allow_update: bool = False,
+    ) -> "BasePackageManager":
+        """Add package."""
+        # check already added
+        actual_package_id = (
+            self.get_package_version_with_hash(package_id)
+            if self.is_package_files_exist(package_id)
+            else None
+        )
 
+        is_update_needed = bool(actual_package_id) and (
+            actual_package_id != package_id
+            or actual_package_id.package_hash != package_id.package_hash
+        )
+
+        if not actual_package_id:
+            # no package on fs, download one
+            self._fetch_package(package_id)
+        elif not is_update_needed:
+            # actual version already, nothing to do
+            return self
+        elif is_update_needed and not allow_update:
+            raise ValueError(
+                f"Required package and package in the registry does not match: {package_id} vs {actual_package_id}"
+            )
+        else:
+            self._update_package(package_id)
+
+        if with_dependencies:
+            self.add_dependencies_for_package(package_id, allow_update=allow_update)
+
+        return self
+
+    def _update_package(self, package_id: PackageId) -> None:
+        """Remove package directory from the filesystem and download new package."""
+        try:
+            self._remove_package_dir(package_id)
+        except (OSError, PermissionError) as e:
+            raise PackageUpdateError(f"Cannot update {package_id}") from e
+        self._fetch_package(package_id)
+
+    def _remove_package_dir(self, package_id: PackageId) -> None:
+        """Remove package directory from the filesystem"""
+        package_path = self.package_path_from_package_id(package_id=package_id)
+        shutil.rmtree(str(package_path))
+
+    def _fetch_package(self, package_id: PackageId) -> None:
+        """Fetch package from ipfs to the filesystem."""
         author_repo = self.path / package_id.author
         if not author_repo.exists():
             author_repo.mkdir()
@@ -259,11 +334,41 @@ class BasePackageManager(ABC):
             (package_type_collection / "__init__.py").touch()
 
         download_path = package_type_collection / package_id.name
+
         fetch_ipfs(
-            str(package_id.package_type), package_id.public_id, dest=str(download_path)
+            str(package_id.package_type),
+            package_id.public_id,
+            dest=str(download_path),
         )
 
-        return self
+    def add_dependencies_for_package(
+        self, package_id: PackageId, allow_update: bool = False
+    ) -> None:
+        """Add dependencies for the package specified."""
+        for dependency_package_id in self.get_package_dependencies(
+            package_id=package_id
+        ):
+            self.add_package(
+                dependency_package_id, with_dependencies=True, allow_update=allow_update
+            )
+
+    def get_package_version_with_hash(self, package_id: PackageId) -> PackageId:
+        """Add package_id with hash for the package presents in registry."""
+        config = self._get_package_configuration(package_id=package_id)
+        actual_package_id = PackageId(
+            package_type=config.package_id.package_type,
+            public_id=PublicId(
+                author=config.package_id.public_id.author,
+                name=config.package_id.public_id.name,
+                version=config.package_id.public_id.version,
+                package_hash=self.calculate_hash_from_package_id(package_id),
+            ),
+        )
+        return actual_package_id
+
+    def is_package_files_exist(self, package_id: PackageId) -> bool:
+        """Check package exists in the filesystem by checking it's config file exists."""
+        return self.get_package_config_file(package_id).exists()
 
     def package_path_from_package_id(self, package_id: PackageId) -> Path:
         """Get package path from the package id."""
@@ -285,14 +390,7 @@ class BasePackageManager(ABC):
         package_id: PackageId,
     ) -> "BasePackageManager":
         """Update package."""
-
-        package_path = self.package_path_from_package_id(package_id=package_id)
-        try:
-            shutil.rmtree(str(package_path))
-        except (OSError, PermissionError) as e:
-            raise PackageUpdateError(f"Cannot update {package_id}") from e
-
-        self.add_package(package_id)
+        self._update_package(package_id)
         return self
 
     @abstractmethod

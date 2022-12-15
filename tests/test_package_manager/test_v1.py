@@ -31,7 +31,7 @@ from unittest import mock
 import pytest
 
 from aea.configurations.constants import PACKAGES
-from aea.configurations.data_types import PackageId
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.v1 import PackageManagerV1
 from aea.protocols.generator.common import INIT_FILE_NAME
@@ -44,6 +44,14 @@ from tests.test_package_manager.test_base import (
     EXAMPLE_PACKAGE_HASH,
     EXAMPLE_PACKAGE_ID,
     PACKAGE_JSON_FILE,
+)
+
+
+TEST_SKILL_ID = PackageId(
+    package_type=PackageType.SKILL,
+    public_id=PublicId.from_str(
+        "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+    ),
 )
 
 
@@ -280,3 +288,122 @@ class TestVerifyFailure(BaseAEATestCase):
 
             assert pm.verify() == 1
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
+
+
+@pytest.mark.intergration
+def test_package_manager_add_item_dependency_support():
+    """Check PackageManager.add_packages works with dependencies on real packages."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager.add_package(TEST_SKILL_ID)
+        assert len(package_manager.dev_packages) == 1
+        package_manager.dump()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager.add_package(
+            TEST_SKILL_ID,
+            with_dependencies=True,
+        )
+        assert len(package_manager.dev_packages) > 1
+
+        str_packages = str(package_manager.dev_packages)
+        # check some  deps
+        assert "protocol, valory/abci" in str_packages
+        assert "skill, valory/abstract_round_abci" in str_packages
+        assert "protocol, valory/tendermint" in str_packages
+        package_manager.dump()
+
+
+@mock.patch("aea.package_manager.base.fetch_ipfs")
+def test_package_manager_add_item_dependency_support_mock(fetch_mock):
+    """Check PackageManager.add_packages works with dependencies on mocks."""
+    FAKE_PACKAGES = [
+        PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                f"valory/abstract_{i}:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+        for i in range(3)
+    ]
+
+    # no deps
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(Path(tmpdir))
+        with mock.patch.object(package_manager, "calculate_hash_from_package_id"):
+            package_manager.add_package(TEST_SKILL_ID)
+            assert len(package_manager.dev_packages) == 1
+
+    # deps loading
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(Path(tmpdir))
+        with mock.patch.object(
+            package_manager, "calculate_hash_from_package_id"
+        ), mock.patch.object(
+            package_manager,
+            "get_package_dependencies",
+            side_effect=[
+                [FAKE_PACKAGES[0]],
+                [FAKE_PACKAGES[1]],
+                [FAKE_PACKAGES[2]],
+                [],
+                [],
+                [],
+                [],
+            ],
+        ):
+            package_manager.add_package(
+                TEST_SKILL_ID,
+                with_dependencies=True,
+            )
+            assert len(package_manager.dev_packages) == 4
+
+
+@mock.patch("aea.package_manager.base.fetch_ipfs")
+def test_package_manager_add_package_already_installed(fetch_mock: mock.Mock):
+    """Test package already installed."""
+    # version already installed
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(Path(tmpdir))
+        with mock.patch.object(
+            package_manager, "get_package_version_with_hash", return_value=TEST_SKILL_ID
+        ), mock.patch.object(
+            package_manager, "is_package_files_exist", return_value=True
+        ), mock.patch.object(
+            package_manager, "calculate_hash_from_package_id"
+        ):
+            package_manager.add_package(TEST_SKILL_ID)
+            fetch_mock.assert_not_called()
+
+
+@mock.patch("aea.package_manager.base.fetch_ipfs")
+def test_package_manager_add_package_can_be_updated(fetch_mock: mock.Mock):
+    """Test package update on add_package."""
+    # version already installed
+    data = TEST_SKILL_ID.public_id.json
+    data["version"] = "0.0.1"
+    OLDER_VERSION = PackageId(
+        package_type=TEST_SKILL_ID.package_type, public_id=PublicId.from_json(data)
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV1(Path(tmpdir))
+        with mock.patch.object(
+            package_manager, "get_package_version_with_hash", return_value=OLDER_VERSION
+        ), mock.patch.object(
+            package_manager, "is_package_files_exist", return_value=True
+        ), mock.patch.object(
+            package_manager, "calculate_hash_from_package_id"
+        ), mock.patch.object(
+            package_manager, "_remove_package_dir"
+        ) as remove_mock:
+            with pytest.raises(
+                ValueError,
+                match="Required package and package in the registry does not match",
+            ):
+                package_manager.add_package(TEST_SKILL_ID)
+            fetch_mock.assert_not_called()
+
+            package_manager.add_package(TEST_SKILL_ID, allow_update=True)
+            remove_mock.assert_called_once_with(TEST_SKILL_ID)

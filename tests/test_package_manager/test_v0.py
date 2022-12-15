@@ -30,7 +30,7 @@ from pathlib import Path
 from unittest import mock
 
 from aea.configurations.constants import PACKAGES
-from aea.configurations.data_types import PackageId
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.v0 import PackageManagerV0
 from aea.protocols.generator.common import INIT_FILE_NAME
@@ -43,6 +43,14 @@ from tests.test_package_manager.test_base import (
     EXAMPLE_PACKAGE_HASH,
     EXAMPLE_PACKAGE_ID,
     PACKAGE_JSON_FILE,
+)
+
+
+TEST_SKILL_ID = PackageId(
+    package_type=PackageType.SKILL,
+    public_id=PublicId.from_str(
+        "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+    ),
 )
 
 
@@ -225,7 +233,9 @@ class TestVerifyFailure(BaseAEATestCase):
     def test_missing_hash(self, caplog) -> None:
         """Test update package hash method."""
 
-        pm = PackageManagerV0(path=self.packages_dir_path, packages=OrderedDict())
+        pm: PackageManagerV0 = PackageManagerV0(
+            path=self.packages_dir_path, packages=OrderedDict()
+        )
 
         with caplog.at_level(logging.ERROR), mock.patch(
             "aea.package_manager.v0.check_fingerprint",
@@ -240,3 +250,48 @@ class TestVerifyFailure(BaseAEATestCase):
 
             assert pm.verify() == 1
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
+
+
+@mock.patch("aea.package_manager.base.fetch_ipfs")
+def test_package_manager_add_item_dependency_support_mock(fetch_mock):
+    """Check PackageManager.add_packages works with dependencies on mocks."""
+    FAKE_PACKAGES = [
+        PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                f"valory/abstract_{i}:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+        for i in range(3)
+    ]
+
+    # no deps
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV0(Path(tmpdir))
+        with mock.patch.object(package_manager, "calculate_hash_from_package_id"):
+            package_manager.add_package(TEST_SKILL_ID)
+            assert len(package_manager.packages) == 1
+
+    # deps loading
+    with tempfile.TemporaryDirectory() as tmpdir:
+        package_manager = PackageManagerV0(Path(tmpdir))
+        with mock.patch.object(
+            package_manager, "calculate_hash_from_package_id"
+        ), mock.patch.object(
+            package_manager,
+            "get_package_dependencies",
+            side_effect=[
+                [FAKE_PACKAGES[0]],
+                [FAKE_PACKAGES[1]],
+                [FAKE_PACKAGES[2]],
+                [],
+                [],
+                [],
+                [],
+            ],
+        ):
+            package_manager.add_package(
+                TEST_SKILL_ID,
+                with_dependencies=True,
+            )
+            assert len(package_manager.packages) == 4
