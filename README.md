@@ -38,7 +38,7 @@ A framework for developing autonomous economic agents (AEAs)
 
 ## To install
 
-1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
+1. Create and launch a clean virtual environment with Python 3.8 (any Python `>=` 3.6 works):
 
        pipenv --python 3.7 && pipenv shell
 
@@ -78,11 +78,7 @@ This approach is not recommended!
 
 This repository contains submodules. Clone with recursive strategy:
 
-    git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
-
-- To fetch/update submodules (for existing local repo):
-
-      git submodule sync --recursive && git submodule update --init --recursive
+    git clone https://github.com/fetchai/agents-aea.git && cd agents-aea
 
 ### Dependencies
 
