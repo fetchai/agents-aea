@@ -15,14 +15,12 @@
 
 ## <a name="get"></a> Getting the Source
 
-Fork and clone the agents-aea repository:
-
 1. Fork the [agents-aea repository](https://github.com/fetchai/agents-aea). 
 2. Clone your fork of the agents-aea repository:
    ```shell
    git clone git@github.com:<github username>/agents-aea.git
    ```
-3. Define an `upstream` remote pointing back to the main agents-aea repository.
+3. Define an `upstream` remote pointing back to the main agents-aea repository:
    ```shell
    git remote add upstream https://github.com/fetchai/agents-aea.git
    ```
@@ -61,7 +59,6 @@ To run general code quality checkers, formatters and linters:
 We use [`mkdocs`][mkdocs] and [`material-for-mkdocs`][material] for static documentation pages. To make changes to the documentation:
 -     make docs-live
   This starts a live-reloading docs server on localhost which you can access by going to http://127.0.0.1:8000/ in your browser. Making changes to the documentation automatically reloads this page, showing you the latest changes. 
-
 
   To create a new documentation page, add a markdown file under `/docs/` and add a reference to this page in `mkdocs.yml` under `nav`.
 
@@ -120,7 +117,7 @@ For instructions on how to contribute to the project (e.g. creating Pull Request
 For instructions on how to make a release, see the [release process][release process] guide.
 
 [protobuf]: https://developers.google.com/protocol-buffers/
-[ipfs]: https://docs.ipfs.io/guides/guides/install/
+[ipfs]: https://docs.ipfs.tech/install/
 [mkdocs]: https://www.mkdocs.org
 [material]: https://squidfunk.github.io/mkdocs-material/
 [poetry]: https://python-poetry.org

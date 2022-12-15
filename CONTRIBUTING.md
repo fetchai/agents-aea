@@ -118,6 +118,4 @@ Please follow the [Conventional Commits v1.0.0][convcommit]. The commit types mu
 [ghdiscussion]: https://github.com/fetchai/agents-aea/discussions
 [issues]: https://github.com/fetchai/agents-aea/issues
 [convcommit]: https://www.conventionalcommits.org/en/v1.0.0/
-[dev-doc]: https://github.com/angular/angular/blob/main/docs/DEVELOPER.md
 [github]: https://github.com/fetchai/agents-aea
-[discord]: https://bit.ly/3ra5uMI
