@@ -78,7 +78,7 @@ We use [GitHub issues][issues] for tracking requests and bugs, and [GitHub Discu
 
 ## License
 
-The AEA project uses [Apache License 2.0][license].
+The AEA project is licensed under [Apache License 2.0][license].
 
 ## Cite
 

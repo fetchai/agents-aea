@@ -1,4 +1,4 @@
-# Development Guide
+# Development Guidelines
 
 - [Getting the Source](#get)
 - [Setting up a New Development Environment](#setup)

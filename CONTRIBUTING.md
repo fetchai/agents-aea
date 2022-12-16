@@ -1,4 +1,4 @@
-# Contributing Guidelines
+# Contribution Guidelines
 
 Contributions to the framework, plugins, packages and related tools are welcome. As a contributor, here are the guidelines we would like you to follow:
 
