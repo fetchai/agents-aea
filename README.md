@@ -1,6 +1,10 @@
 <h1 align="center">
-    <b>AEA Framework - Develop Autonomous Economic Agents</b>
+    <b>AEA Framework</b>
 </h1>
+
+<p align="center">
+Create Autonomous Economic Agents (AEAs)
+</p>
 
 <p align="center">
   <a href="https://pypi.org/project/aea/">
@@ -27,13 +31,10 @@
   </a>
 </p>
 
-<div width="600px" margin="auto">
- <ul style="text-align: justify;">
- <li>An <b>Agent</b> is an entity that represents something (e.g. an individual, family, object, or an organisation), looks after their interests and has their preferences in mind when acting on their behalf.</li>
- <li>AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.</li>
- <li>AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owners.</li>
- </ul>
-</div>
+The AEA framework allows you to create **Autonomous Economic Agents**:
+- An AEA is an <b>Agent</b>, representing an individual, family, organisation or object (a.k.a. its "owner") in the digital world. It looks after its owner's interests and has their preferences in mind when acting on their behalf.
+- AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.
+- AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owners.
 
 <p align="center">
   <a href="https://www.youtube.com/embed/xpJA4IT5X88">
@@ -41,40 +42,21 @@
   </a>
 </p>
 
-[//]: # (## Resources)
-
-[//]: # ()
-[//]: # (- [Installation]&#40;#install&#41;)
-
-[//]: # (- [Documentation][docs])
-
-[//]: # (- [Code of Conduct][coc])
-
-[//]: # (- [Contribution guidelines][contributing])
-
-[//]: # (- [Development guidelines][developing])
-
-[//]: # (- [Questions and Discussions][discussion])
-
-[//]: # (- [Bug Reports or Feature Requests][issues])
-
 ## To install
 
 1. Ensure you have Python (version `3.8`, `3.9` or `3.10`).
 2. (optional) Use a virtual environment (e.g. [`pipenv`][pipenv] or [`poetry`][poetry]).
-3. Install `pip install aea[all]`
+3. Install: `pip install aea[all]`
 
 Please see the [installation page][docs-install] for more details.
 
 ## Documentation
 
-The full documentation can be found [here][docs].
+The full documentation, including how to get started, can be found [here][docs].
 
 ## Contributing
 
-Development of the AEA framework and its related tools happens in the open on [GitHub][github]. 
-
-All contributions very welcome! Remember, contribution is not only PRs and code, but any help with docs or helping other developers solve their issues are very appreciated! Thanks in advance! 
+All contributions are very welcome! Remember, contribution is not only PRs and code, but any help with docs or helping other developers solve their issues are very appreciated! 
 
 Read below to learn how you can take part in the AEA project.
 
@@ -92,7 +74,7 @@ Read our [development guidelines][developing] to learn about the development pro
 
 ### Issues, Questions and Discussions
 
-We use [GitHub issues][issues] for tracking requests and bugs, please see [GitHub Discussions][discussion] for general questions and discussion.
+We use [GitHub issues][issues] for tracking requests and bugs, and [GitHub Discussions][discussion] for general questions and discussion.
 
 ## License
 
