@@ -15,7 +15,7 @@
 
 ## <a name="get"></a> Getting the Source
 
-1. Fork the [agents-aea repository](https://github.com/fetchai/agents-aea). 
+1. Fork the [agents-aea repository][repo]. 
 2. Clone your fork of the agents-aea repository:
    ```shell
    git clone git@github.com:<github username>/agents-aea.git
@@ -36,7 +36,7 @@
 Depending on what you want to do, you might need extra tools on your system:
 
 - The project uses [Google Protocol Buffers][protobuf] compiler for message serialization. The compiler's version must match the `protobuf` library installed with the project (see `pyproject.toml`).  
-- The `fetchai/p2p_libp2p` package is partially developed in Go. To make changes, [install Golang](https://golang.org/doc/install).
+- The `fetchai/p2p_libp2p` package is partially developed in Go. To make changes, [install Golang][go].
 - To update fingerprint hashes of packages, you will need the [IPFS daemon][ipfs]. 
 
 ## <a name="dev"></a>Development
@@ -53,7 +53,7 @@ To run general code quality checkers, formatters and linters:
   Checks the code for known vulnerabilities and common security issues.
 -     make clean
   Cleans your development environment and deletes temporary files and directories.
-- For the Go parts, we use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
+- For the Go parts, we use [`golines`][golines] and [`golangci-lint`][golangci-lint] for linting.
 
 ### <a name="docs"></a>Updating documentation
 We use [`mkdocs`][mkdocs] and [`material-for-mkdocs`][material] for static documentation pages. To make changes to the documentation:
@@ -118,8 +118,12 @@ For instructions on how to make a release, see the [release process][release pro
 
 [protobuf]: https://developers.google.com/protocol-buffers/
 [ipfs]: https://docs.ipfs.tech/install/
+[go]: https://golang.org/doc/install
+[golines]: https://github.com/segmentio/golines
+[golangci-lint]: https://golangci-lint.run
 [mkdocs]: https://www.mkdocs.org
 [material]: https://squidfunk.github.io/mkdocs-material/
 [poetry]: https://python-poetry.org
 [contributing guide]: https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md
 [release process]: https://github.com/fetchai/agents-aea/blob/main/scripts/RELEASE_PROCESS.md
+[repo]: https://github.com/fetchai/agents-aea

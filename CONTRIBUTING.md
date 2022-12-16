@@ -41,7 +41,7 @@ Before you submit an issue, please search the [issue tracker][issues]. An issue 
 
 For bug reports, it is important that we can reproduce and confirm it. For this, we need you to provide a minimal reproduction instruction (this is part of the bug report issue template).
 
-You can file new issues by selecting from our [new issue templates](https://github.com/fetchai/agents-aea/issues/new/choose) and filling out the issue template.
+You can file new issues by selecting from our [new issue templates][new-issue] and filling out the issue template.
 
 ### <a name="submit-pr"></a> Submitting a Pull Request (PR)
 
@@ -49,7 +49,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 
 1. All Pull Requests should be based off of and opened against the `develop` branch. Do **not** open a Pull Request against `main`!
 
-2. Search [Existing PRs](https://github.com/fetchai/agents-aea/pulls) for an open or closed PR that relates to your submission.
+2. Search [Existing PRs][prs] for an open or closed PR that relates to your submission.
    You don't want to duplicate existing efforts.
 
 3. Be sure that an issue exists describing the problem you're fixing, or the design for the feature you'd like to add.
@@ -117,5 +117,7 @@ Please follow the [Conventional Commits v1.0.0][convcommit]. The commit types mu
 [developing]: https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md
 [ghdiscussion]: https://github.com/fetchai/agents-aea/discussions
 [issues]: https://github.com/fetchai/agents-aea/issues
+[new-issue]: https://github.com/fetchai/agents-aea/issues/new/choose
+[prs]: https://github.com/fetchai/agents-aea/pulls
 [convcommit]: https://www.conventionalcommits.org/en/v1.0.0/
 [github]: https://github.com/fetchai/agents-aea
