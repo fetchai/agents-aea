@@ -23,16 +23,16 @@ import json
 import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable
+from typing import Optional
 from typing import OrderedDict as OrderedDictType
 
-from aea.configurations.base import PackageConfiguration
-from aea.configurations.data_types import PackageId, PackageType
+from aea.configurations.data_types import PackageId
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
-from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.base import (
     BasePackageManager,
+    ConfigLoaderCallableType,
+    DepedencyMismatchErrors,
     PACKAGES_FILE,
     PackageIdToHashMapping,
     load_configuration,
@@ -44,10 +44,15 @@ class PackageManagerV0(BasePackageManager):
 
     _packages: OrderedDictType[PackageId, str]
 
-    def __init__(self, path: Path, packages: PackageIdToHashMapping) -> None:
+    def __init__(
+        self,
+        path: Path,
+        packages: Optional[PackageIdToHashMapping] = None,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> None:
         """Initialize object."""
 
-        super().__init__(path)
+        super().__init__(path=path, config_loader=config_loader)
 
         self._packages = packages or OrderedDict()
 
@@ -58,6 +63,11 @@ class PackageManagerV0(BasePackageManager):
         """Returns mappings of package ids -> package hash"""
 
         return self._packages
+
+    def get_package_hash(self, package_id: PackageId) -> Optional[str]:
+        """Get package hash."""
+
+        return self._packages.get(package_id.without_hash())
 
     def sync(
         self,
@@ -96,25 +106,40 @@ class PackageManagerV0(BasePackageManager):
 
         return self
 
-    def update_package_hashes(self) -> "PackageManagerV0":
+    def update_package_hashes(self) -> "BasePackageManager":
         """Update packages.json file."""
-        self._packages.update(self.get_available_package_hashes())
+
+        for package_id in self.iter_dependency_tree():
+            self.update_fingerprints(package_id=package_id)
+            self.update_dependencies(package_id=package_id)
+            package_hash = self.calculate_hash_from_package_id(
+                package_id=package_id,
+            )
+            self._packages[package_id] = package_hash
+
+        return self
+
+    def add_package(
+        self,
+        package_id: PackageId,
+        with_dependencies: bool = False,
+        allow_update: bool = False,
+    ) -> "BasePackageManager":
+        """Add package."""
+        super().add_package(package_id, with_dependencies, allow_update)
+        self._packages[package_id] = self.calculate_hash_from_package_id(package_id)
         return self
 
     def verify(
         self,
-        config_loader: Callable[
-            [PackageType, Path], PackageConfiguration
-        ] = load_configuration,
     ) -> int:
         """Verify fingerprints and outer hash of all available packages."""
 
         failed = False
         try:
-            available_packages = self.get_available_package_hashes()
-            for package_id in available_packages:
+            for package_id in self.iter_dependency_tree():
                 package_path = self.package_path_from_package_id(package_id)
-                configuration_obj = config_loader(
+                configuration_obj = self.config_loader(
                     package_id.package_type,
                     package_path,
                 )
@@ -122,7 +147,7 @@ class PackageManagerV0(BasePackageManager):
                 fingerprint_check = check_fingerprint(configuration_obj)
                 if not fingerprint_check:
                     failed = True
-                    self._logger.info(
+                    self._logger.error(
                         f"Fingerprints does not match for {package_id} @ {package_path}"
                     )
                     continue
@@ -130,20 +155,43 @@ class PackageManagerV0(BasePackageManager):
                 expected_hash = self.packages.get(package_id)
                 if expected_hash is None:
                     failed = True
-                    self._logger.info(f"Cannot find hash for {package_id}")
+                    self._logger.error(f"Cannot find hash for {package_id}")
                     continue
 
-                calculated_hash = IPFSHashOnly.get(str(package_path))
+                calculated_hash = self.calculate_hash_from_package_id(
+                    package_id=package_id
+                )
                 if calculated_hash != expected_hash:
-                    failed = True
-                    self._logger.info(
+                    # this update is required for further dependency checks for
+                    # packages where this package is a dependency
+                    self._packages[package_id] = calculated_hash
+                    self._logger.error(
                         f"\nHash does not match for {package_id}\n\tCalculated hash: {calculated_hash}\n\tExpected hash: {expected_hash}"
                     )
+                    failed = True
+                    continue
 
+                dependencies_with_mismatched_hashes = self.check_dependencies(
+                    configuration=configuration_obj,
+                )
+                if len(dependencies_with_mismatched_hashes) > 0:
+                    for dep, failure in dependencies_with_mismatched_hashes:
+                        if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
+                            self._logger.error(
+                                f"Package contains a dependency that is not defined in the `packages.json`"
+                                f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
+                            )
+                            continue
+
+                        if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
+                            self._logger.error(
+                                f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
+                            )
+                            continue
+                    failed = True
         except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             failed = True
-
         return int(failed)
 
     @property
@@ -157,7 +205,11 @@ class PackageManagerV0(BasePackageManager):
         return data
 
     @classmethod
-    def from_dir(cls, packages_dir: Path) -> "PackageManagerV0":
+    def from_dir(
+        cls,
+        packages_dir: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> "PackageManagerV0":
         """Initialize from packages directory."""
 
         packages_file = packages_dir / PACKAGES_FILE
@@ -168,4 +220,8 @@ class PackageManagerV0(BasePackageManager):
         for package_id, package_hash in _packages.items():
             packages[PackageId.from_uri_path(package_id)] = package_hash
 
-        return cls(packages_dir, packages)
+        return cls(
+            path=packages_dir,
+            packages=packages,
+            config_loader=config_loader,
+        )

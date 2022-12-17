@@ -36,10 +36,13 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 
 @mock.patch("aea.package_manager.base.fetch_ipfs")
+@mock.patch(
+    "aea.package_manager.base.BasePackageManager.calculate_hash_from_package_id"
+)
 class TestSyncCommand(BaseAEATestCase):
     """Test sync command."""
 
-    def test_sync_normal(self, ipfs_mock, caplog) -> None:
+    def test_sync_normal(self, ipfs_mock, hash_mock, caplog) -> None:
         """Test sync command."""
 
         with caplog.at_level(logging.INFO):
@@ -47,7 +50,7 @@ class TestSyncCommand(BaseAEATestCase):
             assert result.exit_code == 0
             assert "No package was updated." in caplog.text
 
-    def test_sync_with_missing_dev_packages(self, ipfs_mock, caplog) -> None:
+    def test_sync_with_missing_dev_packages(self, ipfs_mock, hash_mock, caplog) -> None:
         """Test sync with missing packages."""
 
         packages_file = self.t / PACKAGES / PACKAGES_FILE
@@ -71,7 +74,9 @@ class TestSyncCommand(BaseAEATestCase):
                 in caplog.text
             )
 
-    def test_sync_with_missing_third_party_packages(self, ipfs_mock, caplog) -> None:
+    def test_sync_with_missing_third_party_packages(
+        self, ipfs_mock, hash_mock, caplog
+    ) -> None:
         """Test sync with missing packages."""
 
         packages = {
@@ -90,7 +95,7 @@ class TestSyncCommand(BaseAEATestCase):
                 in caplog.text
             )
 
-    def test_sync_with_wrong_hash(self, ipfs_mock, caplog) -> None:
+    def test_sync_with_wrong_hash(self, ipfs_mock, hash_mock, caplog) -> None:
         """Test sync with missing packages."""
 
         packages = {

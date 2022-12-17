@@ -22,7 +22,7 @@ Or
 
 ## Publish packages
 
-To publish a package on the IPFS registry, first run `aea hash all` to update the dependencies with the latest IPFS hashes. Then push the relevant packages using
+To publish a package on the IPFS registry, first run `aea packages lock` to update the dependencies with the latest IPFS hashes. Then push the relevant packages using
 
 `aea push COMPONENT_TYPE COMPONENT_PATH`
 

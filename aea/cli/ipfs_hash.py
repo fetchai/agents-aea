@@ -29,6 +29,7 @@ import sys
 import traceback
 from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, cast
+from warnings import warn
 
 import click
 
@@ -260,6 +261,16 @@ def generate_all(
     no_wrap: bool,
 ) -> None:
     """Generate IPFS hashes."""
+    message = (
+        "`aea hash all` command has been deprecated and will be removed on v2.0.0, "
+        "please use `aea packages lock` command to perform package hash updates"
+    )
+    warn(
+        message=message,
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
+    click.echo(message=message)
     packages_dir = Path(packages_dir).absolute()
     return_code = update_hashes(packages_dir, no_wrap, vendor=vendor)
     sys.exit(return_code)

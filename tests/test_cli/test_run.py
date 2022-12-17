@@ -31,7 +31,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 from click import ClickException
 from pexpect.exceptions import EOF  # type: ignore
@@ -83,7 +83,7 @@ def test_run(password_or_none):
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier, *password_options],
+        [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier, *password_options],
     )
     assert result.exit_code == 0
 
@@ -92,8 +92,8 @@ def test_run(password_or_none):
         [
             *CLI_LOG_OPTION,
             "add-key",
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
             *password_options,
         ],
     )
@@ -106,7 +106,7 @@ def test_run(password_or_none):
             "config",
             "set",
             "agent.default_ledger",
-            FetchAICrypto.identifier,
+            EthereumCrypto.identifier,
         ],
     )
     assert result.exit_code == 0
@@ -118,7 +118,7 @@ def test_run(password_or_none):
             "config",
             "set",
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             "--type",
             "list",
         ],
@@ -192,7 +192,7 @@ def test_run_with_profiling():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli, [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
     )
     assert result.exit_code == 0
 
@@ -201,8 +201,8 @@ def test_run_with_profiling():
         [
             *CLI_LOG_OPTION,
             "add-key",
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         ],
     )
     assert result.exit_code == 0
@@ -214,7 +214,7 @@ def test_run_with_profiling():
             "config",
             "set",
             "agent.default_ledger",
-            FetchAICrypto.identifier,
+            EthereumCrypto.identifier,
         ],
     )
     assert result.exit_code == 0
@@ -226,7 +226,7 @@ def test_run_with_profiling():
             "config",
             "set",
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             "--type",
             "list",
         ],
@@ -301,7 +301,7 @@ def test_run_with_default_connection():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli, [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
     )
     assert result.exit_code == 0
 
@@ -310,8 +310,8 @@ def test_run_with_default_connection():
         [
             *CLI_LOG_OPTION,
             "add-key",
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         ],
     )
     assert result.exit_code == 0
@@ -323,7 +323,7 @@ def test_run_with_default_connection():
             "config",
             "set",
             "agent.default_ledger",
-            FetchAICrypto.identifier,
+            EthereumCrypto.identifier,
         ],
     )
     assert result.exit_code == 0
@@ -335,7 +335,7 @@ def test_run_with_default_connection():
             "config",
             "set",
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             "--type",
             "list",
         ],
@@ -368,7 +368,6 @@ def test_run_with_default_connection():
             pass
 
 
-@pytest.mark.skip  # need remote registry
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
@@ -399,7 +398,7 @@ def test_run_multiple_connections(connection_ids):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli, [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
     )
     assert result.exit_code == 0
 
@@ -408,8 +407,8 @@ def test_run_multiple_connections(connection_ids):
         [
             *CLI_LOG_OPTION,
             "add-key",
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         ],
     )
     assert result.exit_code == 0
@@ -669,7 +668,6 @@ def test_run_ethereum_private_key_config():
         pass
 
 
-@pytest.mark.skip  # need remote registry
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # install depends on network
 def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
@@ -695,7 +693,7 @@ def test_run_with_install_deps():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli, [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
     )
     assert result.exit_code == 0
 
@@ -704,8 +702,8 @@ def test_run_with_install_deps():
         [
             *CLI_LOG_OPTION,
             "add-key",
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         ],
     )
     assert result.exit_code == 0
@@ -784,7 +782,7 @@ def test_run_with_install_deps_and_requirement_file():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli, [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
     )
     assert result.exit_code == 0
 
@@ -793,8 +791,8 @@ def test_run_with_install_deps_and_requirement_file():
         [
             *CLI_LOG_OPTION,
             "add-key",
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         ],
     )
     assert result.exit_code == 0
@@ -806,7 +804,7 @@ def test_run_with_install_deps_and_requirement_file():
             "config",
             "set",
             "agent.default_ledger",
-            FetchAICrypto.identifier,
+            EthereumCrypto.identifier,
         ],
     )
     assert result.exit_code == 0
@@ -818,7 +816,7 @@ def test_run_with_install_deps_and_requirement_file():
             "config",
             "set",
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             "--type",
             "list",
         ],
@@ -1133,15 +1131,15 @@ class TestRunFailsWhenConnectionNotDeclared(AEATestCaseEmpty):
         super().setup_class()
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.generate_private_key(EthereumCrypto.identifier)
         cls.add_private_key(
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         )
-        cls.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        cls.set_config("agent.default_ledger", EthereumCrypto.identifier)
         cls.set_config(
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             type_="list",
         )
 
@@ -1258,16 +1256,16 @@ class TestRunFailsWhenConnectionNotComplete(AEATestCaseEmpty):
         cls.connection_id = HTTP_ClIENT_PUBLIC_ID
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
-        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.generate_private_key(EthereumCrypto.identifier)
         cls.add_private_key(
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         )
         cls.add_item("connection", str(cls.connection_id))
-        cls.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        cls.set_config("agent.default_ledger", EthereumCrypto.identifier)
         cls.set_config(
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             type_="list",
         )
         cls.set_config("agent.default_connection", str(HTTP_ClIENT_PUBLIC_ID))
@@ -1312,16 +1310,16 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
         super().setup_class()
         cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
-        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.generate_private_key(EthereumCrypto.identifier)
         cls.add_private_key(
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         )
         cls.add_item("connection", cls.connection_id)
-        cls.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        cls.set_config("agent.default_ledger", EthereumCrypto.identifier)
         cls.set_config(
             "agent.required_ledgers",
-            json.dumps([FetchAICrypto.identifier]),
+            json.dumps([EthereumCrypto.identifier]),
             type_="list",
         )
         cls.set_config("agent.default_connection", cls.connection_id)
@@ -1352,7 +1350,6 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             )
 
 
-@pytest.mark.skip  # need remote registry
 class TestRunFailsWhenProtocolConfigFileNotFound:
     """Test that the command 'aea run' fails when a protocol configuration file is not found."""
 
@@ -1372,6 +1369,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -1387,9 +1385,9 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             cls.t,
             cls.agent_name,
             "vendor",
-            "fetchai",
+            "open_aea",
             "protocols",
-            "default",
+            "signing",
             "protocol.yaml",
         )
 
@@ -1587,10 +1585,10 @@ class TestExcludeConnection(AEATestCaseEmpty):
         super().setup_class()
         cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection2_id = str(STUB_CONNECTION_PUBLIC_ID)
-        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.generate_private_key(EthereumCrypto.identifier)
         cls.add_private_key(
-            FetchAICrypto.identifier,
-            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            EthereumCrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier),
         )
         cls.add_item("connection", cls.connection_id)
         cls.add_item("connection", cls.connection2_id)

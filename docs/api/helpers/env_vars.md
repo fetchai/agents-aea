@@ -14,6 +14,16 @@ def is_env_variable(value: Any) -> bool
 
 Check is variable string with env variable pattern.
 
+<a id="aea.helpers.env_vars.export_path_to_env_var_string"></a>
+
+#### export`_`path`_`to`_`env`_`var`_`string
+
+```python
+def export_path_to_env_var_string(export_path: List[str]) -> str
+```
+
+Conver export path to environment variable string.
+
 <a id="aea.helpers.env_vars.replace_with_env_var"></a>
 
 #### replace`_`with`_`env`_`var
@@ -53,4 +63,48 @@ def apply_env_variables_on_agent_config(data: List[Dict], env_variables: Mapping
 ```
 
 Create new resulting dict with env variables applied.
+
+<a id="aea.helpers.env_vars.is_strict_list"></a>
+
+#### is`_`strict`_`list
+
+```python
+def is_strict_list(data: List) -> bool
+```
+
+Check if a data list is an strict list
+
+The data list contains a mapping object we need to process it as an
+object containing configurable parameters. For example
+
+cert_requests:
+- public_key: example_public_key
+
+This will get exported as `CONNECTION_NAME_CERT_REQUESTS_0_PUBLIC_KEY=example_public_key`
+
+Where as
+
+parameters:
+- hello
+- world
+
+will get exported as `SKILL_NAME_PARAMETERS=["hello", "world"]`
+
+**Arguments**:
+
+- `data`: Data list
+
+**Returns**:
+
+Boolean specifying whether it's a strict list or not
+
+<a id="aea.helpers.env_vars.generate_env_vars_recursively"></a>
+
+#### generate`_`env`_`vars`_`recursively
+
+```python
+def generate_env_vars_recursively(data: Union[Dict, List], export_path: List[str]) -> Dict
+```
+
+Generate environment variables recursively.
 

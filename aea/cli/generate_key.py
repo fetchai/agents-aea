@@ -27,7 +27,7 @@ from aea.cli.add_key import _add_private_key
 from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.decorators import _check_aea_project
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
-from aea.crypto.helpers import create_private_key
+from aea.crypto.helpers import create_private_key, generate_multiple_keys
 from aea.crypto.registries import crypto_registry
 
 
@@ -59,6 +59,7 @@ from aea.crypto.registries import crypto_registry
     required=False,
     default="",
 )
+@click.option("-n", type=int, help="Number of keys to generate")
 @click.pass_context
 def generate_key(
     click_context: click.core.Context,
@@ -68,8 +69,40 @@ def generate_key(
     add_key: bool = False,
     connection: bool = False,
     extra_entropy: Union[str, bytes, int] = "",
+    n: Optional[int] = None,
 ) -> None:
     """Generate a private key and place it in a file."""
+    if n is None:
+        _generate_one(
+            click_context=click_context,
+            type_=type_,
+            file=file,
+            password=password,
+            add_key=add_key,
+            connection=connection,
+            extra_entropy=extra_entropy,
+        )
+        return
+
+    generate_multiple_keys(
+        n=n,
+        type_=type_,
+        password=password,
+        extra_entropy=extra_entropy,
+        file=file,
+    )
+
+
+def _generate_one(
+    click_context: click.core.Context,
+    type_: str,
+    file: str,
+    password: Optional[str],
+    add_key: bool = False,
+    connection: bool = False,
+    extra_entropy: Union[str, bytes, int] = "",
+) -> None:
+    """Generate one key."""
     keys_generated = _generate_private_key(type_, file, password, extra_entropy)
     if add_key:
         _check_aea_project((click_context,))
