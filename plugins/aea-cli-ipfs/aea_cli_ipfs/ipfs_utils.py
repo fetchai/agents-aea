@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Ipfs utils for `ipfs cli command`."""
+
 import logging
 import os
 import shutil
@@ -25,7 +26,7 @@ import signal
 import subprocess  # nosec
 import tempfile
 from pathlib import Path
-from typing import Dict, IO, List, Optional, Set, Tuple, cast
+from typing import Dict, IO, List, Union, Optional, Set, Tuple, cast
 
 import ipfshttpclient  # type: ignore
 import requests
@@ -308,7 +309,7 @@ class IPFSTool:
     def download(
         self,
         hash_id: str,
-        target_dir: str,
+        target_dir: Union[str, Path],
         fix_path: bool = True,
         attempts: int = 5,
     ) -> str:
@@ -316,19 +317,19 @@ class IPFSTool:
         Download dir by its hash.
 
         :param hash_id: str. hash of file to download
-        :param target_dir: str. directory to place downloaded
+        :param target_dir: Union[str, Path]. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
         :param attempts: int. default 5. How often to attempt the download.
         :return: downloaded path
         """
 
-        if not os.path.exists(target_dir):  # pragma: nocover
-            os.makedirs(target_dir, exist_ok=True)
+        target_dir = Path(target_dir)
+        target_dir.mkdir(exist_ok=True, parents=True)
 
-        if os.path.exists(os.path.join(target_dir, hash_id)):  # pragma: nocover
-            raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
+        target_path = target_dir / hash_id
+        if target_path.exists():
+            raise DownloadError(f"{hash_id} was already downloaded to {target_path}")
 
-        downloaded_path = str(Path(target_dir) / hash_id)
         while attempts:
             attempts -= 1
             try:  # download to tmp_dir in case of midway download failure
@@ -337,37 +338,20 @@ class IPFSTool:
                     download_path = Path(tmp_dir) / hash_id
                     if fix_path and (download_path / hash_id).is_dir():
                         download_path = download_path / hash_id
-                    shutil.copytree(download_path, downloaded_path)
+                    shutil.copytree(download_path, target_path)
                     break
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
         else:
             raise DownloadError(f"Failed to download: {hash_id}")
 
-        package_path = None
-        if os.path.isdir(downloaded_path):
-            downloaded_files = os.listdir(downloaded_path)
-            if len(downloaded_files) > 0:
-                package_name, *_ = os.listdir(downloaded_path)
-                package_path = str(Path(target_dir) / package_name)
-
-        if package_path is None:
+        if target_path.is_dir() and any(target_path.iterdir()):
+            package_name, *_ = target_path.iterdir()
+            package_path = Path(target_dir) / package_name
+        else:
             package_path = target_dir
 
-        if fix_path:
-            # self.client.get creates result with hash name
-            # and content, but we want content in the target dir
-            try:
-                for each_file in Path(downloaded_path).iterdir():  # grabs all files
-                    shutil.move(str(each_file), target_dir)
-            except shutil.Error as e:  # pragma: nocover
-                if os.path.isdir(downloaded_path):
-                    shutil.rmtree(downloaded_path)
-                raise DownloadError(f"error on move files {str(e)}") from e
-
-        if os.path.isdir(downloaded_path):
-            shutil.rmtree(downloaded_path)
-        return package_path
+        return str(package_path)
 
     def publish(self, hash_id: str) -> Dict:
         """
