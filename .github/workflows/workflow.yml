@@ -63,7 +63,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
@@ -102,7 +102,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
       - name: Pylint check
         run: |
           tox -e pylint
@@ -116,12 +116,15 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: "3.10"
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
           pip install --user --upgrade setuptools
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
@@ -163,7 +166,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
           pip install --user --upgrade setuptools
       - name: Copyright Check
         run: tox -e check-copyright
@@ -188,15 +191,37 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
-      - name: Check Docs links and IPFS hashes
-        run: tox -e check-doc-links-hashes
       - name: Check API Docs updated
         run: tox -e check-api-docs
       - name: Check spelling
         run: tox -e spell-check
+
+  docs_link_check:
+    continue-on-error: True
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.base_ref == 'main'
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tomte[tox]==0.1.5
+      - name: Check Docs links and IPFS hashes
+        run: tox -e check-doc-links-hashes
 
   scan:
     name: gitleaks
@@ -229,7 +254,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
         run: |
-          pip install tox
+          pip install tomte[tox]==0.1.5
       - name: Check Pipfile and tox.ini consistency
         run: |
           python ./scripts/check_pipfile_and_toxini.py
@@ -260,7 +285,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
         run: |
-          pip install tox
+          pip install tomte[tox]==0.1.5
       - name: Check plugin aea-ledger-cosmos
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && aea generate-key cosmos && echo aea-ledger-cosmos checked!"
@@ -320,7 +345,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
@@ -357,7 +382,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
@@ -386,7 +411,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
       - name: Framework integration tests
         run: tox -e py3.10 -- -m 'integration and not unstable and ledger and not profiling'
       - name: Packages integration tests
@@ -406,7 +431,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python_version: ['3.7', '3.8', '3.9', '3.10']
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
@@ -421,7 +446,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
+          pip install tomte[tox]==0.1.5
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
@@ -442,7 +467,7 @@ jobs:
       - if: matrix.os == 'macos-latest'
         name: Install dependencies (macos-latest)
         run: |
-          pip install tox
+          pip install tomte[tox]==0.1.5
           brew install gcc
           # brew install protobuf
           # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
@@ -473,7 +498,7 @@ jobs:
           choco install make -y
           # to check make was installed
           make --version
-          pip install tox
+          pip install tomte[tox]==0.1.5
           # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
           # unzip protoc-3.19.4-win64.zip -d protoc
           # sudo mv protoc/bin/protoc /usr/local/bin/protoc
@@ -547,8 +572,10 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox
-          pip install coverage
+          pip install tomte[tox]==0.1.5
+          # we only need "coverage" from the "tests" group
+          # but this makes it easier to stay in sync
+          pip install tomte[tests]==0.1.5
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc

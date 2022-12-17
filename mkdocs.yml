@@ -190,6 +190,10 @@ nav:
         - Project: 'api/manager/project.md'
         - Helpers:  api/manager/helpers.md
         - Utils: 'api/manager/utils.md'
+      - Package Manager:
+        - Base: 'api/package_manager/base.md'
+        - Package Manager V0: 'api/package_manager/v0.md'
+        - Package Manager V1: 'api/package_manager/v1.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
         - Dialogue:

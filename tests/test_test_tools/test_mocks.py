@@ -47,8 +47,8 @@ def test_regex_comparator(builtin_type: Any) -> None:
 def test_ctx_mock_popen_communicate_return_value() -> None:
     """Test ctx_mock_popen"""
 
-    cmd_name = "python"
-    popen = subprocess.Popen([cmd_name])  # nosec
+    cmd_name, *args = "python", "--version"
+    popen = subprocess.Popen([cmd_name, *args])  # nosec
     stdout, stderr = popen.communicate()
     assert stdout is stderr is None
     assert popen.returncode == 0

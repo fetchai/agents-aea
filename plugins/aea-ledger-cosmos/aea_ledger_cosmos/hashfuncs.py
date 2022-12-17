@@ -2,6 +2,7 @@
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,34 +18,35 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Test ipfs utils."""
+"""Hash functions of Crypto package."""
 
-from aea_cli_ipfs.ipfs_utils import IPFSTool
+import hashlib
 
-from aea.cli.registry.settings import DEFAULT_IPFS_URL, DEFAULT_IPFS_URL_LOCAL
-
-
-def test_init_tool() -> None:
-    """Test tool initialization."""
-
-    tool = IPFSTool(DEFAULT_IPFS_URL)
-    assert tool.is_remote is True
-
-    tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
-    assert tool.is_remote is False
+# pycryptodome, a dependency of bip-utils
+from Crypto.Hash import RIPEMD160  # type: ignore # nosec
 
 
-def test_hash_bytes() -> None:
-    """Test hash bytes."""
-    tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
+def sha256(contents: bytes) -> bytes:
+    """
+    Get sha256 hash.
 
-    tool.daemon.start()
-    try:
-        assert tool.is_remote is False
-        some_bytes = b"there is some bytes"
-        ipfs_hash = tool.add_bytes(some_bytes)
-        assert (
-            ipfs_hash == "QmPPFcK8uynDmceTDkDjHuDbR7gnqBfaMCTifs6oFKHn4E"
-        )  # precalculated
-    finally:
-        tool.daemon.stop()
+    :param contents: bytes contents.
+
+    :return: bytes sha256 hash.
+    """
+    h = hashlib.sha256()
+    h.update(contents)
+    return h.digest()
+
+
+def ripemd160(contents: bytes) -> bytes:
+    """
+    Get ripemd160 hash using PyCryptodome.
+
+    :param contents: bytes contents.
+
+    :return: bytes ripemd160 hash.
+    """
+    h = RIPEMD160.new()
+    h.update(contents)
+    return h.digest()

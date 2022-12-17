@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.transfer module."""
 
+import platform
 import random
 import string
 from pathlib import Path
@@ -39,6 +40,12 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import MAX_FLAKY_RERUNS
+
+
+skip_fetchai_test_macos = pytest.mark.skipif(
+    condition=(platform.system() == "Darwin"),
+    reason="Continuously fails on CI",
+)
 
 
 class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
@@ -94,7 +101,9 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             wallet = get_wallet_from_agent_config(agent_config, password=self.PASSWORD)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
+    @skip_fetchai_test_macos
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    @pytest.mark.skip(reason="https://github.com/valory-xyz/open-aea/issues/456")
     def test_integration(self):
         """Perform integration tests of cli transfer command with real transfer."""
         self.set_agent_context(self.agent_name2)

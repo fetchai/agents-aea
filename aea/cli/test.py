@@ -55,7 +55,6 @@ from aea.configurations.data_types import (
 from aea.configurations.loader import load_component_configuration
 from aea.configurations.manager import find_component_directory_from_component_id
 from aea.exceptions import enforce
-from aea.helpers.base import cd
 from aea.helpers.dependency_tree import DependencyTree
 
 
@@ -91,11 +90,19 @@ output = {root_dir}/coverage.xml
     type=click.Path(exists=True, dir_okay=True, file_okay=False),
     help="Directory to output codecov reports.",
 )
-def test(click_context: click.Context, cov: bool, cov_output: str) -> None:
+@click.option(
+    "--append",
+    help="Directory to output codecov reports.",
+    is_flag=True,
+)
+def test(
+    click_context: click.Context, cov: bool, cov_output: str, append: bool
+) -> None:
     """Run tests of an AEA project."""
     ctx = cast(Context, click_context.obj)
     ctx.config["cov"] = cov
     ctx.config["cov_output"] = cov_output
+    ctx.config["append"] = append
 
     if click_context.invoked_subcommand is None:
         test_aea_project(click_context, Path(ctx.cwd), args=[])
@@ -207,6 +214,7 @@ def by_path(
         packages_dir=Path(ctx.registry_path),
         cov=ctx.config.get("cov", False),
         cov_output=ctx.config.get("cov_output"),
+        append_coverage=ctx.config.get("append", False),
         skip_consistency_check=ctx.config.get("skip_consistency_check", False),
     )
 
@@ -235,17 +243,18 @@ def packages(click_context: click.Context, author: Tuple[str]) -> None:
 
     cov = ctx.config.get("cov", False)
     cov_output = Path(ctx.config.get("cov_output") or Path.cwd()).resolve()
-    with CoveragercFile(root_dir=cov_output) as covrc_file:
-        coverage_data, failures = test_package_collection(
+
+    with CoverageContext(root_dir=cov_output, append=True) as coverage_context:
+        failures = test_package_collection(
             available_packages=available_packages,
             packages_dir=packages_dir,
             pytest_args=click_context.args,
             cov=cov,
-            covrc_file=covrc_file,
+            coverage_context=coverage_context,
             authors=author,
         )
         if cov:
-            aggregate_coverage(coverage_data=coverage_data, covrc_file=covrc_file)
+            coverage_context.generate()
 
     if len(failures) > 0:
         click.echo("Failed tests")
@@ -253,6 +262,63 @@ def packages(click_context: click.Context, author: Tuple[str]) -> None:
         for exit_code, package in failures:
             click.echo(f"{exit_code}       \t{package}")
         sys.exit(1)
+
+
+class CoverageContext:
+    """Coveragerc file context"""
+
+    def __init__(
+        self,
+        root_dir: Path,
+        append: bool = False,
+    ) -> None:
+        """Initialize object."""
+
+        self.root_dir = root_dir
+        self.append = append
+
+        self._t = tempfile.TemporaryDirectory()
+        self.coveragerc_file = Path(self._t.name, COVERAGERC_FILE)
+
+    def pytest_args(
+        self,
+        test_path: Path,
+    ) -> List[str]:
+        """Returns coverage flags for pytest command"""
+
+        args = [
+            f"--cov-config={self.coveragerc_file}",
+            "--cov-report=term",
+            f"--cov={test_path}",
+        ]
+
+        if self.append:
+            args.append("--cov-append")
+
+        return args
+
+    def __enter__(
+        self,
+    ) -> "CoverageContext":
+        """Enter context."""
+        self.coveragerc_file.write_text(
+            COVERAGERC_CONFIG.format(root_dir=self.root_dir),
+        )
+        return self
+
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
+        """Exit context."""
+
+        with contextlib.suppress(OSError, PermissionError):
+            self._t.cleanup()
+
+    def generate(
+        self,
+    ) -> None:
+        """Generate coverage report."""
+
+        coverage(argv=["html", f"--rcfile={self.coveragerc_file}"])
+        coverage(argv=["xml", f"--rcfile={self.coveragerc_file}"])
 
 
 def test_item(
@@ -345,6 +411,7 @@ def test_package_by_path(
     packages_dir: Optional[Path] = None,
     cov: bool = False,
     cov_output: Optional[Path] = None,
+    append_coverage: bool = False,
     skip_consistency_check: bool = False,
 ) -> None:
     """
@@ -356,6 +423,7 @@ def test_package_by_path(
     :param packages_dir: directory of the packages to import from
     :param cov: coverage capture indicator
     :param cov_output: Path to coverage output directory
+    :param append_coverage: Append test coverage instead of starting clean
     :param skip_consistency_check: skip the package consistency check
     """
     cov_output = Path(cov_output or Path.cwd()).resolve()
@@ -366,30 +434,20 @@ def test_package_by_path(
         packages_dir,
         skip_consistency_check=skip_consistency_check,
     )
-    with CoveragercFile(root_dir=cov_output) as covrc_file:
-        with cd(package_dir):
-            runtime_args = [
-                *get_pytest_args(covrc_file=covrc_file, cov=cov),
-                *pytest_arguments,
-            ]
-            exit_code = pytest.main(runtime_args)
-            if cov:
-                coverage_file = ".coverage"
-                coverage(
-                    argv=[
-                        "html",
-                        f"--rcfile={covrc_file}",
-                        f"--data-file={coverage_file}",
-                    ]
-                )
-                coverage(
-                    argv=[
-                        "xml",
-                        f"--rcfile={covrc_file}",
-                        f"--data-file={coverage_file}",
-                    ]
-                )
-                os.remove(coverage_file)
+    with CoverageContext(
+        root_dir=cov_output, append=append_coverage
+    ) as coverage_context:
+        runtime_args = [
+            *get_pytest_args(
+                package_dir=package_dir,
+                cov=cov,
+                coverage_context=coverage_context,
+            ),
+            *pytest_arguments,
+        ]
+        exit_code = pytest.main(runtime_args)
+        if cov:
+            coverage_context.generate()
 
     sys.exit(exit_code)
 
@@ -399,12 +457,11 @@ def test_package_collection(
     packages_dir: Path,
     pytest_args: List[str],
     cov: bool,
-    covrc_file: Path,
+    coverage_context: CoverageContext,
     authors: Tuple[str, ...],
-) -> Tuple[List[str], List[Tuple[int, str]]]:
+) -> List[Tuple[int, str]]:
     """Test a collection of packages."""
 
-    coverage_data = []
     failures = []
 
     for package_type, package_dir in available_packages:
@@ -416,31 +473,32 @@ def test_package_collection(
         if not test_dir.exists():
             continue
 
-        load_package(package_dir, packages_dir=packages_dir)
-        with cd(package_dir):
-            click.echo(f"Running tests for {package_dir.name} of type {package_type}")
-            exit_code = pytest.main(
-                [
-                    *get_pytest_args(covrc_file=covrc_file, cov=cov),
-                    *pytest_args,
-                ]
-            )
-            coverage_file = package_dir / ".coverage"
-            coverage_data.append(str(coverage_file))
+        load_package(
+            package_dir, packages_dir=packages_dir, skip_consistency_check=True
+        )
+        click.echo(f"Running tests for {package_dir.name} of type {package_type}")
+        exit_code = pytest.main(
+            [
+                *get_pytest_args(
+                    package_dir=package_dir, cov=cov, coverage_context=coverage_context
+                ),
+                *pytest_args,
+            ]
+        )
 
-            if exit_code:
-                if exit_code == pytest.ExitCode.NO_TESTS_COLLECTED:
-                    click.echo(
-                        f"Could not collect tests for for {package_dir.name} of type {package_type}"
-                    )
-                    continue
-
+        if exit_code:
+            if exit_code == pytest.ExitCode.NO_TESTS_COLLECTED:
                 click.echo(
-                    f"Running tests for for {package_dir.name} of type {package_type} failed"
+                    f"Could not collect tests for for {package_dir.name} of type {package_type}"
                 )
-                failures.append((exit_code, os.path.sep.join(package_dir.parts[-3:])))
+                continue
 
-    return coverage_data, failures
+            click.echo(
+                f"Running tests for for {package_dir.name} of type {package_type} failed"
+            )
+            failures.append((exit_code, os.path.sep.join(package_dir.parts[-3:])))
+
+    return failures
 
 
 def load_aea_packages_recursively(
@@ -491,63 +549,20 @@ def find_component_directory_from_component_id_in_registry(
     raise ValueError("Package {} not found.".format(component_id))
 
 
-def aggregate_coverage(coverage_data: List[str], covrc_file: Path) -> None:
-    """Aggregate coverage reports."""
-
-    click.echo("Generating coverage reports.")
-
-    coverage_data = [file for file in coverage_data if Path(file).exists()]
-    coverage(argv=["combine", f"--rcfile={covrc_file}", *coverage_data])
-    coverage(argv=["html", f"--rcfile={covrc_file}"])
-    coverage(argv=["xml", f"--rcfile={covrc_file}"])
-
-    # remove redundant coverage data
-    for file in coverage_data:
-        if Path(file).exists():
-            os.remove(file)
-
-
 def get_pytest_args(
-    covrc_file: Path,
+    package_dir: Path,
     cov: bool = False,
+    coverage_context: Optional[CoverageContext] = None,
 ) -> List:
     """Get pytest args for coverage checks."""
 
-    if not cov:
-        return [
-            AEA_TEST_DIRNAME,
-        ]
-
-    return [
-        AEA_TEST_DIRNAME,
-        "--cov=.",
-        "--doctest-modules",
-        ".",
-        f"--cov-config={covrc_file}",
-        "--cov-report=term",
+    args = [
+        str(package_dir / AEA_TEST_DIRNAME),
     ]
 
+    if cov:
+        args.extend(
+            cast(CoverageContext, coverage_context).pytest_args(test_path=package_dir)
+        )
 
-class CoveragercFile:
-    """Coveragerc file context"""
-
-    def __init__(self, root_dir: Path) -> None:
-        """Initialize object."""
-
-        self._t = tempfile.TemporaryDirectory()
-        self.file = Path(self._t.name, COVERAGERC_FILE)
-        self.root_dir = root_dir
-
-    def __enter__(
-        self,
-    ) -> Path:
-        """Enter context."""
-
-        self.file.write_text(COVERAGERC_CONFIG.format(root_dir=self.root_dir))
-        return self.file
-
-    def __exit__(self, *args: Any, **kwargs: Any) -> None:
-        """Exit context."""
-
-        with contextlib.suppress(OSError, PermissionError):
-            self._t.cleanup()
+    return args

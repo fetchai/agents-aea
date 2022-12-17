@@ -18,11 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helper module."""
+from typing import List
+
 import pytest
 
 from aea.helpers.env_vars import (
     apply_env_variables,
     convert_value_str_to_type,
+    export_path_to_env_var_string,
+    generate_env_vars_recursively,
     is_env_variable,
     replace_with_env_var,
 )
@@ -89,3 +93,105 @@ def test_convert_value_str_to_type():
     assert convert_value_str_to_type("none", "str") is None
     assert convert_value_str_to_type("null", "str") is None
     assert convert_value_str_to_type("None", "str") is None
+
+
+@pytest.mark.parametrize(
+    ("export_path", "var_string"),
+    argvalues=[
+        (["skill", "dummy", "models", "args"], "SKILL_DUMMY_MODELS_ARGS"),
+        (
+            ["skill", "dummy", "models", "args", "params"],
+            "SKILL_DUMMY_MODELS_ARGS_PARAMS",
+        ),
+        (
+            ["skill", "dummy", "models", "args", "params", "name"],
+            "SKILL_DUMMY_MODELS_ARGS_PARAMS_NAME",
+        ),
+        (["connection", "dummy", "config", "host"], "CONNECTION_DUMMY_CONFIG_HOST"),
+        ([0, "connection", "dummy"], "0_CONNECTION_DUMMY"),
+        (["connection", 0, "dummy"], "CONNECTION_0_DUMMY"),
+        (["connection", "dummy", 0], "CONNECTION_DUMMY_0"),
+    ],
+)
+def test_env_var_string_generator(export_path: List[str], var_string: str) -> None:
+    """Test `export_path_to_env_var_string` method"""
+
+    assert export_path_to_env_var_string(export_path=export_path) == var_string
+
+
+@pytest.mark.parametrize(
+    ("export_data", "template"),
+    argvalues=[
+        (
+            {
+                "dict": "Viraj",
+            },
+            {
+                "dict": "${str}",
+            },
+        ),
+        (
+            {"list": [1, 2, 3]},
+            {"list": "${list}"},
+        ),
+        (
+            {
+                "nested_dict": {
+                    "dict": "Viraj",
+                }
+            },
+            {
+                "nested_dict": {
+                    "dict": "${str}",
+                },
+            },
+        ),
+        (
+            {"nested_list": [[1], [2], [3]]},
+            {"nested_list": "${list}"},
+        ),
+        (
+            {
+                "nested_dict": {
+                    "dict": "Viraj",
+                    "list": [1, 2, 3],
+                }
+            },
+            {
+                "nested_dict": {
+                    "dict": "${str}",
+                    "list": "${list}",
+                },
+            },
+        ),
+        (
+            {
+                "nested_list": [
+                    {
+                        "dict": "hello",
+                    },
+                    {
+                        "dict": "world",
+                    },
+                ]
+            },
+            {
+                "nested_list": [
+                    {"dict": "${str}"},
+                    {"dict": "${str}"},
+                ]
+            },
+        ),
+    ],
+)
+def test_match_export_parse_consistency(export_data, template) -> None:
+    """Test to match export and parsing consistency with different data structures."""
+
+    env_vars = generate_env_vars_recursively(
+        export_data,
+        export_path=[],
+    )
+
+    parsed_data = apply_env_variables(template, env_variables=env_vars)
+
+    assert parsed_data == export_data

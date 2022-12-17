@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Test module for aea.cli.remove.remove_item method."""
+
 import os
 import shutil
 import tempfile
@@ -42,7 +43,7 @@ from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
-from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 from packages.valory.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
@@ -89,26 +90,25 @@ class RemoveItemBadConfigurationTestCase(TestCase):
 class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
     """Test case for remove package with latest version."""
 
-    @pytest.mark.skip  # need remote registry
     @pytest.mark.parametrize(
         ["type_", "public_id"],
         [
-            ("protocol", DefaultMessage.protocol_id),
+            ("protocol", SigningMessage.protocol_id.to_latest()),
             ("connection", PublicId("fetchai", "stub").to_latest()),
             ("contract", PublicId("fetchai", "erc1155").to_latest()),
         ],
     )
-    def test_remove_pacakge_latest_version(self, type_, public_id):
+    def test_remove_package_latest_version(self, type_, public_id):
         """Test remove protocol with latest version."""
         assert public_id.package_version.is_latest
-        # we need this because there isn't a default contract/connection
-        if type_ == "connection":
-            self.add_item("connection", str(public_id))
-        if type_ == "contract":
-            self.add_item("contract", str(public_id))
+
+        # we need this because <open_aea/signing:1.0.0> is a default protocol
+        if not public_id == SigningMessage.protocol_id.to_latest():
+            self.add_item(type_, str(public_id))
 
         # first, check the package is present
-        items_path = os.path.join(self.agent_name, "vendor", "fetchai", type_ + "s")
+        author = public_id.author
+        items_path = os.path.join(self.agent_name, "vendor", author, type_ + "s")
         items_folders = os.listdir(items_path)
         item_name = public_id.name
         assert item_name in items_folders
