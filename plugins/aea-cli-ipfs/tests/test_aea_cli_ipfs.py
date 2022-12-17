@@ -243,6 +243,7 @@ class TestIPFSToolDownload(CliTest):
         assert result.exit_code == 0, result.stdout
         assert f"Download {self.some_hash} to {self.target_dir}" in result.stdout
         assert "Download complete!" in result.stdout
+        assert self.target_path.exists()
 
     def test_ipfs_download_failure(self) -> None:
         """Test aea ipfs download failure."""
