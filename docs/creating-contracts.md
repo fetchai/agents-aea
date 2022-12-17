@@ -79,7 +79,7 @@ from typing import Optional
 
 2. Fingerprint the contract so its hash matches our changes:
 ```bash
-aea hash all
+aea packages lock
 ```
 
 3. Proceed with the call as we did previously.

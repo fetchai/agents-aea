@@ -21,8 +21,9 @@
 
 import os
 from collections import OrderedDict
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Sequence, Union, cast
+from typing import Any, Callable, Generator, List, Optional, Sequence, Type, Union, cast
 
 import click
 from click import argument, option
@@ -381,3 +382,12 @@ def determine_package_type_for_directory(package_dir: Path) -> PackageType:
     package_type = PackageType(CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
 
     return package_type
+
+
+@contextmanager
+def reraise_as_click_exception(*exceptions: Type[Exception]) -> Generator:
+    """Reraise exceptions as ClickException"""
+    try:
+        yield
+    except exceptions as e:
+        raise click.ClickException(str(e))

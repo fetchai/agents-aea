@@ -337,3 +337,30 @@ class TestPackageTestByPath(BaseAEATestCommand):
                 str(package_dirpath),
             )
             assert result.exit_code == OK_PYTEST_EXIT_CODE
+
+
+@_parametrize_class
+class TestPackageTestByPathWithCov(BaseAEATestCommand):
+    """Test that the command 'aea test by-path path-to-package' works as expected (non-empty test suite)."""
+
+    @pytest.mark.parametrize("package_type", list(ComponentType))
+    def test_run(
+        self, package_type: ComponentType, mock_sys_modules, *_mocks: Any
+    ) -> None:
+        """Assert that the exit code is equal to 0 (tests are run successfully)."""
+        self._configure_package_for_testing(package_type)
+        test_package_name = self._get_dummy_package_name(package_type)
+        package_dirpath = self.dummy_package_dirpath(package_type, test_package_name)
+        with mock_pytest_main():
+            result = self.run_test_command(
+                "--cov",
+                "by-path",
+                str(package_dirpath),
+            )
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
+
+            agent_path = self.t / self.agent_name
+
+            assert (agent_path / "coverage.xml").exists()
+            assert (agent_path / "htmlcov").exists()
+            assert (agent_path / ".coverage").exists()

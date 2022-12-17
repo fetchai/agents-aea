@@ -41,6 +41,12 @@ def is_env_variable(value: Any) -> bool:
     return isinstance(value, str) and bool(ENV_VARIABLE_RE.match(value))
 
 
+def export_path_to_env_var_string(export_path: List[str]) -> str:
+    """Conver export path to environment variable string."""
+    env_var_string = "_".join(map(str, export_path))
+    return env_var_string.upper()
+
+
 NotSet = object()
 
 
@@ -88,12 +94,12 @@ def apply_env_variables(
 
     if isinstance(data, (list, tuple)):
         result = []
-        for i in data:
+        for i, obj in enumerate(data):
             result.append(
                 apply_env_variables(
-                    data=i,
+                    data=obj,
                     env_variables=env_variables,
-                    path=path,
+                    path=[*path, str(i)],
                     default_value=default_value,
                 )
             )
@@ -111,12 +117,11 @@ def apply_env_variables(
         }
 
     if is_env_variable(data):
-        default_var_name = "_".join(path)
         return replace_with_env_var(
             data,
             env_variables,
             default_value,
-            default_var_name=default_var_name,
+            default_var_name=export_path_to_env_var_string(export_path=path),
         )
 
     return data
@@ -174,3 +179,70 @@ def apply_env_variables_on_agent_config(
         overrides_new.append(new_component_config)
 
     return [cast(Dict, agent_config_new), *overrides_new]
+
+
+def is_strict_list(data: List) -> bool:
+    """
+    Check if a data list is an strict list
+
+    The data list contains a mapping object we need to process it as an
+    object containing configurable parameters. For example
+
+    cert_requests:
+      - public_key: example_public_key
+
+    This will get exported as `CONNECTION_NAME_CERT_REQUESTS_0_PUBLIC_KEY=example_public_key`
+
+    Where as
+
+    parameters:
+     - hello
+     - world
+
+     will get exported as `SKILL_NAME_PARAMETERS=["hello", "world"]`
+
+    :param data: Data list
+    :return: Boolean specifying whether it's a strict list or not
+    """
+    is_strict = True
+    for obj in data:
+        if isinstance(obj, dict):
+            return False
+        if isinstance(obj, list):
+            if not is_strict_list(data=obj):
+                return False
+    return is_strict
+
+
+def generate_env_vars_recursively(
+    data: Union[Dict, List],
+    export_path: List[str],
+) -> Dict:
+    """Generate environment variables recursively."""
+    env_var_dict = {}
+
+    if isinstance(data, dict):
+        for key, value in data.items():
+            env_var_dict.update(
+                generate_env_vars_recursively(
+                    data=value,
+                    export_path=[*export_path, key],
+                )
+            )
+    elif isinstance(data, list):
+        if is_strict_list(data=data):
+            env_var_dict[
+                export_path_to_env_var_string(export_path=export_path)
+            ] = json.dumps(data)
+        else:
+            for key, value in enumerate(data):
+                env_var_dict.update(
+                    generate_env_vars_recursively(
+                        data=value,
+                        export_path=[*export_path, key],
+                    )
+                )
+    else:
+        env_var_dict[export_path_to_env_var_string(export_path=export_path)] = data
+
+    return env_var_dict

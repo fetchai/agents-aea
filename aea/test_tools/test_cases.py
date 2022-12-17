@@ -18,16 +18,20 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
+import contextlib
 import copy
 import logging
 import os
+import platform
 import random
 import shutil
+import signal
 import string
 import subprocess  # nosec
 import sys
 import tempfile
 import time
+import warnings
 from abc import ABC
 from contextlib import suppress
 from filecmp import dircmp
@@ -48,7 +52,9 @@ from typing import (
     cast,
 )
 
+import pytest
 import yaml
+from _pytest.capture import CaptureFixture  # type: ignore
 
 from aea.cli import cli
 from aea.configurations.base import (
@@ -67,7 +73,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
-from aea.helpers.base import cd, send_control_c, win_popen_kwargs
+from aea.helpers.base import cd, win_popen_kwargs
 from aea.helpers.io import open_file
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
@@ -78,7 +84,7 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
-from aea.test_tools.utils import wait_for_condition
+from aea.test_tools.utils import consume, wait_for_condition
 
 
 _default_logger = logging.getLogger(__name__)
@@ -92,6 +98,11 @@ TERMINATION_TIMEOUT = 30
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     """Base class for AEA test cases."""
+
+    @pytest.fixture(autouse=True)
+    def set_capfd_on_cli_runner(self, capfd: CaptureFixture) -> None:
+        """Set pytest capfd on CLI runner"""
+        self.runner.capfd = capfd
 
     runner: CliRunner  # CLI runner
     last_cli_runner_result: Optional[Result] = None
@@ -456,15 +467,29 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         """
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
-        for process in subprocesses:
-            process.poll()
-            if process.returncode is None:  # stop only pending processes
-                send_control_c(process)
-        for process in subprocesses:
-            try:
-                process.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                process.kill()
+
+        def active_agents() -> filter:
+            return filter(lambda p: p.poll() is None, subprocesses)
+
+        def send_signal_and_wait(s: signal.Signals) -> None:
+            consume(map(lambda p: p.send_signal(s), active_agents()))
+            wait_for_condition(lambda: not any(active_agents()), timeout=timeout)
+
+        system_name = platform.system()
+        if system_name == "Windows":  # pragma: no cover
+            # ctrl-c event will be handled with stdin in Windows
+            consume(map(lambda p: p.stdin.close(), active_agents()))
+            signals = [signal.CTRL_C_EVENT, signal.CTRL_BREAK_EVENT, signal.SIGTERM]  # type: ignore
+        elif system_name in {"Linux", "Darwin"}:  # pragma: no cover
+            signals = [signal.SIGINT, signal.SIGTERM, signal.SIGKILL]  # type: ignore
+        else:
+            raise RuntimeError(f"Platform {system_name} not supported")
+
+        with contextlib.suppress(TimeoutError):
+            consume(map(send_signal_and_wait, signals))
+
+        if any(active_agents()):
+            raise TimeoutError("Failed to terminate agents")
 
     @classmethod
     def is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool:
@@ -766,6 +791,11 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     @classmethod
     def _terminate_subprocesses(cls) -> None:
         """Terminate all launched subprocesses."""
+        warnings.warn(
+            "BaseAEATestCase._terminate_subprocesses is deprecated and will be removed next release",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         for process in cls.subprocesses:
             if not process.returncode == 0:
                 poll = process.poll()
@@ -962,8 +992,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def teardown_class(cls) -> None:
         """Teardown the test."""
         cls.change_directory(cls.old_cwd)
-        cls.terminate_agents(*cls.subprocesses)
-        cls._terminate_subprocesses()
+        cls.terminate_agents()
         cls._join_threads()
         cls.unset_agent_context()
         cls.last_cli_runner_result = None

@@ -1,5 +1,46 @@
 # Release History - open AEA
 
+## 1.26.0 (2022-12-15)
+
+AEA:
+- Adds support for hashing byte strings on `IPFSHashOnly` tool
+- Introduces `CliTest` tool to help with the `CLI` testing
+- Extends aea packages lock command to update fingerprints
+- Adds support for appending test coverage with previous runs on `aea test` command and fixes the coverage on `aea test packages` command
+- Updates the `BasePackageManager.add_package` to fetch packages recursively
+
+Plugins:
+- Updates the `cosmos` and `fetchai` ledger plugins to use `PyCryptodome` for `ripemd160` hash generation
+- Adds support for publishing byte strings directly to IPFS daemons without intermediate file storage on the `IPFS` plugin
+
+Chores:
+- Pins `tox` version using `tomte` in the CI to maintain version consistency
+- Pins `go` version to `v1.17.7` on the CI
+
+## 1.25.0 (2022-12-01)
+
+AEA:
+- Fixes the mechanism to convert the `json` path to environment variable string
+- Updates the process of agent subprocess termination to make sure we properly terminate agents across the various operating systems
+- Introduces `reraise_as_click_exception` to re-raise exceptions as `click.ClickExceptions` on command definitions
+- Extends `CliRunner` to allow usage of `capfd` to capture test output
+- Introduces `generate_env_vars_recursively` method to auto generate the environment variable names for component overrides
+- Extends `aea generate-key` to support creating multiple keys
+- Extends the package manager API to
+  - Update the hashes for third party packages with a warning
+  - Update the dependency hashes when locking packages
+  - Verifying the dependency hashes when verifying packages
+- Adds deprecation warning for `aea hash all` command since the same functionality is now being provided by `aea packages lock` command
+
+Tests:
+- Updates `libp2p` tests to use `capsys` to read `stdout` instead of patching `sys.stdout`
+- Re enables tests skipped with `# need remote registry` comment
+- Adds tests for package manager API
+
+Chores:
+- Updates the `tox` environment setting for unit tests to report duration of tests
+- Deprecates the usage of `aea hash all` command from the workflow
+
 ## 1.24.0 (2022-11-15)
 
 AEA:

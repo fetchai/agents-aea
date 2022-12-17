@@ -14,6 +14,17 @@ class BaseAEATestCase(ABC)
 
 Base class for AEA test cases.
 
+<a id="aea.test_tools.test_cases.BaseAEATestCase.set_capfd_on_cli_runner"></a>
+
+#### set`_`capfd`_`on`_`cli`_`runner
+
+```python
+@pytest.fixture(autouse=True)
+def set_capfd_on_cli_runner(capfd: CaptureFixture) -> None
+```
+
+Set pytest capfd on CLI runner
+
 <a id="aea.test_tools.test_cases.BaseAEATestCase.set_agent_context"></a>
 
 #### set`_`agent`_`context
