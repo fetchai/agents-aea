@@ -23,7 +23,7 @@ import os
 import re
 import sys
 from pathlib import Path
-
+from unittest import mock
 from unittest.mock import patch
 
 import click
@@ -204,6 +204,18 @@ class TestIPFSToolDownload(CliTest):
         self.args = self.some_hash, str(self.target_dir)
         self.target_path = Path(*map(Path, reversed(self.args)))
 
+    @property
+    def mock_client_get_success(self) -> mock._patch:
+        """Mock IPFSTool.client.get"""
+
+        # self.client.get(hash_id, tmp_dir) creates tmp_dir/hash_id
+        # we need a nested lambda to mock a method on the class instead of instance
+
+        def new_callable(_, hash_id, tmp_dir) -> None:
+            (Path(tmp_dir) / hash_id).mkdir()
+
+        return patch("ipfshttpclient.Client.get", new_callable=lambda: new_callable)
+
     def test_ipfs_download_target_path_exists(self) -> None:
         """Test aea ipfs download target_path exists."""
 
@@ -211,6 +223,16 @@ class TestIPFSToolDownload(CliTest):
         expected = f"{self.some_hash} was already downloaded to {self.target_dir}"
         with pytest.raises(click.ClickException, match=expected):
             self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
+
+    def test_ipfs_download_success(self) -> None:
+        """Test aea ipfs download."""
+
+        with self.mock_client_get_success:
+            result = self.run_cli(*self.args, catch_exceptions=False)
+
+        assert result.exit_code == 0, result.stdout
+        assert f"Download {self.some_hash} to {self.target_dir}" in result.stdout
+        assert "Download complete!" in result.stdout
 
 
 @patch("ipfshttpclient.Client.id")
