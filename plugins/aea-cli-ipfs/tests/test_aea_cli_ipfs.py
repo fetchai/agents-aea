@@ -18,9 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for aea cli ipfs plugin."""
+
 import os
 import re
 import sys
+from pathlib import Path
+
 from unittest.mock import patch
 
 import click
@@ -31,6 +34,7 @@ from click.testing import CliRunner
 from urllib3.exceptions import NewConnectionError
 
 from aea.cli.core import cli
+from aea.test_tools.click_testing import CliTest
 
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -186,20 +190,19 @@ def test_version_did_not_match():
             )
 
 
-@patch("ipfshttpclient.Client.id")
-def test_ipfs_download(*_):
-    """Test aea ipfs download."""
-    runner = CliRunner()
-    with patch("ipfshttpclient.Client.get") as ipfs_get, patch("os.rmdir"), patch(
-        "pathlib.Path.iterdir", return_value=[1]
-    ), patch("shutil.move"), patch(
-        "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
-    ):
-        r = runner.invoke(
-            cli, ["ipfs", "download", "some_hash"], catch_exceptions=False
-        )
-    assert r.exit_code == 0
-    ipfs_get.assert_called()
+class TestIPFSToolDownload(CliTest):
+    """Test IPFSTool.download"""
+
+    cli_options = ("ipfs", "download")
+
+    def setup(self) -> None:
+        """Setup"""
+
+        super().setup()
+        self.some_hash = "not_a_real_ipfs_hash"
+        self.target_dir = self.t / "target_dir"
+        self.args = self.some_hash, str(self.target_dir)
+        self.target_path = Path(*map(Path, reversed(self.args)))
 
 
 @patch("ipfshttpclient.Client.id")
