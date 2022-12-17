@@ -45,7 +45,9 @@ DEFAULT_SETTLE_TIMEOUT = 60
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(ledger_apis_registry.supported_ids),
+    type=click.Choice(
+        choices=list(ledger_apis_registry.supported_ids),
+    ),
     required=True,
 )
 @click.argument(

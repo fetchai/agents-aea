@@ -57,6 +57,8 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 
+from .hashfuncs import ripemd160, sha256
+
 
 def lazy_load():  # Python caches all imported modules
     """Temporary solution because of protos mismatch."""
@@ -339,8 +341,8 @@ class CosmosHelper(Helper):
         :return: str
         """
         public_key_bytes = bytes.fromhex(public_key)
-        s = hashlib.new("sha256", public_key_bytes).digest()
-        r = hashlib.new("ripemd160", s).digest()
+        s = sha256(public_key_bytes)
+        r = ripemd160(s)
         five_bit_r = convertbits(r, 8, 5)
         if five_bit_r is None:  # pragma: nocover
             raise AEAEnforceError("Unsuccessful bech32.convertbits call")

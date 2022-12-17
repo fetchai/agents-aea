@@ -23,7 +23,7 @@ import itertools
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, cast
 
 import click
 from click.core import Command, Group, Option
@@ -49,16 +49,17 @@ def get_cmd_data(cmd: Union[Command, Group]) -> Dict:
     }
 
 
-def get_group_tree(cmd: click.Group) -> Dict:
+def get_group_tree(cmd: Union[click.Group, click.Command]) -> Dict:
     """Returns a tree containing the command data."""
     tree = get_cmd_data(cmd)
+    ctx = click.Context(command=cmd)
 
     if isinstance(cmd, click.Group):
 
-        for sub_cmd_name in cmd.list_commands(click.Context):
+        for sub_cmd_name in cast(click.Group, cmd).list_commands(ctx=ctx):
 
             # Get the sub-command
-            sub_cmd = cmd.get_command(click.Context, sub_cmd_name)
+            sub_cmd = cast(click.Command, cmd.get_command(ctx, sub_cmd_name))
 
             # Recursively build the tree
             tree["commands"][sub_cmd_name] = get_group_tree(sub_cmd)

@@ -18,13 +18,14 @@
 #
 # ------------------------------------------------------------------------------
 """Test P2PLibp2p connection build."""
+
 import os
 import tempfile
 import time
-from io import StringIO
 from unittest import mock
 
 import pytest
+from _pytest.capture import CaptureFixture  # type: ignore
 
 from aea.exceptions import AEAException
 
@@ -47,14 +48,12 @@ def check_versions() -> None:
     time.sleep(0.1)
 
 
-def test_check_versions() -> None:
+def test_check_versions(capsys: CaptureFixture) -> None:
     """Test check_versions - positive case."""
-    with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
-        check_versions()
-        mock_stdout.flush()
-        stdout = mock_stdout.getvalue()
-    assert f"check 'go'>={version_to_string(MINIMUM_GO_VERSION)}, found " in stdout
-    assert f"check 'gcc'>={version_to_string(MINIMUM_GCC_VERSION)}, found " in stdout
+    check_versions()
+    cap = capsys.readouterr()
+    assert f"check 'go'>={version_to_string(MINIMUM_GO_VERSION)}, found " in cap.out
+    assert f"check 'gcc'>={version_to_string(MINIMUM_GCC_VERSION)}, found " in cap.out
 
 
 def test_check_versions_negative_binary_not_found() -> None:
@@ -81,19 +80,18 @@ def test_check_versions_negative_version_too_low() -> None:
             check_versions()
 
 
-def test_check_versions_negative_cannot_parse_version() -> None:
+def test_check_versions_negative_cannot_parse_version(capsys: CaptureFixture) -> None:
     """Test the check_versions - negative case, cannot parse version."""
-    with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
-        with mock.patch("subprocess.check_output", return_value=b""):
-            check_versions()
-            mock_stdout.flush()
-            stdout = mock_stdout.getvalue()
+
+    with mock.patch("subprocess.check_output", return_value=b""):
+        check_versions()
+    cap = capsys.readouterr()
     assert (
-        "Warning: cannot parse 'go' version from command: ['go', 'version']." in stdout
+        "Warning: cannot parse 'go' version from command: ['go', 'version']." in cap.out
     )
     assert (
         "Warning: cannot parse 'gcc' version from command: ['gcc', '--version']."
-        in stdout
+        in cap.out
     )
 
 
