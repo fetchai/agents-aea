@@ -230,7 +230,7 @@ class TestIPFSToolDownload(CliTest):
         """Test aea ipfs download target_path exists."""
 
         self.target_path.mkdir(parents=True)
-        expected = f"{self.some_hash} was already downloaded to {self.target_dir}"
+        expected = f"{self.some_hash} was already downloaded"
         with pytest.raises(click.ClickException, match=expected):
             self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
 
