@@ -216,6 +216,16 @@ class TestIPFSToolDownload(CliTest):
 
         return patch("ipfshttpclient.Client.get", new_callable=lambda: new_callable)
 
+    @property
+    def mock_client_get_failure(self) -> mock._patch:
+        """Mock IPFSTool.client.get failure"""
+
+        def new_callable(*_, **__) -> None:
+            exception = Exception("DummyError for testing")
+            raise ipfshttpclient.exceptions.StatusError(exception)
+
+        return patch("ipfshttpclient.Client.get", new_callable=lambda: new_callable)
+
     def test_ipfs_download_target_path_exists(self) -> None:
         """Test aea ipfs download target_path exists."""
 
@@ -233,6 +243,19 @@ class TestIPFSToolDownload(CliTest):
         assert result.exit_code == 0, result.stdout
         assert f"Download {self.some_hash} to {self.target_dir}" in result.stdout
         assert "Download complete!" in result.stdout
+
+    def test_ipfs_download_failure(self) -> None:
+        """Test aea ipfs download failure."""
+
+        with self.mock_client_get_failure:
+            result = self.run_cli(
+                *self.args, catch_exceptions=True, standalone_mode=False
+            )
+
+        assert result.exit_code == 1, result.stdout
+        assert isinstance(result.exception, click.ClickException)
+        assert f"Failed to download: {self.some_hash}" in result.exception.message
+        assert not self.target_path.exists()
 
 
 @patch("ipfshttpclient.Client.id")
