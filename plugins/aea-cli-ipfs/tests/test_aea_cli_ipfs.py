@@ -204,6 +204,14 @@ class TestIPFSToolDownload(CliTest):
         self.args = self.some_hash, str(self.target_dir)
         self.target_path = Path(*map(Path, reversed(self.args)))
 
+    def test_ipfs_download_target_path_exists(self) -> None:
+        """Test aea ipfs download target_path exists."""
+
+        self.target_path.mkdir(parents=True)
+        expected = f"{self.some_hash} was already downloaded to {self.target_dir}"
+        with pytest.raises(click.ClickException, match=expected):
+            self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
+
 
 @patch("ipfshttpclient.Client.id")
 def test_ipfs_remove(*_):
