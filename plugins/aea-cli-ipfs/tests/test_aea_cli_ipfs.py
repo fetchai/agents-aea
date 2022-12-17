@@ -258,19 +258,6 @@ class TestIPFSToolDownload(CliTest):
         assert f"Failed to download: {self.some_hash}" in result.exception.message
         assert not self.target_path.exists()
 
-    def test_ipfs_download_failure(self) -> None:
-        """Test aea ipfs download failure."""
-
-        with self.mock_client_get_failure:
-            result = self.run_cli(
-                *self.args, catch_exceptions=True, standalone_mode=False
-            )
-
-        assert result.exit_code == 1, result.stdout
-        assert isinstance(result.exception, click.ClickException)
-        assert f"Failed to download: {self.some_hash}" in result.exception.message
-        assert not self.target_path.exists()
-
 
 @patch("ipfshttpclient.Client.id")
 def test_ipfs_remove(*_):
