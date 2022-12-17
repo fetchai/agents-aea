@@ -26,7 +26,7 @@ import signal
 import subprocess  # nosec
 import tempfile
 from pathlib import Path
-from typing import Dict, IO, List, Union, Optional, Set, Tuple, cast
+from typing import Dict, IO, List, Optional, Set, Tuple, Union, cast
 
 import ipfshttpclient  # type: ignore
 import requests
