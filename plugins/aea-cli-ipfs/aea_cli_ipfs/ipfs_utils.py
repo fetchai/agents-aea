@@ -18,14 +18,14 @@
 #
 # ------------------------------------------------------------------------------
 """Ipfs utils for `ipfs cli command`."""
+import logging
 import os
 import shutil
 import signal
 import subprocess  # nosec
+import tempfile
 from pathlib import Path
 from typing import Dict, IO, List, Optional, Set, Tuple, cast
-import tempfile
-import logging
 
 import ipfshttpclient  # type: ignore
 import requests
