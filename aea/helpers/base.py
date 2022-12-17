@@ -563,7 +563,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     # compute the topological order
     queue: Deque[T] = deque()
     order = []
-    queue.extendleft(sorted(roots))  # type: ignore
+    queue.extendleft(roots)  # type: ignore
     while len(queue) > 0:
         current = queue.pop()
         order.append(current)
