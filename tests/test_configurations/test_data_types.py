@@ -24,7 +24,7 @@ import operator
 from math import isnan
 
 import pytest
-from hypothesis import given, assume
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from aea.configurations.data_types import (
