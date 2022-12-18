@@ -335,8 +335,6 @@ class IPFSTool:
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     self.client.get(hash_id, tmp_dir)
                     download_path = Path(tmp_dir) / hash_id
-                    if fix_path and (download_path / hash_id).is_dir():
-                        download_path = download_path / hash_id
                     shutil.copytree(download_path, downloaded_path)
                     break
             except ipfshttpclient.exceptions.StatusError as e:
