@@ -73,6 +73,16 @@ def check_dependencies(configuration: PackageConfiguration) -> List[Tuple[Packag
 
 Verify hashes for package dependecies againts the available hashes.
 
+<a id="aea.package_manager.base.BasePackageManager.get_package_dependencies"></a>
+
+#### get`_`package`_`dependencies
+
+```python
+def get_package_dependencies(package_id: PackageId) -> List[PackageId]
+```
+
+Get package dependencies by package_id.
+
 <a id="aea.package_manager.base.BasePackageManager.update_public_id_hash"></a>
 
 #### update`_`public`_`id`_`hash
@@ -93,6 +103,16 @@ def update_dependencies(package_id: PackageId) -> None
 
 Update dependency hashes to latest for a package.
 
+<a id="aea.package_manager.base.BasePackageManager.get_package_config_file"></a>
+
+#### get`_`package`_`config`_`file
+
+```python
+def get_package_config_file(package_id: PackageId) -> Path
+```
+
+Get package config file path.
+
 <a id="aea.package_manager.base.BasePackageManager.update_fingerprints"></a>
 
 #### update`_`fingerprints
@@ -108,10 +128,40 @@ Update fingerprints for a package.
 #### add`_`package
 
 ```python
-def add_package(package_id: PackageId) -> "BasePackageManager"
+def add_package(package_id: PackageId, with_dependencies: bool = False, allow_update: bool = False) -> "BasePackageManager"
 ```
 
-Add packages.
+Add package.
+
+<a id="aea.package_manager.base.BasePackageManager.add_dependencies_for_package"></a>
+
+#### add`_`dependencies`_`for`_`package
+
+```python
+def add_dependencies_for_package(package_id: PackageId, allow_update: bool = False) -> None
+```
+
+Add dependencies for the package specified.
+
+<a id="aea.package_manager.base.BasePackageManager.get_package_version_with_hash"></a>
+
+#### get`_`package`_`version`_`with`_`hash
+
+```python
+def get_package_version_with_hash(package_id: PackageId) -> PackageId
+```
+
+Add package_id with hash for the package presents in registry.
+
+<a id="aea.package_manager.base.BasePackageManager.is_package_files_exist"></a>
+
+#### is`_`package`_`files`_`exist
+
+```python
+def is_package_files_exist(package_id: PackageId) -> bool
+```
+
+Check package exists in the filesystem by checking it's config file exists.
 
 <a id="aea.package_manager.base.BasePackageManager.package_path_from_package_id"></a>
 
