@@ -32,7 +32,7 @@ from tests.common.utils import wait_for_condition
 
 if platform.system() == "Windows":  # pragma: nocover
     # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import
-    import win32timezone
+    import win32timezone  # type: ignore
 
     _ = win32timezone
 

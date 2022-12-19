@@ -209,6 +209,7 @@ def test_apply_env_variables_on_agent_config():
 
 
 def test_is_strict_list():
+    """Test is_strict method."""
     assert is_strict_list([1, 2, 3])
     assert is_strict_list([1, 2, 3, [1, 2, 3]])
     assert not is_strict_list([1, 2, {}])

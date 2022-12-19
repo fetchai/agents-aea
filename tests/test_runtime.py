@@ -191,4 +191,5 @@ class TestThreadedRuntime(TestAsyncRuntime):
 
     @pytest.mark.asyncio
     async def test_runtime_cancelled(self):
+        """Test runtime cancelled."""
         pytest.skip("only for async runtime")
