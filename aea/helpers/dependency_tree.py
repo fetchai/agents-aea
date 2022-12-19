@@ -246,11 +246,10 @@ class DependencyTree:
         cls.flatten_tree(dep_tree, flat_tree_dirty, 0)
 
         for tree_level in reversed(flat_tree_dirty[:-1]):
-            flat_tree.append(
-                sorted(
-                    {package for package in tree_level if package not in dirty_packages}
-                )
-            )
+            flat_tree.append([])
+            for package in tree_level:
+                if package not in dirty_packages and package not in flat_tree[-1]:
+                    flat_tree[-1].append(package)
             dirty_packages += tree_level
 
         return flat_tree

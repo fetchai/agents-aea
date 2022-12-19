@@ -123,7 +123,7 @@ class PackageVersion:
         """Compare with another object."""
         if not isinstance(other, self.__class__):
             return NotImplemented  # Delegate comparison to the other instance.
-        return str(self) < str(other)
+        return self._version < other._version
 
 
 class PackageType(Enum):
@@ -630,7 +630,11 @@ class PackageId:
         """Compare two public ids."""
         if not isinstance(other, self.__class__):
             return NotImplemented  # Delegate comparison to the other instance.
-        return str(self) < str(other)
+        if not self.package_type == other.package_type:
+            raise TypeError(
+                f"The package IDs {self} and {other} cannot be compared. Their package_type is different."
+            )
+        return self.public_id < other.public_id
 
 
 class ComponentId(PackageId):
