@@ -523,6 +523,22 @@ jobs:
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
 
+      - if: matrix.os == 'ubuntu-latest'
+      - name: Show full coverage report
+        run: |
+          coverage report -m -i
+      
+      - if: matrix.os == 'ubuntu-latest'
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+
   golang_checks:
     continue-on-error: True
     needs:
@@ -551,51 +567,3 @@ jobs:
     #   working-directory: ./libs/go/aealite
     #   run: go test -p 1 -timeout 0 -count 1 -v ./...
 
-  coverage_checks:
-    continue-on-error: True
-    needs:
-      - integration_checks
-      - integration_checks_ledger
-      - platform_checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      - uses: actions/setup-go@v3
-        with:
-          go-version: "1.17.7"
-      - name: Install dependencies (ubuntu-latest)
-        run: |
-          sudo apt-get update --fix-missing
-          sudo apt-get autoremove
-          sudo apt-get autoclean
-          pip install tomte[tox]==0.1.5
-          # we only need "coverage" from the "tests" group
-          # but this makes it easier to stay in sync
-          pip install tomte[tests]==0.1.5
-          # install Protobuf compiler
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
-          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
-          sudo mv protoc/bin/protoc /usr/local/bin/protoc
-          make protolint_install
-      # sudo apt-get install -y protobuf-compiler
-      - name: Run all tests
-        run: |
-          tox -e py3.10-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
-          tox -e plugins-py3.10-cov -- --cov-append -m 'not unstable'
-          tox -e packages-py3.10-cov -- --cov-append -m 'not unstable'
-        continue-on-error: true
-      - name: Show full coverage report
-        run: |
-          coverage report -m -i
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
