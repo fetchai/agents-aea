@@ -40,12 +40,10 @@ jobs:
           # these two files should not be different;
           # we vendorize main "cosmos.py" module in fetchai crypto plugin package
           diff plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py plugins/aea-ledger-fetchai/aea_ledger_fetchai/_cosmos.py
-
           # check diff between plugins' LICENSE and main LICENSE
           diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-ethereum/LICENSE
           diff LICENSE plugins/aea-ledger-fetchai/LICENSE
-
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -106,7 +104,6 @@ jobs:
       - name: Pylint check
         run: |
           tox -e pylint
-
   common_checks_4:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -238,7 +235,6 @@ jobs:
           tar -xzf gitleaks_8.10.1_linux_x64.tar.gz && \
           sudo install gitleaks /usr/bin && \
           gitleaks detect --report-format json --report-path leak_report
-
   dependencies_checks:
     continue-on-error: False
     strategy:
@@ -264,7 +260,6 @@ jobs:
       - name: Check aea dependencies and imports
         run: |
           tox -e dependencies-check
-
   plugins_install_check:
     continue-on-error: False
     runs-on: ${{ matrix.sys.os }}
@@ -298,7 +293,6 @@ jobs:
       - name: Check plugin aea-cli-ipfs
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
-
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -320,7 +314,6 @@ jobs:
       - name: Protolint check
         run: |
           make protolint
-
   integration_checks:
     continue-on-error: True
     needs:
@@ -452,7 +445,6 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           make protolint_install
-
           # install ipfs
           wget https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
           tar -xvzf go-ipfs_v0.6.0_linux-amd64.tar.gz
@@ -476,7 +468,6 @@ jobs:
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           brew tap yoheimuta/protolint
           brew install protolint
-
           # install ipfs
           curl -O https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_darwin-amd64.tar.gz
           tar -xvzf go-ipfs_v0.6.0_darwin-amd64.tar.gz
@@ -485,7 +476,6 @@ jobs:
           cd ..
           rm -rf go-ipfs
           ipfs init
-
       - if: matrix.os == 'windows-latest'
         name: Install dependencies (windows-latest)
         env:
@@ -506,7 +496,6 @@ jobs:
           make protolint_install_win
           # just check protolint runs
           protolint version
-
           curl https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
           cp ~\Apps\go-ipfs\ipfs.exe C:\Users\runneradmin\go\bin\
@@ -524,12 +513,12 @@ jobs:
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
 
       - if: matrix.os == 'ubuntu-latest'
-      - name: Show full coverage report
+        name: Show full coverage report
         run: |
           coverage report -m -i
-      
+
       - if: matrix.os == 'ubuntu-latest'
-      - name: Upload coverage to Codecov
+        name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -537,7 +526,6 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-
 
   golang_checks:
     continue-on-error: True
@@ -566,4 +554,3 @@ jobs:
     #   name: Golang unit tests (aealite)
     #   working-directory: ./libs/go/aealite
     #   run: go test -p 1 -timeout 0 -count 1 -v ./...
-
