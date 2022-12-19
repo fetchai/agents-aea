@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """Tests for config data types."""
+
 import copy
 import operator
+from math import isnan
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from aea.configurations.data_types import (
@@ -39,10 +41,11 @@ from tests.strategies.data_types import (
 )
 
 
-NUMERIC_TYPES = int, float, complex
-SEQUENCE_TYPES = list, str, tuple
-ITERATOR_TYPES = *SEQUENCE_TYPES, list, zip, map
-NAME_SPACE = [PublicId, PackageId, Dependency]
+NUMERIC_TYPES = int, float
+SEQUENCE_TYPES = str, list, tuple
+ITERATOR_TYPES = *SEQUENCE_TYPES, set, frozenset, zip, map
+CUSTOM_TYPES = PublicId, PackageId, Dependency
+ALL_TYPES = *NUMERIC_TYPES, *ITERATOR_TYPES, *CUSTOM_TYPES
 COMPARISON_OPERATORS = [
     operator.lt,
     operator.le,
@@ -61,35 +64,32 @@ def all_comparisons_operations_equal(pair_a, pair_b) -> bool:
     return version_comparison == package_comparison
 
 
-@pytest.mark.parametrize("self_type", [PublicId, PackageId, Dependency])
+@pytest.mark.parametrize("self_type", [PackageVersion, PublicId, PackageId])
 def test_self_type_comparison(self_type):
     """Test comparison to self"""
 
     self = st.from_type(self_type).example()
-    copy_self = copy.deepcopy(self)
-    other = st.from_type(self_type).example()
-    assert self == copy_self
+    other = copy.deepcopy(self)
     for f in COMPARISON_OPERATORS:
         assert isinstance(f(self, other), bool)
         assert isinstance(f(other, self), bool)
 
 
-@pytest.mark.parametrize("self_type", [PublicId, PackageId, Dependency])
-@pytest.mark.parametrize(
-    "other_type", [*NUMERIC_TYPES, *ITERATOR_TYPES, PublicId, PackageId, Dependency]
+@given(
+    st.one_of(list(map(st.from_type, ALL_TYPES))),
+    st.one_of(list(map(st.from_type, CUSTOM_TYPES))),
 )
-def test_type_comparison(self_type, other_type):
+def test_type_comparison(self, other):
     """Test type comparison"""
 
-    if self_type is other_type:
-        return
+    if isinstance(self, float):
+        assume(not isnan(self))
+    assume(type(self) is not type(other))
 
     funcs = (operator.le, operator.lt, operator.ge, operator.gt)
-    self = st.from_type(self_type).example()
-    other = st.from_type(other_type).example()
 
-    assert not isinstance(self, other_type)
-    assert not isinstance(other, self_type)
+    assert not isinstance(self, type(other))
+    assert not isinstance(other, type(self))
     assert self.__eq__(self)
     assert other.__eq__(other)
     assert self.__ne__(other)

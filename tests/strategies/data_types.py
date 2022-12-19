@@ -33,6 +33,7 @@ from aea.configurations.data_types import (
     GitRef,
     PackageId,
     PackageType,
+    PackageVersion,
     PublicId,
     PyPIPackageName,
 )
@@ -68,6 +69,13 @@ version_info_strategy = st.builds(
     ),
 )
 st.register_type_strategy(semver.VersionInfo, version_info_strategy)
+
+
+package_version_strategy = st.builds(
+    lambda kwargs: PackageVersion(**kwargs),
+    st.fixed_dictionaries(dict(version_like=version_info_strategy)),
+)
+st.register_type_strategy(PackageVersion, package_version_strategy)
 
 
 s = st.fixed_dictionaries(
