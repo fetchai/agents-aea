@@ -193,6 +193,12 @@ def test_version_did_not_match():
 class TestIPFSToolDownload(CliTest):
     """Test IPFSTool.download"""
 
+    # we download either a file or a directory
+    # if a file: the original name is not preserved, and will be the hash
+    #   e.g. <filename> --> <some_ipfs_hash>
+    # if a dir : the original name is preserved, as a nested directory
+    #   e.g. <directory>/ --> <some_ipfs_hash>/<directory>/
+
     cli_options = ("ipfs", "download")
 
     def setup(self) -> None:
