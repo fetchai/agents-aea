@@ -194,6 +194,8 @@ def test_ipfs_download(*_):
         "pathlib.Path.iterdir", return_value=[1]
     ), patch("shutil.move"), patch(
         "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
+    ), patch(
+        "shutil.copytree"
     ):
         r = runner.invoke(
             cli, ["ipfs", "download", "some_hash"], catch_exceptions=False

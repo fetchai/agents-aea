@@ -18,10 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """Ipfs utils for `ipfs cli command`."""
+import logging
 import os
 import shutil
 import signal
 import subprocess  # nosec
+import tempfile
 from pathlib import Path
 from typing import Dict, IO, List, Optional, Set, Tuple, cast
 
@@ -303,26 +305,42 @@ class IPFSTool:
                 f"Error while performing garbage collection: {str(e)}"
             ) from e
 
-    def download(self, hash_id: str, target_dir: str, fix_path: bool = True) -> str:
+    def download(
+        self,
+        hash_id: str,
+        target_dir: str,
+        fix_path: bool = True,
+        attempts: int = 5,
+    ) -> str:
         """
-        Download dir by it's hash.
+        Download dir by its hash.
 
         :param hash_id: str. hash of file to download
         :param target_dir: str. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
+        :param attempts: int. default 5. How often to attempt the download.
         :return: downloaded path
         """
+
         if not os.path.exists(target_dir):  # pragma: nocover
             os.makedirs(target_dir, exist_ok=True)
 
         if os.path.exists(os.path.join(target_dir, hash_id)):  # pragma: nocover
             raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
 
-        try:
-            self.client.get(hash_id, target_dir)
-        except ipfshttpclient.exceptions.StatusError as e:
-            raise DownloadError(f"error on download {str(e)}") from e
         downloaded_path = str(Path(target_dir) / hash_id)
+        while attempts:
+            attempts -= 1
+            try:  # download to tmp_dir in case of midway download failure
+                with tempfile.TemporaryDirectory() as tmp_dir:
+                    self.client.get(hash_id, tmp_dir)
+                    download_path = Path(tmp_dir) / hash_id
+                    shutil.copytree(download_path, downloaded_path)
+                    break
+            except ipfshttpclient.exceptions.StatusError as e:
+                logging.error(f"error on download of {hash_id}: {e}")
+        else:
+            raise DownloadError(f"Failed to download: {hash_id}")
 
         package_path = None
         if os.path.isdir(downloaded_path):
