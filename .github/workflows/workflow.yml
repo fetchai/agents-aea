@@ -512,13 +512,13 @@ jobs:
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
 
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.10'
         name: Show full coverage report
         run: |
           pip install tomte[tests]==0.1.5
           coverage report -m -i
 
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.10'
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
