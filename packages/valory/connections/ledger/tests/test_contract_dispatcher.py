@@ -90,10 +90,10 @@ def test_validate_and_call_callable() -> None:
     )
     contract = Mock()
 
-    def callable(ledger_api=None, contract_address=None, _addr=None):  # type: ignore
+    def getAddress(ledger_api=None, contract_address=None, _addr=None):  # type: ignore
         return 0
 
-    contract.getAddress = callable
+    contract.getAddress = getAddress
     contract.dummy_method = None
     contract_instance = Mock()
     contract.get_instance.return_value = contract_instance

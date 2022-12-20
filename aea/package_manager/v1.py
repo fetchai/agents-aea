@@ -297,7 +297,7 @@ class PackageManagerV1(BasePackageManager):
         return data
 
     @staticmethod
-    def _load_packages(packages_file: Path) -> Dict:
+    def _load_packages(packages_file: Path) -> Dict[str, Dict[str, str]]:
         """Load packages json file."""
         return cast(Dict, json.loads(packages_file.read_text()))
 

@@ -214,3 +214,4 @@ def test_is_strict_list():
     assert is_strict_list([1, 2, 3, [1, 2, 3]])
     assert not is_strict_list([1, 2, {}])
     assert not is_strict_list([1, 2, [[{}]]])
+    assert not is_strict_list([(dict(hello="world"),)])

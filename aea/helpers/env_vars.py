@@ -22,7 +22,7 @@
 import json
 import re
 from collections.abc import Mapping as MappingType
-from typing import Any, Dict, List, Mapping, Optional, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from aea.configurations.data_types import PublicId
 from aea.helpers.constants import (
@@ -181,7 +181,7 @@ def apply_env_variables_on_agent_config(
     return [cast(Dict, agent_config_new), *overrides_new]
 
 
-def is_strict_list(data: List) -> bool:
+def is_strict_list(data: Union[List, Tuple]) -> bool:
     """
     Check if a data list is an strict list
 
@@ -208,7 +208,7 @@ def is_strict_list(data: List) -> bool:
     for obj in data:
         if isinstance(obj, dict):
             return False
-        if isinstance(obj, list):
+        if isinstance(obj, (list, tuple)):
             if not is_strict_list(data=obj):
                 return False
     return is_strict

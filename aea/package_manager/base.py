@@ -187,22 +187,20 @@ class BasePackageManager(ABC):
         dependencies_with_mismatched_hashes = self.check_dependencies(
             configuration=configuration_obj,
         )
-        if len(dependencies_with_mismatched_hashes) > 0:
-            for dep, failure in dependencies_with_mismatched_hashes:
-                if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
-                    self._logger.error(
-                        f"Package contains a dependency that is not defined in the `packages.json`"
-                        f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
-                    )
-                    continue
+        for dep, failure in dependencies_with_mismatched_hashes:
+            if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
+                self._logger.error(
+                    f"Package contains a dependency that is not defined in the `packages.json`"
+                    f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
+                )
+                continue
 
-                if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
-                    self._logger.error(
-                        f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
-                    )
-                    continue
-            return False
-        return True
+            if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
+                self._logger.error(
+                    f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
+                )
+                continue
+        return not dependencies_with_mismatched_hashes
 
     def _get_package_configuration(self, package_id: PackageId) -> PackageConfiguration:
         """Get package configuration by package_id."""
