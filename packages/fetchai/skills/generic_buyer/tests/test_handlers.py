@@ -945,7 +945,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
 
-    @pytest.mark.skip  # Fails because of change in the ledger api protocol
     def test_handle_signed_transaction_last_ledger_api_message_is_not_none(
         self,
     ):
@@ -964,7 +963,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:2],
+                messages=self.list_of_ledger_api_messages[0:2],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -999,7 +998,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
 
         mock_logger.assert_any_call(logging.INFO, "sending transaction to ledger.")
 
-    @pytest.mark.skip  # Fails because of change in the ledger api protocol
     def test_handle_error(self):
         """Test the _handle_error method of the signing handler."""
         # setup
@@ -1017,7 +1015,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:4],
+                messages=self.list_of_ledger_api_messages[:1],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -1097,7 +1095,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
-@pytest.mark.skip  # Fails because of change in the ledger api protocol
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic buyer."""
 
@@ -1354,7 +1351,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:3],
+                messages=self.list_of_ledger_api_messages[2:3],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -1400,7 +1397,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -1455,7 +1452,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -1502,7 +1499,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -1524,7 +1521,6 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 transaction_receipt=self.transaction_receipt,
             ),
         )
-
         # operation
         with patch.object(
             self.ledger_api_handler.context.behaviours.transaction, "failed_processing"
