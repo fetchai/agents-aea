@@ -11,13 +11,13 @@ fingerprint:
   __init__.py: bafybeiehln6kky4ih7d2737tb4h4ofoffixbefhmjzlpzhzpkhlpg7dww4
   behaviours.py: bafybeibwapkjqchntzwtm5kd5bm7fjuzlt4nwgni7va3f3vltaja2brfp4
   dialogues.py: bafybeihfhbmbjl2pddxvdveokmcdlnbb4vjab6dpd6p5kega7nts2axkde
-  handlers.py: bafybeia2wjtlgev4n6ge4idrnvdyi3utrwpxctyuixliumpa7nz54fufwq
+  handlers.py: bafybeigvir7v6ebevxrk2pfali7klthv5wxjjxwnpq27nlrjieexdd3j3e
   strategy.py: bafybeif5eor26xfagaoy3xafmwraw74btlw3o7jv2a6hpon46x5flzt6ey
   tests/__init__.py: bafybeig6dkwpgzga7j7xtr4m2lue5geufhea2wrhrr4t24maf3qb6f7ofq
   tests/intermediate_class.py: bafybeihduyb3zuhtfgbi2c625gerwdumf5mdybufa4bz5rmgm2ksgpd5jq
   tests/test_behaviours.py: bafybeieqmuwxk3f5ktmpzjdh5aow5ge7p7h7hzbhqdkmygrfzu3s4o5gu4
   tests/test_dialogues.py: bafybeiddb5xuvxuuneuepr4nwctbn3rs6g224i3khr6vdcj6dpx2c6wbc4
-  tests/test_handlers.py: bafybeibzitwe2u3ssoabdsz5tiyucr2wb4uuuihs4bbab2kmetnovcglxy
+  tests/test_handlers.py: bafybeiguthsnj4huf5p7xjxw45jlzwnzgmzgzcgopipfe6fesqn6k3slsu
   tests/test_strategy.py: bafybeigxtw2j2c7vl6xhdwos62jbtmx62xfgdyadptm5eewmkesmcooyea
 fingerprint_ignore_patterns: []
 connections:
