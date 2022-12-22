@@ -40,11 +40,11 @@ from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
-class TestAsyncRuntime:
-    """Test async runtime."""
+class BaseTestRuntime:
+    """Base tests runtime class."""
 
     # set a copy to prevent lasting state changes via class attributes
-    RUNTIME: Type[BaseRuntime] = AsyncRuntime
+    RUNTIME: Type[BaseRuntime]
 
     def setup(self):
         """Set up case."""
@@ -120,21 +120,6 @@ class TestAsyncRuntime:
         self.runtime.wait_completed(sync=True)
         assert self.runtime.is_stopped
 
-    @pytest.mark.asyncio
-    async def test_runtime_cancelled(self):
-        """Test runtime cancelled and stopped properly."""
-        self.runtime.set_loop(asyncio.get_event_loop())
-        task = asyncio.ensure_future(self.runtime.run_runtime())
-        await wait_for_condition_async(lambda: self.runtime.is_running, timeout=5)
-        assert self.runtime.agent_loop.is_running
-        task.cancel()
-        await asyncio.sleep(0.1)
-
-        with pytest.raises(asyncio.CancelledError):
-            await task
-
-        assert not self.runtime.agent_loop.is_running
-
     def test_error_state(self):
         """Test runtime fails on start."""
 
@@ -174,7 +159,27 @@ class TestAsyncRuntime:
             self.runtime.wait_completed(sync=True)
 
 
-class TestThreadedRuntime(TestAsyncRuntime):
+class TestAsyncRuntime(BaseTestRuntime):
+    """Test async runtime."""
+
+    RUNTIME: Type[BaseRuntime] = AsyncRuntime
+
+    @pytest.mark.asyncio
+    async def test_runtime_cancelled(self):
+        """Test runtime cancelled and stopped properly."""
+        self.runtime.set_loop(asyncio.get_event_loop())
+        task = asyncio.ensure_future(self.runtime.run_runtime())
+        await wait_for_condition_async(lambda: self.runtime.is_running, timeout=5)
+        assert self.runtime.agent_loop.is_running
+        task.cancel()
+
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+        assert not self.runtime.agent_loop.is_running
+
+
+class TestThreadedRuntime(BaseTestRuntime):
     """Test threaded runtime."""
 
     RUNTIME = ThreadedRuntime
@@ -188,8 +193,3 @@ class TestThreadedRuntime(TestAsyncRuntime):
                 self.runtime.start_and_wait_completed(sync=True)
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state
-
-    @pytest.mark.asyncio
-    async def test_runtime_cancelled(self):
-        """Test runtime cancelled."""
-        pytest.skip("only for async runtime")

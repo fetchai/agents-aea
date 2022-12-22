@@ -567,8 +567,8 @@ def test_package_manager_add_package_can_be_updated(fetch_mock: mock.Mock):
             remove_mock.assert_called_once_with(TEST_SKILL_ID)
 
 
-class TestVariousMEthods(BaseAEATestCase):
-    """Test various methods."""
+class TestGetPackageDependencies(BaseAEATestCase):
+    """Test test_get_package_dependencies."""
 
     HTTP_CONNECTION_PACKAGE = PackageId(
         package_type=PackageType.CONNECTION,
@@ -587,6 +587,18 @@ class TestVariousMEthods(BaseAEATestCase):
         assert "PackageId(protocol, valory/http" in str(
             pm.get_package_dependencies(self.HTTP_CONNECTION_PACKAGE)
         )
+
+
+class TestGetPackageVersionWithHash(BaseAEATestCase):
+    """Test get_package_version_with_hash."""
+
+    HTTP_CONNECTION_PACKAGE = PackageId(
+        package_type=PackageType.CONNECTION,
+        public_id=PublicId(
+            author="valory", name="http_client", version="1.0.0"
+        ).to_latest(),
+    )
+    use_packages_dir: bool = True
 
     def test_get_package_version_with_hash(
         self,

@@ -25,7 +25,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, Optional
 from typing import OrderedDict as OrderedDictType
-from typing import cast
+from typing import Union, cast
 
 from aea.configurations.data_types import PackageId
 from aea.helpers.fingerprint import check_fingerprint
@@ -219,7 +219,7 @@ class PackageManagerV1(BasePackageManager):
         return self
 
     @staticmethod
-    def _calculate_hash(package_path: str) -> str:
+    def _calculate_hash(package_path: Union[Path, str]) -> str:
         """Calculate hash for path."""
         return IPFSHashOnly.get(str(package_path))
 
