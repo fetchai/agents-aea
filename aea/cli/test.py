@@ -62,6 +62,8 @@ COVERAGERC_FILE = ".coveragerc"
 COVERAGERC_CONFIG = """[run]
 omit =
     */tests/*
+    */*_pb2.py
+    */*_pb2_*.py
 
 [html]
 directory = {root_dir}/htmlcov
