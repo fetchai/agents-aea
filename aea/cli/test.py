@@ -62,6 +62,7 @@ COVERAGERC_FILE = ".coveragerc"
 COVERAGERC_CONFIG = """[run]
 omit =
     */tests/*
+    */.tox/*
     */*_pb2.py
     */*_pb2_*.py
 
