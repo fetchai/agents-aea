@@ -73,6 +73,16 @@ def check_dependencies(configuration: PackageConfiguration) -> List[Tuple[Packag
 
 Verify hashes for package dependecies againts the available hashes.
 
+<a id="aea.package_manager.base.BasePackageManager.is_dependencies_hashes_match"></a>
+
+#### is`_`dependencies`_`hashes`_`match
+
+```python
+def is_dependencies_hashes_match(package_id: PackageId, configuration_obj: PackageConfiguration) -> bool
+```
+
+Check dependecies hashes match and print errors
+
 <a id="aea.package_manager.base.BasePackageManager.get_package_dependencies"></a>
 
 #### get`_`package`_`dependencies

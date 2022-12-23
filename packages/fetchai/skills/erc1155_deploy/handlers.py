@@ -253,7 +253,7 @@ class LedgerApiHandler(Handler):
             ledger_api_msg.performative
             is LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
-            self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+            self._handle_transaction_digest(ledger_api_msg)
         elif (
             ledger_api_msg.performative
             is LedgerApiMessage.Performative.TRANSACTION_RECEIPT
@@ -292,25 +292,27 @@ class LedgerApiHandler(Handler):
             )
         )
 
-    def _handle_transaction_digest(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_transaction_digest(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of transaction_digest performative.
 
         :param ledger_api_msg: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        msg = ledger_api_dialogue.reply(
+
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        msg, _ = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-            target_message=ledger_api_msg,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
+
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 

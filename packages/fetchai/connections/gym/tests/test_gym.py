@@ -24,7 +24,7 @@
 import asyncio
 import logging
 from typing import cast
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import gym
 import pytest
@@ -36,6 +36,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
+from packages.fetchai.connections.gym import connection
 from packages.fetchai.connections.gym.connection import GymConnection
 from packages.fetchai.protocols.gym.dialogues import GymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
@@ -261,3 +262,22 @@ class TestGymConnection:
         """Test receive connection error and Cancel Error."""
         with pytest.raises(ConnectionError):
             await self.gym_con.receive()
+
+    def test_gym_connection_init(self):
+        """Test creating of gym connection without enc specified."""
+        configuration = Mock()
+        configuration.public_id = GymConnection.connection_id
+        configuration.config = {}
+        data_dir = "some"
+        with pytest.raises(ValueError, match="`env` must be set in configuration!"):
+            GymConnection(configuration=configuration, data_dir=data_dir)
+
+        configuration.config = {"env": Mock()}
+        env = gym.GoalEnv()
+        identity = Identity(
+            "name", address=self.agent_address, public_key=self.agent_public_key
+        )
+        with patch.object(connection, "locate", return_value=Mock(return_value=env)):
+            GymConnection(
+                configuration=configuration, data_dir=data_dir, identity=identity
+            )

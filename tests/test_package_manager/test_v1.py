@@ -33,6 +33,12 @@ import pytest
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
+from aea.package_manager.base import (
+    DepedencyMismatchErrors,
+    PackageFileNotValid,
+    PackageHashDoesNotMatch,
+    PackageNotValid,
+)
 from aea.package_manager.v1 import PackageManagerV1
 from aea.protocols.generator.common import INIT_FILE_NAME
 from aea.test_tools.test_cases import BaseAEATestCase
@@ -68,6 +74,10 @@ class TestPackageManagerV1(BaseAEATestCase):
         super().setup_class()
         cls.packages_json_file = cls.t / PACKAGES / "packages.json"
 
+
+class TestPackageManagerV1Initialization(TestPackageManagerV1):
+    """Test object initialization."""
+
     def test_initialization(
         self,
     ) -> None:
@@ -80,8 +90,19 @@ class TestPackageManagerV1(BaseAEATestCase):
         assert len(pm.third_party_packages) == len(packages["third_party"])
 
         assert pm.path == self.packages_dir_path
-        assert pm.get_package_hash(package_id=EXAMPLE_PACKAGE_ID) is not None
+        assert pm.get_package_hash(package_id=EXAMPLE_PACKAGE_ID) is not None, packages
         assert pm.get_package_hash(package_id=DUMMY_PACKAGE_ID) is None
+
+        # fails on bad file
+        with mock.patch.object(
+            PackageManagerV1, "_load_packages", return_value={"some": []}
+        ):
+            with pytest.raises(PackageFileNotValid):
+                PackageManagerV1.from_dir(self.packages_dir_path)
+
+
+class TestPackageManagerV1Sync(TestPackageManagerV1):
+    """Test sync."""
 
     def test_sync(
         self,
@@ -105,6 +126,59 @@ class TestPackageManagerV1(BaseAEATestCase):
             pm.sync(dev=True, third_party=False)
             update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
 
+        # test package already exists.
+        with mock.patch.object(pm, "add_package") as update_patch, mock.patch(
+            "pathlib.Path.exists", return_value=True
+        ), mock.patch(
+            "aea.helpers.ipfs.base.IPFSHashOnly.get", return_value=DUMMY_PACKAGE_HASH
+        ):
+            pm.sync(dev=True, third_party=False)
+            update_patch.assert_not_called()
+
+        # test package already exists but hash differs.
+        with mock.patch.object(pm, "add_package") as add_patch, mock.patch(
+            "pathlib.Path.exists", return_value=True
+        ), mock.patch(
+            "aea.helpers.ipfs.base.IPFSHashOnly.get",
+            return_value=DUMMY_PACKAGE_HASH + "X",
+        ):
+            with pytest.raises(PackageHashDoesNotMatch):
+                pm.sync(dev=True, third_party=False)
+            add_patch.assert_not_called()
+
+        # update hashes
+        pm = PackageManagerV1(
+            path=self.packages_dir_path,
+            dev_packages=OrderedDict({DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}),
+        )
+
+        with mock.patch.object(pm, "add_package") as add_patch, mock.patch(
+            "pathlib.Path.exists", return_value=True
+        ), mock.patch(
+            "aea.helpers.ipfs.base.IPFSHashOnly.get",
+            return_value=DUMMY_PACKAGE_HASH + "X",
+        ):
+            pm.sync(dev=True, third_party=False, update_hashes=True)
+            add_patch.assert_not_called()
+
+        # update packages
+        pm = PackageManagerV1(
+            path=self.packages_dir_path,
+            dev_packages=OrderedDict({DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}),
+        )
+
+        with mock.patch.object(pm, "add_package") as add_patch, mock.patch.object(
+            pm, "_update_package"
+        ) as update_patch, mock.patch(
+            "pathlib.Path.exists", return_value=True
+        ), mock.patch(
+            "aea.helpers.ipfs.base.IPFSHashOnly.get",
+            return_value=DUMMY_PACKAGE_HASH + "X",
+        ):
+            pm.sync(dev=True, third_party=False, update_packages=True)
+            update_patch.assert_called_once()
+
+        # third party
         pm = PackageManagerV1(
             path=self.packages_dir_path,
             third_party_packages=OrderedDict({DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}),
@@ -113,6 +187,29 @@ class TestPackageManagerV1(BaseAEATestCase):
         with mock.patch.object(pm, "add_package") as update_patch:
             pm.sync(dev=False, third_party=True)
             update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
+
+        # 3d part hashes
+        pm = PackageManagerV1(
+            path=self.packages_dir_path,
+            third_party_packages=OrderedDict({DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}),
+        )
+
+        with mock.patch.object(pm, "add_package") as update_patch:
+            pm.sync(dev=False, third_party=True, update_hashes=True)
+            update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
+
+        # 3d part packages
+        with mock.patch.object(pm, "update_package") as update_patch, mock.patch.object(
+            pm,
+            "_sync",
+            return_value=[True, None, {DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}],
+        ):
+            pm.sync(dev=False, third_party=True, update_packages=True)
+            update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
+
+
+class TestPackageManagerV1UpdateFingerprint(TestPackageManagerV1):
+    """Test update fingerprints."""
 
     def test_update_fingerprints(self, caplog) -> None:
         """Test update fingerprints."""
@@ -180,6 +277,30 @@ class TestHashUpdateDev(BaseAEATestCase):
             packages_v1_updated["dev"][EXAMPLE_PACKAGE_ID.to_uri_path] == original_hash
         )
 
+        with mock.patch.object(
+            pm,
+            "iter_dependency_tree",
+            return_value=[EXAMPLE_PACKAGE_ID],
+        ), mock.patch.object(
+            pm, "is_third_party_package", return_value=True
+        ), mock.patch.object(
+            pm, "is_dev_package", return_value=False
+        ), mock.patch.object(
+            pm._logger, "warning"
+        ) as mock_warning:
+            pm._third_party_packages[EXAMPLE_PACKAGE_ID] = EXAMPLE_PACKAGE_HASH
+            pm.update_package_hashes()
+            mock_warning.assert_not_called()
+
+        with mock.patch.object(
+            pm, "iter_dependency_tree", return_value=[TEST_SKILL_ID]
+        ):
+            with pytest.raises(
+                PackageNotValid,
+                match="Found a package which is not listed in the `packages.json`",
+            ):
+                pm.update_package_hashes()
+
 
 class TestHashUpdateThirdParty(BaseAEATestCase):
     """Test hash update."""
@@ -222,6 +343,27 @@ class TestVerifyFailure(BaseAEATestCase):
         pm = PackageManagerV1.from_dir(self.packages_dir_path)
         assert pm.verify() == 0
 
+        with caplog.at_level(logging.ERROR), mock.patch.object(
+            pm,
+            "check_dependencies",
+            return_value=[
+                (EXAMPLE_PACKAGE_ID, DepedencyMismatchErrors.HASH_NOT_FOUND),
+                (EXAMPLE_PACKAGE_ID, DepedencyMismatchErrors.HASH_DOES_NOT_MATCH),
+            ],
+        ):
+            assert pm.verify() == 1
+            assert (
+                "Package contains a dependency that is not defined in the"
+                in caplog.text
+            )
+            assert "Dependency check failed\nHash does not match for" in caplog.text
+
+        with mock.patch.object(
+            pm, "check_dependencies", side_effect=ValueError("expected")
+        ), mock.patch("traceback.print_exc") as print_tb_mock:
+            assert pm.verify() == 1
+            print_tb_mock.assert_called_once()
+
         # updating the `packages/open_aea/protocols/signing/__init__.py` file
         init_file = (
             pm.package_path_from_package_id(package_id=EXAMPLE_PACKAGE_ID)
@@ -254,6 +396,18 @@ class TestVerifyFailure(BaseAEATestCase):
             ),
         )
 
+        with mock.patch.object(
+            pm,
+            "_calculate_hash",
+            return_value=DUMMY_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "is_third_party_package",
+            return_value=True,
+        ):
+            assert pm.verify() == 1
+            assert pm._third_party_packages[EXAMPLE_PACKAGE_ID] == DUMMY_PACKAGE_HASH
+
         with caplog.at_level(logging.ERROR), mock.patch(
             "aea.package_manager.v1.check_fingerprint",
             return_value=False,
@@ -263,6 +417,10 @@ class TestVerifyFailure(BaseAEATestCase):
             return_value=[
                 EXAMPLE_PACKAGE_ID,
             ],
+        ), mock.patch.object(
+            pm,
+            "is_third_party_package",
+            return_value=True,
         ):
 
             assert pm.verify() == 1
@@ -290,7 +448,7 @@ class TestVerifyFailure(BaseAEATestCase):
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
 
 
-@pytest.mark.intergration
+@pytest.mark.integration
 def test_package_manager_add_item_dependency_support():
     """Check PackageManager.add_packages works with dependencies on real packages."""
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -407,3 +565,46 @@ def test_package_manager_add_package_can_be_updated(fetch_mock: mock.Mock):
 
             package_manager.add_package(TEST_SKILL_ID, allow_update=True)
             remove_mock.assert_called_once_with(TEST_SKILL_ID)
+
+
+class TestGetPackageDependencies(BaseAEATestCase):
+    """Test test_get_package_dependencies."""
+
+    HTTP_CONNECTION_PACKAGE = PackageId(
+        package_type=PackageType.CONNECTION,
+        public_id=PublicId(
+            author="valory", name="http_client", version="1.0.0"
+        ).to_latest(),
+    )
+    use_packages_dir: bool = True
+
+    def test_get_package_dependencies(
+        self,
+    ) -> None:
+        """Test get_package_dependencies method."""
+
+        pm = PackageManagerV1.from_dir(self.t / self.packages_dir_path)
+        assert "PackageId(protocol, valory/http" in str(
+            pm.get_package_dependencies(self.HTTP_CONNECTION_PACKAGE)
+        )
+
+
+class TestGetPackageVersionWithHash(BaseAEATestCase):
+    """Test get_package_version_with_hash."""
+
+    HTTP_CONNECTION_PACKAGE = PackageId(
+        package_type=PackageType.CONNECTION,
+        public_id=PublicId(
+            author="valory", name="http_client", version="1.0.0"
+        ).to_latest(),
+    )
+    use_packages_dir: bool = True
+
+    def test_get_package_version_with_hash(
+        self,
+    ) -> None:
+        """Test get_package_dependencies method."""
+
+        pm = PackageManagerV1.from_dir(self.t / self.packages_dir_path)
+        package_id = pm.get_package_version_with_hash(self.HTTP_CONNECTION_PACKAGE)
+        assert package_id.package_hash
