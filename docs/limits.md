@@ -160,7 +160,7 @@ Python is not a compiled language. However, various projects attempt this, e.g. 
 
 It would be great to integrate <a href="https://www.w3.org/TR/did-core/" target="_blank">DID</a> in the framework design, specifically identification of packages (most urgently protocols). Other projects and standards worth reviewing in the context (in particular with respect to identity):
 
-- <a href="https://docs.ethhub.io/built-on-ethereum/identity/ERC725/" target="_blank">ERC 725: Ethereum Identity Standard</a> and <a href="https://erc725alliance.org" target="_blank">here</a>.
+- <a href="https://erc725alliance.org" target="_blank">ERC 725: Ethereum Identity Standard</a> and <a href="https://erc725alliance.org" target="_blank">here</a>.
 - <a href="https://github.com/ethereum/eips/issues/735" target="_blank">ERC 735: Claim Holder</a>
 
 #### Optimise protocol schemas and messages
