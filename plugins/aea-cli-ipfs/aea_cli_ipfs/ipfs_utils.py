@@ -24,6 +24,7 @@ import shutil
 import signal
 import subprocess  # nosec
 import tempfile
+import time
 from pathlib import Path
 from typing import Dict, IO, List, Optional, Set, Tuple, cast
 
@@ -339,6 +340,7 @@ class IPFSTool:
                     break
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
+                time.sleep(1)
         else:
             raise DownloadError(f"Failed to download: {hash_id}")
 
