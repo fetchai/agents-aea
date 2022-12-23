@@ -254,9 +254,10 @@ class TestIPFSToolDownload(CliTest):
         """Test aea ipfs download failure."""
 
         with self.mock_client_get_failure:
-            result = self.run_cli(
-                *self.args, catch_exceptions=True, standalone_mode=False
-            )
+            with mock.patch("time.sleep"):
+                result = self.run_cli(
+                    *self.args, catch_exceptions=True, standalone_mode=False
+                )
 
         assert result.exit_code == 1, result.stdout
         assert isinstance(result.exception, click.ClickException)
