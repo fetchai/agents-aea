@@ -19,8 +19,6 @@
 
 """This module contains the tests of the ledger connection module."""
 
-# pylint: skip-file
-
 import asyncio
 import logging
 import time
@@ -44,8 +42,14 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
 from packages.valory.connections.ledger.base import RequestDispatcher
-from packages.valory.connections.ledger.connection import LedgerConnection
+from packages.valory.connections.ledger.connection import LedgerConnection, PUBLIC_ID
+from packages.valory.connections.ledger.ledger_dispatcher import (
+    LedgerApiRequestDispatcher,
+)
 from packages.valory.connections.ledger.tests.conftest import make_ledger_api_connection
+
+# pylint: skip-file
+from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.protocols.ledger_api.custom_types import Kwargs
 
@@ -96,13 +100,16 @@ class TestLedgerConnection:
         blocking_task = dummy_task_wrapper(
             BLOCKING_TIME,
             LedgerApiMessage(
-                LedgerApiMessage.Performative.ERROR, _body={"data": b"blocking_task"}  # type: ignore
+                LedgerApiMessage.Performative.ERROR,
+                _body={"data": b"blocking_task"},  # type: ignore
             ),
         )
         blocking_dummy_envelope = Envelope(
             to="test_blocking_to",
             sender="test_blocking_sender",
-            message=LedgerApiMessage(LedgerApiMessage.Performative.ERROR),  # type: ignore
+            message=LedgerApiMessage(
+                LedgerApiMessage.Performative.ERROR
+            ),  # type: ignore
         )
         with mock.patch.object(
             LedgerConnection, "_schedule_request", return_value=blocking_task
@@ -113,12 +120,16 @@ class TestLedgerConnection:
         await asyncio.sleep(WAIT_TIME_AMONG_TASKS)
         normal_task = dummy_task_wrapper(
             NON_BLOCKING_TIME,
-            LedgerApiMessage(LedgerApiMessage.Performative.ERROR, _body={"data": b"normal_task"}),  # type: ignore
+            LedgerApiMessage(
+                LedgerApiMessage.Performative.ERROR, _body={"data": b"normal_task"}
+            ),  # type: ignore
         )
         normal_dummy_envelope = Envelope(
             to="test_normal_to",
             sender="test_normal_sender",
-            message=LedgerApiMessage(LedgerApiMessage.Performative.ERROR),  # type: ignore
+            message=LedgerApiMessage(
+                LedgerApiMessage.Performative.ERROR
+            ),  # type: ignore
         )
         with mock.patch.object(
             LedgerConnection, "_schedule_request", return_value=normal_task
@@ -545,3 +556,54 @@ class TestLedgerConnectionWithMultiplexer:
             message.data == b"normal_task"
         ), "Normal task should be the first item in the multiplexer's `in_queue`."
         assert self.ledger_connection._ledger_dispatcher.block  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_request_dispatcher_run_async() -> None:
+    """Test request dispatcher run async."""
+    dispatcher = LedgerApiRequestDispatcher(
+        logger=mock.Mock(), connection_id=PUBLIC_ID, connection_state=AsyncState()
+    )
+    assert (
+        await dispatcher.run_async(
+            lambda x, y, z: 12, mock.Mock(), mock.Mock(), mock.Mock()  # type: ignore
+        )
+        == 12
+    )
+
+    def raise_exc(*args):  # type: ignore
+        raise ValueError("expected")
+
+    dialogue = mock.Mock()
+    dialogue.reply = mock.Mock(return_value=124)
+    assert (
+        await dispatcher.run_async(
+            raise_exc, mock.Mock(), mock.Mock(), dialogue=dialogue
+        )
+        == 124
+    )
+    dialogue.reply.assert_called_once_with(
+        performative=mock.ANY,
+        target_message=mock.ANY,
+        code=500,
+        message="expected",
+        data=b"",
+    )
+
+
+def test_ledger_connection_exceptions() -> None:
+    """Test exception."""
+    configuration = mock.Mock()
+    configuration.public_id = LedgerConnection.connection_id
+    connection = LedgerConnection(data_dir="", configuration=configuration)
+    with pytest.raises(
+        ValueError,
+        match="`asyncio.Queue` for `_response_envelopes` not set. Is the ledger connection active?",
+    ):
+        connection.response_envelopes
+
+    envelope = mock.Mock()
+    envelope.protocol_specification_id = ContractApiMessage.protocol_specification_id
+    connection._contract_dispatcher = mock.Mock()
+    connection._contract_dispatcher.dispatch.return_value = 12
+    assert connection._schedule_request(envelope) == 12

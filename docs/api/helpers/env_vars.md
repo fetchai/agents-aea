@@ -69,7 +69,7 @@ Create new resulting dict with env variables applied.
 #### is`_`strict`_`list
 
 ```python
-def is_strict_list(data: List) -> bool
+def is_strict_list(data: Union[List, Tuple]) -> bool
 ```
 
 Check if a data list is an strict list
