@@ -196,7 +196,7 @@ jobs:
           sudo apt-get autoclean
       - name: Install tox
         run: |
-          pip install tox
+          pip install tox==3.28.0
       - name: Check plugin aea-ledger-cosmos
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && aea generate-key cosmos && echo aea-ledger-cosmos checked!"
