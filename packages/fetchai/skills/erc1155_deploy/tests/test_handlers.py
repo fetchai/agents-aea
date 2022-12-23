@@ -24,8 +24,6 @@ import logging
 from typing import cast
 from unittest.mock import patch
 
-import pytest
-
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import State
 from aea.protocols.dialogue.base import Dialogues
@@ -309,7 +307,6 @@ class TestFipaHandler(ERC1155DeployTestCase):
         self.assert_quantity_in_outbox(0)
 
 
-@pytest.mark.skip  # Fails because of change in the ledger api protocol
 class TestLedgerApiHandler(ERC1155DeployTestCase):
     """Test ledger_api handler of erc1155_deploy."""
 
@@ -384,7 +381,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:3],
+                messages=self.list_of_ledger_api_messages[2:3],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -430,7 +427,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -463,7 +460,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -501,7 +498,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -539,7 +536,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -577,7 +574,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
+                messages=self.list_of_ledger_api_messages[4:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
