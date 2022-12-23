@@ -19,7 +19,23 @@
 
 """Test ipfs utils."""
 
-from aea_cli_ipfs.ipfs_utils import IPFSTool
+import os
+import re
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import Mock, patch
+
+import ipfshttpclient
+import pytest
+import requests
+from aea_cli_ipfs.ipfs_utils import (
+    DownloadError,
+    IPFSDaemon,
+    IPFSTool,
+    PinError,
+    RemoveError,
+    resolve_addr,
+)
 
 from aea.cli.registry.settings import DEFAULT_IPFS_URL, DEFAULT_IPFS_URL_LOCAL
 
@@ -48,3 +64,177 @@ def test_hash_bytes() -> None:
         )  # precalculated
     finally:
         tool.daemon.stop()
+
+
+def test_resolve_addr() -> None:
+    """Test resolve_addr function."""
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Address type should be one of the ('ip4', 'dns'), provided: 2"
+        ),
+    ):
+        resolve_addr("1/2/3/4/5/6")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Connection should be one of the ('tcp',), provided: 4"),
+    ):
+        resolve_addr("1/ip4/3/4/5/6")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Protocol should be one of the ('http', 'https'), provided: 6"),
+    ):
+        resolve_addr("1/ip4/3/tcp/5/6")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Invalid multiaddr string provided, valid format: /{dns,dns4,dns6,ip4}/<host>/tcp/<port>/protocol. Provided: 1/ip4/3/tcp/5/https/1/2"
+        ),
+    ):
+        resolve_addr("1/ip4/3/tcp/5/https/1/2")
+
+
+def test_daemon_url_trim() -> None:
+    """Test extra slash in addr url trimmed."""
+    daemon = IPFSDaemon(is_remote=False, node_url="http://1.1.1.1:1/")
+    assert daemon.node_url == "http://1.1.1.1:1"
+
+
+def test_daemon_ipfs_not_found() -> None:
+    """Test ipfs cli command avialable."""
+    with patch("shutil.which", return_value=None):
+        with pytest.raises(Exception, match="Please install IPFS first!"):
+            IPFSDaemon._check_ipfs()
+
+    with patch("subprocess.Popen.communicate", return_value=(b"", b"")):
+        with pytest.raises(
+            Exception,
+            match=re.escape(
+                "Please ensure you have version 0.6.0 of IPFS daemon installed."
+            ),
+        ):
+            IPFSDaemon._check_ipfs()
+
+
+def test_daemon_is_started_externally() -> None:
+    """Test IPFSDaemon is started externally."""
+    daemon = IPFSDaemon()
+    response_mock = Mock()
+    response_mock.status_code = 200
+    with patch("requests.post", return_value=response_mock):
+        assert daemon.is_started_externally()
+
+    response_mock.status_code = 400
+    with patch("requests.post", return_value=response_mock):
+        assert not daemon.is_started_externally()
+
+    with patch("requests.post", side_effect=requests.exceptions.ConnectionError()):
+        assert not daemon.is_started_externally()
+
+    assert not daemon.is_started()
+
+
+def test_daemon_start() -> None:
+    """Test IPFSDaemon start method."""
+    daemon = IPFSDaemon()
+    popen_mock = Mock()
+    popen_mock.communicate = Mock(return_value=(b"0.6.0", b""))
+    popen_mock.stdout = None
+    with patch("subprocess.Popen", return_value=popen_mock):
+        with pytest.raises(RuntimeError, match="Could not start IPFS daemon."):
+            daemon.start()
+
+        popen_mock.stdout = Mock()
+        popen_mock.stdout.readline = Mock(side_effect=[b""] * 10)
+        with pytest.raises(RuntimeError, match="Could not start IPFS daemon."):
+            daemon.start()
+
+
+def test_daemon_context() -> None:
+    """Test IPFSDaemon context manager."""
+    daemon = IPFSDaemon()
+    with patch.object(daemon, "start") as start_mock, patch.object(
+        daemon, "stop"
+    ) as stop_mock:
+        with daemon:
+            pass
+
+        start_mock.assert_called_once()
+        stop_mock.assert_called_once()
+
+
+def test_tool_all_pins() -> None:
+    """Test IPFSTool.all_pins and is_a_package method."""
+    ipfs_tool = IPFSTool()
+    client_mock = Mock()
+    client_mock.pin.ls = Mock(return_value={"Keys": [1, 2, 3, 4, 5]})
+    with patch.object(ipfs_tool, "client", client_mock):
+        assert ipfs_tool.all_pins() == {1, 2, 3, 4, 5}
+        assert ipfs_tool.is_a_package(1)
+        assert not ipfs_tool.is_a_package(6)
+
+
+def test_tool_add_pin() -> None:
+    """Test IPFSTool.pin method."""
+    ipfs_tool = IPFSTool()
+    client_mock = Mock()
+    client_mock.pin.add = Mock(return_value={"Keys": [1]})
+    with patch.object(ipfs_tool, "client", client_mock):
+        assert ipfs_tool.pin("some")
+
+        with pytest.raises(PinError):
+            client_mock.pin.add = Mock(
+                side_effect=ipfshttpclient.exceptions.ErrorResponse(Mock(), Mock())
+            )
+            ipfs_tool.pin("some")
+
+
+def test_tool_remove_unpinned_files() -> None:
+    """Test IPFSTool.remove_unpinned_files method."""
+    ipfs_tool = IPFSTool()
+    client_mock = Mock()
+    client_mock.repo.gc = Mock(return_value={"Keys": [1]})
+    with patch.object(ipfs_tool, "client", client_mock):
+        ipfs_tool.remove_unpinned_files()
+
+        with pytest.raises(RemoveError):
+            client_mock.repo.gc = Mock(
+                side_effect=ipfshttpclient.exceptions.ErrorResponse(Mock(), Mock())
+            )
+            ipfs_tool.remove_unpinned_files()
+
+
+def test_tool_download() -> None:
+    """Test IPFSTool.download method."""
+    ipfs_tool = IPFSTool()
+    client_mock = Mock()
+    client_mock.get = Mock(
+        side_effect=ipfshttpclient.exceptions.StatusError(Mock(), Mock())
+    )
+    with patch.object(
+        ipfs_tool, "client", client_mock
+    ), TemporaryDirectory() as tmp_dir, patch(
+        "os.path.isdir", return_value=True
+    ), patch(
+        "shutil.copytree"
+    ), patch(
+        "os.listdir", return_value=["1"]
+    ), patch(
+        "pathlib.Path.iterdir", return_value=[]
+    ), patch(
+        "shutil.rmtree"
+    ):
+        with pytest.raises(DownloadError, match="Failed to download: some"):
+            ipfs_tool.download("some", tmp_dir, attempts=5)
+        assert client_mock.get.call_count == 5
+
+        client_mock.get = Mock()
+
+        ipfs_tool.download("some", tmp_dir, attempts=5)
+
+        with pytest.raises(DownloadError, match="was already downloaded to"):
+            os.mkdir(Path(tmp_dir) / "some")
+            ipfs_tool.download("some", tmp_dir, attempts=5)

@@ -24,6 +24,7 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
+from aea_cli_ipfs.exceptions import HashNotProvided
 from aea_cli_ipfs.registry import (
     LOCAL_REGISTRY_DEFAULT,
     fetch_ipfs,
@@ -99,6 +100,12 @@ def test_get_ipfs_hash_from_public_id() -> None:
         )
         assert package_hash is None
 
+        # test hash retrival for latest package not exists
+        package_hash = get_ipfs_hash_from_public_id(
+            "protocol", PublicId.from_str("default_author/component1:latest")
+        )
+        assert package_hash is None
+
 
 def test_register_item_to_local_registry() -> None:
     """Test register_item_to_local_registry method."""
@@ -147,3 +154,31 @@ def test_fetch_ipfs() -> None:
                 dest_path,
             )
             assert package_path == Path(dest_path).absolute()
+
+            package_path = fetch_ipfs(
+                "protocol",
+                PublicId.from_str(
+                    "default_author/component:0.2.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"
+                ),
+                dest_path,
+                remote=False,
+            )
+            assert package_path == Path(dest_path).absolute()
+
+            # no public_id hash
+            package_path = fetch_ipfs(
+                "protocol",
+                PublicId.from_str("default_author/component:0.2.0"),
+                dest_path,
+                remote=False,
+            )
+            assert package_path == Path(dest_path).absolute()
+
+            # no public_id hash  remote=True
+            with pytest.raises(HashNotProvided):
+                fetch_ipfs(
+                    "protocol",
+                    PublicId.from_str("default_author/component:0.2.0"),
+                    dest_path,
+                    remote=True,
+                )
