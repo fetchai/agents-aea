@@ -246,10 +246,11 @@ class TestIPFSToolDownload(CliTest):
         with pytest.raises(click.ClickException, match=expected):
             self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
 
-    def test_ipfs_download_file_success(self) -> None:
+    @pytest.mark.parametrize("is_dir", [False, True])
+    def test_ipfs_download_success(self, is_dir: bool) -> None:
         """Test aea ipfs download."""
 
-        with self.mock_client_get_success(is_dir=False):
+        with self.mock_client_get_success(is_dir=is_dir):
             result = self.run_cli(*self.args, catch_exceptions=False)
 
         assert result.exit_code == 0, result.stdout
@@ -257,24 +258,14 @@ class TestIPFSToolDownload(CliTest):
         assert "Download complete!" in result.stdout
 
         all_new_paths = list(self.target_dir.rglob("*"))
-        assert len(all_new_paths) == 1
-        path = all_new_paths.pop()
-        assert path.is_file()
-        assert path.name == self.some_ipfs_hash
 
-    def test_ipfs_download_directory_success(self) -> None:
-        """Test aea ipfs download."""
-
-        with self.mock_client_get_success(is_dir=True):
-            result = self.run_cli(*self.args, catch_exceptions=False)
-
-        assert result.exit_code == 0, result.stdout
-        assert f"Download {self.some_ipfs_hash} to {self.target_dir}" in result.stdout
-        assert "Download complete!" in result.stdout
-
-        all_new_paths = list(self.target_dir.rglob("*"))
-        assert len(all_new_paths) == 4
-        assert not any(self.some_ipfs_hash in str(p) for p in all_new_paths)
+        if is_dir:
+            assert len(all_new_paths) == 4
+            assert not any(self.some_ipfs_hash in str(p) for p in all_new_paths)
+        else:
+            assert len(all_new_paths) == 1
+            assert all_new_paths[0].is_file()
+            assert all_new_paths[0].name == self.some_ipfs_hash
 
     def test_ipfs_download_failure(self) -> None:
         """Test aea ipfs download failure."""
