@@ -19,9 +19,7 @@
 
 """Test ipfs utils."""
 
-import os
 import re
-from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
