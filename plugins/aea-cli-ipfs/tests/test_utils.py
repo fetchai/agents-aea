@@ -235,7 +235,3 @@ def test_tool_download() -> None:
         client_mock.get = Mock()
 
         ipfs_tool.download("some", tmp_dir, attempts=5)
-
-        with pytest.raises(DownloadError, match="was already downloaded to"):
-            os.mkdir(Path(tmp_dir) / "some")
-            ipfs_tool.download("some", tmp_dir, attempts=5)
