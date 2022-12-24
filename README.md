@@ -74,7 +74,7 @@ Read our [development guidelines][developing] to learn about the development pro
 
 ### Issues, Questions and Discussions
 
-We use [GitHub issues][issues] for tracking requests and bugs, and [GitHub Discussions][discussion] for general questions and discussion.
+We use [GitHub Issues][issues] for tracking requests and bugs, and [GitHub Discussions][discussion] for general questions and discussion.
 
 ## License
 
@@ -82,16 +82,7 @@ The AEA project is licensed under [Apache License 2.0][license].
 
 ## Cite
 
-If you are using our software in a publication, please 
-consider to cite it with the following BibTex entry:
-
-```
-@misc{agents-aea,
-  Author = {Fetch.ai},
-  Title = {Autonomous Economic Agent Framework},
-  Year = {2019},
-}
-```
+If you want to cite this software in a publication, please use the `Cite this repository` option on the [main GiHub page][github].
 
 [poetry]: https://python-poetry.org
 [pipenv]: https://pypi.org/project/pipenv/

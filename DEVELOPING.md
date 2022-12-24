@@ -74,7 +74,7 @@ If you've made any changes to the dependencies (e.g. added/removed dependencies,
 -     poetry lock
   This re-locks the dependencies. Ensure that the `poetry.lock` file is pushed into the repository (by default it is).
 -     make liccheck
-  Checks that the licence for the framework is correct, taking into account the licences for all dependencies, their dependencies and so on.
+  Checks that the licence for the framework is correct, taking into account the licences for all dependencies, their dependencies and so forth.
 
 ### <a name="package"></a>Updating packages
 If you've made changes to the packages included in the repository (e.g. skills, protocols, connections, contracts):
