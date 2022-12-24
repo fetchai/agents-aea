@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for aea cli ipfs plugin."""
-import logging
+
 import os
 import re
 import sys

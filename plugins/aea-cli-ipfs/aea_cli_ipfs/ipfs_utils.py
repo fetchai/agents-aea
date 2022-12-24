@@ -317,7 +317,7 @@ class IPFSTool:
         """
         Download dir by its hash.
 
-        :param hash_id: str. hash of file to download
+        :param hash_id: str. hash of file or package to download
         :param target_dir: Union[str, Path]. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
         :param attempts: int. default 5. How often to attempt the download.
@@ -335,10 +335,12 @@ class IPFSTool:
             package_path = download_path
             if fix_path:
                 # assumption is it contains one nested directory: the package
-                package_paths = list(download_path.glob("*"))
-                if not len(package_paths) == 1 or not package_paths[0].is_dir():
-                    raise DownloadError(f"Expected a single directory, found: {package_paths}")
-                package_path = package_paths.pop()
+                paths = list(download_path.glob("*"))
+                assumption_is_valid = len(paths) == 1 and paths[0].is_dir()
+                if not assumption_is_valid:  # pragma: no cover
+                    error_msg = f"Expected a single directory, found: {paths}"
+                    raise DownloadError(error_msg)
+                package_path = paths.pop()
 
             package_path.rename(target_dir / package_path.name)
             return str(package_path)
