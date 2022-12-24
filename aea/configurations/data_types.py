@@ -60,9 +60,6 @@ from aea.helpers.base import (
 
 
 T = TypeVar("T")
-
-
-VersionInfoClass = semver.VersionInfo
 PackageVersionLike = Union[str, semver.VersionInfo]
 
 
@@ -93,16 +90,19 @@ class PackageVersion:
 
         :param version_like: a string, os a semver.VersionInfo object.
         """
-        if isinstance(version_like, str) and version_like == "latest":
-            self._version = version_like
-        elif isinstance(version_like, str) and version_like == "any":
+        if isinstance(version_like, str) and version_like in ("any", "latest"):
             self._version = version_like
         elif isinstance(version_like, str):
-            self._version = VersionInfoClass.parse(version_like)
-        elif isinstance(version_like, VersionInfoClass):
+            self._version = semver.VersionInfo.parse(version_like)
+        elif isinstance(version_like, semver.VersionInfo):
             self._version = version_like
         else:
             raise ValueError("Version type not valid.")
+
+    @property
+    def is_any(self) -> bool:
+        """Check whether the version is 'any'."""
+        return isinstance(self._version, str) and self._version == "any"
 
     @property
     def is_latest(self) -> bool:
@@ -117,12 +117,21 @@ class PackageVersion:
         """Check equality."""
         if not isinstance(other, self.__class__):
             return NotImplemented  # Delegate comparison to the other instance's __eq__.
+        if (self.is_any and other.is_any) or (self.is_latest and other.is_latest):
+            return True
+        if self.is_any or other.is_any or self.is_latest or other.is_latest:
+            return False
         return all(getattr(self, s) == getattr(other, s) for s in self.__slots__)
 
     def __lt__(self, other: Any) -> bool:
         """Compare with another object."""
         if not isinstance(other, self.__class__):
             return NotImplemented  # Delegate comparison to the other instance.
+        if (self.is_any and other.is_any) or (self.is_latest and other.is_latest):
+            return False
+        if self.is_any or other.is_any or self.is_latest or other.is_latest:
+            error_msg = "Comparison not supported between"
+            raise TypeError(f"{error_msg} {self._version} and {other._version}")
         return self._version < other._version
 
 
