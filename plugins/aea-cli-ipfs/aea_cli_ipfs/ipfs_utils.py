@@ -25,6 +25,7 @@ import shutil
 import signal
 import subprocess  # nosec
 import tempfile
+import time
 from pathlib import Path
 from typing import Dict, IO, List, Optional, Set, Tuple, Union, cast
 
@@ -336,21 +337,40 @@ class IPFSTool:
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     self.client.get(hash_id, tmp_dir)
                     download_path = Path(tmp_dir) / hash_id
-                    if fix_path and (download_path / hash_id).is_dir():
-                        download_path = download_path / hash_id
-                    shutil.copytree(download_path, target_path)
+                    if download_path.is_dir():
+                        shutil.copytree(download_path, target_path)
+                    else:
+                        shutil.copy(download_path, target_path)
                     break
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
+                time.sleep(1)
         else:
             raise DownloadError(f"Failed to download: {hash_id}")
 
-        if target_path.is_dir() and any(target_path.iterdir()):
-            package_name, *_ = target_path.iterdir()
-            package_path = Path(target_dir) / package_name
-        else:
+        package_path = None
+        if os.path.isdir(target_path):
+            downloaded_files = os.listdir(target_path)
+            if len(downloaded_files) > 0:
+                package_name, *_ = os.listdir(target_path)
+                package_path = str(Path(target_dir) / package_name)
+
+        if package_path is None:
             package_path = target_dir
 
+        if fix_path and Path(target_path).is_dir():
+            # self.client.get creates result with hash name
+            # and content, but we want content in the target dir
+            try:
+                for each_file in Path(target_path).iterdir():  # grabs all files
+                    shutil.move(str(each_file), target_dir)
+            except shutil.Error as e:  # pragma: nocover
+                if os.path.isdir(target_path):
+                    shutil.rmtree(target_path)
+                raise DownloadError(f"error on move files {str(e)}") from e
+
+        if os.path.isdir(target_path):
+            shutil.rmtree(target_path)
         return str(package_path)
 
     def publish(self, hash_id: str) -> Dict:

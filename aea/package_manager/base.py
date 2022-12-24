@@ -45,7 +45,7 @@ try:
     from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
     IS_IPFS_PLUGIN_INSTALLED = True
-except (ImportError, ModuleNotFoundError):
+except (ImportError, ModuleNotFoundError):  # pragma: nocover  # cause obvious
     IS_IPFS_PLUGIN_INSTALLED = False
 
 PACKAGES_FILE = "packages.json"
@@ -119,7 +119,6 @@ class BasePackageManager(ABC):
 
         for package_id in packages:
             package_path = self.package_path_from_package_id(package_id)
-
             if package_path.exists():
                 package_hash = IPFSHashOnly.get(str(package_path))
                 expected_hash = packages[package_id]
@@ -180,6 +179,28 @@ class BasePackageManager(ABC):
                     (package_id, DepedencyMismatchErrors.HASH_DOES_NOT_MATCH)
                 )
         return mismatches
+
+    def is_dependencies_hashes_match(
+        self, package_id: PackageId, configuration_obj: PackageConfiguration
+    ) -> bool:
+        """Check dependecies hashes match and print errors"""
+        dependencies_with_mismatched_hashes = self.check_dependencies(
+            configuration=configuration_obj,
+        )
+        for dep, failure in dependencies_with_mismatched_hashes:
+            if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
+                self._logger.error(
+                    f"Package contains a dependency that is not defined in the `packages.json`"
+                    f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
+                )
+                continue
+
+            if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
+                self._logger.error(
+                    f"Dependency check failed\nHash does not match for {dep.without_hash()} in {package_id} configuration."
+                )
+                continue
+        return not dependencies_with_mismatched_hashes
 
     def _get_package_configuration(self, package_id: PackageId) -> PackageConfiguration:
         """Get package configuration by package_id."""

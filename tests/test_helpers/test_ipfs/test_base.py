@@ -194,3 +194,6 @@ class TestDirectoryHashing:
         )
         ipfs_hash = self.ipfs_tool.add_bytes(some_bytes)
         assert local_hash == ipfs_hash
+
+        with pytest.raises(ValueError, match="is required if wrap option is True"):
+            self.hash_tool.hash_bytes(some_bytes, wrap=True, cid_v1=False)

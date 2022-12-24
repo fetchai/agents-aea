@@ -40,12 +40,10 @@ jobs:
           # these two files should not be different;
           # we vendorize main "cosmos.py" module in fetchai crypto plugin package
           diff plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py plugins/aea-ledger-fetchai/aea_ledger_fetchai/_cosmos.py
-
           # check diff between plugins' LICENSE and main LICENSE
           diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-ethereum/LICENSE
           diff LICENSE plugins/aea-ledger-fetchai/LICENSE
-
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -106,7 +104,6 @@ jobs:
       - name: Pylint check
         run: |
           tox -e pylint
-
   common_checks_4:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -238,7 +235,6 @@ jobs:
           tar -xzf gitleaks_8.10.1_linux_x64.tar.gz && \
           sudo install gitleaks /usr/bin && \
           gitleaks detect --report-format json --report-path leak_report
-
   dependencies_checks:
     continue-on-error: False
     strategy:
@@ -264,7 +260,6 @@ jobs:
       - name: Check aea dependencies and imports
         run: |
           tox -e dependencies-check
-
   plugins_install_check:
     continue-on-error: False
     runs-on: ${{ matrix.sys.os }}
@@ -298,7 +293,6 @@ jobs:
       - name: Check plugin aea-cli-ipfs
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
-
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -320,7 +314,6 @@ jobs:
       - name: Protolint check
         run: |
           make protolint
-
   integration_checks:
     continue-on-error: True
     needs:
@@ -452,7 +445,6 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           make protolint_install
-
           # install ipfs
           wget https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
           tar -xvzf go-ipfs_v0.6.0_linux-amd64.tar.gz
@@ -476,7 +468,6 @@ jobs:
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           brew tap yoheimuta/protolint
           brew install protolint
-
           # install ipfs
           curl -O https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_darwin-amd64.tar.gz
           tar -xvzf go-ipfs_v0.6.0_darwin-amd64.tar.gz
@@ -485,7 +476,6 @@ jobs:
           cd ..
           rm -rf go-ipfs
           ipfs init
-
       - if: matrix.os == 'windows-latest'
         name: Install dependencies (windows-latest)
         env:
@@ -506,7 +496,6 @@ jobs:
           make protolint_install_win
           # just check protolint runs
           protolint version
-
           curl https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
           cp ~\Apps\go-ipfs\ipfs.exe C:\Users\runneradmin\go\bin\
@@ -522,6 +511,22 @@ jobs:
       - name: Plugin unit tests
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
+
+      - if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.10'
+        name: Show full coverage report
+        run: |
+          pip install tomte[tests]==0.1.5
+          coverage report -m -i
+
+      - if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.10'
+        name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
 
   golang_checks:
     continue-on-error: True
@@ -550,52 +555,3 @@ jobs:
     #   name: Golang unit tests (aealite)
     #   working-directory: ./libs/go/aealite
     #   run: go test -p 1 -timeout 0 -count 1 -v ./...
-
-  coverage_checks:
-    continue-on-error: True
-    needs:
-      - integration_checks
-      - integration_checks_ledger
-      - platform_checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      - uses: actions/setup-go@v3
-        with:
-          go-version: "1.17.7"
-      - name: Install dependencies (ubuntu-latest)
-        run: |
-          sudo apt-get update --fix-missing
-          sudo apt-get autoremove
-          sudo apt-get autoclean
-          pip install tomte[tox]==0.1.5
-          # we only need "coverage" from the "tests" group
-          # but this makes it easier to stay in sync
-          pip install tomte[tests]==0.1.5
-          # install Protobuf compiler
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
-          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
-          sudo mv protoc/bin/protoc /usr/local/bin/protoc
-          make protolint_install
-      # sudo apt-get install -y protobuf-compiler
-      - name: Run all tests
-        run: |
-          tox -e py3.10-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
-          tox -e plugins-py3.10-cov -- --cov-append -m 'not unstable'
-          tox -e packages-py3.10-cov -- --cov-append -m 'not unstable'
-        continue-on-error: true
-      - name: Show full coverage report
-        run: |
-          coverage report -m -i
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false

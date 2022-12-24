@@ -403,7 +403,7 @@ def test_send_envelope_error_is_logged_by_send_loop():
 
     with unittest.mock.patch.object(multiplexer.logger, "error") as mock_logger_error:
         multiplexer.put(envelope)
-        time.sleep(0.1)
+        wait_for_condition(lambda: mock_logger_error.call_count > 0, timeout=3)
         mock_logger_error.assert_called_with(
             "No connection registered with id: {}".format(fake_connection_id)
         )

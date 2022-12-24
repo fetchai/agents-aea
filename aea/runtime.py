@@ -389,12 +389,8 @@ class AsyncRuntime(BaseRuntime):
         )
 
         self._state.set(RuntimeStates.running)
-        try:
-            await self.agent_loop.wait_completed()
-        except asyncio.CancelledError:
-            self.agent_loop.stop()
-            await self.agent_loop.wait_completed()
-            raise
+        # loop will be stopped in wait completed
+        await self.agent_loop.wait_completed()
 
 
 class ThreadedRuntime(AsyncRuntime):

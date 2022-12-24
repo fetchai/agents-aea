@@ -193,27 +193,39 @@ def test_version_did_not_match():
 class TestIPFSToolDownload(CliTest):
     """Test IPFSTool.download"""
 
+    # we download either a file or a directory
+    # if a file: the original name is not preserved, and will be the hash
+    #   e.g. <filename> --> <some_ipfs_hash>
+    # if a dir : the original name is preserved, as a nested directory
+    #   e.g. <directory>/ --> <some_ipfs_hash>/<directory>/
+
     cli_options = ("ipfs", "download")
 
     def setup(self) -> None:
         """Setup"""
 
         super().setup()
-        self.some_hash = "not_a_real_ipfs_hash"
+        self.some_ipfs_hash = "not_a_real_ipfs_hash"
         self.target_dir = self.t / "target_dir"
-        self.args = self.some_hash, str(self.target_dir)
-        self.target_path = Path(*map(Path, reversed(self.args)))
+        self.args = self.some_ipfs_hash, str(self.target_dir)
 
-    @property
-    def mock_client_get_success(self) -> mock._patch:
+    @staticmethod
+    def mock_client_get_success(is_dir: bool) -> mock._patch:
         """Mock IPFSTool.client.get"""
 
         # self.client.get(hash_id, tmp_dir) creates tmp_dir/hash_id
-        # we need a nested lambda to mock a method on the class instead of instance
 
         def new_callable(_, hash_id, tmp_dir) -> None:
-            (Path(tmp_dir) / hash_id).mkdir()
+            if is_dir:  # <ipfs_hash>/<dir_name>/...
+                some_dir = Path(tmp_dir) / hash_id / "some_dir"
+                some_dir.mkdir(parents=True)
+                (some_dir / "some_file").touch()
+                (some_dir / "some_nested_dir").mkdir()
+                (some_dir / "some_nested_dir" / "some_nested_file").touch()
+            else:  # <ipfs_hash>
+                (Path(tmp_dir) / hash_id).touch()
 
+        # we need a nested lambda to mock a method on the class instead of instance
         return patch("ipfshttpclient.Client.get", new_callable=lambda: new_callable)
 
     @property
@@ -229,34 +241,46 @@ class TestIPFSToolDownload(CliTest):
     def test_ipfs_download_target_path_exists(self) -> None:
         """Test aea ipfs download target_path exists."""
 
-        self.target_path.mkdir(parents=True)
-        expected = f"{self.some_hash} was already downloaded"
+        Path(self.target_dir, self.some_ipfs_hash).mkdir(parents=True)
+        expected = f"{self.some_ipfs_hash} was already downloaded"
         with pytest.raises(click.ClickException, match=expected):
             self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
 
-    def test_ipfs_download_success(self) -> None:
+    @pytest.mark.parametrize("is_dir", [False, True])
+    def test_ipfs_download_success(self, is_dir: bool) -> None:
         """Test aea ipfs download."""
 
-        with self.mock_client_get_success:
+        with self.mock_client_get_success(is_dir=is_dir):
             result = self.run_cli(*self.args, catch_exceptions=False)
 
         assert result.exit_code == 0, result.stdout
-        assert f"Download {self.some_hash} to {self.target_dir}" in result.stdout
+        assert f"Download {self.some_ipfs_hash} to {self.target_dir}" in result.stdout
         assert "Download complete!" in result.stdout
         assert self.target_path.exists()
+
+        all_new_paths = list(self.target_dir.rglob("*"))
+
+        if is_dir:
+            assert len(all_new_paths) == 4
+            assert not any(self.some_ipfs_hash in str(p) for p in all_new_paths)
+        else:
+            assert len(all_new_paths) == 1
+            assert all_new_paths[0].is_file()
+            assert all_new_paths[0].name == self.some_ipfs_hash
 
     def test_ipfs_download_failure(self) -> None:
         """Test aea ipfs download failure."""
 
         with self.mock_client_get_failure:
-            result = self.run_cli(
-                *self.args, catch_exceptions=True, standalone_mode=False
-            )
+            with mock.patch("time.sleep"):
+                result = self.run_cli(
+                    *self.args, catch_exceptions=True, standalone_mode=False
+                )
 
         assert result.exit_code == 1, result.stdout
         assert isinstance(result.exception, click.ClickException)
-        assert f"Failed to download: {self.some_hash}" in result.exception.message
-        assert not self.target_path.exists()
+        assert f"Failed to download: {self.some_ipfs_hash}" in result.exception.message
+        assert not any(self.target_dir.rglob("*"))
 
 
 @patch("ipfshttpclient.Client.id")
