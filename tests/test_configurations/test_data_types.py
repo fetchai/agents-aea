@@ -21,6 +21,8 @@
 
 import copy
 import operator
+from typing import Tuple
+from itertools import permutations
 from math import isnan
 
 import pytest
@@ -59,9 +61,10 @@ COMPARISON_OPERATORS = [
 def all_comparisons_operations_equal(pair_a, pair_b) -> bool:
     """Check whether all operator comparisons return the same result."""
 
-    version_comparison = tuple(f(*pair_a) for f in COMPARISON_OPERATORS)
-    package_comparison = tuple(f(*pair_b) for f in COMPARISON_OPERATORS)
-    return version_comparison == package_comparison
+    def all_comparisons(pair) -> Tuple[bool, ...]:
+        return tuple(f(*pair) for f in COMPARISON_OPERATORS)
+
+    return all_comparisons(pair_a) == all_comparisons(pair_b)
 
 
 @pytest.mark.parametrize("self_type", [PackageVersion, PublicId, PackageId])
@@ -126,3 +129,26 @@ def test_package_id_comparison(package_id_pair):
     package_id_pair[0]._package_type = package_id_pair[1]._package_type
     version_pair = tuple(p.public_id.package_version._version for p in package_id_pair)
     assert all_comparisons_operations_equal(version_pair, package_id_pair)
+
+
+@pytest.mark.parametrize("version_like", ["any", "latest", "0.1.0"])
+def test_any_and_latest_equal(version_like: str):
+    """Test special version types "any" and "latest" when equal."""
+
+    version_a, version_b = (PackageVersion(version_like) for _ in range(2))
+    assert version_a == version_b
+    assert not version_a < version_b
+
+
+@pytest.mark.parametrize("version_like_pair", permutations(["any", "latest", "0.1.0"], 2))
+def test_any_latest_and_numeric_unequal(version_like_pair: Tuple[str]):
+    """Test special version types "any" and "latest" when equal."""
+
+    self, other = map(PackageVersion, version_like_pair)
+    assert not self == other
+    assert self != other
+
+    funcs = (operator.le, operator.lt, operator.ge, operator.gt)
+    for f in funcs:
+        with pytest.raises(TypeError, match="not supported between"):
+            assert f(self, other)
