@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for aea cli ipfs plugin."""
-import logging
+
 import os
 import re
 import sys
@@ -217,7 +217,7 @@ class TestIPFSToolDownload(CliTest):
 
         def new_callable(_, hash_id, tmp_dir) -> None:
             if is_dir:  # <ipfs_hash>/<dir_name>/...
-                some_dir = (Path(tmp_dir) / hash_id / "some_dir")
+                some_dir = Path(tmp_dir) / hash_id / "some_dir"
                 some_dir.mkdir(parents=True)
                 (some_dir / "some_file").touch()
                 (some_dir / "some_nested_dir").mkdir()
