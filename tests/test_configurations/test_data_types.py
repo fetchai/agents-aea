@@ -21,9 +21,9 @@
 
 import copy
 import operator
-from typing import Tuple
 from itertools import permutations
 from math import isnan
+from typing import Tuple
 
 import pytest
 from hypothesis import assume, given
@@ -140,7 +140,9 @@ def test_any_and_latest_equal(version_like: str):
     assert not version_a < version_b
 
 
-@pytest.mark.parametrize("version_like_pair", permutations(["any", "latest", "0.1.0"], 2))
+@pytest.mark.parametrize(
+    "version_like_pair", permutations(["any", "latest", "0.1.0"], 2)
+)
 def test_any_latest_and_numeric_unequal(version_like_pair: Tuple[str]):
     """Test special version types "any" and "latest" when equal."""
 
