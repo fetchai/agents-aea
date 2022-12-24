@@ -29,6 +29,8 @@ from collections import OrderedDict
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -99,6 +101,26 @@ class TestPackageManagerV0(BaseAEATestCase):
         with mock.patch.object(pm, "add_package") as update_patch:
             pm.sync()
             update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
+
+        with pytest.raises(
+            ValueError,
+            match="Both `update_packages` and `update_hashes` cannot be set to `True`.",
+        ):
+            pm.sync(update_hashes=True, update_packages=True)
+
+        PACKAGES = {EXAMPLE_PACKAGE_ID: EXAMPLE_PACKAGE_HASH}
+        with mock.patch.object(
+            pm, "_sync", return_value=[False, PACKAGES, []]
+        ) as update_patch:
+            pm.sync(update_hashes=True)
+            assert pm._packages == PACKAGES
+
+        PACKAGES = {EXAMPLE_PACKAGE_ID: EXAMPLE_PACKAGE_HASH}
+        with mock.patch.object(
+            pm, "_sync", return_value=[False, PACKAGES, PACKAGES]
+        ), mock.patch.object(pm, "update_package") as update_package:
+            pm.sync(update_packages=True)
+            update_package.assert_called_once_with(package_id=EXAMPLE_PACKAGE_ID)
 
     def test_update_fingerprints(self, caplog) -> None:
         """Test update fingerprints."""
@@ -201,6 +223,14 @@ class TestVerifyFailure(BaseAEATestCase):
                 f"Dependency check failed\nHash does not match for {EXAMPLE_PACKAGE_ID}"
                 in caplog.text
             )
+
+        with mock.patch("traceback.print_exc",) as print_tb, mock.patch(
+            "aea.package_manager.v0.check_fingerprint",
+            side_effect=ValueError("expeceted_exception"),
+        ):
+            pm = PackageManagerV0.from_dir(self.packages_dir_path)
+            assert pm.verify() == 1
+            print_tb.assert_called_once()
 
     def test_fingerprint_failure(self, caplog) -> None:
         """Test update package hash method."""

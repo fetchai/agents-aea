@@ -166,6 +166,7 @@ class TestHTTPServer:
             status_code=200,
             status_text="Success",
             body=b"Response body",
+            headers="Content-Length: 1",
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -179,11 +180,11 @@ class TestHTTPServer:
             request_task,
             timeout=20,
         )
-
         assert (
             response.status == 200
             and response.reason == "Success"
             and await response.text() == "Response body"
+            and int(response.headers["Content-Length"]) == len("Response body")
         )
 
     @pytest.mark.asyncio
@@ -268,7 +269,7 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_late_message_get_timeout_error(self):
         """Test send get request w/ 200 response."""
-        self.http_connection.channel.timeout_window = 1
+        self.http_connection.channel.timeout_window = 0.2
         request_task = self.loop.create_task(self.request("get", "/pets"))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
         assert envelope
@@ -288,7 +289,7 @@ class TestHTTPServer:
             context=envelope.context,
             message=message,
         )
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(0.4)
         with patch.object(self.http_connection.logger, "warning") as mock_logger:
             await self.http_connection.send(response_envelope)
             mock_logger.assert_any_call(

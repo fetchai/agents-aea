@@ -2099,6 +2099,61 @@ class TestBaseDialoguesStorage:
             == 0
         )
 
+    def test_dialogues_complete_kept(self):
+        """Test dialogues completed handled properly."""
+        assert not self.storage._incomplete_to_complete_dialogue_labels
+        self.storage.add(self.dialogue_opponent_started)
+        assert self.storage.dialogues_in_active_state
+        assert not self.storage.dialogues_in_terminal_state
+        assert len(self.storage._incomplete_to_complete_dialogue_labels) == 1
+
+        self.dialogue_opponent_started._update(self.valid_message_1_by_self)
+        self.dialogue_opponent_started._incoming_messages.append(
+            self.valid_message_1_by_self
+        )
+        self.dialogue_opponent_started.reply(
+            target_message=self.valid_message_1_by_self,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+
+        assert not self.storage.dialogues_in_active_state
+        assert self.storage.dialogues_in_terminal_state
+
+        self.storage.remove(self.dialogue_opponent_started.dialogue_label)
+        assert not self.storage.dialogues_in_active_state
+        assert not self.storage.dialogues_in_terminal_state
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._incomplete_to_complete_dialogue_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            len(
+                self.storage._dialogue_by_address[
+                    self.dialogue.dialogue_label.dialogue_opponent_addr
+                ]
+            )
+            == 0
+        )
+
     def teardown(self):
         """Tear down the environment to test BaseDialogueStorage."""
 

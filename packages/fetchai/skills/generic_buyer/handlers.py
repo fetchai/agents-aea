@@ -451,11 +451,16 @@ class GenericSigningHandler(Handler):
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
-        ledger_api_msg = ledger_api_dialogue.reply(
+
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, _ = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-            target_message=last_ledger_api_msg,
             signed_transaction=signing_msg.signed_transaction,
         )
+
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")
 
@@ -541,7 +546,7 @@ class GenericLedgerApiHandler(Handler):
             ledger_api_msg.performative
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
-            self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+            self._handle_transaction_digest(ledger_api_msg)
         elif (
             ledger_api_msg.performative
             == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
@@ -614,22 +619,25 @@ class GenericLedgerApiHandler(Handler):
         )
 
     def _handle_transaction_digest(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+        self,
+        ledger_api_msg: LedgerApiMessage,
     ) -> None:
         """
         Handle a message of transaction_digest performative.
 
         :param ledger_api_msg: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        ledger_api_msg_ = ledger_api_dialogue.reply(
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg_, _ = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-            target_message=ledger_api_msg,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
         self.context.logger.info("checking transaction is settled.")

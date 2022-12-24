@@ -15,7 +15,7 @@ fingerprint:
   tests/data/certs/server.csr: bafybeicvp7xdl5w3o4bzikkudpduitss3bpp6xqfwlxbw6kabdangohy5u
   tests/data/certs/server.key: bafybeiabvpkpqr4fctrbssfal6pviv5otgmu32qyrfpyhcql5wgmlzjtoe
   tests/data/petstore_sim.yaml: bafybeiaekkfxljlv57uviz4ug6isdqbzsnuxpsgy3dvhzh22daql3xh2i4
-  tests/test_http_server.py: bafybeifq6ovgbi3gmpprrojmoyr7lx7365r6dub44lqzsfwqkzkfdchzpi
+  tests/test_http_server.py: bafybeihxrl4eqgbroqfcrnued3twwx24cfzfpuxrqkkgvirqtqhadbmxzm
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
