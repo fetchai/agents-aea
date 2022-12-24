@@ -331,32 +331,31 @@ class IPFSTool:
         if target_path.exists():
             raise DownloadError(f"{hash_id} was already downloaded to {target_path}")
 
+        def move_to_target_dir(download_path) -> str:
+            if download_path.is_file():
+                shutil.copy(download_path, target_dir)
+                return str(target_dir)
+            # else it is a directory containing a single package path
+            package_path = download_path
+            if fix_path:
+                # assumption is it contains one nested directory, the package
+                package_paths = list(download_path.glob("*"))
+                if not len(package_paths) == 1 or not package_paths[0].is_dir():
+                    raise DownloadError(f"Expected a single directory, found: {package_paths}")
+                package_path = package_paths.pop()
+            package_path.rename(target_dir / package_path.name)
+            return str(package_path)
+
         while attempts:
             attempts -= 1
             try:  # download to tmp_dir in case of midway download failure
                 with tempfile.TemporaryDirectory() as tmp_dir:
-
                     self.client.get(hash_id, tmp_dir)
-                    download_path = Path(tmp_dir) / hash_id
-
-                    if download_path.is_file():
-                        shutil.copy(download_path, target_dir)
-                        return str(target_dir)
-
-                    # else it is a directory containing a single package path
-                    package_path = download_path
-                    if fix_path:
-                        # assumption is it contains one nested directory, the package
-                        package_paths = list(download_path.glob("*"))
-                        if not len(package_paths) == 1 or not package_paths[0].is_dir():
-                            raise DownloadError(f"Expected a single directory, found: {package_paths}")
-                        package_path = package_paths.pop()
-                    package_path.rename(target_dir / package_path.name)
-                    return str(package_path)
-                
+                    return move_to_target_dir(Path(tmp_dir) / hash_id)
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
                 time.sleep(1)
+
         raise DownloadError(f"Failed to download: {hash_id}")
 
     def publish(self, hash_id: str) -> Dict:
