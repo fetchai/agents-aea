@@ -208,7 +208,6 @@ class TestIPFSToolDownload(CliTest):
         self.some_ipfs_hash = "not_a_real_ipfs_hash"
         self.target_dir = self.t / "target_dir"
         self.args = self.some_ipfs_hash, str(self.target_dir)
-        self.target_path = Path(*map(Path, reversed(self.args)))
 
     @staticmethod
     def mock_client_get_success(is_dir: bool) -> mock._patch:
@@ -242,7 +241,7 @@ class TestIPFSToolDownload(CliTest):
     def test_ipfs_download_target_path_exists(self) -> None:
         """Test aea ipfs download target_path exists."""
 
-        self.target_path.mkdir(parents=True)
+        Path(self.target_dir, self.some_ipfs_hash).mkdir(parents=True)
         expected = f"{self.some_ipfs_hash} was already downloaded"
         with pytest.raises(click.ClickException, match=expected):
             self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
@@ -289,7 +288,7 @@ class TestIPFSToolDownload(CliTest):
         assert result.exit_code == 1, result.stdout
         assert isinstance(result.exception, click.ClickException)
         assert f"Failed to download: {self.some_ipfs_hash}" in result.exception.message
-        assert not self.target_path.exists()
+        assert not any(self.target_dir.rglob("*"))
 
 
 @patch("ipfshttpclient.Client.id")
