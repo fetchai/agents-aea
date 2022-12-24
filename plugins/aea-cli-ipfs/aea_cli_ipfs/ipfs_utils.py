@@ -335,43 +335,29 @@ class IPFSTool:
             attempts -= 1
             try:  # download to tmp_dir in case of midway download failure
                 with tempfile.TemporaryDirectory() as tmp_dir:
+
                     self.client.get(hash_id, tmp_dir)
                     download_path = Path(tmp_dir) / hash_id
-                    if download_path.is_dir():
-                        shutil.copytree(download_path, target_path)
-                    else:
-                        shutil.copy(download_path, target_path)
-                    break
+
+                    if download_path.is_file():
+                        shutil.copy(download_path, target_dir)
+                        return str(target_dir)
+
+                    # else it is a directory containing a single package path
+                    package_path = download_path
+                    if fix_path:
+                        # assumption is it contains one nested directory, the package
+                        package_paths = list(download_path.glob("*"))
+                        if not len(package_paths) == 1 or not package_paths[0].is_dir():
+                            raise DownloadError(f"Expected a single directory, found: {package_paths}")
+                        package_path = package_paths.pop()
+                    package_path.rename(target_dir / package_path.name)
+                    return str(package_path)
+                
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
                 time.sleep(1)
-        else:
-            raise DownloadError(f"Failed to download: {hash_id}")
-
-        package_path = None
-        if os.path.isdir(target_path):
-            downloaded_files = os.listdir(target_path)
-            if len(downloaded_files) > 0:
-                package_name, *_ = os.listdir(target_path)
-                package_path = str(Path(target_dir) / package_name)
-
-        if package_path is None:
-            package_path = target_dir
-
-        if fix_path and Path(target_path).is_dir():
-            # self.client.get creates result with hash name
-            # and content, but we want content in the target dir
-            try:
-                for each_file in Path(target_path).iterdir():  # grabs all files
-                    shutil.move(str(each_file), target_dir)
-            except shutil.Error as e:  # pragma: nocover
-                if os.path.isdir(target_path):
-                    shutil.rmtree(target_path)
-                raise DownloadError(f"error on move files {str(e)}") from e
-
-        if os.path.isdir(target_path):
-            shutil.rmtree(target_path)
-        return str(package_path)
+        raise DownloadError(f"Failed to download: {hash_id}")
 
     def publish(self, hash_id: str) -> Dict:
         """
