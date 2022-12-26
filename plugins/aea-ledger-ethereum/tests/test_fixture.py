@@ -18,15 +18,29 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ethereum module."""
 import pytest
+import requests
 from _pytest.compat import get_real_func
-from aea_ledger_ethereum.test_tools.fixture_helpers import ganache
+from aea_ledger_ethereum.test_tools.fixture_helpers import (
+    DEFAULT_GANACHE_ADDR,
+    DEFAULT_GANACHE_PORT,
+    ganache,
+)
 
 
 def test_ganache_fixture() -> None:
     """Test ganache fixture just start and stop."""
+    request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
 
     gen = get_real_func(ganache)()
 
     next(gen)
-    with pytest.raises(StopIteration):
-        next(gen)
+    # started
+
+    try:
+        response = requests.post(
+            f"{DEFAULT_GANACHE_ADDR}:{DEFAULT_GANACHE_PORT}", json=request
+        )
+        assert response.status_code == 200
+    finally:
+        with pytest.raises(StopIteration):
+            next(gen)
