@@ -112,12 +112,12 @@ class DependencyNotFound(CustomException):
 
     def print_error(self) -> None:
         """Print the error message."""
-        sorted_expected = list(map(str, sorted(self.expected_dependencies)))
-        sorted_missing = list(map(str, sorted(self.missing_dependencies)))
+        expected = list(map(str, self.expected_dependencies))
+        missing = list(map(str, self.missing_dependencies))
         print("=" * 50)
         print(f"Package {self.configuration_file}:")
-        print(f"Expected: {pprint.pformat(sorted_expected)}")
-        print(f"Missing: {pprint.pformat(sorted_missing)}")
+        print(f"Expected: {pprint.pformat(expected)}")
+        print(f"Missing: {pprint.pformat(missing)}")
         print("=" * 50)
 
 

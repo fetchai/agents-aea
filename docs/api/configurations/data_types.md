@@ -224,6 +224,7 @@ Get the string representation.
 ## PublicId Objects
 
 ```python
+@functools.total_ordering
 class PublicId(JSONSerializable)
 ```
 
@@ -521,7 +522,7 @@ Get the representation.
 def __eq__(other: Any) -> bool
 ```
 
-Compare with another object.
+Check equality.
 
 <a id="aea.configurations.data_types.PublicId.__lt__"></a>
 
@@ -531,32 +532,7 @@ Compare with another object.
 def __lt__(other: Any) -> bool
 ```
 
-Compare two public ids.
-
->>> public_id_1 = PublicId("author_1", "name_1", "0.1.0")
->>> public_id_2 = PublicId("author_1", "name_1", "0.1.1")
->>> public_id_3 = PublicId("author_1", "name_2", "0.1.0")
->>> public_id_1 > public_id_2
-False
->>> public_id_1 < public_id_2
-True
-
->>> public_id_1 < public_id_3
-Traceback (most recent call last):
-...
-ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
-
-**Arguments**:
-
-- `other`: the object to compate to
-
-**Raises**:
-
-- `ValueError`: if the public ids cannot be confirmed
-
-**Returns**:
-
-whether or not the inequality is satisfied
+Compare with another object.
 
 <a id="aea.configurations.data_types.PublicId.without_hash"></a>
 
@@ -593,6 +569,7 @@ Get the string representation.
 ## PackageId Objects
 
 ```python
+@functools.total_ordering
 class PackageId()
 ```
 
@@ -795,7 +772,7 @@ Get the object representation in string.
 def __eq__(other: Any) -> bool
 ```
 
-Compare with another object.
+Check equality.
 
 <a id="aea.configurations.data_types.PackageId.__lt__"></a>
 
@@ -1080,7 +1057,7 @@ Get the string representation.
 def __eq__(other: Any) -> bool
 ```
 
-Compare with another object.
+Check equality.
 
 <a id="aea.configurations.data_types.Dependencies"></a>
 

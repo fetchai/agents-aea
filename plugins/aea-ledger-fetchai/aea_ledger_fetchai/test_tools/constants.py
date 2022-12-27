@@ -27,6 +27,7 @@ from aea_ledger_fetchai.fetchai import FetchAICrypto
 
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.ledger_apis import FETCHAI_DEFAULT_ADDRESS
+from aea.test_tools.network import LOCALHOST
 
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -54,3 +55,25 @@ FUNDED_FETCHAI_PRIVATE_KEY_2 = (
 FETCHAI_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"  # relates to NON_FUNDED_FETCHAI_PRIVATE_KEY_1
 
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(DATA_DIR, FETCHAI_PRIVATE_KEY_FILE)
+
+# URL to local Fetch ledger instance
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.10.2"
+DEFAULT_FETCH_LEDGER_ADDR = LOCALHOST.geturl()
+DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
+DEFAULT_FETCH_LEDGER_REST_PORT = 1317
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-dorado.fetch.ai:443"
+DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
+DEFAULT_MONIKER = "test-node"
+DEFAULT_FETCH_CHAIN_ID = "dorado-1"
+DEFAULT_GENESIS_ACCOUNT = "validator"
+DEFAULT_DENOMINATION = "atestfet"
+FETCHD_INITIAL_TX_SLEEP = 6
+
+
+FETCHD_CONFIGURATION = dict(
+    mnemonic=DEFAULT_FETCH_MNEMONIC,
+    moniker=DEFAULT_MONIKER,
+    chain_id=DEFAULT_FETCH_CHAIN_ID,
+    genesis_account=DEFAULT_GENESIS_ACCOUNT,
+    denom=DEFAULT_DENOMINATION,
+)

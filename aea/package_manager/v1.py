@@ -22,6 +22,7 @@
 import json
 import traceback
 from collections import OrderedDict
+from itertools import chain
 from pathlib import Path
 from typing import Dict, Optional
 from typing import OrderedDict as OrderedDictType
@@ -75,6 +76,13 @@ class PackageManagerV1(BasePackageManager):
         """Returns mappings of package ids -> package hash"""
 
         return self._third_party_packages
+
+    @property
+    def all_packages(self) -> PackageIdToHashMapping:
+        """Return all packages."""
+        return OrderedDict(
+            chain(self.dev_packages.items(), self.third_party_packages.items())
+        )
 
     def get_package_hash(self, package_id: PackageId) -> Optional[str]:
         """Get package hash."""

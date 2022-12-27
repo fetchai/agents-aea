@@ -31,10 +31,17 @@ import pytest
 from _pytest.config import ExitCode  # type: ignore
 
 from aea.cli import cli
+from aea.cli.test import get_packages_list
 from aea.cli.utils.package_utils import get_package_path
 from aea.configurations.constants import AEA_TEST_DIRNAME
-from aea.configurations.data_types import ComponentType, PublicId
+from aea.configurations.data_types import (
+    ComponentType,
+    PackageId,
+    PackageType,
+    PublicId,
+)
 from aea.helpers.base import cd
+from aea.package_manager.v1 import PackageManagerV1
 from aea.test_tools.test_cases import AEATestCaseEmpty, CLI_LOG_OPTION
 
 
@@ -364,3 +371,62 @@ class TestPackageTestByPathWithCov(BaseAEATestCommand):
             assert (agent_path / "coverage.xml").exists()
             assert (agent_path / "htmlcov").exists()
             assert (agent_path / ".coverage").exists()
+
+
+def test_get_packages_list() -> None:
+    """Test get packages list function."""
+    package_manager = PackageManagerV1(Path("some"))
+    dev_package = PackageId(
+        package_type=PackageType.CONNECTION,
+        public_id=PublicId(author="test", name="third", version="1.0.0"),
+    )
+    third_part_package = PackageId(
+        package_type=PackageType.SKILL,
+        public_id=PublicId(author="test", name="third", version="1.0.0"),
+    )
+    package_manager._dev_packages = {dev_package: "some_hash"}  # type: ignore
+    package_manager._third_party_packages = {third_part_package: "some_hash"}  # type: ignore
+
+    with mock.patch.object(
+        PackageManagerV1, "from_dir", return_value=package_manager
+    ), mock.patch.object(
+        package_manager, "package_path_from_package_id", return_value=Path("some")
+    ):
+        assert len(get_packages_list(Path("some"), packages_filter="dev")) == 1
+        assert (
+            get_packages_list(Path("some"), packages_filter="dev")[0][0]
+            == PackageType.CONNECTION.to_plural()
+        )
+        assert len(get_packages_list(Path("some"), packages_filter="all")) == 2
+
+        with pytest.raises(
+            ValueError, match="Unknown package filter: bad. Valid are all,dev"
+        ):
+            get_packages_list(Path("some"), packages_filter="bad")
+
+
+class TestPackageTestPackages(BaseAEATestCommand):
+    """Test that the command 'aea test pacakages' works as expected (non-empty test suite)."""
+
+    def test_packages_all_dev(self) -> None:
+        """Check test pacakges --all  flag on/off."""
+
+        with mock_pytest_main(), mock.patch(
+            "aea.cli.test.get_packages_list", return_value=[]
+        ) as get_packages_list_mock:
+            result = self.run_test_command(
+                "packages",
+            )
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
+            get_packages_list_mock.assert_called_once_with(
+                packages_dir=mock.ANY, packages_filter="dev"
+            )
+
+        with mock_pytest_main(), mock.patch(
+            "aea.cli.test.get_packages_list", return_value=[]
+        ) as get_packages_list_mock:
+            result = self.run_test_command("packages", "--all")
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
+            get_packages_list_mock.assert_called_once_with(
+                packages_dir=mock.ANY, packages_filter="all"
+            )
