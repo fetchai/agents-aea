@@ -438,7 +438,7 @@ class TestLedgerConnectionWithMultiplexer:
     ledger_api_dialogues: DummyLedgerApiDialogues
 
     @classmethod
-    def setup(cls) -> None:
+    def setup_class(cls) -> None:
         """Setup the test class."""
         # set up a multiplexer with the required ledger connection
         cls.running_loop = asyncio.new_event_loop()
@@ -466,7 +466,7 @@ class TestLedgerConnectionWithMultiplexer:
         )
 
     @classmethod
-    def teardown(cls) -> None:
+    def teardown_class(cls) -> None:
         """Tear down the multiplexer."""
         cls.ledger_connection._ledger_dispatcher.block = False  # type: ignore
         if cls.multiplexer.is_connected:

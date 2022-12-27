@@ -104,8 +104,7 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
     3. use filecmp and difflib to check for differences
     """
 
-    @classmethod
-    def setup(cls) -> Any:  # I don't take extra args :)
+    def setup(self) -> Any:  # I don't take extra args :)
         """Set the test up"""
 
     def test_repo_not_bare(self, acn_repo_dir: Any) -> Any:

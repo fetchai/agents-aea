@@ -589,7 +589,8 @@ class TestBaseContractTestCase(TestCase):
         """Test sign_send_confirm_receipt_multisig_transaction is called for backward compatibility."""
 
         class ContractTestCase(BaseContractTestCase):
-            pass
+            path_to_contract = Path(".")
+            ledger_identifier = ""
 
         ContractTestCase.sign_send_confirm_receipt_transaction(
             "tx", "ledger_api", "crypto"

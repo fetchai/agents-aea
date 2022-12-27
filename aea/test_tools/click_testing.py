@@ -41,6 +41,7 @@ import shlex
 import subprocess  # nosec
 import sys
 import tempfile
+from abc import ABC
 from contextlib import nullcontext, redirect_stderr
 from pathlib import Path
 from typing import Any, ContextManager, Optional, Sequence, cast
@@ -147,12 +148,12 @@ class CliRunner(ClickCliRunner):
         )
 
 
-class CliTest:
+class CliTest(ABC):
     """Test cli commands."""
 
-    t: Path
     cli_options: Sequence[str] = ()
 
+    _t: Path
     __cwd: Path
     __cli: click.core.Group = aea_cli
     __cli_runner: CliRunner
@@ -179,12 +180,12 @@ class CliTest:
     def setup(self) -> None:
         """Setup test."""
 
-        self.t = Path(tempfile.mkdtemp()).resolve()
+        self._t = Path(tempfile.mkdtemp()).resolve()
 
     def teardown(self) -> None:
         """Teardown test."""
 
-        remove_test_directory(self.t)
+        remove_test_directory(self._t)
 
     def run_cli(
         self,

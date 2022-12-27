@@ -176,11 +176,11 @@ class TestCliTest:
         self.test_cls.setup_class()
         assert isinstance(self.test_cls._CliTest__cli_runner, CliRunner)  # type: ignore
         assert self.test_cls._CliTest__cli.name == "aea"  # type: ignore
-        assert not hasattr(self.test_cls, "t")
+        assert not hasattr(self.test_cls, "_t")
 
         test_instance = self.test_cls()  # type: ignore
         test_instance.setup()
-        assert isinstance(test_instance.t, Path)
+        assert isinstance(test_instance._t, Path)
 
     def test_teardown_and_teardown_cls(self) -> None:
         """Test teardown and teardown_class"""
@@ -188,11 +188,11 @@ class TestCliTest:
         test_instance = self.setup_test()
         cwd = Path.cwd()
 
-        assert not test_instance.t == cwd
-        os.chdir(test_instance.t)
-        assert test_instance.t == Path.cwd()
+        assert not test_instance._t == cwd
+        os.chdir(test_instance._t)
+        assert test_instance._t == Path.cwd()
         test_instance.teardown()
-        assert not hasattr(self.test_cls, "t")
+        assert not hasattr(self.test_cls, "_t")
 
         test_instance.teardown_class()
         assert Path.cwd() == cwd

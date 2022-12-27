@@ -20,6 +20,7 @@
 """This module contains test case classes based on pytest for AEA skill testing."""
 import asyncio
 import os
+from abc import ABC, ABCMeta
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -43,10 +44,45 @@ COUNTERPARTY_AGENT_ADDRESS = "counterparty"
 COUNTERPARTY_SKILL_ADDRESS = "some_author/some_skill:0.1.0"
 
 
-class BaseSkillTestCase:
+class _MetaBaseSkillTestCase(ABCMeta):
+    """A metaclass that validates BaseSkillTestCase's class."""
+
+    def __new__(  # type: ignore # pylint: disable=bad-mcs-classmethod-argument
+        mcs, name: str, bases: Tuple, namespace: Dict, **kwargs: Any
+    ) -> Type:
+        """Initialize the class."""
+        new_cls = super().__new__(mcs, name, bases, namespace, **kwargs)
+
+        if ABC in bases:
+            # abstract class, return
+            return new_cls
+        if not issubclass(new_cls, BaseSkillTestCase):
+            # the check only applies to BaseSkillTestCase subclasses
+            return new_cls
+
+        mcs._check_consistency(cast(Type[BaseSkillTestCase], new_cls))
+        return new_cls
+
+    @classmethod
+    def _check_consistency(  # pylint: disable=bad-mcs-classmethod-argument
+        mcs, base_skill_test_case_cls: Type["BaseSkillTestCase"]
+    ) -> None:
+        """Check consistency of class."""
+        mcs._check_required_class_attributes(base_skill_test_case_cls)
+
+    @classmethod
+    def _check_required_class_attributes(  # pylint: disable=bad-mcs-classmethod-argument
+        mcs, base_skill_test_case_cls: Type["BaseSkillTestCase"]
+    ) -> None:
+        """Check that required class attributes are set."""
+        if not hasattr(base_skill_test_case_cls, "path_to_skill"):
+            raise ValueError(f"'path_to_skill' not set on {base_skill_test_case_cls}")
+
+
+class BaseSkillTestCase(ABC, metaclass=_MetaBaseSkillTestCase):
     """A class to test a skill."""
 
-    path_to_skill: Path = Path(".")
+    path_to_skill: Path
     is_agent_to_agent_messages: bool = True
     _skill: Skill
     _multiplexer: AsyncMultiplexer
