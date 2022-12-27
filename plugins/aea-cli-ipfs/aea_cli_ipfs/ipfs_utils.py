@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Ipfs utils for `ipfs cli command`."""
+
 import logging
 import os
 import shutil
@@ -26,7 +27,7 @@ import subprocess  # nosec
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, IO, List, Optional, Set, Tuple, cast
+from typing import Dict, IO, List, Optional, Set, Tuple, Union, cast
 
 import ipfshttpclient  # type: ignore
 import requests
@@ -309,68 +310,55 @@ class IPFSTool:
     def download(
         self,
         hash_id: str,
-        target_dir: str,
+        target_dir: Union[str, Path],
         fix_path: bool = True,
         attempts: int = 5,
     ) -> str:
         """
         Download dir by its hash.
 
-        :param hash_id: str. hash of file to download
-        :param target_dir: str. directory to place downloaded
+        :param hash_id: str. hash of file or package to download
+        :param target_dir: Union[str, Path]. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
         :param attempts: int. default 5. How often to attempt the download.
         :return: downloaded path
         """
 
-        if not os.path.exists(target_dir):  # pragma: nocover
-            os.makedirs(target_dir, exist_ok=True)
+        def move_to_target_dir(download_path) -> str:
+            """Move downloaded content to target directory"""
 
-        if os.path.exists(os.path.join(target_dir, hash_id)):  # pragma: nocover
-            raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
+            if download_path.is_file():
+                shutil.copy(download_path, target_dir)
+                return str(target_dir)
 
-        downloaded_path = str(Path(target_dir) / hash_id)
+            # else it is a directory containing a single package path
+            package_path = download_path
+            if fix_path:
+                # assumption is it contains one nested directory: the package
+                paths = list(download_path.glob("*"))
+                assumption_is_valid = len(paths) == 1 and paths[0].is_dir()
+                if not assumption_is_valid:  # pragma: no cover
+                    error_msg = f"Expected a single directory, found: {paths}"
+                    raise DownloadError(error_msg)
+                package_path = paths.pop()
+
+            package_path.rename(target_dir / package_path.name)
+            return str(package_path)
+
+        target_dir = Path(target_dir)
+        target_dir.mkdir(exist_ok=True, parents=True)
+
         while attempts:
             attempts -= 1
             try:  # download to tmp_dir in case of midway download failure
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     self.client.get(hash_id, tmp_dir)
-                    download_path = Path(tmp_dir) / hash_id
-                    if download_path.is_dir():
-                        shutil.copytree(download_path, downloaded_path)
-                    else:
-                        shutil.copy(download_path, downloaded_path)
-                    break
+                    return move_to_target_dir(Path(tmp_dir) / hash_id)
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
                 time.sleep(1)
-        else:
-            raise DownloadError(f"Failed to download: {hash_id}")
 
-        package_path = None
-        if os.path.isdir(downloaded_path):
-            downloaded_files = os.listdir(downloaded_path)
-            if len(downloaded_files) > 0:
-                package_name, *_ = os.listdir(downloaded_path)
-                package_path = str(Path(target_dir) / package_name)
-
-        if package_path is None:
-            package_path = target_dir
-
-        if fix_path and Path(downloaded_path).is_dir():
-            # self.client.get creates result with hash name
-            # and content, but we want content in the target dir
-            try:
-                for each_file in Path(downloaded_path).iterdir():  # grabs all files
-                    shutil.move(str(each_file), target_dir)
-            except shutil.Error as e:  # pragma: nocover
-                if os.path.isdir(downloaded_path):
-                    shutil.rmtree(downloaded_path)
-                raise DownloadError(f"error on move files {str(e)}") from e
-
-        if os.path.isdir(downloaded_path):
-            shutil.rmtree(downloaded_path)
-        return package_path
+        raise DownloadError(f"Failed to download: {hash_id}")
 
     def publish(self, hash_id: str) -> Dict:
         """

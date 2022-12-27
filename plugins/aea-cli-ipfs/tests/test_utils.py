@@ -19,9 +19,7 @@
 
 """Test ipfs utils."""
 
-import os
 import re
-from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
@@ -217,7 +215,7 @@ def test_tool_download() -> None:
     with patch.object(
         ipfs_tool, "client", client_mock
     ), TemporaryDirectory() as tmp_dir, patch(
-        "os.path.isdir", return_value=True
+        "pathlib.Path.is_file", return_value=True
     ), patch(
         "shutil.copy"
     ), patch(
@@ -228,13 +226,10 @@ def test_tool_download() -> None:
         "shutil.rmtree"
     ):
         with pytest.raises(DownloadError, match="Failed to download: some"):
-            ipfs_tool.download("some", tmp_dir, attempts=5)
+            with patch("time.sleep"):
+                ipfs_tool.download("some", tmp_dir, attempts=5)
         assert client_mock.get.call_count == 5
 
         client_mock.get = Mock()
 
         ipfs_tool.download("some", tmp_dir, attempts=5)
-
-        with pytest.raises(DownloadError, match="was already downloaded to"):
-            os.mkdir(Path(tmp_dir) / "some")
-            ipfs_tool.download("some", tmp_dir, attempts=5)

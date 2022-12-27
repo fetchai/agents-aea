@@ -277,15 +277,15 @@ Remove dir added by it's hash.
 #### download
 
 ```python
-def download(hash_id: str, target_dir: str, fix_path: bool = True, attempts: int = 5) -> str
+def download(hash_id: str, target_dir: Union[str, Path], fix_path: bool = True, attempts: int = 5) -> str
 ```
 
 Download dir by its hash.
 
 **Arguments**:
 
-- `hash_id`: str. hash of file to download
-- `target_dir`: str. directory to place downloaded
+- `hash_id`: str. hash of file or package to download
+- `target_dir`: Union[str, Path]. directory to place downloaded
 - `fix_path`: bool. default True. on download don't wrap result in to hash_id directory.
 - `attempts`: int. default 5. How often to attempt the download.
 

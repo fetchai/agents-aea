@@ -238,14 +238,6 @@ class TestIPFSToolDownload(CliTest):
 
         return patch("ipfshttpclient.Client.get", new_callable=lambda: new_callable)
 
-    def test_ipfs_download_target_path_exists(self) -> None:
-        """Test aea ipfs download target_path exists."""
-
-        Path(self.target_dir, self.some_ipfs_hash).mkdir(parents=True)
-        expected = f"{self.some_ipfs_hash} was already downloaded"
-        with pytest.raises(click.ClickException, match=expected):
-            self.run_cli(*self.args, catch_exceptions=False, standalone_mode=False)
-
     @pytest.mark.parametrize("is_dir", [False, True])
     def test_ipfs_download_success(self, is_dir: bool) -> None:
         """Test aea ipfs download."""
