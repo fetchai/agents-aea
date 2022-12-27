@@ -208,6 +208,7 @@ nav:
           - Dialogues: 'api/protocols/signing/dialogues.md'
           - Message: 'api/protocols/signing/message.md'
           - Serialization: 'api/protocols/signing/serialization.md'
+          - Test: 'api/protocols/signing/tests/test_signing.md'
       - Registries:
         - Base: 'api/registries/base.md'
         - Filter: 'api/registries/filter.md'
@@ -234,6 +235,7 @@ nav:
             - Exceptions: 'api/plugins/aea_cli_ipfs/exceptions.md'
             - Registry: 'api/plugins/aea_cli_ipfs/registry.md'
             - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
+            - Test Tools: 'api/plugins/aea_cli_ipfs/test_tools/fixture_helpers.md'
           - Benchmark:
               - Core: api/plugins/aea_cli_benchmark/core.md
               - Utils:  api/plugins/aea_cli_benchmark/utils.md
@@ -283,6 +285,7 @@ nav:
         - Ledger:
           - Cosmos:
             - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'
+            - HashFuncs: 'api/plugins/aea_ledger_cosmos/hashfuncs.md'
           - Ethereum:
             - API: 'api/plugins/aea_ledger_ethereum/ethereum.md'
             - Constants: api/plugins/aea_ledger_ethereum/test_tools/constants.md
@@ -292,6 +295,7 @@ nav:
             - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
             - Constants: api/plugins/aea_ledger_fetchai/test_tools/constants.md
             - Docker Images: api/plugins/aea_ledger_fetchai/test_tools/docker_images.md
+            - HashFuncs: 'api/plugins/aea_ledger_fetchai/hashfuncs.md'
             - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Registries:
     - IPFS: ipfs_registry.md
