@@ -80,7 +80,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         :param method_name: the contract method to call
         :param method_args: the contract call parameters
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     def build_transaction(
         self,
@@ -98,7 +98,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         :param tx_args: the transaction parameters
         :param raise_on_try: whether the method will raise or log on error
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     def get_transaction_transfer_logs(
         self,
@@ -113,7 +113,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         :param tx_hash: the transaction hash
         :param target_address: optional address to filter transfer events to just those that affect it
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
 
 class FetchAIFaucetApi(CosmosFaucetApi):

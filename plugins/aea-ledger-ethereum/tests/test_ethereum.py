@@ -29,7 +29,7 @@ import time
 from pathlib import Path
 from typing import Dict, Generator, Optional, Tuple, Union, cast
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from aea_ledger_ethereum import (
@@ -51,7 +51,11 @@ from aea_ledger_ethereum.ethereum import (
     EIP1559_POLYGON,
     GAS_STATION,
     TIP_INCREASE,
+    estimate_priority_fee,
+    get_base_fee_multiplier,
+    get_gas_price_strategy_eip1559_polygon,
 )
+from requests import HTTPError
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 from web3.datastructures import AttributeDict
@@ -454,6 +458,36 @@ def test_ethereum_api_get_deploy_transaction(ethereum_testnet_config):
             is None
         )
 
+    contract_instance = Mock()
+    constructor = Mock()
+    constructor.buildTransaction = lambda x: x
+    contract_instance.constructor = Mock(return_value=constructor)
+
+    with patch.object(
+        ethereum_api.api.eth, "get_transaction_count", return_value=1
+    ), patch.object(
+        ethereum_api, "_is_gas_estimation_enabled", return_value=True
+    ), mock.patch.object(
+        ethereum_api,
+        "_try_get_gas_estimate",
+        return_value=120,
+    ), patch.object(
+        ethereum_api, "_is_gas_estimation_enabled", return_value=True
+    ), patch.object(
+        ethereum_api, "get_contract_instance", return_value=contract_instance
+    ):
+        tx = ethereum_api.get_deploy_transaction(
+            **{
+                "contract_interface": {"": ""},
+                "deployer_address": ec1.address,
+                "value": 1,
+                "max_fee_per_gas": 1,
+                "gas_price": 1,
+                "max_priority_fee_per_gas": 1,
+            }
+        )
+        assert tx["gas"] == 120
+
 
 def test_session_cache():
     """Test session cache."""
@@ -733,6 +767,32 @@ def test_build_transaction(ethereum_testnet_config):
 
             assert result == dict(nonce=0, value=0, gas=0)
 
+        # try get gas estimates if _is_gas_estimation_enabled
+        with mock.patch.object(
+            EthereumApi,
+            "try_get_gas_pricing",
+            return_value={"gas": 0},
+        ), mock.patch.object(
+            eth_api,
+            "_is_gas_estimation_enabled",
+            return_value=True,
+        ), mock.patch.object(
+            eth_api,
+            "_try_get_gas_estimate",
+            return_value=12,
+        ):
+            result = eth_api.build_transaction(
+                contract_instance=contract_instance,
+                method_name="dummy_method",
+                method_args={},
+                tx_args=dict(
+                    sender_address="sender_address",
+                    eth_value=0,
+                ),
+            )
+
+            assert result == dict(nonce=0, value=0, gas=12)
+
 
 def test_get_transaction_transfer_logs(ethereum_testnet_config):
     """Test EthereumApi.get_transaction_transfer_logs."""
@@ -920,3 +980,91 @@ def test_gas_estimation(
             assert (
                 "ValueError: triggered exception" in caplog.text
             ), f"Cannot find message in output: {caplog.text}"
+
+
+@patch.object(EthereumApi, "_try_get_transaction_count", return_value=1)
+@patch.object(EthereumApi, "_try_get_max_priority_fee", return_value=1)
+def test_ethereum_api_get_transfer_transaction_estimate_gas(*args) -> None:
+    """Test EthereumApi.get_transfer_transaction gas auto estimate."""
+    ec1 = EthereumCrypto()
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
+    ethereum_api._is_gas_estimation_enabled = True
+    args = {
+        "sender_address": ec1.address,
+        "destination_address": ec2.address,
+        "amount": 1,
+        "tx_fee": 0,
+        "tx_nonce": "",
+        "max_fee_per_gas": None,
+    }
+    with patch.object(
+        ethereum_api, "try_get_gas_pricing", return_value={"gasPrice": 12}
+    ) as get_gas_pricing:
+        result = ethereum_api.get_transfer_transaction(**args)
+        assert result["gasPrice"] == 12
+        get_gas_pricing.assert_called_once()
+
+    args["gas_price"] = 13
+    result = ethereum_api.get_transfer_transaction(**args)
+    assert result["gasPrice"] == 13
+
+
+def test_get_base_fee_multiplier() -> None:
+    """Test get_base_fee_multiplier."""
+    assert get_base_fee_multiplier(35) == 2.0
+    assert get_base_fee_multiplier(45) == 1.6
+    assert get_base_fee_multiplier(105) == 1.4
+    assert get_base_fee_multiplier(205) == 1.2
+
+
+def test_estimate_priority_fee() -> None:
+    """Test estimate_priority_fee."""
+    # return none on no rewards
+    web3_mock = Mock()
+    web3_mock.eth.fee_history = Mock(return_value={"reward": []})
+    assert estimate_priority_fee(web3_mock, 1, 1, 1, 1, 11, 1, 1) is None
+
+    # If we have big increase in value, we could be considering "outliers" in our estimate
+    # Skip the low elements and take a new median
+    web3_mock.eth.fee_history = Mock(return_value={"reward": [[1], [10], [10000]]})
+    assert estimate_priority_fee(web3_mock, 1, 1, 1, 1, 11, 1, 1) == 10000
+
+
+def test_try_get_revert_reason_http_error_propagated(ethereum_testnet_config) -> None:
+    """Test httperror reraised if get_revert_reason fails."""
+    eth_api = EthereumApi(**ethereum_testnet_config)
+    tx = {"from": 1, "to": 1, "input": 1, "value": 1, "blockNumber": 1}
+    api_mock = Mock()
+    api_mock.eth.call = Mock(side_effect=HTTPError("http_error"))
+    with patch.object(eth_api, "_api", new=api_mock):
+        with pytest.raises(HTTPError):
+            eth_api._try_get_revert_reason(tx, raise_on_try=True)
+
+
+def test_get_gas_price_strategy() -> None:
+    """Test get_gas_price_strategy and strategies."""
+    strategy = get_gas_price_strategy(None)
+    assert strategy is rpc_gas_price_strategy_wrapper
+    assert "gasPrice" in strategy(Mock(), Mock())
+
+    strategy = get_gas_price_strategy_eip1559_polygon("test", {"gasPrice": 12})
+
+    resp_mock = Mock()
+    resp_mock.status_code = 300
+    with patch("aea.helpers.http_requests.get", return_value=resp_mock):
+        assert strategy(Mock(), Mock()) == {"gasPrice": 12}
+
+    resp_mock.status_code = 200
+    resp_mock.json = Mock(return_value={"fast": {"maxFee": 2, "maxPriorityFee": 2}})
+    with patch("aea.helpers.http_requests.get", return_value=resp_mock):
+        assert strategy(Mock(), Mock()) == {
+            "maxFeePerGas": 2000000000,
+            "maxPriorityFeePerGas": 2000000000,
+        }
+
+    with patch(
+        "aea.helpers.http_requests.get",
+        side_effect=requests.exceptions.RequestException(Mock()),
+    ):
+        assert strategy(Mock(), Mock()) == {"gasPrice": 12}
