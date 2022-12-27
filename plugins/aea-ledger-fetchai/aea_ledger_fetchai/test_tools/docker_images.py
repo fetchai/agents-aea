@@ -29,7 +29,7 @@ from typing import Any, Dict, Optional
 try:
     from docker import DockerClient
     from docker.models.containers import Container
-except ImportError:
+except ImportError:  # pragma: nocover
     DockerClient = Any
     Container = Any
 
@@ -44,6 +44,8 @@ logger = logging.getLogger(__name__)
 
 class FetchLedgerDockerImage(DockerImage):
     """Wrapper to Fetch ledger Docker image."""
+
+    tmpdirname: tempfile.TemporaryDirectory
 
     PORTS = {1317: 1317, 26657: 26657}
 
@@ -107,19 +109,19 @@ class FetchLedgerDockerImage(DockerImage):
 
     def create(self) -> Container:
         """Create the container."""
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            self._make_entrypoint_file(tmpdirname)
-            mount_path = "/mnt"
-            volumes = {tmpdirname: {"bind": mount_path, "mode": "rw"}}
-            entrypoint = os.path.join(mount_path, "run-node.sh")
-            container = self._client.containers.run(
-                self.tag,
-                detach=True,
-                network="host",
-                volumes=volumes,
-                entrypoint=str(entrypoint),
-                ports=self.PORTS,
-            )
+        self.tmpdirname = tempfile.TemporaryDirectory()
+        self._make_entrypoint_file(self.tmpdirname.name)
+        mount_path = "/mnt"
+        volumes = {self.tmpdirname.name: {"bind": mount_path, "mode": "rw"}}
+        entrypoint = os.path.join(mount_path, "run-node.sh")
+        container = self._client.containers.run(
+            self.tag,
+            detach=True,
+            network="host",
+            volumes=volumes,
+            entrypoint=str(entrypoint),
+            ports=self.PORTS,
+        )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
@@ -135,4 +137,4 @@ class FetchLedgerDockerImage(DockerImage):
                     "Attempt %s failed. Retrying in %s seconds...", i, sleep_rate
                 )
                 time.sleep(sleep_rate)
-        return False
+        return False  # pragma: nocover
