@@ -95,6 +95,7 @@ class TestBaseContractTestCaseSetup:
 
         test_instance = self.test_cls()  # type: ignore
         test_instance.setup_class()
+        test_instance.setup()
         return test_instance
 
     def test_contract_setup_contract_configuration_not_found(self):

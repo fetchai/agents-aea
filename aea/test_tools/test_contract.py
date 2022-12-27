@@ -107,7 +107,7 @@ class BaseContractTestCase(ABC, metaclass=_MetaBaseContractTestCase):
         return value
 
     @classmethod
-    def setup_class(cls, **kwargs: Any) -> None:
+    def setup_class(cls) -> None:
         """Set up the contract test case class."""
         # register contract
         configuration = cast(
@@ -121,7 +121,6 @@ class BaseContractTestCase(ABC, metaclass=_MetaBaseContractTestCase):
             # load contract into sys modules
             Contract.from_config(configuration)  # pragma: nocover
         cls._contract = contract_registry.make(str(configuration.public_id))
-        cls.setup(**kwargs)
 
     @classmethod
     def setup(cls, **kwargs: Any) -> None:
