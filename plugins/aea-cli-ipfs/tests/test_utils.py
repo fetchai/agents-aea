@@ -219,7 +219,7 @@ def test_tool_download() -> None:
     ), TemporaryDirectory() as tmp_dir, patch(
         "os.path.isdir", return_value=True
     ), patch(
-        "shutil.copytree"
+        "shutil.copy"
     ), patch(
         "os.listdir", return_value=["1"]
     ), patch(

@@ -336,7 +336,10 @@ class IPFSTool:
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     self.client.get(hash_id, tmp_dir)
                     download_path = Path(tmp_dir) / hash_id
-                    shutil.copytree(download_path, downloaded_path)
+                    if download_path.is_dir():
+                        shutil.copytree(download_path, downloaded_path)
+                    else:
+                        shutil.copy(download_path, downloaded_path)
                     break
             except ipfshttpclient.exceptions.StatusError as e:
                 logging.error(f"error on download of {hash_id}: {e}")
@@ -354,7 +357,7 @@ class IPFSTool:
         if package_path is None:
             package_path = target_dir
 
-        if fix_path:
+        if fix_path and Path(downloaded_path).is_dir():
             # self.client.get creates result with hash name
             # and content, but we want content in the target dir
             try:
