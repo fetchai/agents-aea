@@ -1,5 +1,25 @@
 # Release History - open AEA
 
+## 1.27.0 (2022-12-27)
+
+AEA:
+- Adds auto-generated protobuf `*_pb2.py` and `*_pb2_*.py` files to `coveragerc` ignore template for aea test command.
+- Fixes comparison operators ` __eq__`, `__ne__`, `__lt__`, `__le__`, `__gt__`, `__ge__` for multiple classes including `PackageVersion`.
+- Adds support to `test packages` command for the `--all` flag and switches default behaviour to only run tests on `dev` packages.
+- Fixes miscellaneous issues on base test classes and adds consistency checks via meta classes.
+
+Plugins:
+- Updates `open-aea-cli-ipfs` to retry in case an IPFS download fails
+
+Tests:
+- Fills coverage gaps on core `aea`
+- Fills coverage gaps on multiple packages
+- Fills coverage gaps on all plugins
+
+Chores:
+- Merges the coverage checks with unit tests and removes the extra test coverage CI run.
+- Cleans up release flow.
+
 ## 1.26.0 (2022-12-15)
 
 AEA:
