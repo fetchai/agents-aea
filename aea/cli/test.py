@@ -55,7 +55,7 @@ from aea.configurations.data_types import (
 from aea.configurations.loader import load_component_configuration
 from aea.configurations.manager import find_component_directory_from_component_id
 from aea.exceptions import enforce
-from aea.helpers.dependency_tree import DependencyTree
+from aea.package_manager.v1 import PackageManagerV1
 
 
 COVERAGERC_FILE = ".coveragerc"
@@ -235,13 +235,21 @@ def by_path(
     multiple=True,
     help="Author name(s) to restrict tests to.",
 )
+@click.option(
+    "--all",
+    "all_",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="Run test for all packages. By default dev only.",
+)
 @click.pass_context
-def packages(click_context: click.Context, author: Tuple[str]) -> None:
+def packages(click_context: click.Context, author: Tuple[str], all_: bool) -> None:
     """Executes a test suite for a collection of packages."""
     ctx: Context = click_context.obj
     packages_dir = Path(ctx.registry_path)
-    available_packages = DependencyTree.find_packages_in_a_local_repository(
-        packages_dir
+    available_packages = get_packages_list(
+        packages_dir=packages_dir, packages_filter="all" if all_ else "dev"
     )
 
     cov = ctx.config.get("cov", False)
@@ -265,6 +273,37 @@ def packages(click_context: click.Context, author: Tuple[str]) -> None:
         for exit_code, package in failures:
             click.echo(f"{exit_code}       \t{package}")
         sys.exit(1)
+
+
+def get_packages_list(
+    packages_dir: Path, packages_filter: str = "dev"
+) -> List[Tuple[str, Path]]:
+    """
+    Get list of packages to test.
+
+    :param packages_dir: Path
+    :param packages_filter: str, ["all", "dev"]
+
+    :return: List of tuples of pacakge type and path
+    """
+    package_manager = PackageManagerV1.from_dir(packages_dir)
+    if packages_filter == "all":
+        packages_ids = package_manager.all_packages.keys()
+    elif packages_filter == "dev":
+        packages_ids = package_manager.dev_packages.keys()
+    else:
+        raise ValueError(
+            f"Unknown package filter: {packages_filter}. Valid are all,dev"
+        )
+
+    packages_list = [
+        (
+            str(package_id.package_type.to_plural()),
+            package_manager.package_path_from_package_id(package_id),
+        )
+        for package_id in packages_ids
+    ]
+    return packages_list
 
 
 class CoverageContext:
