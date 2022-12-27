@@ -66,9 +66,9 @@ class TestERC1155ContractEthereum(BaseContractTestCase):
     path_to_contract = PACKAGE_DIR
 
     @classmethod
-    def setup_class(cls) -> None:
+    def setup(cls) -> None:
         """Setup."""
-        super().setup_class(
+        super().setup(
             ledger_config=ETHEREUM_TESTNET_CONFIG,
             deployer_private_key_path=ETHEREUM_PRIVATE_KEY_PATH,
             item_owner_private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH,

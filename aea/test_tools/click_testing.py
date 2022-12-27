@@ -164,6 +164,11 @@ class CliTest(ABC):
 
         self.__cli_runner.capfd = capfd
 
+    @property
+    def t(self) -> Path:
+        """Get t."""
+        return self._t
+
     @classmethod
     def setup_class(cls, mix_stderr: bool = True) -> None:
         """Setup test class."""

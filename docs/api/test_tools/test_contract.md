@@ -56,6 +56,17 @@ def setup_class(cls, **kwargs: Any) -> None
 
 Set up the contract test case class.
 
+<a id="aea.test_tools.test_contract.BaseContractTestCase.setup"></a>
+
+#### setup
+
+```python
+@classmethod
+def setup(cls, **kwargs: Any) -> None
+```
+
+Set up the contract test case.
+
 <a id="aea.test_tools.test_contract.BaseContractTestCase.finish_contract_deployment"></a>
 
 #### finish`_`contract`_`deployment

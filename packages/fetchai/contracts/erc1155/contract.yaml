@@ -17,7 +17,7 @@ fingerprint:
   migrations/1_initial_migration.js: bafybeigzg7dadlq7sepncquzoo5hgs7q2pwvbhzilolgkjkr3jacb2owvy
   migrations/2_deploy_contracts.js: bafybeihnzburnurq4gvp4rj36b57uzrlgif5y73ggyu3rfc3iot4e5zppy
   tests/__init__.py: bafybeig4dvxi35qewu667l3hktdygp33p5r6hzsz4abqzkgggptl3d4vje
-  tests/test_contract.py: bafybeigqj4plcprixandfsh57dodbpyrrqcdmifdjlnaceui2lot7oqdnu
+  tests/test_contract.py: bafybeiearu7rv4qug5zdoajgsillqxt2j67olpenjq5sk6ryqlupvyxr3i
 fingerprint_ignore_patterns: []
 class_name: ERC1155Contract
 contract_interface_paths:

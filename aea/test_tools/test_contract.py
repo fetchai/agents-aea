@@ -109,6 +109,23 @@ class BaseContractTestCase(ABC, metaclass=_MetaBaseContractTestCase):
     @classmethod
     def setup_class(cls, **kwargs: Any) -> None:
         """Set up the contract test case class."""
+        # register contract
+        configuration = cast(
+            ContractConfig,
+            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
+        )
+        configuration._directory = (  # pylint: disable=protected-access
+            cls.path_to_contract
+        )
+        if str(configuration.public_id) not in contract_registry.specs:
+            # load contract into sys modules
+            Contract.from_config(configuration)  # pragma: nocover
+        cls._contract = contract_registry.make(str(configuration.public_id))
+        cls.setup(**kwargs)
+
+    @classmethod
+    def setup(cls, **kwargs: Any) -> None:
+        """Set up the contract test case."""
         _ledger_config: Dict[str, str] = kwargs.pop("ledger_config", {})
         _deployer_private_key_path: Optional[str] = kwargs.pop(
             "deployer_private_key_path", None
@@ -138,19 +155,6 @@ class BaseContractTestCase(ABC, metaclass=_MetaBaseContractTestCase):
             cls.refill_from_faucet(
                 cls.ledger_api, cls.faucet_api, cls.item_owner_crypto.address
             )
-
-        # register contract
-        configuration = cast(
-            ContractConfig,
-            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
-        )
-        configuration._directory = (  # pylint: disable=protected-access
-            cls.path_to_contract
-        )
-        if str(configuration.public_id) not in contract_registry.specs:
-            # load contract into sys modules
-            Contract.from_config(configuration)  # pragma: nocover
-        cls._contract = contract_registry.make(str(configuration.public_id))
 
         # deploy contract
         cls.deployment_tx_receipt = cls._deploy_contract(

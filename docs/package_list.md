@@ -13,7 +13,7 @@
 | connection/valory/p2p_libp2p/0.1.0                            | `bafybeigfp2fjiqqcy5xess6kffcqp7eb2qmn2p6ihb6kgpul2ygcawtx2i` |
 | connection/valory/p2p_libp2p_client/0.1.0                     | `bafybeidkk33xbga54szmitk6uwsi3ef56hbbdbuasltqtiyki34hgfpnxa` |
 | connection/valory/p2p_libp2p_mailbox/0.1.0                    | `bafybeihjjsenbsgh6x2vukea7mqzsbcbqqbog6xa43raen24ewqf4qq3pm` |
-| contract/fetchai/erc1155/0.22.0                               | `bafybeihck5xcpzs7ohtulnnkijlx2grd5x5yg4bjwqnal7wgzlrpdyjnfu` |
+| contract/fetchai/erc1155/0.22.0                               | `bafybeieq5xpb6k52csnzscdqrzo4yizoqxeim46pa5jltrmg7zhihcgspe` |
 | protocol/fetchai/fipa/1.0.0                                   | `bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei` |
 | protocol/fetchai/oef_search/1.0.0                             | `bafybeifiec4jvsa6mcbmasjno3bwvjwwwubyp25hjqwe7gjfksgvwgdisq` |
 | protocol/fetchai/state_update/1.0.0                           | `bafybeidtndlmppst6l6iughpflqbbbkzditixo2fy2dncxfkb5apkx5y4m` |
@@ -32,8 +32,8 @@
 | connection/valory/http_client/0.23.0                          | `bafybeihz3tubwado7j3wlivndzzuj3c6fdsp4ra5r3nqixn3ufawzo3wii` |
 | connection/valory/test_libp2p/0.1.0                           | `bafybeibqoz7zp7vrlhw4glnwz4gby7ruugeib6whe6h4xrzjta5u2sbbi4` |
 | protocol/fetchai/tac/1.0.0                                    | `bafybeiaew226n32rwp3h57zl4b2mmbrhjbyrdjbl2evnxf2tmmi4vrls7a` |
-| skill/fetchai/erc1155_client/0.28.0                           | `bafybeibroi6j6ytfy2fl6ucnjujqx22iimicibeqkqxzci2fkv74rtfl4m` |
-| skill/fetchai/erc1155_deploy/0.30.0                           | `bafybeiblmfazioqzi5z4ktnilbcg6t5nxcodmsxygnhnpmhju2dh4pazey` |
+| skill/fetchai/erc1155_client/0.28.0                           | `bafybeidlrgyn4eonxl2sglzu36lmpo7say2pw7usvrfisbhjt2jtv7ht4e` |
+| skill/fetchai/erc1155_deploy/0.30.0                           | `bafybeiexcya6etb5tn4nkcpvxuhvqextwbfvcznansn7dccfnqgff6kioq` |
 | skill/fetchai/error/0.17.0                                    | `bafybeib7nhokw3bc46oxuk5mjazan42evipowmka2ikfcs6drcdz4mwkjm` |
 | skill/fetchai/fipa_dummy_buyer/0.2.0                          | `bafybeiha4jultg5srhr2ijplvubeo7esv4raq2cjlggmyzcaimop2ggg2m` |
 | skill/fetchai/generic_buyer/0.26.0                            | `bafybeiht376to56oeutzpxoyoijv4i76sydyiou3ydwfmzta4l4kljotmm` |

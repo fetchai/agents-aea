@@ -9,7 +9,7 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
-## `v1.25.0` to `v1.26.0`
+## `v1.26.0` to `v1.27.0`
 
 Multiple small backwards incompatible changes:
 - `BaseContractTestCase` no longer sets a default `path_to_contract` and `ledger_identifier`. The user is expected to set these and an exception is thrown if classes are defined without these.

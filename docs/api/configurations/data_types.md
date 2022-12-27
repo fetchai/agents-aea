@@ -62,6 +62,17 @@ Initialize a package version.
 
 - `version_like`: a string, os a semver.VersionInfo object.
 
+<a id="aea.configurations.data_types.PackageVersion.is_any"></a>
+
+#### is`_`any
+
+```python
+@property
+def is_any() -> bool
+```
+
+Check whether the version is 'any'.
+
 <a id="aea.configurations.data_types.PackageVersion.is_latest"></a>
 
 #### is`_`latest
