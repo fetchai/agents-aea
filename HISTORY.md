@@ -19,6 +19,7 @@ Tests:
 Chores:
 - Merges the coverage checks with unit tests and removes the extra test coverage CI run.
 - Cleans up release flow.
+- Adds workflow for image building.
 
 ## 1.26.0 (2022-12-15)
 

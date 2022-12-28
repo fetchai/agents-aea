@@ -51,7 +51,7 @@ Get the contract.
 
 ```python
 @classmethod
-def setup_class(cls, **kwargs: Any) -> None
+def setup_class(cls) -> None
 ```
 
 Set up the contract test case class.
