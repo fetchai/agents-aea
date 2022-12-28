@@ -154,7 +154,7 @@ class TestDialogueLabel:
     """Test for DialogueLabel."""
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Initialise the environment to test DialogueLabel."""
         cls.agent_address = "agent 1"
         cls.opponent_address = "agent 2"
@@ -231,58 +231,57 @@ class TestDialogueLabel:
 class TestDialogueBase:
     """Test for Dialogue."""
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Initialise the environment to test Dialogue."""
-        cls.incomplete_reference = (str(1), "")
-        cls.complete_reference = (str(1), str(1))
-        cls.opponent_address = "agent 2"
-        cls.agent_address = "agent 1"
+        self.incomplete_reference = (str(1), "")
+        self.complete_reference = (str(1), str(1))
+        self.opponent_address = "agent 2"
+        self.agent_address = "agent 1"
 
-        cls.dialogue_label = DialogueLabel(
-            dialogue_reference=cls.incomplete_reference,
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.agent_address,
+        self.dialogue_label = DialogueLabel(
+            dialogue_reference=self.incomplete_reference,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
         )
-        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
+        self.dialogue = Dialogue(dialogue_label=self.dialogue_label)
 
-        cls.dialogue_label_opponent_started = DialogueLabel(
-            dialogue_reference=cls.complete_reference,
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.opponent_address,
+        self.dialogue_label_opponent_started = DialogueLabel(
+            dialogue_reference=self.complete_reference,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.opponent_address,
         )
-        cls.dialogue_opponent_started = Dialogue(
-            dialogue_label=cls.dialogue_label_opponent_started
+        self.dialogue_opponent_started = Dialogue(
+            dialogue_label=self.dialogue_label_opponent_started
         )
 
         # convenient messages to reuse across tests
-        cls.valid_message_1_by_self = DefaultMessage(
+        self.valid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        cls.valid_message_1_by_self.sender = cls.agent_address
-        cls.valid_message_1_by_self.to = cls.opponent_address
+        self.valid_message_1_by_self.sender = self.agent_address
+        self.valid_message_1_by_self.to = self.opponent_address
 
-        cls.valid_message_2_by_other = DefaultMessage(
+        self.valid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
             message_id=-1,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        cls.valid_message_2_by_other.sender = cls.opponent_address
-        cls.valid_message_2_by_other.to = cls.agent_address
+        self.valid_message_2_by_other.sender = self.opponent_address
+        self.valid_message_2_by_other.to = self.agent_address
 
-        cls.valid_message_3_by_self = DefaultMessage(
+        self.valid_message_3_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
             message_id=2,
             target=-1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
-        cls.valid_message_3_by_self.sender = cls.agent_address
-        cls.valid_message_3_by_self.to = cls.opponent_address
+        self.valid_message_3_by_self.sender = self.agent_address
+        self.valid_message_3_by_self.to = self.opponent_address
 
     def test_inner_classes(self):
         """Test the inner classes: Role and EndStates."""
@@ -967,21 +966,20 @@ class TestDialogueBase:
 class TestDialogueStats:
     """Test for DialogueStats."""
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Initialise the environment to test DialogueStats."""
-        cls.agent_address = "agent 1"
-        cls.opponent_address = "agent 2"
-        cls.dialogue_label = DialogueLabel(
+        self.agent_address = "agent 1"
+        self.opponent_address = "agent 2"
+        self.dialogue_label = DialogueLabel(
             dialogue_reference=(str(1), ""),
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.agent_address,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
         )
-        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
+        self.dialogue = Dialogue(dialogue_label=self.dialogue_label)
         end_states = frozenset(
             {Dialogue.EndState.SUCCESSFUL, Dialogue.EndState.FAILED}
         )  # type: FrozenSet[BaseDialogue.EndState]
-        cls.dialogue_stats = DialogueStats(end_states)
+        self.dialogue_stats = DialogueStats(end_states)
 
     def test_properties(self):
         """Test dialogue properties."""
@@ -1965,40 +1963,39 @@ class TestPersistDialoguesStorageOffloading:
 class TestBaseDialoguesStorage:
     """Test PersistDialoguesStorage."""
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Initialise the environment to test Dialogue."""
-        cls.incomplete_reference = (str(1), "")
-        cls.complete_reference = (str(1), str(1))
-        cls.opponent_address = "agent 2"
-        cls.agent_address = "agent 1"
+        self.incomplete_reference = (str(1), "")
+        self.complete_reference = (str(1), str(1))
+        self.opponent_address = "agent 2"
+        self.agent_address = "agent 1"
 
-        cls.dialogue_label = DialogueLabel(
-            dialogue_reference=cls.incomplete_reference,
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.agent_address,
+        self.dialogue_label = DialogueLabel(
+            dialogue_reference=self.incomplete_reference,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
         )
-        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
+        self.dialogue = Dialogue(dialogue_label=self.dialogue_label)
 
-        cls.dialogue_label_opponent_started = DialogueLabel(
-            dialogue_reference=cls.complete_reference,
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.opponent_address,
+        self.dialogue_label_opponent_started = DialogueLabel(
+            dialogue_reference=self.complete_reference,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.opponent_address,
         )
-        cls.dialogue_opponent_started = Dialogue(
-            dialogue_label=cls.dialogue_label_opponent_started
+        self.dialogue_opponent_started = Dialogue(
+            dialogue_label=self.dialogue_label_opponent_started
         )
 
         # convenient messages to reuse across tests
-        cls.valid_message_1_by_self = DefaultMessage(
+        self.valid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        cls.valid_message_1_by_self.sender = cls.agent_address
-        cls.valid_message_1_by_self.to = cls.opponent_address
+        self.valid_message_1_by_self.sender = self.agent_address
+        self.valid_message_1_by_self.to = self.opponent_address
 
-        cls.storage = BasicDialoguesStorage(Mock())
+        self.storage = BasicDialoguesStorage(Mock())
 
     def test_dialogues_in_terminal_state_kept(self):
         """Test dialogues in terminal state handled properly."""

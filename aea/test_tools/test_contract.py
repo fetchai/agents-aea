@@ -20,9 +20,9 @@
 """This module contains test case classes based on pytest for AEA contract testing."""
 
 import time
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, cast
 
 from aea.common import JSONLike
 from aea.configurations.loader import (
@@ -39,11 +39,52 @@ from aea.crypto.registries import (
 )
 
 
-class BaseContractTestCase(ABC):
+class _MetaBaseContractTestCase(ABCMeta):
+    """A metaclass that validates BaseContractTestCase's class."""
+
+    def __new__(  # type: ignore # pylint: disable=bad-mcs-classmethod-argument # type: ignore
+        mcs, name: str, bases: Tuple, namespace: Dict, **kwargs: Any
+    ) -> Type:
+        """Initialize the class."""
+        new_cls = super().__new__(mcs, name, bases, namespace, **kwargs)
+
+        if ABC in bases:
+            # abstract class, return
+            return new_cls
+        if not issubclass(new_cls, BaseContractTestCase):
+            # the check only applies to BaseContractTestCase subclasses
+            return new_cls
+
+        mcs._check_consistency(cast(Type[BaseContractTestCase], new_cls))
+        return new_cls
+
+    @classmethod
+    def _check_consistency(  # pylint: disable=bad-mcs-classmethod-argument
+        mcs, base_contract_test_case_cls: Type["BaseContractTestCase"]
+    ) -> None:
+        """Check consistency of class."""
+        mcs._check_required_class_attributes(base_contract_test_case_cls)
+
+    @classmethod
+    def _check_required_class_attributes(  # pylint: disable=bad-mcs-classmethod-argument
+        mcs, base_contract_test_case_cls: Type["BaseContractTestCase"]
+    ) -> None:
+        """Check that required class attributes are set."""
+        if not hasattr(base_contract_test_case_cls, "path_to_contract"):
+            raise ValueError(
+                f"'path_to_contract' not set on {base_contract_test_case_cls}"
+            )
+        if not hasattr(base_contract_test_case_cls, "ledger_identifier"):
+            raise ValueError(
+                f"'ledger_identifier' not set on {base_contract_test_case_cls}"
+            )
+
+
+class BaseContractTestCase(ABC, metaclass=_MetaBaseContractTestCase):
     """A class to test a contract."""
 
-    path_to_contract: Path = Path(".")
-    ledger_identifier: str = ""
+    path_to_contract: Path
+    ledger_identifier: str
     fund_from_faucet: bool = False
     _deployment_gas: int = 5000000
     _contract: Contract
@@ -66,11 +107,24 @@ class BaseContractTestCase(ABC):
         return value
 
     @classmethod
+    def setup_class(cls) -> None:
+        """Set up the contract test case class."""
+        # register contract
+        configuration = cast(
+            ContractConfig,
+            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
+        )
+        configuration._directory = (  # pylint: disable=protected-access
+            cls.path_to_contract
+        )
+        if str(configuration.public_id) not in contract_registry.specs:
+            # load contract into sys modules
+            Contract.from_config(configuration)  # pragma: nocover
+        cls._contract = contract_registry.make(str(configuration.public_id))
+
+    @classmethod
     def setup(cls, **kwargs: Any) -> None:
         """Set up the contract test case."""
-        if cls.ledger_identifier == "":
-            raise ValueError("ledger_identifier not set!")  # pragma: nocover
-
         _ledger_config: Dict[str, str] = kwargs.pop("ledger_config", {})
         _deployer_private_key_path: Optional[str] = kwargs.pop(
             "deployer_private_key_path", None
@@ -78,7 +132,6 @@ class BaseContractTestCase(ABC):
         _item_owner_private_key_path: Optional[str] = kwargs.pop(
             "item_owner_private_key_path", None
         )
-
         cls.ledger_api = ledger_apis_registry.make(
             cls.ledger_identifier, **_ledger_config
         )
@@ -101,19 +154,6 @@ class BaseContractTestCase(ABC):
             cls.refill_from_faucet(
                 cls.ledger_api, cls.faucet_api, cls.item_owner_crypto.address
             )
-
-        # register contract
-        configuration = cast(
-            ContractConfig,
-            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
-        )
-        configuration._directory = (  # pylint: disable=protected-access
-            cls.path_to_contract
-        )
-        if str(configuration.public_id) not in contract_registry.specs:
-            # load contract into sys modules
-            Contract.from_config(configuration)  # pragma: nocover
-        cls._contract = contract_registry.make(str(configuration.public_id))
 
         # deploy contract
         cls.deployment_tx_receipt = cls._deploy_contract(

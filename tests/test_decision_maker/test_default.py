@@ -94,8 +94,10 @@ class SigningDialogues(BaseSigningDialogues):
 class BaseTestDecisionMaker:
     """Test the decision maker."""
 
+    decision_maker: DecisionMaker
+
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Initialise the decision maker."""
         cls.wallet = Wallet(
             {
@@ -115,14 +117,15 @@ class BaseTestDecisionMaker:
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet, config=cls.config
         )
-        cls.decision_maker = DecisionMaker(cls.decision_maker_handler)
-
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
         cls.ledger_id = FetchAICrypto.identifier
 
-        cls.decision_maker.start()
+    def setup(self):
+        """Setup test method."""
+        self.decision_maker = DecisionMaker(self.decision_maker_handler)
+        self.decision_maker.start()
 
     def test_decision_maker_properties(self):
         """Test DecisionMaker properties."""
@@ -494,10 +497,9 @@ class BaseTestDecisionMaker:
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert signing_msg_response is not None
 
-    @classmethod
-    def teardown(cls):
+    def teardown(self):
         """Tear the tests down."""
-        cls.decision_maker.stop()
+        self.decision_maker.stop()
 
 
 class TestDecisionMaker(BaseTestDecisionMaker):

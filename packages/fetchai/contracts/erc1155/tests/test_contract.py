@@ -656,10 +656,10 @@ class TestCosmWasmContract(BaseContractTestCase):
     fund_from_faucet = True
 
     @classmethod
-    def setup(cls) -> None:
+    def setup_class(cls) -> None:
         """Setup."""
         # Test tokens IDs
-        super().setup(ledger_config=FETCHAI_TESTNET_CONFIG)
+        super().setup_class(ledger_config=FETCHAI_TESTNET_CONFIG)
         cls.token_ids_a = [
             340282366920938463463374607431768211456,
             340282366920938463463374607431768211457,
@@ -1020,8 +1020,8 @@ class TestContractCommon:
     """Other tests for the contract."""
 
     @classmethod
-    def setup(cls) -> None:
-        """Setup."""
+    def setup_class(cls) -> None:
+        """Setup class."""
 
         # Register smart contract used for testing
         cls.path_to_contract = PACKAGE_DIR
@@ -1039,14 +1039,16 @@ class TestContractCommon:
             Contract.from_config(configuration)
         cls.contract = contract_registry.make(str(configuration.public_id))
 
-        cls.token_ids_a = [
+    def setup(self) -> None:
+        """Setup test method."""
+        self.token_ids_a = [
             340282366920938463463374607431768211456,
         ]
 
         # Create mock ledger with unknown identifier
-        cls.ledger_api = mock.Mock()
+        self.ledger_api = mock.Mock()
         attrs = {"identifier": "dummy"}
-        cls.ledger_api.configure_mock(**attrs)
+        self.ledger_api.configure_mock(**attrs)
 
     @pytest.mark.ledger
     def test_get_create_batch_transaction_wrong_identifier(self) -> None:

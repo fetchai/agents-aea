@@ -4,12 +4,32 @@
 
 This module contains test case classes based on pytest for AEA contract testing.
 
+<a id="aea.test_tools.test_contract._MetaBaseContractTestCase"></a>
+
+## `_`MetaBaseContractTestCase Objects
+
+```python
+class _MetaBaseContractTestCase(ABCMeta)
+```
+
+A metaclass that validates BaseContractTestCase's class.
+
+<a id="aea.test_tools.test_contract._MetaBaseContractTestCase.__new__"></a>
+
+#### `__`new`__`
+
+```python
+def __new__(mcs, name: str, bases: Tuple, namespace: Dict, **kwargs: Any) -> Type
+```
+
+Initialize the class.
+
 <a id="aea.test_tools.test_contract.BaseContractTestCase"></a>
 
 ## BaseContractTestCase Objects
 
 ```python
-class BaseContractTestCase(ABC)
+class BaseContractTestCase(ABC, metaclass=_MetaBaseContractTestCase)
 ```
 
 A class to test a contract.
@@ -24,6 +44,17 @@ def contract() -> Contract
 ```
 
 Get the contract.
+
+<a id="aea.test_tools.test_contract.BaseContractTestCase.setup_class"></a>
+
+#### setup`_`class
+
+```python
+@classmethod
+def setup_class(cls) -> None
+```
+
+Set up the contract test case class.
 
 <a id="aea.test_tools.test_contract.BaseContractTestCase.setup"></a>
 

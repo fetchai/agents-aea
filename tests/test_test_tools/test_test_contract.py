@@ -59,10 +59,26 @@ mock_get_balance_increment = mock.patch.object(
 class TestCls(BaseContractTestCase):
     """Concrete `copy` of BaseContractTestCase"""
 
+    path_to_contract = Path(".")
+    ledger_identifier = ""
+
     @classmethod
     def finish_contract_deployment(cls) -> str:
         """Concrete finish_contract_deployment"""
         return ""
+
+
+def test_base_contract_test_case_definition_without_attributes_raises_error() -> None:
+    """Test that definition of concrete subclass of BaseContractTestCase without attributes raises error."""
+    with pytest.raises(ValueError):
+
+        class TestCls(BaseContractTestCase):
+            pass
+
+    with pytest.raises(ValueError):
+
+        class TestClsB(BaseContractTestCase):
+            path_to_contract = Path(".")
 
 
 class TestBaseContractTestCaseSetup:
@@ -78,14 +94,9 @@ class TestBaseContractTestCaseSetup:
         """Helper method to setup test to be tested"""
 
         test_instance = self.test_cls()  # type: ignore
+        test_instance.setup_class()
         test_instance.setup()
         return test_instance
-
-    def test_contract_setup_missing_ledger_identifier(self):
-        """Test contract setup missing ledger identifier"""
-
-        with pytest.raises(ValueError, match="ledger_identifier not set!"):
-            self.setup_test_cls()
 
     def test_contract_setup_contract_configuration_not_found(self):
         """Test contract setup contract configuration not found"""

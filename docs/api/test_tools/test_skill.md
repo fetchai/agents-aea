@@ -4,12 +4,32 @@
 
 This module contains test case classes based on pytest for AEA skill testing.
 
+<a id="aea.test_tools.test_skill._MetaBaseSkillTestCase"></a>
+
+## `_`MetaBaseSkillTestCase Objects
+
+```python
+class _MetaBaseSkillTestCase(ABCMeta)
+```
+
+A metaclass that validates BaseSkillTestCase's class.
+
+<a id="aea.test_tools.test_skill._MetaBaseSkillTestCase.__new__"></a>
+
+#### `__`new`__`
+
+```python
+def __new__(mcs, name: str, bases: Tuple, namespace: Dict, **kwargs: Any) -> Type
+```
+
+Initialize the class.
+
 <a id="aea.test_tools.test_skill.BaseSkillTestCase"></a>
 
 ## BaseSkillTestCase Objects
 
 ```python
-class BaseSkillTestCase()
+class BaseSkillTestCase(ABC, metaclass=_MetaBaseSkillTestCase)
 ```
 
 A class to test a skill.

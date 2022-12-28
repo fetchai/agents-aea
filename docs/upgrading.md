@@ -9,6 +9,16 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
+## `v1.26.0` to `v1.27.0`
+
+Multiple small backwards incompatible changes:
+- `BaseContractTestCase` no longer sets a default `path_to_contract` and `ledger_identifier`. The user is expected to set these and an exception is thrown if classes are defined without these.
+- `BaseContractTestCase` had wrongly defined `setup`. This is now changed to `setup_class`.
+- `BaseSkillTestCase` no longer sets a default `path_to_skill`. The user is expected to set this and an exception is thrown if classes are defined without this.
+- Comparison operators were fixed for multiple custom classes. Some edge cases will behave differently. Consult <a href="https://github.com/valory-xyz/open-aea/pull/428" target="_blank">#428</a> and related PRs.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.25.0` to `v1.26.0`
 
 No backwards incompatible changes.
