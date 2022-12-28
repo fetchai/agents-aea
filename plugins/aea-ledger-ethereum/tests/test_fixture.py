@@ -26,7 +26,10 @@ from aea_ledger_ethereum.test_tools.fixture_helpers import (
     ganache,
 )
 
+from tests.conftest import action_for_platform
 
+
+@action_for_platform("Linux", skip=False)
 def test_ganache_fixture() -> None:
     """Test ganache fixture just start and stop."""
     request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)

@@ -31,8 +31,8 @@ from aea_ledger_fetchai.test_tools.fixture_helpers import fetchd
 
 def test_fetchd_fixture() -> None:
     """Test fetchd fixture just start and stop."""
-    if platform.system() == "Windows":
-        pytest.skip("Skip on windows")
+    if platform.system() != "Linux":
+        pytest.skip("Skip on non Linux systems")
     gen = get_real_func(fetchd)()
 
     next(gen)
