@@ -224,6 +224,8 @@ def test_tool_download() -> None:
         "pathlib.Path.iterdir", return_value=[]
     ), patch(
         "shutil.rmtree"
+    ), patch(
+        "shutil.move"
     ):
         with pytest.raises(DownloadError, match="Failed to download: some"):
             with patch("time.sleep"):
@@ -232,4 +234,4 @@ def test_tool_download() -> None:
 
         client_mock.get = Mock()
 
-        ipfs_tool.download("some", tmp_dir, attempts=5)
+        assert ipfs_tool.download("some", tmp_dir, attempts=5) == tmp_dir
