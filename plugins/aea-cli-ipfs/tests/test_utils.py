@@ -19,7 +19,9 @@
 
 """Test ipfs utils."""
 
+import os
 import re
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
@@ -235,3 +237,37 @@ def test_tool_download() -> None:
         client_mock.get = Mock()
 
         assert ipfs_tool.download("some", tmp_dir, attempts=5) == tmp_dir
+
+
+def test_tool_download_fix_path_works() -> None:
+    """Test IPFSTool.download method."""
+    ipfs_tool = IPFSTool()
+    client_mock = Mock()
+    sub_file_name = "some1"
+    hash_id = "some_hash"
+
+    def make_files(hash_, download_dir):
+        os.mkdir(Path(download_dir) / hash_)
+        os.mkdir(Path(download_dir) / hash_ / sub_file_name)
+
+    client_mock.get = make_files
+    with patch.object(ipfs_tool, "client", client_mock), patch(
+        "pathlib.Path.is_file", return_value=False
+    ), patch("shutil.copy"), patch("os.listdir", return_value=["1"]), patch(
+        "pathlib.Path.iterdir", return_value=[]
+    ), patch(
+        "shutil.rmtree"
+    ):
+        with TemporaryDirectory() as target_tmp_dir:
+            assert (
+                ipfs_tool.download(hash_id, target_tmp_dir, fix_path=True)
+                == target_tmp_dir
+            )
+            assert [i.name for i in Path(target_tmp_dir).glob("*")] == [sub_file_name]
+
+        with TemporaryDirectory() as target_tmp_dir:
+            assert (
+                ipfs_tool.download(hash_id, target_tmp_dir, fix_path=False)
+                == target_tmp_dir + f"/{hash_id}"
+            )
+            assert [i.name for i in Path(target_tmp_dir).glob("*")] == [hash_id]
