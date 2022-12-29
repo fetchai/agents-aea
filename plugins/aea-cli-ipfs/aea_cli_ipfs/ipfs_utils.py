@@ -341,9 +341,9 @@ class IPFSTool:
                     error_msg = f"Expected a single directory, found: {paths}"
                     raise DownloadError(error_msg)
                 package_path = paths.pop()
-
-            package_path.rename(target_dir / package_path.name)
-            return str(package_path)
+            # move not rename cause can be on different filesystems
+            shutil.move(package_path, target_dir / package_path.name)
+            return str(target_dir / package_path.name)
 
         target_dir = Path(target_dir)
         target_dir.mkdir(exist_ok=True, parents=True)
