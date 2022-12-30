@@ -266,8 +266,7 @@ def test_tool_download_fix_path_works() -> None:
             assert [i.name for i in Path(target_tmp_dir).glob("*")] == [sub_file_name]
 
         with TemporaryDirectory() as target_tmp_dir:
-            assert (
-                ipfs_tool.download(hash_id, target_tmp_dir, fix_path=False)
-                == target_tmp_dir + f"/{hash_id}"
+            assert ipfs_tool.download(hash_id, target_tmp_dir, fix_path=False) == str(
+                Path(target_tmp_dir) / hash_id
             )
             assert [i.name for i in Path(target_tmp_dir).glob("*")] == [hash_id]
