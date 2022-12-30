@@ -259,9 +259,8 @@ def test_tool_download_fix_path_works() -> None:
         "shutil.rmtree"
     ):
         with TemporaryDirectory() as target_tmp_dir:
-            assert (
-                ipfs_tool.download(hash_id, target_tmp_dir, fix_path=True)
-                == target_tmp_dir
+            assert ipfs_tool.download(hash_id, target_tmp_dir, fix_path=True) == str(
+                Path(target_tmp_dir, sub_file_name)
             )
             assert [i.name for i in Path(target_tmp_dir).glob("*")] == [sub_file_name]
 

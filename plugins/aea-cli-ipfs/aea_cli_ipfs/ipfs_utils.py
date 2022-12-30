@@ -332,11 +332,17 @@ class IPFSTool:
                 return str(target_dir)
 
             if fix_path:
-                # move content of directory with hashid to target dir
+                # identify name of package
                 paths = list(download_tmp_path.glob("*"))
-                for path in paths:
-                    shutil.move(str(path), str(target_dir))
-                return str(target_dir)
+                assumption_is_valid = len(paths) == 1 and paths[0].is_dir()
+                if not assumption_is_valid:  # pragma: no cover
+                    error_msg = f"Expected a single directory, found: {paths}"
+                    raise DownloadError(error_msg)
+                package_path = paths.pop()
+
+                # move content of directory with hashid to target dir
+                shutil.move(str(package_path), str(target_dir))
+                return str(target_dir / package_path.name)
 
             # move directory with hash id to target dir
             shutil.move(str(download_tmp_path), str(target_dir))
