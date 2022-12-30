@@ -328,18 +328,18 @@ class IPFSTool:
             """Move downloaded content to target directory"""
             if download_tmp_path.is_file():
                 # file is ok!
-                shutil.move(download_tmp_path, target_dir)
+                shutil.move(str(download_tmp_path), str(target_dir))
                 return str(target_dir)
 
             if fix_path:
                 # move content of directory with hashid to target dir
                 paths = list(download_tmp_path.glob("*"))
                 for path in paths:
-                    shutil.move(path, target_dir)
+                    shutil.move(str(path), str(target_dir))
                 return str(target_dir)
 
             # move directory with hash id to target dir
-            shutil.move(download_tmp_path, target_dir)
+            shutil.move(str(download_tmp_path), str(target_dir))
             return str(target_dir / download_tmp_path.name)
 
         target_dir = Path(target_dir)
