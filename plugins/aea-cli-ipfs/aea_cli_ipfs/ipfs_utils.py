@@ -324,26 +324,23 @@ class IPFSTool:
         :return: downloaded path
         """
 
-        def move_to_target_dir(download_path) -> str:
+        def move_to_target_dir(download_tmp_path) -> str:
             """Move downloaded content to target directory"""
-
-            if download_path.is_file():
-                shutil.copy(download_path, target_dir)
+            if download_tmp_path.is_file():
+                # file is ok!
+                shutil.move(str(download_tmp_path), str(target_dir))
                 return str(target_dir)
 
-            # else it is a directory containing a single package path
-            package_path = download_path
             if fix_path:
-                # assumption is it contains one nested directory: the package
-                paths = list(download_path.glob("*"))
-                assumption_is_valid = len(paths) == 1 and paths[0].is_dir()
-                if not assumption_is_valid:  # pragma: no cover
-                    error_msg = f"Expected a single directory, found: {paths}"
-                    raise DownloadError(error_msg)
-                package_path = paths.pop()
-            # move not rename cause can be on different filesystems
-            shutil.move(package_path, target_dir / package_path.name)
-            return str(target_dir / package_path.name)
+                # move content of directory with hashid to target dir
+                paths = list(download_tmp_path.glob("*"))
+                for path in paths:
+                    shutil.move(str(path), str(target_dir))
+                return str(target_dir)
+
+            # move directory with hash id to target dir
+            shutil.move(str(download_tmp_path), str(target_dir))
+            return str(target_dir / download_tmp_path.name)
 
         target_dir = Path(target_dir)
         target_dir.mkdir(exist_ok=True, parents=True)
