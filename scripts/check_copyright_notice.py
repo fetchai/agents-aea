@@ -46,7 +46,7 @@ VALORY_FORK_DATE = datetime.strptime(
 )
 GIT_PATH = shutil.which("git")
 START_YEARS_FETCHAI = (2018, 2019, 2020, 2021)
-START_YEARS_VALORY = (2021, 2022)
+START_YEARS_VALORY = (2021, 2022, 2023)
 FETCHAI = "FetchAI"
 VALORY = "Valory"
 MIXED = "Mixed"
@@ -234,7 +234,7 @@ def _validate_years(
         check_info["error_code"] = ErrorTypes.START_YEAR_NOT_ALLOWED
         return check_info
 
-    # Specified year is 2021 but the file has been last modified in another later year (missing -202x)
+    # Specified year is 2021/2022 but the file has been last modified in another later year (missing -202x)
     if end_year is not None and check_end_year:
 
         if start_year > end_year:
