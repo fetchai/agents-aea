@@ -58,7 +58,9 @@ class TestStrategy(ConfirmationAW3TestCase):
         # operation
         with patch.object(self.db, "_execute_single_sql") as mock_exe:
             self.db.set_trade(
-                self.address, self.timestamp, self.data,
+                self.address,
+                self.timestamp,
+                self.data,
             )
 
         # after
@@ -76,11 +78,14 @@ class TestStrategy(ConfirmationAW3TestCase):
         with patch.object(
             self.db, "_execute_single_sql", return_value=result
         ) as mock_exe:
-            actual_result = self.db.get_trade_count(self.address,)
+            actual_result = self.db.get_trade_count(
+                self.address,
+            )
 
         # after
         mock_exe.assert_any_call(
-            "SELECT COUNT(*) FROM trades_table where address=?", (self.address,),
+            "SELECT COUNT(*) FROM trades_table where address=?",
+            (self.address,),
         )
         assert actual_result == 1
 
@@ -93,7 +98,9 @@ class TestStrategy(ConfirmationAW3TestCase):
         with patch.object(
             self.db, "_execute_single_sql", return_value=result
         ) as mock_exe:
-            actual_result = self.db.get_developer_handle(self.address,)
+            actual_result = self.db.get_developer_handle(
+                self.address,
+            )
 
         # after
         mock_exe.assert_any_call(
@@ -132,7 +139,9 @@ class TestStrategy(ConfirmationAW3TestCase):
         with patch.object(
             self.db, "_execute_single_sql", return_value=result
         ) as mock_exe:
-            actual_addresses = self.db.get_addresses(self.developer_handle,)
+            actual_addresses = self.db.get_addresses(
+                self.developer_handle,
+            )
 
         # after
         mock_exe.assert_any_call(
@@ -154,7 +163,9 @@ class TestStrategy(ConfirmationAW3TestCase):
                 ValueError,
                 match=f"Should find at least one address for developer_handle={self.developer_handle}.",
             ):
-                self.db.get_addresses(self.developer_handle,)
+                self.db.get_addresses(
+                    self.developer_handle,
+                )
 
         # after
         mock_exe.assert_any_call(
@@ -178,7 +189,9 @@ class TestStrategy(ConfirmationAW3TestCase):
                 with patch.object(
                     self.db, "get_trade_count", side_effect=trade_counts
                 ) as mock_trade_counts:
-                    actual_addresses = self.db.get_handle_and_trades(self.address,)
+                    actual_addresses = self.db.get_handle_and_trades(
+                        self.address,
+                    )
 
         # after
         mock_developer_handle.assert_any_call(self.address)
@@ -302,7 +315,8 @@ class TestStrategy(ConfirmationAW3TestCase):
 
         # after
         mock_exe.assert_any_call(
-            "SELECT * FROM registered_table WHERE address=?", (self.address,),
+            "SELECT * FROM registered_table WHERE address=?",
+            (self.address,),
         )
         assert is_registered is True
 
@@ -319,6 +333,7 @@ class TestStrategy(ConfirmationAW3TestCase):
 
         # after
         mock_exe.assert_any_call(
-            "SELECT * FROM registered_table WHERE address=?", (self.address,),
+            "SELECT * FROM registered_table WHERE address=?",
+            (self.address,),
         )
         assert is_registered is False

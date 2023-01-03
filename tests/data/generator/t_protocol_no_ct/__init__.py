@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the t_protocol_no_ct protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.1.1`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.4`.
 """
 
 from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage

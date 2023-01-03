@@ -56,7 +56,10 @@ from packages.fetchai.skills.tac_control_contract.handlers import (
     LedgerApiHandler,
     SigningHandler,
 )
-from packages.fetchai.skills.tac_control_contract.parameters import Parameters
+from packages.fetchai.skills.tac_control_contract.parameters import (
+    DEFAULT_CONTRACT_DEPLOY_FEE,
+    Parameters,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -127,7 +130,9 @@ class TestContractApiHandler(BaseSkillTestCase):
             f"received invalid contract_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_raw_transaction(self,):
+    def test_handle_raw_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         contract_api_dialogue = cast(
@@ -312,7 +317,9 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction(self,):
+    def test_handle_signed_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -810,7 +817,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
                     "amount": 0,
                     "code_id": self.code_id,
                     "deployer_address": self.skill.skill_context.agent_address,
-                    "tx_fee": 0,
+                    "tx_fee": DEFAULT_CONTRACT_DEPLOY_FEE,
                 }
             ),
         )
@@ -825,7 +832,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, "requesting contract initialisation transaction...",
+            logging.INFO,
+            "requesting contract initialisation transaction...",
         )
 
     def test_handle_transaction_receipt_callable_get_deploy_transaction_label_store_no_code_id(
@@ -884,7 +892,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         # _request_init_transaction
         self.assert_quantity_in_outbox(0)
         mock_logger.assert_any_call(
-            logging.INFO, "Failed to initialise contract: code_id not found",
+            logging.INFO,
+            "Failed to initialise contract: code_id not found",
         )
 
     def test_handle_transaction_receipt_callable_get_deploy_transaction_label_init(

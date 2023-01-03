@@ -1,6 +1,6 @@
 name: ml_data_provider
 author: fetchai
-version: 0.27.0
+version: 0.27.5
 type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
@@ -8,21 +8,21 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmYBr97UhQA8GoWFN6yNKdWix1AKJYx4zY246HYAFGpYRP
-  __init__.py: Qmcu1vLmq842XTdnGVjgSdEjvcY2fbaUAYBeWjVu1oTjp8
+  __init__.py: QmV7xhaceBN4Hj4taKGhyZBZaEZ1b8Zo1jANkUg3xxQTRj
   behaviours.py: QmU6DnhfLsYNGoJMrW9jeQ9CknpJG5cp2WjCFwPQfuJkiV
   dialogues.py: QmTWTeidShLf6Pg5pxrYTxAFMYWQ5rRdgLrXLcXMJS8vYn
-  handlers.py: Qmda9SU3rhoMQFiWFfpFRJ9dEwDtqopsYFGnNFydRrQ8ms
-  strategy.py: QmVbxMMFCzwdJKf4Toyfd4Qpqn9tMVy4x4JVUqc6GEPYzb
+  handlers.py: QmYoipDR88wvdgvNxK4xaEpiugpWAtgcKr6dsp1kxtDm4N
+  strategy.py: QmVNtB9CfMbVKd1GRymNCr9iQtpayfrjzMg8jQZaZgTVoG
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/ml_trade:1.1.0
-- fetchai/oef_search:1.1.0
+- fetchai/default:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/ml_trade:1.1.6
+- fetchai/oef_search:1.1.6
 skills:
-- fetchai/generic_seller:0.28.0
+- fetchai/generic_seller:0.28.5
 behaviours:
   service_registration:
     args:
@@ -54,7 +54,7 @@ models:
   strategy:
     args:
       batch_size: 2
-      buyer_tx_fee: 10
+      buyer_tx_fee: 1550000000000000
       classification:
         piece: classification
         value: seller
@@ -75,5 +75,5 @@ models:
 dependencies:
   numpy: {}
   tensorflow:
-    version: ~=2.4.0
+    version: <3.0.0,>=2.4.0
 is_abstract: false

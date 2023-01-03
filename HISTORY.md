@@ -1,5 +1,93 @@
 # Release History
 
+## 1.2.4(2022-11-30)
+
+Agents:
+- Add hello_world skill and agent
+
+Docs:
+- Update repository documentations
+- Update installation guide for Raspberry Pis (add a link to prebuilt image for Raspberry Pis)
+
+Misc:
+- Update the dependencies (protobuf, jsonschema, cosmpy)
+- Various improvements in the repository structure (e.g. makefile, tox, workflows)
+- Speed up CI/CD
+- Various bug fixes
+
+## 1.2.3(2022-11-03)
+
+AEA:
+- core and development are dependencies updated.
+- ci improvements
+- cosmpy updated to 0.6.0
+- Small code format improvements and better linting
+
+Plugins:
+- Small code format improvements
+- cosmpy updated to 0.6.0
+
+Packages:
+- Small code format improvements
+
+## 1.2.2 (2022-10-17)
+
+AEA:
+- Dependency management switched from pipenv to poetry.
+- Protocol generator updated to support Unions
+- Dependencies versions updates: click, mypy, black, ipfshttpclient
+- Small code format improvements
+
+Plugins:
+- Update web3 to version 5.31
+- Small code format improvements
+- ipfshttpclient dependency version updated to 0.8.0a2
+
+Packages:
+- Protocols regenerated according to the latest protocol generator improvements: Union support
+- Small code format improvements
+
+## 1.2.1 (2022-07-12)
+
+AEA:
+- Protocol generator uses int64 instead of int32
+- Dependencies versions updates
+
+Plugins:
+- Upgrades fetchai plugin to use cosmpy>=0.5.0
+- Upgrades cosmos plugin to use cosmpy>=0.5.0
+
+Packages:
+- Fixes for skills to work with dorado testnet (tx fee adjusted)
+
+## 1.2.0 (2022-05-05)
+
+AEA:
+- Adds support for Python 3.10
+- Updates protobuf dependency 
+- Updates asyncio dependency
+- Updates golang modules
+- Updates many dependencies to their latest versions
+- Fixes dependency issues
+
+Plugins:
+- Upgrades fetchai plugin to be compatible with Dorado networks
+- Upgrades cosmos plugin to be compatible with Dorado networks
+
+Packages:
+- Adds more logging to the p2p_libp2p packages (vanilla, client, mailbox)
+- Aries demo updated to cover the full base scenario
+- Protocols were regenerated with newer protobuf
+
+Chores:
+- Fixed various tests
+- Fixed docker container issue in tests
+- Added automated script to add support for new versions of the Fetchai network
+- Added automated script to update copyright headers and check their validity
+- Apply the above script on all packages
+- Adds tests for BaseContractTestTool
+- Improves the script that automatically updates package versions
+
 ## 1.1.1 (2021-12-15)
 
 AEA:

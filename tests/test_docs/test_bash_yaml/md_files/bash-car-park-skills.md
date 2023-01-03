@@ -8,7 +8,7 @@
 }
 ```
 ``` bash
-aea fetch fetchai/car_detector:0.32.0
+aea fetch fetchai/car_detector:0.32.4
 cd car_detector
 aea install
 aea build
@@ -16,25 +16,25 @@ aea build
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/carpark_detection:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/ledger:0.21.4
+aea add skill fetchai/carpark_detection:0.27.5
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
 }'
 aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/car_data_buyer:0.33.0
+aea fetch fetchai/car_data_buyer:0.33.4
 cd car_data_buyer
 aea install
 aea build
@@ -42,19 +42,19 @@ aea build
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/carpark_client:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/ledger:0.21.4
+aea add skill fetchai/carpark_client:0.27.5
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
 }'
 aea install
 aea build
@@ -108,7 +108,7 @@ aea delete car_data_buyer
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.26.0
+public_id: fetchai/p2p_libp2p:0.27.4
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

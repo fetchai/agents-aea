@@ -13,17 +13,17 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v3
  
     - name: Setup GCloud - sandbox
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0
       if: github.ref == 'refs/heads/develop'
       with:
           project_id: ${{ secrets.GCLOUD_FETCH_AI_SANDBOX_PROJECT }}
           service_account_key: ${{ secrets.GCLOUD_FETCH_AI_SANDBOX_KEY }}
 
     - name: Setup GCloud - production
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0
       if: github.ref == 'refs/heads/main'
       with:
           project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}

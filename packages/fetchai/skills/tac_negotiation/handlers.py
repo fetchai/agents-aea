@@ -147,7 +147,8 @@ class FipaNegotiationHandler(Handler):
         )
         if proposal is None:
             fipa_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=cfp,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=cfp,
             )
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -195,7 +196,8 @@ class FipaNegotiationHandler(Handler):
             fipa_dialogue.terms, role=cast(FipaDialogue.Role, fipa_dialogue.role)
         ):
             fipa_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.ACCEPT, target_message=propose,
+                performative=FipaMessage.Performative.ACCEPT,
+                target_message=propose,
             )
             transactions.add_locked_tx(
                 fipa_dialogue.terms, role=cast(FipaDialogue.Role, fipa_dialogue.role)
@@ -205,7 +207,8 @@ class FipaNegotiationHandler(Handler):
             )
         else:
             fipa_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=propose,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=propose,
             )
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -278,6 +281,10 @@ class FipaNegotiationHandler(Handler):
                     contract_api_dialogues = cast(
                         ContractApiDialogues, self.context.contract_api_dialogues
                     )
+                    kwargs = strategy.kwargs_from_terms(
+                        fipa_dialogue.terms, is_from_terms_sender=False
+                    )
+                    kwargs.pop("tx_fee", None)
                     (
                         contract_api_msg,
                         contract_api_dialogue,
@@ -288,11 +295,7 @@ class FipaNegotiationHandler(Handler):
                         contract_id=strategy.contract_id,
                         contract_address=strategy.contract_address,
                         callable="get_hash_batch",
-                        kwargs=ContractApiMessage.Kwargs(
-                            strategy.kwargs_from_terms(
-                                fipa_dialogue.terms, is_from_terms_sender=False
-                            )
-                        ),
+                        kwargs=ContractApiMessage.Kwargs(kwargs),
                     )
                     contract_api_dialogue = cast(
                         ContractApiDialogue, contract_api_dialogue
@@ -345,13 +348,15 @@ class FipaNegotiationHandler(Handler):
                 signing_dialogue.associated_fipa_dialogue = fipa_dialogue
                 self.context.logger.info(
                     "requesting signature, sending {} to decision_maker, message={}".format(
-                        signing_msg.performative, signing_msg,
+                        signing_msg.performative,
+                        signing_msg,
                     )
                 )
                 self.context.decision_maker_message_queue.put(signing_msg)
         else:
             fipa_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=accept,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=accept,
             )
             dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(
@@ -441,7 +446,8 @@ class FipaNegotiationHandler(Handler):
                     callable="get_atomic_swap_batch_transaction",
                     kwargs=ContractApiMessage.Kwargs(
                         strategy.kwargs_from_terms(
-                            fipa_dialogue.terms, signature=counterparty_signature,
+                            fipa_dialogue.terms,
+                            signature=counterparty_signature,
                         )
                     ),
                 )
@@ -483,7 +489,8 @@ class FipaNegotiationHandler(Handler):
             signing_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.logger.info(
                 "requesting signature, sending {} to decision_maker, message={}".format(
-                    signing_msg.performative, signing_msg,
+                    signing_msg.performative,
+                    signing_msg,
                 )
             )
             self.context.decision_maker_message_queue.put(signing_msg)
@@ -691,7 +698,8 @@ class SigningHandler(Handler):
 
         self.context.logger.info(
             "received {} from decision_maker, message={}".format(
-                signing_msg.performative.value, signing_msg,
+                signing_msg.performative.value,
+                signing_msg,
             )
         )
         # handle message
@@ -797,7 +805,9 @@ class SigningHandler(Handler):
             ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
             self.context.logger.info(
                 "sending {} to ledger {}, message={}".format(
-                    ledger_api_msg.performative, strategy.ledger_id, ledger_api_msg,
+                    ledger_api_msg.performative,
+                    strategy.ledger_id,
+                    ledger_api_msg,
                 )
             )
             self.context.outbox.put_message(message=ledger_api_msg)
@@ -838,7 +848,9 @@ class SigningHandler(Handler):
                 ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
                 self.context.logger.info(
                     "sending {} to ledger {}, message={}".format(
-                        ledger_api_msg.performative, strategy.ledger_id, ledger_api_msg,
+                        ledger_api_msg.performative,
+                        strategy.ledger_id,
+                        ledger_api_msg,
                     )
                 )
                 self.context.outbox.put_message(message=ledger_api_msg)
@@ -967,7 +979,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
 
@@ -1042,7 +1055,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 
@@ -1216,7 +1230,9 @@ class OefSearchHandler(Handler):
         if len(agents) > 0:
             self.context.logger.info(
                 "found potential {} agents={} on search_id={}.".format(
-                    searched_for, list(map(lambda x: x[-5:], agents)), search_id,
+                    searched_for,
+                    list(map(lambda x: x[-5:], agents)),
+                    search_id,
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
@@ -1251,7 +1267,8 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )
 
@@ -1404,6 +1421,7 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
+                contract_api_msg.performative,
+                contract_api_dialogue,
             )
         )

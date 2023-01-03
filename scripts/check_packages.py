@@ -87,7 +87,11 @@ class DependencyNotFound(Exception):
 class EmptyPackageDescription(Exception):
     """Custom exception for empty description field."""
 
-    def __init__(self, configuration_file: Path, *args: Any,) -> None:
+    def __init__(
+        self,
+        configuration_file: Path,
+        *args: Any,
+    ) -> None:
         """
         Initialize EmptyPackageDescription exception.
 
@@ -104,7 +108,7 @@ def find_all_configuration_files() -> List:
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
-        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+        if any(file in str(path) for file in CONFIG_FILE_NAMES)
     ]
     return list(chain(config_files, default_config_file_paths()))
 

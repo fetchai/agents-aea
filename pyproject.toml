@@ -1,3 +1,311 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build_backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.1.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry]
+name = "aea"
+version = "1.2.4"
+description = "Autonomous Economic Agent framework"
+authors = ["Fetch.AI Limited"]
+readme = "README.md"
+license = "Apache-2.0"
+homepage = "https://github.com/fetchai/agents-aea"
+classifiers = [
+    "Environment :: Console",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Communications",
+    "Topic :: Internet",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development",
+    "Topic :: System",
+]
+
+[tool.poetry.scripts]
+aea = 'aea.cli:cli'
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+base58 = ">=1.0.3,<3.0.0"
+jsonschema = ">=3.2.0,<5"
+packaging = "^21.0"
+semver = ">=2.9.1,<3.0.0"
+protobuf = ">=3.19.4,<4"
+pymultihash = "==0.8.2"
+pyyaml = ">=4.2b1,<6.0"
+requests = ">=2.22.0,<3.0.0"
+python-dotenv = ">=0.14.0,<0.18.0"
+ecdsa = ">=0.15,<0.17.0"
+importlib-metadata = ">4,<5"
+
+pywin32 = { version = "==303", markers = "sys_platform == 'win32' or platform_system == 'Windows'" }
+
+# cli, test_tools extras
+click = { version = "^8.0.0", optional = true }
+
+[tool.poetry.extras]
+cli = ["click"]
+all = ["click"]
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+tox = "^3.26"
+py-sr25519-bindings = ">=0.1.5,<0.2"
+pylint = "==2.15.5"
+cosmpy = ">=0.6.2,<0.7.0"
+bandit = "==1.7.4"
+vulture = "==2.6"
+isort = "==5.10.1"
+safety = "==2.3.5"
+mypy = "==0.982"
+darglint = "==1.8.1"
+flake8 = "==5.0.4"
+flake8-bugbear = "==22.10.25"
+flake8-docstrings = "==1.6.0"
+flake8-eradicate = "==1.4.0"
+flake8-isort = "==5.0"
+liccheck = "==0.7.2"
+black = "^22.10"
+
+[tool.poetry.group.testing]
+optional = true
+
+[tool.poetry.group.testing.dependencies]
+pytest = "^7.2.0"
+pytest-asyncio = "^0.20.0"
+pytest-cov = "^4.0.0"
+pytest-custom-exit-code = "^0.3.0"
+pytest-randomly = "^3.12.0"
+pytest-rerunfailures = "^10.2"
+docker = "^4.2.2"
+pexpect = "^4.8.0"
+sqlalchemy = ">=1.4.41"            # used in one test
+mistune = "^2.0.4"
+requests = "^2.28.0"
+web3 = ">=5.31.0,<6.0.0"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^8.5.7"
+mkdocs-mermaid-plugin = { git = "https://github.com/pugong/mkdocs-mermaid-plugin.git" }
+pydoc-markdown = "^4.6.3"
+pydocstyle = "^6.1.1"
+pymdown-extensions = "^9.7"
+pygments = ">=2.7.4"
+
+[tool.poetry.group.packages]
+optional = true
+
+[tool.poetry.group.packages.dependencies]
+tensorflow = [
+    { version = ">=2.9,<2.11.0"},
+]
+# openapi-core = "==0.13.2"  # problematic package for poetry. requirede by http server connection
+openapi-spec-validator = "==0.2.8" # required by openapi core and best to pin it here
+gym = "==0.15.6"
+aiohttp = "^3.8"
+aioprometheus = ">=20.0.0,<21.0.0"
+numpy = ">=1.18.1"
+oef = ">=0.8.1"
+defusedxml = ">=0.7.1"
+scikit-image = ">=0.17.2"
+colorlog = ">=4.1.0"
+temper-py = "==0.0.3"
+
+
+[tool.poetry.group.tools]
+optional = true
+
+[tool.poetry.group.tools.dependencies]
+#benchmark
+matplotlib = ">=3.3.0,<3.4"
+psutil = "^5.9.3"
+memory-profiler = ">=0.57.0"
+# scripts
+gitpython = "==3.1.14"
+ipfshttpclient = "==0.8.0a2"
+
+
+[tool.poetry.group.types]
+optional = true
+
+[tool.poetry.group.types.dependencies]
+# types defenitions for mypy
+types-certifi = "*"
+types-requests = "*"
+types-setuptools = "*"
+types-urllib3 = "*"
+types-click = "*"
+types-PyYAML = "*"
+
+
+[tool.mypy]
+python_version = 3.8
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "aea/mail/base_pb2",
+    "aea/helpers/multiaddr/crypto_pb2",
+    "aea/helpers/search/models_pb2",
+    "aea/helpers/ipfs/pb/unixfs_pb2",
+    "aea/helpers/ipfs/pb/merkledag_pb2",
+    "tests/data/generator/t_protocol/*",
+    "tests/data/generator/t_protocol_no_ct/*",
+    "tests/data/dummy_aea/vendor/*",
+    "packages/fetchai/protocols/acn/acn_pb2",
+    "packages/fetchai/protocols/aggregation/aggregation_pb2",
+    "packages/fetchai/protocols/contract_api/contract_api_pb2",
+    "packages/fetchai/protocols/cosm_trade/cosm_trade_pb2",
+    "packages/fetchai/protocols/default/default_pb2",
+    "packages/fetchai/protocols/fipa/fipa_pb2",
+    "packages/fetchai/protocols/gym/gym_pb2",
+    "packages/fetchai/protocols/http/http_pb2",
+    "packages/fetchai/protocols/ledger_api/ledger_api_pb2",
+    "packages/fetchai/protocols/ml_trade/ml_trade_pb2",
+    "packages/fetchai/protocols/prometheus/prometheus_pb2",
+    "packages/fetchai/protocols/oef_search/oef_search_pb2",
+    "packages/fetchai/protocols/signing/signing_pb2",
+    "packages/fetchai/protocols/state_update/state_update_pb2",
+    "packages/fetchai/protocols/tac/tac_pb2",
+    "packages/fetchai/protocols/register/register_pb2",
+    "packages/fetchai/protocols/yoti/yoti_pb2",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "oef.*",
+    "semver.*",
+    "werkzeug.*",
+    "eth_keys.*",
+    "jsonschema.*",
+    "dotenv",
+    "connexion",
+    "eth_account.*",
+    "ipfshttpclient.*",
+    "win32con.*",
+    "win32file.*",
+    "pywintypes.*",
+    "ecdsa.*",
+    "urllib3.*",
+    "aea_ledger_fetchai.*",
+    "aea_ledger_ethereum.*",
+    "aea_ledger_cosmos.*",
+    "numpy",
+    "gym.*",
+    "pytest",
+    "docker.*",
+    "mistune",
+    "git.*",
+    "tensorflow.*",
+    "temper.*",
+    "openapi_core.*",
+    "openapi_spec_validator.*",
+    "sqlalchemy",
+    "defusedxml.*",
+    "cosmpy.*",
+    "google.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "packages/fetchai/connections/p2p_libp2p_mailbox/connection",
+    "packages/fetchai/connections/p2p_libp2p_client/connection",
+]
+disable_error_code = "attr-defined"
+
+[tool.isort]
+# for black compatibility
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 88
+# custom configurations
+order_by_type = false
+case_sensitive = true
+lines_after_imports = 2
+skip = [
+    "tests/data/dummy_aea/vendor/",
+    "tests/data/dummy_aea/skills/dummy"
+    ]
+skip_glob = "**/*_pb2.py"
+known_first_party = "aea"
+known_packages = "packages"
+known_local_folder = "tests"
+sections = ["FUTURE",'STDLIB',"THIRDPARTY","FIRSTPARTY","PACKAGES","LOCALFOLDER"]
+
+[tool.pylint.'MASTER']
+ignore-patterns = ["__main__.py",".*_pb2.py","tac.sh","tac_local.sh"]
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = ["C0103","C0201","C0301","C0302","W0105","W0707","W1202","W1203","R0801","C0209","R1735"]
+
+# See here for more options: https://www.codeac.io/documentation/pylint-configuration.html
+## Eventually resolve these:
+# W0707: raise-missing-from
+
+## Eventually decide on a logging policy:
+# W1202: logging-format-interpolation
+# W1203: logging-fstring-interpolation
+
+## Keep the following:
+# C0103: invalid-name, # kept as no harm
+# C0201: consider-iterating-dictionary, # kept as no harm
+# C0301: http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s), # kept as no harm
+# C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s) , # kept as no harm
+# W0105: pointless-string-statement, # kept as no harm
+# R0801: similar lines, # too granular
+# C0209: Formatting a regular string which could be a f-string (consider-using-f-string)  # to many usage atm
+# R1735: Consider using {} instead of dict() (use-dict-literal)
+
+[tool.pylint.'IMPORTS']
+ignored-modules = ["bech32", "ecdsa", "lru", "eth_typing", "eth_keys", "eth_account", "ipfshttpclient", "werkzeug", "openapi_spec_validator", "aiohttp", "multidict", "yoti_python_sdk", "defusedxml", "gym", "fetch", "matplotlib", "memory_profiler", "numpy", "oef", "openapi_core", "psutil", "tensorflow", "temper", "skimage", "web3", "aioprometheus", "pyaes", "Crypto", "asn1crypto", "cosmpy", "google", "google.protobuf.any_pb2", "google.protobuf.struct_pb2"]
+
+[tool.pylint.'DESIGN']
+min-public-methods = 1
+max-public-methods = 36
+max-returns = 10
+max-bool-expr = 7
+max-args = 27
+max-locals = 31
+max-statements = 80
+max-parents = 11
+max-branches = 24
+max-attributes = 38
+
+[tool.pylint.'REFACTORING']
+max-nested-blocks = 6
+
+[tool.pylint.'SPELLING']
+# uncomment to enable
+# spelling-dict=en_US
+
+# List of comma separated words that should not be checked.
+spelling-ignore-words = ["nocover", "pragma", "params", "multiaddress", "multihash", "OEF", "wrt", "Protobuf", "protobuf", "backend", "coroutine", "noqa", "ascii", "asyncio", "awaitable", "kwargs", "multihashing", "interoperable", "inlining", "datamodel", "str", "sqlite", "sql", "async", "json", "boolean", "config", "pytest", "counterparty", "Unregister", "unregister", "behaviours", "crypto", "cryptos", "args", "url", "tx", "testnet", "decrypt", "validator", "env", "jsonschema", "URI", "uri", "entrypoint", "initialise", "ethereum", "traceback", "fetchai", "apis", "api", "TCPSocketProtocol", "instantiation", "ip", "Haversine", "instantiation", "enum", "nosec", "Init", "init", "Behaviour", "className", "AEA", "aea", "schemas", "vendorized", "subcommand", "filesystem", "workdir", "ctx", "yaml", "representer", "multiprocess", "Struct", "struct", "Serializers", "ValueType", "serializer", "filepath", "subprocesses", "Teardown", "namespace", "LF", "maddr", "profiler", "cpu", "myfunction", "prepend", "mydecorator", "CLI", "subprocess", "ComponentId", "bool", "satisfiable", "unsatisfiable", "dicts", "utils", "entrypoints", "prepended", "coroutines", "functools", "ctrl", "posix", "stdin", "Posix", "tcp", "AbstractServer", "StreamReaderProtocol", "StreamReader", "cli", "reraise", "SafeLoader", "SafeDumper", "pathlib", "coro", "runnable", "Runnable", "PublicId", "stdout", "netloc", "dest", "subgraph", "subdict", "behaviour", "Popen", "Interprocess", "datetime", "isort", "runtime", "toplevel", "callables", "Enqueue", "Kahn's", "myagent", "fn", "cwd", "disjunction", "cancelled", "Pythonic", "pythonic", "prepends", "subclasses", "protolint", "Protolint", "performatives", "programmatically", "behaviour's", "AsyncResult", "sys", "enqueued", "multithread", "teardown", "satisfiability", "dep", "overridables", "arg", "stderr", "multithreading", "configs", "getters", "getter", "classmethods", "enqueue", "interprocess", "exc", "pydocstyle", "linter", "programme", "compositional", "formatter", "counterparty's", "endstates", "EndState", "AgentContext", "disambiguated", "prepending", "dir", "tarfiles", "docstyle", "msg", "func", "ComponentType", "PosixNamedPipeProtocol", "ungrouped", "reformats", "protoc", "DialogueLabel", "Metaclass", "responder", "UtilityParams", "ExchangeParams", "GoodHoldings", "CurrencyHoldings", "rb", "auth", "dirs", "symlink", "BadParameter", "metavar", "readme", "multithreads", "upgrader", "src", "pid", "mypy", "outstream", "CliRunner", "semver", "VersionInfo", "reinstantiate", "pre", "ItemId", "serializable", "repo", "upgraders", "addr", "endstate", "performative's", "proto", "uncomment", "Deserialize", "fnctl", "Sym", "cd", "ACN", "os", "ok", "SDK", "subtypes", "JS", "fifos", "preprocess", "dst", "overridable", "Mixin", "unregistration", "multithreaded", "iterable", "txt", "ln", "py", "Util", "ClickException", "ai", "ABI", "approver", "deployer", "trustless", "wei", "AppRunner", "TCPSite", "webhook", "Webhook", "Webhooks", "hostname", "http", "ClientResponse", "TLS", "soef", "xml", "unregisters", "FET", "eth", "nft", "AbstractEventLoop", "aiohttp", "uris", "StreamWriter", "msgs", "oef", "watchdogging", "webhooks", "RequestValidator", "ACA", "alice", "faber", "RegisterDialogue", "fipa", "prometheus", "TAC", "fet", "tac", "CFP", "GymDialogue", "RL", "LedgerApiDialogue", "faber's", "AWx", "parametrized", "FipaDialogue", "MlTradeDialogue", "carpark", "blockchain", "counterparties", "dec", "mins", "Calc", "vyper", "SigningDialogue", "modelling", "ContractApiDialogue", "alice's", "quickfix", "StateUpdateDialogue", "hacky", "aea's", "dataset", "MessageId", "cfp", "rl", "TacDialogue", "BaseFipaDialogue", "von", "maths", "Deque", "unregistering", "yoti", "copyable", "deepcopy", "multiaddresses", "logfile", "Vous", "ipaddress", "clargs", "IPCChannel", "MultiAddr", "Rendez", "gcc", "aioprometheus", "getattr", "noop", "Noop", "multiagent", "ttfb", "rtt", "mem", "xaxis", "superclass", "docstring", "execreport", "benchmarked", "ReportPrinter", "plt", "kb", "num", "initialised", "bytecode", "wasm", "denom", "mainnet", "fp", "uid", "cosmwasm", "Conftest", "decrypted", "initialisation", "hmac", "plaintext", "aes", "ipfs", "unlinked", "ipfshttpclient", "gasstation", "Ganache", "hexbytes", "txs", "LRU"]
+
+[tool.coverage.run]
+omit = [
+    "*/.tox/*"
+]

@@ -213,7 +213,7 @@ class _DialogueMeta(type):
     def __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta":
         """Construct a new type."""
         # set class level `_rules`
-        dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
+        dialogue_cls = cast(Type["Dialogue"], super().__new__(cls, name, bases, dct))
         dialogue_cls._rules = dialogue_cls.Rules(
             dialogue_cls.INITIAL_PERFORMATIVES,
             dialogue_cls.TERMINAL_PERFORMATIVES,
@@ -614,7 +614,8 @@ class Dialogue(metaclass=_DialogueMeta):
         if not is_valid_result:
             raise InvalidDialogueMessage(
                 "Message {} is invalid with respect to this dialogue. Error: {}".format(
-                    message.message_id, validation_message,
+                    message.message_id,
+                    validation_message,
                 )
             )
 
@@ -650,7 +651,9 @@ class Dialogue(metaclass=_DialogueMeta):
             result = self_initiated_dialogue_label in self.dialogue_labels
         else:
             other_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, opponent, opponent,
+                message.dialogue_reference,
+                opponent,
+                opponent,
             )
             result = other_initiated_dialogue_label in self.dialogue_labels
         return result
@@ -960,7 +963,7 @@ class Dialogue(metaclass=_DialogueMeta):
         )
         self._dialogue_label = final_dialogue_label
 
-    def _custom_validation(  # pylint: disable=no-self-use,unused-argument
+    def _custom_validation(  # pylint: disable=unused-argument
         self, message: Message
     ) -> Tuple[bool, str]:
         """
@@ -1638,7 +1641,10 @@ class Dialogues:
         return cls._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
-        self, counterparty: Address, performative: Message.Performative, **kwargs: Any,
+        self,
+        counterparty: Address,
+        performative: Message.Performative,
+        **kwargs: Any,
     ) -> Tuple[Message, Dialogue]:
         """
         Create a dialogue with 'counterparty', with an initial message whose performative is 'performative' and contents are from 'kwargs'.
@@ -1796,9 +1802,8 @@ class Dialogues:
         """
         complete_dialogue_reference = message.dialogue_reference
         enforce(
-            complete_dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and complete_dialogue_reference[1]
-            != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            not in (complete_dialogue_reference[0], complete_dialogue_reference[1]),
             "Only complete dialogue references allowed.",
         )
 
@@ -1807,7 +1812,9 @@ class Dialogues:
             Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
         )
         incomplete_dialogue_label = DialogueLabel(
-            incomplete_dialogue_reference, message.sender, self.self_address,
+            incomplete_dialogue_reference,
+            message.sender,
+            self.self_address,
         )
 
         if self._dialogues_storage.is_dialogue_present(

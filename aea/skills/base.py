@@ -412,7 +412,7 @@ class Behaviour(AbstractBehaviour, ABC):
         :return: None
         """
 
-    def is_done(self) -> bool:  # pylint: disable=no-self-use
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return False
 
@@ -429,7 +429,7 @@ class Behaviour(AbstractBehaviour, ABC):
             )
 
     @classmethod
-    def parse_module(  # pylint: disable=arguments-differ
+    def parse_module(  # pylint: disable=arguments-differ,arguments-renamed
         cls,
         path: str,
         behaviour_configs: Dict[str, SkillComponentConfiguration],
@@ -488,7 +488,7 @@ class Handler(SkillComponent, ABC):
             )
 
     @classmethod
-    def parse_module(  # pylint: disable=arguments-differ
+    def parse_module(  # pylint: disable=arguments-differ,arguments-renamed
         cls,
         path: str,
         handler_configs: Dict[str, SkillComponentConfiguration],
@@ -544,7 +544,7 @@ class Model(SkillComponent, ABC):
             super_obj.teardown()  # type: ignore  # pylint: disable=no-member
 
     @classmethod
-    def parse_module(  # pylint: disable=arguments-differ
+    def parse_module(  # pylint: disable=arguments-differ,arguments-renamed
         cls,
         path: str,
         model_configs: Dict[str, SkillComponentConfiguration],
@@ -976,7 +976,8 @@ class _SkillComponentLoader:
         return result
 
     def _get_component_instances(
-        self, component_loading_items: List[_SkillComponentLoadingItem],
+        self,
+        component_loading_items: List[_SkillComponentLoadingItem],
     ) -> _ComponentsHelperIndex:
         """
         Instantiate classes declared in configuration files.
@@ -997,7 +998,8 @@ class _SkillComponentLoader:
 
     @classmethod
     def _get_skill_component_type(
-        cls, skill_component_type: Type[SkillComponent],
+        cls,
+        skill_component_type: Type[SkillComponent],
     ) -> Type[Union[Handler, Behaviour, Model]]:
         """Get the concrete skill component type."""
         parent_skill_component_types = list(

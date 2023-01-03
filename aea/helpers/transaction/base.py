@@ -37,7 +37,11 @@ class RawTransaction:
 
     __slots__ = ("_ledger_id", "_body")
 
-    def __init__(self, ledger_id: str, body: JSONLike,) -> None:
+    def __init__(
+        self,
+        ledger_id: str,
+        body: JSONLike,
+    ) -> None:
         """Initialise an instance of RawTransaction."""
         self._ledger_id = ledger_id
         self._body = body
@@ -76,8 +80,8 @@ class RawTransaction:
             "body": raw_transaction_object.body,
         }
 
-        raw_transaction_protobuf_object.raw_transaction = DictProtobufStructSerializer.encode(
-            raw_transaction_dict
+        raw_transaction_protobuf_object.raw_transaction = (
+            DictProtobufStructSerializer.encode(raw_transaction_dict)
         )
 
     @classmethod
@@ -106,7 +110,8 @@ class RawTransaction:
     def __str__(self) -> str:
         """Get string representation."""
         return "RawTransaction: ledger_id={}, body={}".format(
-            self.ledger_id, self.body,
+            self.ledger_id,
+            self.body,
         )
 
 
@@ -116,7 +121,10 @@ class RawMessage:
     __slots__ = ("_ledger_id", "_body", "_is_deprecated_mode")
 
     def __init__(
-        self, ledger_id: str, body: bytes, is_deprecated_mode: bool = False,
+        self,
+        ledger_id: str,
+        body: bytes,
+        is_deprecated_mode: bool = False,
     ) -> None:
         """Initialise an instance of RawMessage."""
         self._ledger_id = ledger_id
@@ -201,7 +209,9 @@ class RawMessage:
     def __str__(self) -> str:
         """Get string representation."""
         return "RawMessage: ledger_id={}, body={!r}, is_deprecated_mode={}".format(
-            self.ledger_id, self.body, self.is_deprecated_mode,
+            self.ledger_id,
+            self.body,
+            self.is_deprecated_mode,
         )
 
 
@@ -210,7 +220,11 @@ class SignedTransaction:
 
     __slots__ = ("_ledger_id", "_body")
 
-    def __init__(self, ledger_id: str, body: JSONLike,) -> None:
+    def __init__(
+        self,
+        ledger_id: str,
+        body: JSONLike,
+    ) -> None:
         """Initialise an instance of SignedTransaction."""
         self._ledger_id = ledger_id
         self._body = body
@@ -249,8 +263,8 @@ class SignedTransaction:
             "body": signed_transaction_object.body,
         }
 
-        signed_transaction_protobuf_object.signed_transaction = DictProtobufStructSerializer.encode(
-            signed_transaction_dict
+        signed_transaction_protobuf_object.signed_transaction = (
+            DictProtobufStructSerializer.encode(signed_transaction_dict)
         )
 
     @classmethod
@@ -281,7 +295,8 @@ class SignedTransaction:
     def __str__(self) -> str:
         """Get string representation."""
         return "SignedTransaction: ledger_id={}, body={}".format(
-            self.ledger_id, self.body,
+            self.ledger_id,
+            self.body,
         )
 
 
@@ -291,7 +306,10 @@ class SignedMessage:
     __slots__ = ("_ledger_id", "_body", "_is_deprecated_mode")
 
     def __init__(
-        self, ledger_id: str, body: str, is_deprecated_mode: bool = False,
+        self,
+        ledger_id: str,
+        body: str,
+        is_deprecated_mode: bool = False,
     ) -> None:
         """Initialise an instance of SignedMessage."""
         self._ledger_id = ledger_id
@@ -341,8 +359,8 @@ class SignedMessage:
             "is_deprecated_mode": signed_message_object.is_deprecated_mode,
         }
 
-        signed_message_protobuf_object.signed_message = DictProtobufStructSerializer.encode(
-            signed_message_dict
+        signed_message_protobuf_object.signed_message = (
+            DictProtobufStructSerializer.encode(signed_message_dict)
         )
 
     @classmethod
@@ -376,7 +394,9 @@ class SignedMessage:
     def __str__(self) -> str:
         """Get string representation."""
         return "SignedMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
-            self.ledger_id, self.body, self.is_deprecated_mode,
+            self.ledger_id,
+            self.body,
+            self.is_deprecated_mode,
         )
 
 
@@ -552,20 +572,20 @@ class Terms:
         enforce(
             isinstance(self._amount_by_currency_id, dict)
             and all(
-                [
+                (
                     isinstance(key, str) and isinstance(value, int)
                     for key, value in self._amount_by_currency_id.items()
-                ]
+                )
             ),
             "amount_by_currency_id must be a dictionary with str keys and int values.",
         )
         enforce(
             isinstance(self._quantities_by_good_id, dict)
             and all(
-                [
+                (
                     isinstance(key, str) and isinstance(value, int)
                     for key, value in self._quantities_by_good_id.items()
-                ]
+                )
             ),
             "quantities_by_good_id must be a dictionary with str keys and int values.",
         )
@@ -579,35 +599,35 @@ class Terms:
             or (
                 isinstance(self._fee_by_currency_id, dict)
                 and all(
-                    [
+                    (
                         isinstance(key, str) and isinstance(value, int) and value >= 0
                         for key, value in self._fee_by_currency_id.items()
-                    ]
+                    )
                 )
             ),
             "fee must be None or Dict[str, int] with positive fees only.",
         )
         enforce(
             all(
-                [
+                (
                     key in self._amount_by_currency_id
                     for key in self._fee_by_currency_id.keys()
-                ]
+                )
             ),
             "Fee dictionary has keys which are not present in amount dictionary.",
         )
         if self._is_strict:
             is_pos_amounts = all(
-                [amount >= 0 for amount in self._amount_by_currency_id.values()]
+                (amount >= 0 for amount in self._amount_by_currency_id.values())
             )
             is_neg_amounts = all(
-                [amount <= 0 for amount in self._amount_by_currency_id.values()]
+                (amount <= 0 for amount in self._amount_by_currency_id.values())
             )
             is_pos_quantities = all(
-                [quantity >= 0 for quantity in self._quantities_by_good_id.values()]
+                (quantity >= 0 for quantity in self._quantities_by_good_id.values())
             )
             is_neg_quantities = all(
-                [quantity <= 0 for quantity in self._quantities_by_good_id.values()]
+                (quantity <= 0 for quantity in self._quantities_by_good_id.values())
             )
             enforce(
                 (is_pos_amounts and is_neg_quantities)
@@ -1007,8 +1027,8 @@ class TransactionDigest:
             "body": transaction_digest_object.body,
         }
 
-        transaction_digest_protobuf_object.transaction_digest = DictProtobufStructSerializer.encode(
-            transaction_digest_dict
+        transaction_digest_protobuf_object.transaction_digest = (
+            DictProtobufStructSerializer.encode(transaction_digest_dict)
         )
 
     @classmethod
@@ -1098,8 +1118,8 @@ class TransactionReceipt:
             "transaction": transaction_receipt_object.transaction,
         }
 
-        transaction_receipt_protobuf_object.transaction_receipt = DictProtobufStructSerializer.encode(
-            transaction_receipt_dict
+        transaction_receipt_protobuf_object.transaction_receipt = (
+            DictProtobufStructSerializer.encode(transaction_receipt_dict)
         )
 
     @classmethod

@@ -28,8 +28,6 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
-from pip._internal.commands.show import search_packages_info  # type: ignore
-
 
 AEA_ROOT_DIR = Path(__file__).parent.parent
 
@@ -40,7 +38,7 @@ from aea.crypto.registries import (  # noqa # pylint: disable=wrong-import-posit
 )
 
 
-IGNORE: Set[str] = {"pkg_resources"}
+IGNORE: Set[str] = {"pkg_resources", "distutils.dir_util"}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 
@@ -60,6 +58,10 @@ class DependenciesTool:
     @staticmethod
     def get_package_files(package_name: str) -> List[Path]:
         """Get package files list."""
+        from pip._internal.commands.show import (  # type: ignore  # noqa  # pylint: disable=import-outside-toplevel
+            search_packages_info,
+        )
+
         packages_info = list(search_packages_info([package_name]))
         if len(packages_info) == 0:
             raise Exception(f"package {package_name} not found")
@@ -86,7 +88,7 @@ class ImportsTool:
     @staticmethod
     def get_imports_for_file(pyfile: Union[str, Path]) -> List[str]:
         """Get all imported modules for python source file."""
-        with open(pyfile, "r") as f:
+        with open(pyfile, "r", encoding="utf-8") as f:
             statements = f.read()
         instructions = dis.get_instructions(statements)  # type: ignore
         imports = [i for i in instructions if "IMPORT" in i.opname]
@@ -151,6 +153,7 @@ class CheckTool:
         spec = importlib.util.spec_from_file_location(
             "setup", str(AEA_ROOT_DIR / "setup.py")
         )
+        assert spec
         setup = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = setup
         spec.loader.exec_module(setup)  # type: ignore
@@ -235,7 +238,7 @@ class CheckTool:
 
     @staticmethod
     def check_imports(
-        sections_imports: Dict[str, Set[str]],
+        sections_imports: Dict[str, Set[Tuple[str, Path]]],
         sections_dependencies: Dict[str, Dict[str, List[str]]],
     ) -> Tuple[Dict[str, List[str]], List[str]]:
         """Find missing dependencies for imports and not imported dependencies."""
@@ -254,7 +257,7 @@ class CheckTool:
         for section, modules in sections_imports.items():
             for module, pyfile in modules:
                 package = _find_dependency_for_module(
-                    sections_dependencies.get(section, {}), pyfile
+                    sections_dependencies.get(section, {}), pyfile  # type: ignore
                 )
                 if module not in IGNORE:
                     sections_imports_packages[section][module] = package

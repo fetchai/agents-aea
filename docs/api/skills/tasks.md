@@ -1,9 +1,11 @@
-<a name="aea.skills.tasks"></a>
+<a id="aea.skills.tasks"></a>
+
 # aea.skills.tasks
 
 This module contains the classes for tasks.
 
-<a name="aea.skills.tasks.Task"></a>
+<a id="aea.skills.tasks.Task"></a>
+
 ## Task Objects
 
 ```python
@@ -12,20 +14,22 @@ class Task(WithLogger)
 
 This class implements an abstract task.
 
-<a name="aea.skills.tasks.Task.__init__"></a>
+<a id="aea.skills.tasks.Task.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs: Any) -> None
+def __init__(**kwargs: Any) -> None
 ```
 
 Initialize a task.
 
-<a name="aea.skills.tasks.Task.__call__"></a>
+<a id="aea.skills.tasks.Task.__call__"></a>
+
 #### `__`call`__`
 
 ```python
- | __call__(*args: Any, **kwargs: Any) -> Any
+def __call__(*args: Any, **kwargs: Any) -> Any
 ```
 
 Execute the task.
@@ -35,57 +39,61 @@ Execute the task.
 - `args`: positional arguments forwarded to the 'execute' method.
 - `kwargs`: keyword arguments forwarded to the 'execute' method.
 
-**Returns**:
-
-the task instance
-
 **Raises**:
 
 - `ValueError`: if the task has already been executed.
 
-<a name="aea.skills.tasks.Task.is_executed"></a>
+**Returns**:
+
+the task instance
+
+<a id="aea.skills.tasks.Task.is_executed"></a>
+
 #### is`_`executed
 
 ```python
- | @property
- | is_executed() -> bool
+@property
+def is_executed() -> bool
 ```
 
 Check if the task has already been executed.
 
-<a name="aea.skills.tasks.Task.result"></a>
+<a id="aea.skills.tasks.Task.result"></a>
+
 #### result
 
 ```python
- | @property
- | result() -> Any
+@property
+def result() -> Any
 ```
 
 Get the result.
-
-**Returns**:
-
-the result from the execute method.
 
 **Raises**:
 
 - `ValueError`: if the task has not been executed yet.
 
-<a name="aea.skills.tasks.Task.setup"></a>
+**Returns**:
+
+the result from the execute method.
+
+<a id="aea.skills.tasks.Task.setup"></a>
+
 #### setup
 
 ```python
- | setup() -> None
+def setup() -> None
 ```
 
 Implement the task setup.
 
-<a name="aea.skills.tasks.Task.execute"></a>
+<a id="aea.skills.tasks.Task.execute"></a>
+
 #### execute
 
 ```python
- | @abstractmethod
- | execute(*args: Any, **kwargs: Any) -> Any
+@abstractmethod
+def execute(*args: Any, **kwargs: Any) -> Any
 ```
 
 Run the task logic.
@@ -99,20 +107,22 @@ Run the task logic.
 
 any
 
-<a name="aea.skills.tasks.Task.teardown"></a>
+<a id="aea.skills.tasks.Task.teardown"></a>
+
 #### teardown
 
 ```python
- | teardown() -> None
+def teardown() -> None
 ```
 
 Implement the task teardown.
 
-<a name="aea.skills.tasks.init_worker"></a>
+<a id="aea.skills.tasks.init_worker"></a>
+
 #### init`_`worker
 
 ```python
-init_worker() -> None
+def init_worker() -> None
 ```
 
 Initialize a worker.
@@ -120,7 +130,8 @@ Initialize a worker.
 Disable the SIGINT handler of process pool is using.
 Related to a well-known bug: https://bugs.python.org/issue8296
 
-<a name="aea.skills.tasks.TaskManager"></a>
+<a id="aea.skills.tasks.TaskManager"></a>
+
 ## TaskManager Objects
 
 ```python
@@ -129,11 +140,15 @@ class TaskManager(WithLogger)
 
 A Task manager.
 
-<a name="aea.skills.tasks.TaskManager.__init__"></a>
+<a id="aea.skills.tasks.TaskManager.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None, pool_mode: str = THREAD_POOL_MODE) -> None
+def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+             is_lazy_pool_start: bool = True,
+             logger: Optional[logging.Logger] = None,
+             pool_mode: str = THREAD_POOL_MODE) -> None
 ```
 
 Initialize the task manager.
@@ -145,12 +160,13 @@ Initialize the task manager.
 - `logger`: the logger.
 - `pool_mode`: str. multithread or multiprocess
 
-<a name="aea.skills.tasks.TaskManager.is_started"></a>
+<a id="aea.skills.tasks.TaskManager.is_started"></a>
+
 #### is`_`started
 
 ```python
- | @property
- | is_started() -> bool
+@property
+def is_started() -> bool
 ```
 
 Get started status of TaskManager.
@@ -159,12 +175,13 @@ Get started status of TaskManager.
 
 bool
 
-<a name="aea.skills.tasks.TaskManager.nb_workers"></a>
+<a id="aea.skills.tasks.TaskManager.nb_workers"></a>
+
 #### nb`_`workers
 
 ```python
- | @property
- | nb_workers() -> int
+@property
+def nb_workers() -> int
 ```
 
 Get the number of workers.
@@ -173,11 +190,14 @@ Get the number of workers.
 
 int
 
-<a name="aea.skills.tasks.TaskManager.enqueue_task"></a>
+<a id="aea.skills.tasks.TaskManager.enqueue_task"></a>
+
 #### enqueue`_`task
 
 ```python
- | enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
+def enqueue_task(func: Callable,
+                 args: Sequence = (),
+                 kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the executor.
@@ -188,19 +208,20 @@ Enqueue a task with the executor.
 - `args`: the positional arguments to be passed to the function.
 - `kwargs`: the keyword arguments to be passed to the function.
 
-**Returns**:
-
-the task id to get the the result.
-
 **Raises**:
 
 - `ValueError`: if the task manager is not running.
 
-<a name="aea.skills.tasks.TaskManager.get_task_result"></a>
+**Returns**:
+
+the task id to get the the result.
+
+<a id="aea.skills.tasks.TaskManager.get_task_result"></a>
+
 #### get`_`task`_`result
 
 ```python
- | get_task_result(task_id: int) -> AsyncResult
+def get_task_result(task_id: int) -> AsyncResult
 ```
 
 Get the result from a task.
@@ -213,25 +234,28 @@ Get the result from a task.
 
 async result for task_id
 
-<a name="aea.skills.tasks.TaskManager.start"></a>
+<a id="aea.skills.tasks.TaskManager.start"></a>
+
 #### start
 
 ```python
- | start() -> None
+def start() -> None
 ```
 
 Start the task manager.
 
-<a name="aea.skills.tasks.TaskManager.stop"></a>
+<a id="aea.skills.tasks.TaskManager.stop"></a>
+
 #### stop
 
 ```python
- | stop() -> None
+def stop() -> None
 ```
 
 Stop the task manager.
 
-<a name="aea.skills.tasks.ThreadedTaskManager"></a>
+<a id="aea.skills.tasks.ThreadedTaskManager"></a>
+
 ## ThreadedTaskManager Objects
 
 ```python
@@ -240,11 +264,14 @@ class ThreadedTaskManager(TaskManager)
 
 A threaded task manager.
 
-<a name="aea.skills.tasks.ThreadedTaskManager.__init__"></a>
+<a id="aea.skills.tasks.ThreadedTaskManager.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
+def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+             is_lazy_pool_start: bool = True,
+             logger: Optional[logging.Logger] = None) -> None
 ```
 
 Initialize the task manager.
@@ -255,7 +282,8 @@ Initialize the task manager.
 - `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
 - `logger`: the logger.
 
-<a name="aea.skills.tasks.ProcessTaskManager"></a>
+<a id="aea.skills.tasks.ProcessTaskManager"></a>
+
 ## ProcessTaskManager Objects
 
 ```python
@@ -264,11 +292,14 @@ class ProcessTaskManager(TaskManager)
 
 A multiprocess task manager.
 
-<a name="aea.skills.tasks.ProcessTaskManager.__init__"></a>
+<a id="aea.skills.tasks.ProcessTaskManager.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
+def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+             is_lazy_pool_start: bool = True,
+             logger: Optional[logging.Logger] = None) -> None
 ```
 
 Initialize the task manager.

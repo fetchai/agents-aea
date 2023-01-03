@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x10prometheus.proto\x12\x1d\x61\x65\x61.fetchai.prometheus.v1_0_0"\xdf\x06\n\x11PrometheusMessage\x12^\n\nadd_metric\x18\x05 \x01(\x0b\x32H.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Add_Metric_PerformativeH\x00\x12Z\n\x08response\x18\x06 \x01(\x0b\x32\x46.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Response_PerformativeH\x00\x12\x64\n\rupdate_metric\x18\x07 \x01(\x0b\x32K.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Update_Metric_PerformativeH\x00\x1a\xe0\x01\n\x17\x41\x64\x64_Metric_Performative\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x64\n\x06labels\x18\x04 \x03(\x0b\x32T.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xe4\x01\n\x1aUpdate_Metric_Performative\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\r\n\x05value\x18\x03 \x01(\x02\x12g\n\x06labels\x18\x04 \x03(\x0b\x32W.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1aN\n\x15Response_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3'
+    b'\n\x10prometheus.proto\x12\x1d\x61\x65\x61.fetchai.prometheus.v1_0_0"\xdf\x06\n\x11PrometheusMessage\x12^\n\nadd_metric\x18\x05 \x01(\x0b\x32H.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Add_Metric_PerformativeH\x00\x12Z\n\x08response\x18\x06 \x01(\x0b\x32\x46.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Response_PerformativeH\x00\x12\x64\n\rupdate_metric\x18\x07 \x01(\x0b\x32K.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Update_Metric_PerformativeH\x00\x1a\xe0\x01\n\x17\x41\x64\x64_Metric_Performative\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x64\n\x06labels\x18\x04 \x03(\x0b\x32T.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xe4\x01\n\x1aUpdate_Metric_Performative\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\r\n\x05value\x18\x03 \x01(\x02\x12g\n\x06labels\x18\x04 \x03(\x0b\x32W.aea.fetchai.prometheus.v1_0_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1aN\n\x15Response_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x03\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3'
 )
 
 
@@ -22,15 +22,15 @@ _PROMETHEUSMESSAGE = DESCRIPTOR.message_types_by_name["PrometheusMessage"]
 _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE = _PROMETHEUSMESSAGE.nested_types_by_name[
     "Add_Metric_Performative"
 ]
-_PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE_LABELSENTRY = _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE.nested_types_by_name[
-    "LabelsEntry"
-]
+_PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE_LABELSENTRY = (
+    _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE.nested_types_by_name["LabelsEntry"]
+)
 _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE = _PROMETHEUSMESSAGE.nested_types_by_name[
     "Update_Metric_Performative"
 ]
-_PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE_LABELSENTRY = _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE.nested_types_by_name[
-    "LabelsEntry"
-]
+_PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE_LABELSENTRY = (
+    _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE.nested_types_by_name["LabelsEntry"]
+)
 _PROMETHEUSMESSAGE_RESPONSE_PERFORMATIVE = _PROMETHEUSMESSAGE.nested_types_by_name[
     "Response_Performative"
 ]

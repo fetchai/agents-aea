@@ -108,7 +108,7 @@ class MlTradeSerializer(Serializer):
         ml_trade_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = ml_trade_pb.WhichOneof("performative")
         performative_id = MlTradeMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == MlTradeMessage.Performative.CFP:
             pb2_query = ml_trade_pb.cfp.query
             query = Query.decode(pb2_query)

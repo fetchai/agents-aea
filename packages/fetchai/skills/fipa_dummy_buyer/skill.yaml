@@ -1,13 +1,13 @@
 name: fipa_dummy_buyer
 author: fetchai
-version: 0.3.0
+version: 0.3.5
 type: skill
 description: Sample skill for FIPA interaction as a buyer.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRvuk8JPFrir9kwiT1zRBWYZvYUBrjyqMurk2UMaDBABW
-  __init__.py: QmdvKzMXQ6SXLEN8tcDeBbfvzrCEJg3duHN63c7i7j3XaJ
+  __init__.py: QmVd2gNnLVCpQiFmi9AtVQccqpjjihkZ2TiDzkXAC6j1RQ
   behaviours.py: QmWwghRSimHLVvqYVDvPfgD4D6BBDW86aW6bciD1UW4T9n
   dialogues.py: QmfYQk9uhDiNZJMEScR174z5xu3AhuqKTyrwHk2uYV8DBr
   handlers.py: QmZv5Pv5uuqzLcPBRHiJvv6rNZF1xxP7hVSTwP1T8Mp1Ks
@@ -15,7 +15,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/fipa:1.1.0
+- fetchai/fipa:1.1.6
 skills: []
 behaviours:
   initializer:

@@ -144,7 +144,7 @@ set_p2p_connection(){
 	json=$(printf '{"delegate_uri": null, "entry_peers": [%s], "local_uri": "127.0.0.1:1%0.4d", "public_uri": %s}' "$peer" "$port" "$public_url")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	aea config get vendor.fetchai.connections.p2p_libp2p.config
-	json=$(printf '[{"identifier": "acn", "ledger_id": "%s", "not_after": "2030-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]' "$key_type")
+	json=$(printf '[{"identifier": "acn", "ledger_id": "%s", "not_after": "2030-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]' "$key_type")
 	aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
 }
 
@@ -168,7 +168,7 @@ set_PEER(){
 	  # do nothing
 	    ;;
 	  local)
-	  	PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri`
+	  	PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri`
 	    ;;
 	esac
 }

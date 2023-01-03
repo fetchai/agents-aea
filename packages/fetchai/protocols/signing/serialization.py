@@ -122,7 +122,7 @@ class SigningSerializer(Serializer):
         signing_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = signing_pb.WhichOneof("performative")
         performative_id = SigningMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == SigningMessage.Performative.SIGN_TRANSACTION:
             pb2_terms = signing_pb.sign_transaction.terms
             terms = Terms.decode(pb2_terms)

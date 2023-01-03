@@ -1,9 +1,11 @@
-<a name="aea.aea"></a>
+<a id="aea.aea"></a>
+
 # aea.aea
 
 This module contains the implementation of an autonomous economic agent (AEA).
 
-<a name="aea.aea.AEA"></a>
+<a id="aea.aea.AEA"></a>
+
 ## AEA Objects
 
 ```python
@@ -12,11 +14,40 @@ class AEA(Agent)
 
 This class implements an autonomous economic agent.
 
-<a name="aea.aea.AEA.__init__"></a>
+<a id="aea.aea.AEA.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, error_handler_config: Optional[Dict[str, Any]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, decision_maker_handler_config: Optional[Dict[str, Any]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, task_manager_mode: Optional[str] = None, **kwargs: Any, ,) -> None
+def __init__(
+        identity: Identity,
+        wallet: Wallet,
+        resources: Resources,
+        data_dir: str,
+        loop: Optional[AbstractEventLoop] = None,
+        period: float = 0.05,
+        execution_timeout: float = 0,
+        max_reactions: int = 20,
+        error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
+        error_handler_config: Optional[Dict[str, Any]] = None,
+        decision_maker_handler_class: Optional[
+            Type[DecisionMakerHandler]] = None,
+        decision_maker_handler_config: Optional[Dict[str, Any]] = None,
+        skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.
+    propagate,
+        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.
+    propagate,
+        loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
+        default_ledger: Optional[str] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
+        default_connection: Optional[PublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
+        storage_uri: Optional[str] = None,
+        task_manager_mode: Optional[str] = None,
+        **kwargs: Any) -> None
 ```
 
 Instantiate the agent.
@@ -49,93 +80,102 @@ Instantiate the agent.
 - `task_manager_mode`: task manager mode (threaded) to run tasks with.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
-<a name="aea.aea.AEA.get_build_dir"></a>
+<a id="aea.aea.AEA.get_build_dir"></a>
+
 #### get`_`build`_`dir
 
 ```python
- | @classmethod
- | get_build_dir(cls) -> str
+@classmethod
+def get_build_dir(cls) -> str
 ```
 
 Get agent build directory.
 
-<a name="aea.aea.AEA.context"></a>
+<a id="aea.aea.AEA.context"></a>
+
 #### context
 
 ```python
- | @property
- | context() -> AgentContext
+@property
+def context() -> AgentContext
 ```
 
 Get (agent) context.
 
-<a name="aea.aea.AEA.resources"></a>
+<a id="aea.aea.AEA.resources"></a>
+
 #### resources
 
 ```python
- | @property
- | resources() -> Resources
+@property
+def resources() -> Resources
 ```
 
 Get resources.
 
-<a name="aea.aea.AEA.resources"></a>
+<a id="aea.aea.AEA.resources"></a>
+
 #### resources
 
 ```python
- | @resources.setter
- | resources(resources: "Resources") -> None
+@resources.setter
+def resources(resources: "Resources") -> None
 ```
 
 Set resources.
 
-<a name="aea.aea.AEA.filter"></a>
+<a id="aea.aea.AEA.filter"></a>
+
 #### filter
 
 ```python
- | @property
- | filter() -> Filter
+@property
+def filter() -> Filter
 ```
 
 Get the filter.
 
-<a name="aea.aea.AEA.active_behaviours"></a>
+<a id="aea.aea.AEA.active_behaviours"></a>
+
 #### active`_`behaviours
 
 ```python
- | @property
- | active_behaviours() -> List[Behaviour]
+@property
+def active_behaviours() -> List[Behaviour]
 ```
 
 Get all active behaviours to use in act.
 
-<a name="aea.aea.AEA.setup"></a>
+<a id="aea.aea.AEA.setup"></a>
+
 #### setup
 
 ```python
- | setup() -> None
+def setup() -> None
 ```
 
 Set up the agent.
 
 Calls setup() on the resources.
 
-<a name="aea.aea.AEA.act"></a>
+<a id="aea.aea.AEA.act"></a>
+
 #### act
 
 ```python
- | act() -> None
+def act() -> None
 ```
 
 Perform actions.
 
 Adds new handlers and behaviours for use/execution by the runtime.
 
-<a name="aea.aea.AEA.handle_envelope"></a>
+<a id="aea.aea.AEA.handle_envelope"></a>
+
 #### handle`_`envelope
 
 ```python
- | handle_envelope(envelope: Envelope) -> None
+def handle_envelope(envelope: Envelope) -> None
 ```
 
 Handle an envelope.
@@ -156,11 +196,13 @@ Performs the following:
 
 None
 
-<a name="aea.aea.AEA.get_periodic_tasks"></a>
+<a id="aea.aea.AEA.get_periodic_tasks"></a>
+
 #### get`_`periodic`_`tasks
 
 ```python
- | get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
+def get_periodic_tasks(
+) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
 ```
 
 Get all periodic tasks for agent.
@@ -169,11 +211,12 @@ Get all periodic tasks for agent.
 
 dict of callable with period specified
 
-<a name="aea.aea.AEA.get_message_handlers"></a>
+<a id="aea.aea.AEA.get_message_handlers"></a>
+
 #### get`_`message`_`handlers
 
 ```python
- | get_message_handlers() -> List[Tuple[Callable[[Any], None], Callable]]
+def get_message_handlers() -> List[Tuple[Callable[[Any], None], Callable]]
 ```
 
 Get handlers with message getters.
@@ -182,11 +225,12 @@ Get handlers with message getters.
 
 List of tuples of callables: handler and coroutine to get a message
 
-<a name="aea.aea.AEA.exception_handler"></a>
+<a id="aea.aea.AEA.exception_handler"></a>
+
 #### exception`_`handler
 
 ```python
- | exception_handler(exception: Exception, function: Callable) -> bool
+def exception_handler(exception: Exception, function: Callable) -> bool
 ```
 
 Handle exception raised during agent main loop execution.
@@ -200,11 +244,12 @@ Handle exception raised during agent main loop execution.
 
 bool, propagate exception if True otherwise skip it.
 
-<a name="aea.aea.AEA.teardown"></a>
+<a id="aea.aea.AEA.teardown"></a>
+
 #### teardown
 
 ```python
- | teardown() -> None
+def teardown() -> None
 ```
 
 Tear down the agent.
@@ -213,11 +258,12 @@ Performs the following:
 
 - tears down the resources.
 
-<a name="aea.aea.AEA.get_task_result"></a>
+<a id="aea.aea.AEA.get_task_result"></a>
+
 #### get`_`task`_`result
 
 ```python
- | get_task_result(task_id: int) -> AsyncResult
+def get_task_result(task_id: int) -> AsyncResult
 ```
 
 Get the result from a task.
@@ -230,11 +276,14 @@ Get the result from a task.
 
 async result for task_id
 
-<a name="aea.aea.AEA.enqueue_task"></a>
+<a id="aea.aea.AEA.enqueue_task"></a>
+
 #### enqueue`_`task
 
 ```python
- | enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
+def enqueue_task(func: Callable,
+                 args: Sequence = (),
+                 kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the task manager.

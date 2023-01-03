@@ -15,17 +15,17 @@ aca-py start --admin 127.0.0.1 8021 --admin-insecure-mode --inbound-transport ht
 aca-py start --admin 127.0.0.1 8031 --admin-insecure-mode --inbound-transport http 0.0.0.0 8030 --outbound-transp http --webhook-url http://127.0.0.1:8032/webhooks
 ```
 ``` bash
-aea fetch fetchai/aries_alice:0.32.0
+aea fetch fetchai/aries_alice:0.32.4
 cd aries_alice
 ```
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/http_client:0.24.0
-aea add connection fetchai/webhook:0.20.0
-aea add skill fetchai/aries_alice:0.25.0
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/http_client:0.24.5
+aea add connection fetchai/webhook:0.20.5
+aea add skill fetchai/aries_alice:0.26.5
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_alice.models.strategy.args.admin_host 127.0.0.1
@@ -57,17 +57,17 @@ aea build
 aea run
 ```
 ``` bash
-aea fetch fetchai/aries_faber:0.32.0
+aea fetch fetchai/aries_faber:0.32.4
 cd aries_faber
 ```
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/http_client:0.24.0
-aea add connection fetchai/webhook:0.20.0
-aea add skill fetchai/aries_faber:0.23.0
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/http_client:0.24.5
+aea add connection fetchai/webhook:0.20.5
+aea add skill fetchai/aries_faber:0.24.4
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_faber.models.strategy.args.admin_host 127.0.0.1

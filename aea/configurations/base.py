@@ -447,7 +447,7 @@ class PackageConfiguration(Configuration, ABC):
         if instance is None:
             instance = cls(**params)
         else:
-            instance.__init__(**params)  # type: ignore
+            instance.__init__(**params)  # type: ignore # pylint: disable=unnecessary-dunder-call
 
         if directory and not instance.directory:
             instance.directory = directory
@@ -486,7 +486,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             fingerprint_ignore_patterns,
             build_entrypoint,
         )
-        self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
+        self.pypi_dependencies: Dependencies = (
+            dependencies if dependencies is not None else {}
+        )
         self._build_directory = build_directory
 
     @property
@@ -610,17 +612,29 @@ class ConnectionConfig(ComponentConfiguration):
             enforce(version != "", "Version or connection_id must be set.")
         else:
             enforce(
-                name in ("", connection_id.name,),
+                name
+                in (
+                    "",
+                    connection_id.name,
+                ),
                 "Non matching name in ConnectionConfig name and public id.",
             )
             name = connection_id.name
             enforce(
-                author in ("", connection_id.author,),
+                author
+                in (
+                    "",
+                    connection_id.author,
+                ),
                 "Non matching author in ConnectionConfig author and public id.",
             )
             author = connection_id.author
             enforce(
-                version in ("", connection_id.version,),
+                version
+                in (
+                    "",
+                    connection_id.version,
+                ),
                 "Non matching version in ConnectionConfig version and public id.",
             )
             version = connection_id.version
@@ -916,7 +930,7 @@ class SkillComponentConfiguration:
         if instance is None:
             instance = cls(**params)
         else:  # pragma: nocover
-            instance.__init__(**params)  # type: ignore
+            instance.__init__(**params)  # type: ignore # pylint: disable=unnecessary-dunder-call
         return instance
 
 
@@ -1500,17 +1514,35 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         agent_config.connections = set(
-            map(PublicId.from_str, obj.get(CONNECTIONS, []),)
+            map(
+                PublicId.from_str,
+                obj.get(CONNECTIONS, []),
+            )
         )
 
         # parse contracts public ids
-        agent_config.contracts = set(map(PublicId.from_str, obj.get(CONTRACTS, []),))
+        agent_config.contracts = set(
+            map(
+                PublicId.from_str,
+                obj.get(CONTRACTS, []),
+            )
+        )
 
         # parse protocol public ids
-        agent_config.protocols = set(map(PublicId.from_str, obj.get(PROTOCOLS, []),))
+        agent_config.protocols = set(
+            map(
+                PublicId.from_str,
+                obj.get(PROTOCOLS, []),
+            )
+        )
 
         # parse skills public ids
-        agent_config.skills = set(map(PublicId.from_str, obj.get(SKILLS, []),))
+        agent_config.skills = set(
+            map(
+                PublicId.from_str,
+                obj.get(SKILLS, []),
+            )
+        )
 
         # parse component configurations
         component_configurations = {}

@@ -43,6 +43,7 @@ def _rand_seed():
 
 README = """
 To start with test:
+`apt install libindy`  to instal indy library binary file. required by acapy
 `pip install aries-cloudagent[indy]` acaPY is required
 
 ## VON Network
@@ -57,6 +58,10 @@ This <a href="https://github.com/bcgov/von-network#running-the-network-locally" 
 ```
 
 172.17.0.1 - is ip address of the docker0 network interface, can be used  any address assigned to the host except 127.0.0.1
+
+UPDATE `ACAPY_HOST` at line 76 to the same host selected for von network
+
+change `SKIP_TEST = True` to `SKIP_TEST = False`
 """
 
 # set to False to run it manually
@@ -68,6 +73,7 @@ SKIP_TEST = True
 class TestAriesSkillsDemo(AEATestCaseMany):
     """Test integrated aries skills."""
 
+    ACAPY_HOST = "172.17.0.1"
     capture_log = True
     alice_seed: str
     bob_seed: str
@@ -146,7 +152,7 @@ class TestAriesSkillsDemo(AEATestCaseMany):
 
         cls.port = 10001  # type: ignore
         super(TestAriesSkillsDemo, cls).setup_class()
-        acapy_host = "192.168.1.43"
+        acapy_host = cls.ACAPY_HOST
         cls.alice = "alice"  # type: ignore
         cls.soef_id = "intro_aries" + str(  # type: ignore
             randint(1000000, 99999999999999)  # nosec
@@ -162,7 +168,9 @@ class TestAriesSkillsDemo(AEATestCaseMany):
         cls.fetch_agent("fetchai/aries_alice", cls.alice, is_local=True)  # type: ignore
         cls.fetch_agent("fetchai/aries_alice", cls.bob, is_local=True)  # type: ignore
         cls.fetch_agent("fetchai/aries_faber", cls.faber, is_local=True)  # type: ignore
-        cls.create_agents(cls.controller,)  # type: ignore
+        cls.create_agents(
+            cls.controller,  # type: ignore
+        )
 
         cls.set_agent_context(cls.controller)  # type: ignore
         cls.add_item("connection", "fetchai/p2p_libp2p")
@@ -204,7 +212,9 @@ class TestAriesSkillsDemo(AEATestCaseMany):
             cls.generate_private_key("fetchai", "fetchai.key")
             cls.add_private_key("fetchai", "fetchai.key")
             cls.add_private_key(
-                "fetchai", "fetchai.key", connection=True,
+                "fetchai",
+                "fetchai.key",
+                connection=True,
             )
             cls.nested_set_config(
                 "vendor.fetchai.connections.p2p_libp2p.config", p2p_config
@@ -333,7 +343,11 @@ class TestAriesSkillsDemo(AEATestCaseMany):
                 "http://localhost:9000/genesis",
             ),
             cls.start_acapy(
-                "bob", 8040, cls.bob_seed, acapy_host, "http://localhost:9000/genesis",
+                "bob",
+                8040,
+                cls.bob_seed,
+                acapy_host,
+                "http://localhost:9000/genesis",
             ),
             cls.start_acapy(
                 "faber",

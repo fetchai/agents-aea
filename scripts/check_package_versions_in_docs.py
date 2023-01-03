@@ -153,7 +153,7 @@ def find_all_packages_ids() -> Set[PackageId]:
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
-        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+        if any(file in str(path) for file in CONFIG_FILE_NAMES)
     ]
     for configuration_file in chain(config_files, default_config_file_paths()):
         package_type = PackageType(configuration_file.parts[-3][:-1])

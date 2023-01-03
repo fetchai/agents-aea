@@ -412,7 +412,7 @@ class Transaction(Terms):
             "Wrong performative",
         )
         sender_is_seller = all(
-            [value >= 0 for value in message.amount_by_currency_id.values()]
+            value >= 0 for value in message.amount_by_currency_id.values()
         )
         transaction = Transaction(
             ledger_id=message.ledger_id,
@@ -1023,7 +1023,8 @@ class Game(Model):
         :return: a description of the agent's location
         """
         description = Description(
-            self.context.parameters.agent_location, data_model=AGENT_LOCATION_MODEL,
+            self.context.parameters.agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 

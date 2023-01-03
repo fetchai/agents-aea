@@ -127,7 +127,8 @@ class Strategy(Model):
         registration_db = cast(RegistrationDB, self.context.registration_db)
         if self.developer_handle_only:
             registration_db.set_registered_developer_only(
-                address=address, developer_handle=info["developer_handle"],
+                address=address,
+                developer_handle=info["developer_handle"],
             )
         else:
             registration_db.set_registered(
@@ -189,7 +190,7 @@ class Strategy(Model):
         """
         if self.developer_handle_only:
             if not all(
-                [key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS]
+                key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS
             ):
                 return (
                     False,
@@ -202,7 +203,7 @@ class Strategy(Model):
             )
             return (is_valid, error_code, error_msg)
 
-        if not all([key in registration_info for key in REQUIRED_KEYS]):
+        if not all(key in registration_info for key in REQUIRED_KEYS):
             return (
                 False,
                 1,

@@ -84,7 +84,8 @@ class AriesFaberTestCase(BaseSkillTestCase):
 
         # behaviours
         cls.faber_behaviour = cast(
-            FaberBehaviour, cls._skill.skill_context.behaviours.faber,
+            FaberBehaviour,
+            cls._skill.skill_context.behaviours.faber,
         )
 
         # dialogues

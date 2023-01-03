@@ -25,7 +25,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="aea-ledger-cosmos",
-    version="1.1.0",
+    version="1.2.4",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
@@ -35,7 +35,7 @@ setup(
         "ecdsa>=0.15,<0.17.0",
         "bech32==1.2.0",
         "pycryptodome>=3.10.1,<4.0.0",
-        "cosmpy>=0.4.1,<0.5.0",
+        "cosmpy>=0.6.2,<0.7.0",
     ],
     tests_require=["pytest"],
     entry_points={

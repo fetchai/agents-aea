@@ -40,7 +40,8 @@ class Kwargs:
     __slots__ = ("_body",)
 
     def __init__(
-        self, body: JSONLike,
+        self,
+        body: JSONLike,
     ):
         """Initialise an instance of RawTransaction."""
         self._body = body
@@ -50,7 +51,7 @@ class Kwargs:
         """Check consistency of the object."""
         enforce(
             isinstance(self._body, dict)
-            and all([isinstance(key, str) for key in self._body.keys()]),
+            and all(isinstance(key, str) for key in self._body.keys()),
             "Body must be dict and keys must be str.",
         )
 

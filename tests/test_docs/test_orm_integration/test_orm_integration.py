@@ -99,7 +99,7 @@ buyer_strategy_replacement = """models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       search_query:
         constraint_type: ==
@@ -127,8 +127,8 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-            "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0",
+            "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+            "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5",
         }
 
         # generate random location
@@ -139,15 +139,15 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/thermometer:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.4")
+        self.add_item("connection", "fetchai/soef:0.27.5")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.4")
+        self.add_item("connection", "fetchai/ledger:0.21.4")
+        self.add_item("skill", "fetchai/thermometer:0.27.5")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.27.0")
+        self.eject_item("skill", "fetchai/thermometer:0.27.5")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.nested_set_config(
             "skills.thermometer.models.strategy.args",
@@ -159,11 +159,15 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         )
         # Replace the seller strategy
         seller_stategy_path = Path(
-            seller_aea_name, "skills", "thermometer", "strategy.py",
+            seller_aea_name,
+            "skills",
+            "thermometer",
+            "strategy.py",
         )
         self.replace_file_content(ORM_SELLER_STRATEGY_PATH, seller_stategy_path)
         self.fingerprint_item(
-            "skill", "{}/thermometer:0.1.0".format(self.author),
+            "skill",
+            "{}/thermometer:0.1.0".format(self.author),
         )
         self.run_install()
 
@@ -190,11 +194,11 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.26.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.4")
+        self.add_item("connection", "fetchai/soef:0.27.5")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.4")
+        self.add_item("connection", "fetchai/ledger:0.21.4")
+        self.add_item("skill", "fetchai/thermometer_client:0.26.5")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
@@ -260,7 +264,10 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=30, is_terminating=False,
+            buyer_aea_process,
+            check_strings,
+            timeout=30,
+            is_terminating=False,
         )
         assert (
             missing_strings == []

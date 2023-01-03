@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2022 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
 
 """This module contains t_protocol's message definition."""
 
@@ -11,6 +28,10 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
+from tests.data.generator.t_protocol.custom_types import DataModel1 as CustomDataModel1
+from tests.data.generator.t_protocol.custom_types import DataModel2 as CustomDataModel2
+from tests.data.generator.t_protocol.custom_types import DataModel3 as CustomDataModel3
+from tests.data.generator.t_protocol.custom_types import DataModel4 as CustomDataModel4
 
 
 _default_logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
@@ -27,6 +48,14 @@ class TProtocolMessage(Message):
     )
 
     DataModel = CustomDataModel
+
+    DataModel1 = CustomDataModel1
+
+    DataModel2 = CustomDataModel2
+
+    DataModel3 = CustomDataModel3
+
+    DataModel4 = CustomDataModel4
 
     class Performative(Message.Performative):
         """Performatives for the t_protocol protocol."""
@@ -94,6 +123,7 @@ class TProtocolMessage(Message):
             "content_str",
             "content_union_1",
             "content_union_2",
+            "content_union_3",
             "dialogue_reference",
             "message_id",
             "performative",
@@ -367,9 +397,9 @@ class TProtocolMessage(Message):
         return cast(Optional[bool], self.get("content_o_bool"))
 
     @property
-    def content_o_ct(self) -> Optional[CustomDataModel]:
+    def content_o_ct(self) -> Optional[CustomDataModel4]:
         """Get the 'content_o_ct' content from the message."""
-        return cast(Optional[CustomDataModel], self.get("content_o_ct"))
+        return cast(Optional[CustomDataModel4], self.get("content_o_ct"))
 
     @property
     def content_o_dict_str_int(self) -> Optional[Dict[str, int]]:
@@ -432,7 +462,7 @@ class TProtocolMessage(Message):
     def content_union_1(
         self,
     ) -> Union[
-        CustomDataModel,
+        CustomDataModel1,
         bytes,
         int,
         float,
@@ -446,7 +476,7 @@ class TProtocolMessage(Message):
         enforce(self.is_set("content_union_1"), "'content_union_1' content is not set.")
         return cast(
             Union[
-                CustomDataModel,
+                CustomDataModel1,
                 bytes,
                 int,
                 float,
@@ -472,6 +502,7 @@ class TProtocolMessage(Message):
         Dict[str, int],
         Dict[int, float],
         Dict[bool, bytes],
+        int,
     ]:
         """Get the 'content_union_2' content from the message."""
         enforce(self.is_set("content_union_2"), "'content_union_2' content is not set.")
@@ -486,8 +517,17 @@ class TProtocolMessage(Message):
                 Dict[str, int],
                 Dict[int, float],
                 Dict[bool, bytes],
+                int,
             ],
             self.get("content_union_2"),
+        )
+
+    @property
+    def content_union_3(self) -> Union[CustomDataModel2, CustomDataModel3]:
+        """Get the 'content_union_3' content from the message."""
+        enforce(self.is_set("content_union_3"), "'content_union_3' content is not set.")
+        return cast(
+            Union[CustomDataModel2, CustomDataModel3], self.get("content_union_3")
         )
 
     def _is_consistent(self) -> bool:
@@ -1023,9 +1063,9 @@ class TProtocolMessage(Message):
                         ),
                     )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_MT:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 3
                 enforce(
-                    isinstance(self.content_union_1, CustomDataModel)
+                    isinstance(self.content_union_1, CustomDataModel1)
                     or isinstance(self.content_union_1, bool)
                     or isinstance(self.content_union_1, bytes)
                     or isinstance(self.content_union_1, dict)
@@ -1034,7 +1074,7 @@ class TProtocolMessage(Message):
                     or type(self.content_union_1) is int
                     or isinstance(self.content_union_1, str)
                     or isinstance(self.content_union_1, tuple),
-                    "Invalid type for content 'content_union_1'. Expected either of '['DataModel', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
+                    "Invalid type for content 'content_union_1'. Expected either of '['DataModel1', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
                         type(self.content_union_1)
                     ),
                 )
@@ -1066,8 +1106,9 @@ class TProtocolMessage(Message):
                 enforce(
                     isinstance(self.content_union_2, dict)
                     or isinstance(self.content_union_2, frozenset)
+                    or type(self.content_union_2) is int
                     or isinstance(self.content_union_2, tuple),
-                    "Invalid type for content 'content_union_2'. Expected either of '['dict', 'frozenset', 'tuple']'. Found '{}'.".format(
+                    "Invalid type for content 'content_union_2'. Expected either of '['dict', 'frozenset', 'int', 'tuple']'. Found '{}'.".format(
                         type(self.content_union_2)
                     ),
                 )
@@ -1119,14 +1160,21 @@ class TProtocolMessage(Message):
                             ),
                             "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'.",
                         )
+                enforce(
+                    isinstance(self.content_union_3, CustomDataModel2)
+                    or isinstance(self.content_union_3, CustomDataModel3),
+                    "Invalid type for content 'content_union_3'. Expected either of '['DataModel2', 'DataModel3']'. Found '{}'.".format(
+                        type(self.content_union_3)
+                    ),
+                )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_ct"):
                     expected_nb_of_contents += 1
-                    content_o_ct = cast(CustomDataModel, self.content_o_ct)
+                    content_o_ct = cast(CustomDataModel4, self.content_o_ct)
                     enforce(
-                        isinstance(content_o_ct, CustomDataModel),
-                        "Invalid type for content 'content_o_ct'. Expected 'DataModel'. Found '{}'.".format(
+                        isinstance(content_o_ct, CustomDataModel4),
+                        "Invalid type for content 'content_o_ct'. Expected 'DataModel4'. Found '{}'.".format(
                             type(content_o_ct)
                         ),
                     )

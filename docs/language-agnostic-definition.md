@@ -27,7 +27,7 @@ The format for the above fields are as follows:
 
 <ul>
 <li><code>to</code> and <code>sender</code>: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">secp256k1</a>-compatible elliptic curve</li>
-<li><code>protocol_id</code>: this must match a defined  <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a> (see below)
+<li><code>protocol_id</code>: this must match a defined  <a href="https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a> (see below)
 <li><code>message</code>: a bytes string representing a serialized message in the specified  <a href="../protocol">protocol</a></li>
 <li><code>URI</code>: follows <a href="https://datatracker.ietf.org/doc/html/rfc3986" target="_blank">this syntax</a></li>
 </ul>
@@ -71,7 +71,7 @@ message Envelope{
 
 <li> It MUST implement protocols according to their specification (see <a href="../protocol-generator/#full-mode-vs-protobuf-only-mode">here</a> for details).
 
-<li> It SHOULD implement the <code>fetchai/default:1.1.0</code> protocol which satisfies the following protobuf schema:
+<li> It SHOULD implement the <code>fetchai/default:1.1.6</code> protocol which satisfies the following protobuf schema:
 
 ``` proto
 syntax = "proto3";
@@ -121,7 +121,7 @@ message DefaultMessage{
 </li>
 <li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
 </li>
-<li> It SHOULD implement handling of errors using the <code>fetchai/default:1.1.0</code> protocol. The protobuf schema is given above.
+<li> It SHOULD implement handling of errors using the <code>fetchai/default:1.1.6</code> protocol. The protobuf schema is given above.
 </li>
 <li> It MUST implement the following principles when handling messages:
 <ul>

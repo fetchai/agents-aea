@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the coin price skill."""
-
 import time
 from typing import Dict
 
@@ -26,6 +24,8 @@ import pytest
 
 from aea.helpers import http_requests as requests
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from tests.common.utils import wait_for_condition
 
 
 def parse_prometheus_output(prom_data: bytes) -> Dict[str, float]:
@@ -49,15 +49,15 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/http_client:0.24.0")
-        self.add_item("connection", "fetchai/http_server:0.23.0")
-        self.add_item("connection", "fetchai/prometheus:0.9.0")
-        self.add_item("skill", "fetchai/advanced_data_request:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.23.0")
+        self.add_item("connection", "fetchai/http_client:0.24.5")
+        self.add_item("connection", "fetchai/http_server:0.23.5")
+        self.add_item("connection", "fetchai/prometheus:0.9.5")
+        self.add_item("skill", "fetchai/advanced_data_request:0.7.5")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.23.5")
 
         default_routing = {
-            "fetchai/http:1.1.0": "fetchai/http_client:0.24.0",
-            "fetchai/prometheus:1.1.0": "fetchai/prometheus:0.9.0",
+            "fetchai/http:1.1.6": "fetchai/http_client:0.24.5",
+            "fetchai/prometheus:1.1.6": "fetchai/prometheus:0.9.5",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -69,7 +69,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
-            "fetchai/advanced_data_request:0.7.0",
+            "fetchai/advanced_data_request:0.7.5",
         )
         self.set_config(
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",
@@ -88,7 +88,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.15.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.15.4", coin_price_feed_aea_name
         )
         assert (
             diff == []
@@ -102,10 +102,16 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
 
-        response = requests.get("http://127.0.0.1:8000/data")
-        assert response.status_code == 200, "Failed to get response code 200"
-        coin_price = response.json()
-        assert "price" in coin_price, "Response does not contain 'price'"
+        def wait():
+            response = requests.get("http://127.0.0.1:8000/data")
+            if response.status_code != 200:
+                return False
+            coin_price = response.json()
+            return "price" in coin_price
+
+        wait_for_condition(
+            wait, timeout=10, period=0.1, error_msg="Response does not contain 'price'"
+        )
 
         response = requests.get("http://127.0.0.1:8000")
         assert response.status_code == 404

@@ -1,9 +1,11 @@
-<a name="aea.configurations.manager"></a>
+<a id="aea.configurations.manager"></a>
+
 # aea.configurations.manager
 
 Implementation of the AgentConfigManager.
 
-<a name="aea.configurations.manager.VariableDoesNotExist"></a>
+<a id="aea.configurations.manager.VariableDoesNotExist"></a>
+
 ## VariableDoesNotExist Objects
 
 ```python
@@ -12,11 +14,16 @@ class VariableDoesNotExist(ValueError)
 
 Variable does not exist in a config exception.
 
-<a name="aea.configurations.manager.handle_dotted_path"></a>
+<a id="aea.configurations.manager.handle_dotted_path"></a>
+
 #### handle`_`dotted`_`path
 
 ```python
-handle_dotted_path(value: str, author: str, aea_project_path: Union[str, Path] = ".") -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]
+def handle_dotted_path(
+    value: str,
+    author: str,
+    aea_project_path: Union[str, Path] = "."
+) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]
 ```
 
 Separate the path between path to resource and json path to attribute.
@@ -44,16 +51,19 @@ we will filter with only the component prefix (i.e. the triple type, author and 
 
 Tuple[list of settings dict keys, filepath, config loader, component id].
 
-<a name="aea.configurations.manager.find_component_directory_from_component_id"></a>
+<a id="aea.configurations.manager.find_component_directory_from_component_id"></a>
+
 #### find`_`component`_`directory`_`from`_`component`_`id
 
 ```python
-find_component_directory_from_component_id(aea_project_directory: Path, component_id: ComponentId) -> Path
+def find_component_directory_from_component_id(
+        aea_project_directory: Path, component_id: ComponentId) -> Path
 ```
 
 Find a component directory from component id.
 
-<a name="aea.configurations.manager.AgentConfigManager"></a>
+<a id="aea.configurations.manager.AgentConfigManager"></a>
+
 ## AgentConfigManager Objects
 
 ```python
@@ -62,11 +72,14 @@ class AgentConfigManager()
 
 AeaConfig manager.
 
-<a name="aea.configurations.manager.AgentConfigManager.__init__"></a>
+<a id="aea.configurations.manager.AgentConfigManager.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(agent_config: AgentConfig, aea_project_directory: Union[str, Path], env_vars_friendly: bool = False) -> None
+def __init__(agent_config: AgentConfig,
+             aea_project_directory: Union[str, Path],
+             env_vars_friendly: bool = False) -> None
 ```
 
 Init manager.
@@ -77,11 +90,14 @@ Init manager.
 - `aea_project_directory`: directory where project for agent_config placed.
 - `env_vars_friendly`: whether or not it is env vars friendly
 
-<a name="aea.configurations.manager.AgentConfigManager.load_component_configuration"></a>
+<a id="aea.configurations.manager.AgentConfigManager.load_component_configuration"></a>
+
 #### load`_`component`_`configuration
 
 ```python
- | load_component_configuration(component_id: ComponentId, skip_consistency_check: bool = True) -> ComponentConfiguration
+def load_component_configuration(
+        component_id: ComponentId,
+        skip_consistency_check: bool = True) -> ComponentConfiguration
 ```
 
 Load component configuration from the project directory.
@@ -95,31 +111,36 @@ Load component configuration from the project directory.
 
 ComponentConfiguration
 
-<a name="aea.configurations.manager.AgentConfigManager.agent_config_file_path"></a>
+<a id="aea.configurations.manager.AgentConfigManager.agent_config_file_path"></a>
+
 #### agent`_`config`_`file`_`path
 
 ```python
- | @property
- | agent_config_file_path() -> Path
+@property
+def agent_config_file_path() -> Path
 ```
 
 Return agent config file path.
 
-<a name="aea.configurations.manager.AgentConfigManager.load"></a>
+<a id="aea.configurations.manager.AgentConfigManager.load"></a>
+
 #### load
 
 ```python
- | @classmethod
- | load(cls, aea_project_path: Union[Path, str], substitude_env_vars: bool = False) -> "AgentConfigManager"
+@classmethod
+def load(cls,
+         aea_project_path: Union[Path, str],
+         substitude_env_vars: bool = False) -> "AgentConfigManager"
 ```
 
 Create AgentConfigManager instance from agent project path.
 
-<a name="aea.configurations.manager.AgentConfigManager.set_variable"></a>
+<a id="aea.configurations.manager.AgentConfigManager.set_variable"></a>
+
 #### set`_`variable
 
 ```python
- | set_variable(path: VariablePath, value: JSON_TYPES) -> None
+def set_variable(path: VariablePath, value: JSON_TYPES) -> None
 ```
 
 Set config variable.
@@ -129,11 +150,12 @@ Set config variable.
 - `path`: str dotted path  or List[Union[ComponentId, str]]
 - `value`: one of the json friendly objects.
 
-<a name="aea.configurations.manager.AgentConfigManager.get_variable"></a>
+<a id="aea.configurations.manager.AgentConfigManager.get_variable"></a>
+
 #### get`_`variable
 
 ```python
- | get_variable(path: VariablePath) -> JSON_TYPES
+def get_variable(path: VariablePath) -> JSON_TYPES
 ```
 
 Set config variable.
@@ -146,11 +168,12 @@ Set config variable.
 
 json friendly value.
 
-<a name="aea.configurations.manager.AgentConfigManager.update_config"></a>
+<a id="aea.configurations.manager.AgentConfigManager.update_config"></a>
+
 #### update`_`config
 
 ```python
- | update_config(overrides: Dict) -> None
+def update_config(overrides: Dict) -> None
 ```
 
 Apply overrides for agent config.
@@ -166,40 +189,49 @@ Does not save it on the disc!
 
 None
 
-<a name="aea.configurations.manager.AgentConfigManager.validate_current_config"></a>
+<a id="aea.configurations.manager.AgentConfigManager.validate_current_config"></a>
+
 #### validate`_`current`_`config
 
 ```python
- | validate_current_config() -> None
+def validate_current_config() -> None
 ```
 
 Check is current config valid.
 
-<a name="aea.configurations.manager.AgentConfigManager.json"></a>
+<a id="aea.configurations.manager.AgentConfigManager.json"></a>
+
 #### json
 
 ```python
- | @property
- | json() -> Dict
+@property
+def json() -> Dict
 ```
 
 Return current agent config json representation.
 
-<a name="aea.configurations.manager.AgentConfigManager.dump_config"></a>
+<a id="aea.configurations.manager.AgentConfigManager.dump_config"></a>
+
 #### dump`_`config
 
 ```python
- | dump_config() -> None
+def dump_config() -> None
 ```
 
 Save agent config on the disc.
 
-<a name="aea.configurations.manager.AgentConfigManager.verify_private_keys"></a>
+<a id="aea.configurations.manager.AgentConfigManager.verify_private_keys"></a>
+
 #### verify`_`private`_`keys
 
 ```python
- | @classmethod
- | verify_private_keys(cls, aea_project_path: Union[Path, str], private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None], substitude_env_vars: bool = False, password: Optional[str] = None) -> "AgentConfigManager"
+@classmethod
+def verify_private_keys(
+        cls,
+        aea_project_path: Union[Path, str],
+        private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None],
+        substitude_env_vars: bool = False,
+        password: Optional[str] = None) -> "AgentConfigManager"
 ```
 
 Verify private keys.
@@ -217,11 +249,12 @@ Does not saves the config! Use AgentConfigManager.dump_config()
 
 the agent configuration manager.
 
-<a name="aea.configurations.manager.AgentConfigManager.get_overridables"></a>
+<a id="aea.configurations.manager.AgentConfigManager.get_overridables"></a>
+
 #### get`_`overridables
 
 ```python
- | get_overridables() -> Tuple[Dict, Dict[ComponentId, Dict]]
+def get_overridables() -> Tuple[Dict, Dict[ComponentId, Dict]]
 ```
 
 Get config overridables.

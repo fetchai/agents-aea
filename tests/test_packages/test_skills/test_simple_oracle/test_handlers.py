@@ -233,7 +233,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"Balance on {ETHEREUM_LEDGER_ID} ledger={balance}.",
+            logging.INFO,
+            f"Balance on {ETHEREUM_LEDGER_ID} ledger={balance}.",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -394,7 +395,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
                 {
                     "label": "OracleContract",
                     "init_msg": {"fee": str(strategy.initial_fee_deploy)},
-                    "gas": strategy.default_gas_deploy,
+                    "gas": strategy.gas_limit_instantiate,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_instantiate,
                     "amount": 1,
                     "code_id": 8888,
                     "deployer_address": "test_agent_address",
@@ -501,7 +503,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle role successfully granted!",
+            logging.INFO,
+            "Oracle role successfully granted!",
         )
 
         assert (
@@ -553,7 +556,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle value successfully updated!",
+            logging.INFO,
+            "Oracle value successfully updated!",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -576,7 +580,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=dialogue, performative=LedgerApiMessage.Performative.ERROR, code=1,
+            dialogue=dialogue,
+            performative=LedgerApiMessage.Performative.ERROR,
+            code=1,
         )
 
         # operation
@@ -720,7 +726,8 @@ class TestContractApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received raw transaction={incoming_message}",
+            logging.INFO,
+            f"received raw transaction={incoming_message}",
         )
         mock_logger.assert_any_call(
             logging.INFO,
@@ -857,7 +864,9 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction(self,):
+    def test_handle_signed_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -1009,7 +1018,8 @@ class TestPrometheusHandler(BaseSkillTestCase):
         """Test the _handle_response method of the prometheus handler to a valid response."""
         # setup
         prometheus_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.prometheus_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.prometheus_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=prometheus_dialogue,

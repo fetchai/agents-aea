@@ -42,6 +42,9 @@ sys.modules["packages.fetchai.protocols.gym"] = locate(  # isort:skip
 
 
 from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
+    GymConnection,
+)
+from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
     PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: disable=wrong-import-position
@@ -105,9 +108,11 @@ class ProxyEnv(gym.Env):
     @property
     def active_dialogue(self) -> GymDialogue:
         """Get the active dialogue."""
+        if self._active_dialogue is None:
+            raise RuntimeError("active dialogue was not set")
         return self._active_dialogue
 
-    def step(self, action: Action) -> Feedback:
+    def step(self, action: Action) -> Feedback:  # type: ignore
         """
         Run one time-step of the environment's dynamics.
 
@@ -136,27 +141,34 @@ class ProxyEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode="human") -> None:
+    def render(self, mode: str = "human") -> None:
         """
         Render the environment.
 
         :param mode: the run mode
         """
-        self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)
+        if self._agent.runtime.multiplexer.default_connection is None:
+            raise RuntimeError("Default connection was not set")
+        cast(
+            GymConnection, self._agent.runtime.multiplexer.default_connection
+        ).channel.gym_env.render(
+            mode
+        )  # type: ignore
 
-    def reset(self) -> None:
+    def reset(self) -> None:  # type: ignore # pylint: disable=arguments-differ
         """Reset the environment."""
         if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
         gym_msg, gym_dialogue = self.gym_dialogues.create(
-            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
+            counterparty=self.gym_address,
+            performative=GymMessage.Performative.RESET,
         )
         gym_dialogue = cast(GymDialogue, gym_dialogue)
         self._active_dialogue = gym_dialogue
         self._agent.outbox.put_message(message=gym_msg)
 
         # Wait (blocking!) for the response envelope from the environment
-        in_envelope = self._queue.get(block=True, timeout=None)  # type: GymMessage
+        in_envelope = self._queue.get(block=True, timeout=None)  # type: Envelope
 
         self._decode_status(in_envelope)
 
@@ -166,13 +178,14 @@ class ProxyEnv(gym.Env):
         if last_msg is None:
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_dialogue.reply(
-            performative=GymMessage.Performative.CLOSE, target_message=last_msg,
+            performative=GymMessage.Performative.CLOSE,
+            target_message=last_msg,
         )
         self._agent.outbox.put_message(message=gym_msg)
 
         self._disconnect()
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Connect to this proxy environment. It starts a proxy agent that can interact with the framework."""
         if self._agent_thread.is_alive():
             raise ValueError("Agent already running.")
@@ -181,11 +194,10 @@ class ProxyEnv(gym.Env):
         while not self._agent.runtime.is_running:  # check agent completely running
             time.sleep(0.01)
 
-    def _disconnect(self):
+    def _disconnect(self) -> None:
         """Disconnect from this proxy environment. It stops the proxy agent and kills its thread."""
         self._agent.stop()
         self._agent_thread.join()
-        self._agent_thread = None
 
     def _encode_and_send_action(self, action: Action, step_id: int) -> None:
         """

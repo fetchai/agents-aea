@@ -119,7 +119,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "Balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
         if self.context.prometheus_dialogues.enabled:
@@ -174,7 +175,8 @@ class LedgerApiHandler(Handler):
                     {
                         "label": "OracleContract",
                         "init_msg": {"fee": str(strategy.initial_fee_deploy)},
-                        "gas": strategy.default_gas_deploy,
+                        "gas": strategy.gas_limit_instantiate,
+                        "tx_fee": strategy.gas_price * strategy.gas_limit_instantiate,
                         "amount": 1,
                         "code_id": code_id,
                         "deployer_address": self.context.agent_address,
@@ -196,7 +198,7 @@ class LedgerApiHandler(Handler):
             self.context.logger.info(
                 f"Saving contract address to file: {strategy.contract_address_file}"
             )
-            with open(strategy.contract_address_file, "w") as file:
+            with open(strategy.contract_address_file, "w", encoding="utf-8") as file:
                 file.write(strategy.contract_address)
 
     def _handle_transaction_receipt(
@@ -212,7 +214,8 @@ class LedgerApiHandler(Handler):
         tx_receipt = cast(JSONLike, ledger_api_msg.transaction_receipt.receipt)
 
         is_transaction_successful = LedgerApis.is_transaction_settled(
-            ledger_id, tx_receipt,
+            ledger_id,
+            tx_receipt,
         )
         if is_transaction_successful:
             self.context.logger.info(
@@ -298,7 +301,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 
@@ -418,7 +422,8 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
+                contract_api_msg.performative,
+                contract_api_dialogue,
             )
         )
 

@@ -159,7 +159,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._recv_loop_task = None  # type: Optional[asyncio.Task]
         self._send_loop_task = None  # type: Optional[asyncio.Task]
 
-        self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
+        self._loop: asyncio.AbstractEventLoop = (
+            loop if loop is not None else asyncio.new_event_loop()
+        )
         self.set_loop(self._loop)
 
     @property
@@ -378,7 +380,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
     def _check_and_set_disconnected_state(self) -> None:
         """Check every connection is disconnected and set disconnected state."""
-        if all([c.is_disconnected for c in self.connections]):
+        if all((c.is_disconnected for c in self.connections)):
             self.connection_status.set(ConnectionStates.disconnected)
         else:
             connections_left = [
@@ -966,7 +968,9 @@ class OutBox:
         self._multiplexer.put(envelope)
 
     def put_message(
-        self, message: Message, context: Optional[EnvelopeContext] = None,
+        self,
+        message: Message,
+        context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
@@ -983,6 +987,9 @@ class OutBox:
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.to, sender=message.sender, message=message, context=context,
+            to=message.to,
+            sender=message.sender,
+            message=message,
+            context=context,
         )
         self.put(envelope)

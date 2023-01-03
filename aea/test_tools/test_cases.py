@@ -204,8 +204,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         )
         kwargs.update(win_popen_kwargs())
 
-        process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
-            [sys.executable, *args], **kwargs,
+        process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs # pylint: disable=consider-using-with
+            [sys.executable, *args],
+            **kwargs,
         )
         cls.subprocesses.append(process)
         return process
@@ -324,10 +325,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "required_ledgers",
             ]
             result = all(
-                [key in allowed_diff_keys for key in content1_agentconfig.keys()]
+                (key in allowed_diff_keys for key in content1_agentconfig.keys())
             )
             result = result and all(
-                [key in allowed_diff_keys for key in content2_agentconfig.keys()]
+                (key in allowed_diff_keys for key in content2_agentconfig.keys())
             )
             if not result:
                 return result, content1_agentconfig, content2_agentconfig
@@ -432,7 +433,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def terminate_agents(
-        cls, *subprocesses: subprocess.Popen, timeout: int = 20,
+        cls,
+        *subprocesses: subprocess.Popen,
+        timeout: int = 20,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -457,13 +460,13 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
 
-        all_terminated = all([process.returncode == 0 for process in subprocesses])
+        all_terminated = all((process.returncode == 0 for process in subprocesses))
         return all_terminated
 
     @classmethod
     def initialize_aea(cls, author: str) -> None:
         """Initialize AEA locally with author name."""
-        cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
+        cls.run_cli_command("init", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
     def add_item(cls, item_type: str, public_id: str, local: bool = True) -> Result:
@@ -628,7 +631,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def remove_private_key(
-        cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False,
+        cls,
+        ledger_api_id: str = DEFAULT_LEDGER,
+        connection: bool = False,
     ) -> Result:
         """
         Remove private key with CLI command.
@@ -769,6 +774,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def _read_out(
         cls, process: subprocess.Popen
     ) -> None:  # pragma: nocover # runs in thread!
+        if process.stdout is None:
+            raise Exception("Stdout of the process is None")
         for line in TextIOWrapper(process.stdout, encoding="utf-8"):
             cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line
@@ -990,7 +997,9 @@ class AEATestCaseEmpty(BaseAEATestCase):
     def setup_class(cls) -> None:
         """Set up the test class."""
         super(AEATestCaseEmpty, cls).setup_class()
-        cls.agent_name = "agent_" + "".join(random.choices(string.ascii_lowercase, k=5))
+        cls.agent_name = "agent_" + "".join(
+            random.choices(string.ascii_lowercase, k=5)  # nosec
+        )
         cls.create_agents(cls.agent_name, is_local=cls.IS_LOCAL, is_empty=cls.IS_EMPTY)
         cls.set_agent_context(cls.agent_name)
 

@@ -104,9 +104,6 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self.context.logger.info("No oracle value to publish")
         else:
             self.context.logger.info("Publishing oracle value")
-
-            # add expiration block
-            oracle_data["expiration_block"] = EXPIRATION_BLOCK
             self.context.logger.info(f"Update kwargs: {oracle_data}")
             self._request_update_transaction(oracle_data)
 
@@ -125,7 +122,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
             callable="get_deploy_transaction",
             kwargs=strategy.get_deploy_kwargs(),
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
@@ -147,7 +147,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "oracle_address": self.context.agent_address,
-                    "gas": strategy.default_gas_grant_role,
+                    "gas": strategy.gas_limit_grant_role,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_grant_role,
                 }
             ),
         )
@@ -156,6 +157,11 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting grant role transaction...")
 
+    @staticmethod
+    def _get_tx_expriration_block() -> int:
+        """Return max block number for no expiration."""
+        return 2**256 - 1
+
     def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
         """Request transaction that updates value in Fetch oracle contract."""
         strategy = cast(Strategy, self.context.strategy)
@@ -163,6 +169,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
+        update_kwargs = {
+            **update_kwargs,
+            "txExpirationBlock": self._get_tx_expriration_block(),
+        }
         contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
             counterparty=str(LEDGER_API_ADDRESS),
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -175,7 +185,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
                     "oracle_address": self.context.agent_address,
                     "update_function": strategy.update_function,
                     "update_kwargs": update_kwargs,
-                    "gas": strategy.default_gas_update,
+                    "gas": strategy.gas_limit_update,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_update,
                 }
             ),
         )
@@ -230,7 +241,11 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
-        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
+        self,
+        metric_name: str,
+        update_func: str,
+        value: float,
+        labels: Dict[str, str],
     ) -> None:
         """
         Update a prometheus metric.

@@ -227,6 +227,33 @@ dockerised
 Mermaid-JS
 darglint
 aea-cli-ipfs
+tensorflow
+ethereum
+mypy
+ipfshttpclient
+0.8.0a2
+int64
+int32
+cosmpy
+tx
+asyncio
+golang
+basecontracttesttool
+linter
+stargateworld
+faq
+fetchai
+agents-aea
+ci
+perf
+scipy
+numpy
+scikit-image
+hello_world
+pis
+prebuilt
+jsonschema
+tox
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -236,6 +263,7 @@ CosmWasm
  - docs/ledger-integration.md
 atestfet
 v0.2.x
+dorado-1
  - docs/questions-and-answers.md
 state_update
 txt
@@ -282,3 +310,10 @@ packages.fetchai.skills.my_search.dialogues
 capricorn-1
 dorado
 dorado-1
+ - acapy-alice-bob/AdminAPI.md
+ACA-Py
+ACA-Py-based
+prover
+ - CODE_OF_CONDUCT.md
+color
+behavior

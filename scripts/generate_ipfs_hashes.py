@@ -37,7 +37,9 @@ import subprocess  # nosec
 import sys
 import time
 import traceback
+from contextlib import suppress
 from pathlib import Path
+from subprocess import TimeoutExpired  # nosec
 from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
@@ -132,10 +134,13 @@ def sort_configuration_file(config: PackageConfiguration) -> None:
         json_data = config.ordered_json
         component_configurations = json_data.pop("component_configurations")
         yaml_dump_all(
-            [json_data] + component_configurations, configuration_filepath.open("w")
+            [json_data] + component_configurations,
+            configuration_filepath.open("w", encoding="utf-8"),
         )
     else:
-        yaml_dump(config.ordered_json, configuration_filepath.open("w"))
+        yaml_dump(
+            config.ordered_json, configuration_filepath.open("w", encoding="utf-8")
+        )
 
 
 def ipfs_hashing(
@@ -164,7 +169,9 @@ def ipfs_hashing(
         follow_symlinks=False,
     )
     key = os.path.join(
-        configuration.author, package_type.to_plural(), configuration.directory.name,
+        configuration.author,
+        package_type.to_plural(),
+        configuration.directory.name,
     )
     # check that the last result of the list is for the whole package directory
     assert result_list[-1]["Name"] == configuration.directory.name
@@ -176,7 +183,7 @@ def to_csv(package_hashes: Dict[str, str], path: str) -> None:
     """Outputs a dictionary to CSV."""
     try:
         ordered = collections.OrderedDict(sorted(package_hashes.items()))
-        with open(path, "w") as csv_file:
+        with open(path, "w", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(ordered.items())
     except IOError:
@@ -186,7 +193,7 @@ def to_csv(package_hashes: Dict[str, str], path: str) -> None:
 def from_csv(path: str) -> Dict[str, str]:
     """Load a CSV into a dictionary."""
     result = collections.OrderedDict({})  # type: Dict[str, str]
-    with open(path, "r") as csv_file:
+    with open(path, "r", encoding="utf-8") as csv_file:
         reader = csv.reader(csv_file)
         for row in reader:
             assert len(row) == 2
@@ -220,20 +227,25 @@ class IPFSDaemon:
         res = shutil.which("ipfs")
         if res is None:
             raise Exception("Please install IPFS first!")
-        process = subprocess.Popen(  # nosec
-            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
-        )
-        output, _ = process.communicate()
-        if b"0.6.0" not in output:
-            raise Exception(
-                "Please ensure you have version 0.6.0 of IPFS daemon installed."
-            )
+
+        with subprocess.Popen(  # nosec
+            ["ipfs", "--version"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        ) as process:
+            output, _ = process.communicate()
+            if b"0.6.0" not in output:
+                raise Exception(
+                    "Please ensure you have version 0.6.0 of IPFS daemon installed."
+                )
         self.process = None  # type: Optional[subprocess.Popen]
 
     def __enter__(self) -> None:
         """Run the ipfs daemon."""
-        self.process = subprocess.Popen(  # nosec
-            ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
+        self.process = subprocess.Popen(  # nosec  # pylint: disable=consider-using-with
+            ["ipfs", "daemon"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
         )
         print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
 
@@ -249,7 +261,8 @@ class IPFSDaemon:
         if self.process is None:
             return
         self.process.send_signal(signal.SIGTERM)
-        self.process.wait(timeout=30)
+        with suppress(TimeoutExpired):
+            self.process.wait(timeout=30)
         poll = self.process.poll()
         if poll is None:
             self.process.terminate()
@@ -335,7 +348,8 @@ def compute_fingerprint(  # pylint: disable=unsubscriptable-object
     :return: the fingerprint
     """
     fingerprint = _compute_fingerprint(
-        package_path, ignore_patterns=fingerprint_ignore_patterns,
+        package_path,
+        ignore_patterns=fingerprint_ignore_patterns,
     )
     assert_hash_consistency(fingerprint, package_path, client)
     return fingerprint
@@ -543,8 +557,8 @@ def check_hashes(timeout: float = 15.0) -> int:
 def clean_directory() -> None:
     """Clean the directory."""
     clean_command = ["make", "clean"]
-    process = subprocess.Popen(clean_command, stdout=subprocess.PIPE)  # nosec
-    _, _ = process.communicate()
+    with subprocess.Popen(clean_command, stdout=subprocess.PIPE) as process:  # nosec
+        _, _ = process.communicate()
 
 
 if __name__ == "__main__":

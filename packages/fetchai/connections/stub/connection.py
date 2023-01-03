@@ -44,7 +44,7 @@ INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.21.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.21.2")
 
 
 class StubConnection(Connection):
@@ -116,8 +116,12 @@ class StubConnection(Connection):
 
     def _open_files(self) -> None:
         """Open file to read and write."""
-        self.input_file = open(self.input_file_path, "rb+")
-        self.output_file = open(self.output_file_path, "wb+")
+        self.input_file = open(  # pylint: disable=consider-using-with
+            self.input_file_path, "rb+"
+        )
+        self.output_file = open(  # pylint: disable=consider-using-with
+            self.output_file_path, "wb+"
+        )
 
     def _close_files(self) -> None:
         """Close opened files."""

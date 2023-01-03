@@ -63,6 +63,7 @@ DEFAULT_SEARCH_QUERY = {
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "tac.participant"}
 DEFAULT_SEARCH_RADIUS = 5.0
+DEFAULT_TX_FEE_PROPOSAL = 1500000000000000
 
 
 class Strategy(Model):
@@ -120,6 +121,7 @@ class Strategy(Model):
         self._remove_service_data = {"key": self.service_key}
         self._simple_service_data = {self.service_key: self._register_as.value}
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+        self._tx_fee_proposal = kwargs.pop("tx_fee_proposal", DEFAULT_TX_FEE_PROPOSAL)
 
         self._contract_id = str(CONTRACT_ID)
 
@@ -187,7 +189,8 @@ class Strategy(Model):
         :return: a description of the agent's location
         """
         description = Description(
-            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+            self._agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 
@@ -201,7 +204,10 @@ class Strategy(Model):
             "key": f"{self.service_key}_{self.tac_version_id}",
             "value": self._register_as.value,
         }
-        description = Description(service_data, data_model=AGENT_SET_SERVICE_MODEL,)
+        description = Description(
+            service_data,
+            data_model=AGENT_SET_SERVICE_MODEL,
+        )
         return description
 
     def get_register_personality_description(self) -> Description:
@@ -211,7 +217,8 @@ class Strategy(Model):
         :return: a description of the personality
         """
         description = Description(
-            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_personality_data,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -222,7 +229,8 @@ class Strategy(Model):
         :return: a description of the classification
         """
         description = Description(
-            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_classification,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -233,7 +241,8 @@ class Strategy(Model):
         :return: a description of the to be removed service
         """
         description = Description(
-            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+            self._remove_service_data,
+            data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 
@@ -257,10 +266,13 @@ class Strategy(Model):
         service_key_filter = Constraint(
             search_query["search_key"],
             ConstraintType(
-                search_query["constraint_type"], search_query["search_value"],
+                search_query["constraint_type"],
+                search_query["search_value"],
             ),
         )
-        query = Query([close_to_my_service, service_key_filter],)
+        query = Query(
+            [close_to_my_service, service_key_filter],
+        )
         return query
 
     def get_own_service_description(self, is_supply: bool) -> Description:
@@ -316,7 +328,10 @@ class Strategy(Model):
             demand[good_id] = 1
         return demand
 
-    def get_own_services_query(self, is_searching_for_sellers: bool,) -> Query:
+    def get_own_services_query(
+        self,
+        is_searching_for_sellers: bool,
+    ) -> Query:
         """
         Build a query.
 
@@ -382,7 +397,9 @@ class Strategy(Model):
         """
         is_seller = role == FipaDialogue.Role.SELLER
 
-        own_service_description = self.get_own_service_description(is_supply=is_seller,)
+        own_service_description = self.get_own_service_description(
+            is_supply=is_seller,
+        )
         if not query.check(own_service_description):  # pragma: nocover
             self.context.logger.debug("current holdings do not satisfy CFP query.")
             return None
@@ -414,7 +431,9 @@ class Strategy(Model):
             good_id: 0 for good_id in good_id_to_quantities.keys()
         }  # type: Dict[str, int]
         proposals = []
-        fee_by_currency_id = self.context.shared_state.get("tx_fee", {"FET": 0})
+        fee_by_currency_id = self.context.shared_state.get(
+            "tx_fee", {"FET": self._tx_fee_proposal}
+        )
         buyer_tx_fee = next(iter(fee_by_currency_id.values()))
         ownership_state = cast(
             OwnershipState, self.context.decision_maker_handler_context.ownership_state
@@ -595,6 +614,7 @@ class Strategy(Model):
             "to_supplies": to_supplies,
             "value": 0,
             "trade_nonce": int(terms.nonce),
+            "tx_fee": list(terms.fee_by_currency_id.values())[0],
         }
         enforce(
             sender_public_key is not None

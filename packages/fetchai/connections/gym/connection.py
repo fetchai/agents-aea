@@ -43,7 +43,7 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.20.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.20.5")
 
 
 class GymDialogues(BaseGymDialogues):
@@ -188,7 +188,11 @@ class GymChannel:
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self._send(envelope)
 
     async def _send(self, envelope: Envelope) -> None:

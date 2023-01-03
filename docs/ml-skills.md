@@ -55,7 +55,8 @@ Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and
 
 ### Preparation instructions
 
-Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+* Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+* Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
 
 ### Demo instructions
 
@@ -94,7 +95,8 @@ Follow this approach when using the `aea` CLI.
 
 #### Dependencies
 
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+* Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+* Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
 
 ### Demo instructions
 
@@ -102,7 +104,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.32.0
+aea fetch fetchai/ml_data_provider:0.32.4
 cd ml_data_provider
 aea install
 aea build
@@ -115,19 +117,19 @@ The following steps create the data provider from scratch:
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/ml_data_provider:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/ledger:0.21.4
+aea add skill fetchai/ml_data_provider:0.27.5
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
 }'
 aea install
 aea build
@@ -140,7 +142,7 @@ aea build
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.33.0
+aea fetch fetchai/ml_model_trainer:0.33.4
 cd ml_model_trainer
 aea install
 aea build
@@ -153,19 +155,19 @@ The following steps create the model trainer from scratch:
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/ml_train:0.29.0
+aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.5
+aea add connection fetchai/ledger:0.21.4
+aea add skill fetchai/ml_train:0.29.5
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
 }'
 aea install
 aea build
@@ -230,7 +232,7 @@ First, run the data provider AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the ML data provider.
 
 <!--
@@ -238,7 +240,7 @@ Then, in the model trainer, update the configuration of the model trainer AEA's 
 
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.26.0
+public_id: fetchai/p2p_libp2p:0.27.4
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

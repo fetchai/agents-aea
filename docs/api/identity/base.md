@@ -1,9 +1,11 @@
-<a name="aea.identity.base"></a>
+<a id="aea.identity.base"></a>
+
 # aea.identity.base
 
 This module contains the identity class.
 
-<a name="aea.identity.base.Identity"></a>
+<a id="aea.identity.base.Identity"></a>
+
 ## Identity Objects
 
 ```python
@@ -17,11 +19,17 @@ It includes:
 - the agent name
 - the addresses, a map from address identifier to address (can be a single key-value pair)
 
-<a name="aea.identity.base.Identity.__init__"></a>
+<a id="aea.identity.base.Identity.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(name: SimpleIdOrStr, address: Optional[str] = None, public_key: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, public_keys: Optional[Dict[str, str]] = None, default_address_key: str = DEFAULT_LEDGER) -> None
+def __init__(name: SimpleIdOrStr,
+             address: Optional[str] = None,
+             public_key: Optional[str] = None,
+             addresses: Optional[Dict[str, Address]] = None,
+             public_keys: Optional[Dict[str, str]] = None,
+             default_address_key: str = DEFAULT_LEDGER) -> None
 ```
 
 Instantiate the identity.
@@ -35,62 +43,68 @@ Instantiate the identity.
 - `public_keys`: the public keys of the agent.
 - `default_address_key`: the key for the default address.
 
-<a name="aea.identity.base.Identity.default_address_key"></a>
+<a id="aea.identity.base.Identity.default_address_key"></a>
+
 #### default`_`address`_`key
 
 ```python
- | @property
- | default_address_key() -> str
+@property
+def default_address_key() -> str
 ```
 
 Get the default address key.
 
-<a name="aea.identity.base.Identity.name"></a>
+<a id="aea.identity.base.Identity.name"></a>
+
 #### name
 
 ```python
- | @property
- | name() -> str
+@property
+def name() -> str
 ```
 
 Get the agent name.
 
-<a name="aea.identity.base.Identity.addresses"></a>
+<a id="aea.identity.base.Identity.addresses"></a>
+
 #### addresses
 
 ```python
- | @property
- | addresses() -> Dict[str, Address]
+@property
+def addresses() -> Dict[str, Address]
 ```
 
 Get the addresses.
 
-<a name="aea.identity.base.Identity.address"></a>
+<a id="aea.identity.base.Identity.address"></a>
+
 #### address
 
 ```python
- | @property
- | address() -> Address
+@property
+def address() -> Address
 ```
 
 Get the default address.
 
-<a name="aea.identity.base.Identity.public_keys"></a>
+<a id="aea.identity.base.Identity.public_keys"></a>
+
 #### public`_`keys
 
 ```python
- | @property
- | public_keys() -> Dict[str, str]
+@property
+def public_keys() -> Dict[str, str]
 ```
 
 Get the public keys.
 
-<a name="aea.identity.base.Identity.public_key"></a>
+<a id="aea.identity.base.Identity.public_key"></a>
+
 #### public`_`key
 
 ```python
- | @property
- | public_key() -> str
+@property
+def public_key() -> str
 ```
 
 Get the default public key.

@@ -90,7 +90,8 @@ def lock_file(
     :yield: generator
     """
     with exception_log_and_reraise(
-        logger.error, f"Couldn't acquire lock for file {file_descriptor.name}: {{}}",
+        logger.error,
+        f"Couldn't acquire lock for file {file_descriptor.name}: {{}}",
     ):
         file_lock.lock(file_descriptor, file_lock.LOCK_EX)
 

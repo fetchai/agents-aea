@@ -58,7 +58,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.20.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.20.5")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -221,7 +221,9 @@ class NodeClient:
         """
         return await self.pipe.read()
 
-    async def register(self,) -> None:
+    async def register(
+        self,
+    ) -> None:
         """Register agent on the remote node."""
         agent_record = self.make_agent_record()
         acn_msg = acn_pb2.AcnMessage()
@@ -663,7 +665,9 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
         reader, writer = await asyncio.open_connection(
-            self._host, self._port, ssl=ssl_ctx,
+            self._host,
+            self._port,
+            ssl=ssl_ctx,
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 

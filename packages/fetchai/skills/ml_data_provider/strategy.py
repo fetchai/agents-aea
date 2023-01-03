@@ -52,7 +52,9 @@ DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 class NumpyArrayEncoder(json.JSONEncoder):
     """This class defines a custom JSON encoder for numpy ndarray objects."""
 
-    def default(self, obj: Any) -> Any:  # pylint: disable=arguments-differ
+    def default(  # pylint: disable=arguments-differ,arguments-renamed
+        self, obj: Any
+    ) -> Any:
         """Encode an object (including a numpy ndarray) into its JSON representation."""
         if isinstance(obj, np.ndarray):
             return obj.tolist()
@@ -146,7 +148,8 @@ class Strategy(Model):
         :return: a description of the agent's location
         """
         description = Description(
-            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+            self._agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 
@@ -157,7 +160,8 @@ class Strategy(Model):
         :return: a description of the personality
         """
         description = Description(
-            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_personality_data,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -168,7 +172,8 @@ class Strategy(Model):
         :return: a description of the classification
         """
         description = Description(
-            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_classification,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -179,7 +184,8 @@ class Strategy(Model):
         :return: a description of the offered services
         """
         description = Description(
-            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+            self._set_service_data,
+            data_model=AGENT_SET_SERVICE_MODEL,
         )
         return description
 
@@ -190,7 +196,8 @@ class Strategy(Model):
         :return: a description of the offered services
         """
         description = Description(
-            self._simple_service_data, data_model=SIMPLE_DATA_MODEL,
+            self._simple_service_data,
+            data_model=SIMPLE_DATA_MODEL,
         )
         return description
 
@@ -201,7 +208,8 @@ class Strategy(Model):
         :return: a description of the to be removed service
         """
         description = Description(
-            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+            self._remove_service_data,
+            data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 
@@ -267,17 +275,15 @@ class Strategy(Model):
         """
         generated_terms = self.generate_terms()
         return all(
-            [
-                terms.values[key] == generated_terms.values[key]
-                for key in [
-                    "batch_size",
-                    "price",
-                    "seller_tx_fee",
-                    "buyer_tx_fee",
-                    "currency_id",
-                    "ledger_id",
-                    "address",
-                    "service_id",
-                ]
+            terms.values[key] == generated_terms.values[key]
+            for key in [
+                "batch_size",
+                "price",
+                "seller_tx_fee",
+                "buyer_tx_fee",
+                "currency_id",
+                "ledger_id",
+                "address",
+                "service_id",
             ]
         )

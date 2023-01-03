@@ -160,4 +160,6 @@ class TestParameters(BaseSkillTestCase):
         error_message = "If the contract address is set, then good ids and currency id must be provided and consistent."
 
         with pytest.raises(ValueError, match=error_message):
-            assert Parameters(**self.kwargs,)
+            assert Parameters(
+                **self.kwargs,
+            )

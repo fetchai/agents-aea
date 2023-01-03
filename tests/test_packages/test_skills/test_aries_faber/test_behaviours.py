@@ -95,7 +95,8 @@ class TestFaberBehaviour(AriesFaberTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, "Searching for Alice on SOEF...",
+            logging.INFO,
+            "Searching for Alice on SOEF...",
         )
 
     def test_teardown(self):

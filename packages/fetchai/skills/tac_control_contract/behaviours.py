@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This package contains the behaviours."""
 
 import datetime
@@ -38,6 +37,7 @@ from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
+FETCHAI_LEDGER_ID = "fetchai"
 
 
 class TacBehaviour(BaseTacBehaviour):
@@ -58,17 +58,24 @@ class TacBehaviour(BaseTacBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
+        kwargs = {
+            "deployer_address": self.context.agent_address,
+            "gas": parameters.gas,
+        }
+        if parameters.ledger_id == FETCHAI_LEDGER_ID:
+            kwargs["tx_fee"] = parameters.contract_deploy_tx_fee
         contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=parameters.ledger_id,
             contract_id=parameters.contract_id,
             callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
-            kwargs=ContractApiMessage.Kwargs(
-                {"deployer_address": self.context.agent_address, "gas": parameters.gas}
-            ),
+            kwargs=ContractApiMessage.Kwargs(kwargs),  # type: ignore
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = parameters.get_deploy_terms()
         contract_api_dialogue.callable = (
             ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
@@ -102,7 +109,8 @@ class TacBehaviour(BaseTacBehaviour):
             if game.registration.nb_agents < parameters.min_nb_agents:
                 self.context.logger.info(
                     "registered agents={}, minimum agents required={}".format(
-                        game.registration.nb_agents, parameters.min_nb_agents,
+                        game.registration.nb_agents,
+                        parameters.min_nb_agents,
                     )
                 )
                 self._cancel_tac(game)
@@ -149,6 +157,15 @@ class TacBehaviour(BaseTacBehaviour):
         token_ids = [int(good_id) for good_id in game.conf.good_id_to_name.keys()] + [
             int(currency_id) for currency_id in game.conf.currency_id_to_name.keys()
         ]
+
+        kwargs = {
+            "deployer_address": self.context.agent_address,
+            "token_ids": token_ids,
+            "gas": parameters.gas,
+        }
+        if parameters.ledger_id == FETCHAI_LEDGER_ID:
+            kwargs["tx_fee"] = parameters.contract_execute_tx_fee
+
         contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -156,13 +173,7 @@ class TacBehaviour(BaseTacBehaviour):
             contract_id=parameters.contract_id,
             contract_address=parameters.contract_address,
             callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION.value,
-            kwargs=ContractApiMessage.Kwargs(
-                {
-                    "deployer_address": self.context.agent_address,
-                    "token_ids": token_ids,
-                    "gas": parameters.gas,
-                }
-            ),
+            kwargs=ContractApiMessage.Kwargs(kwargs),  # type: ignore
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = parameters.get_create_token_terms()
@@ -200,6 +211,17 @@ class TacBehaviour(BaseTacBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
+        kwargs = {
+            "deployer_address": self.context.agent_address,
+            "recipient_address": agent_state.agent_address,
+            "token_ids": token_ids,
+            "mint_quantities": mint_quantities,
+            "gas": parameters.gas,
+        }
+
+        if parameters.ledger_id == FETCHAI_LEDGER_ID:
+            kwargs["tx_fee"] = parameters.contract_execute_tx_fee  # type: ignore
+
         contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -207,15 +229,7 @@ class TacBehaviour(BaseTacBehaviour):
             contract_id=parameters.contract_id,
             contract_address=parameters.contract_address,
             callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION.value,
-            kwargs=ContractApiMessage.Kwargs(
-                {
-                    "deployer_address": self.context.agent_address,
-                    "recipient_address": agent_state.agent_address,
-                    "token_ids": token_ids,
-                    "mint_quantities": mint_quantities,
-                    "gas": parameters.gas,
-                }
-            ),
+            kwargs=ContractApiMessage.Kwargs(kwargs),  # type: ignore
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = parameters.get_mint_token_terms()

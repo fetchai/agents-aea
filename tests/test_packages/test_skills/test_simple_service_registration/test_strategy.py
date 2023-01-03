@@ -77,21 +77,24 @@ class TestStrategy(BaseSkillTestCase):
             AEAEnforceError, match="service_data must contain keys `key` and `value`"
         ):
             Strategy(
-                location=self.location, service_data=incorrect_service_data_1,
+                location=self.location,
+                service_data=incorrect_service_data_1,
             )
 
         with pytest.raises(
             AEAEnforceError, match="service_data must contain keys `key` and `value`"
         ):
             Strategy(
-                location=self.location, service_data=incorrect_service_data_2,
+                location=self.location,
+                service_data=incorrect_service_data_2,
             )
 
         with pytest.raises(
             AEAEnforceError, match="service_data must contain keys `key` and `value`"
         ):
             Strategy(
-                location=self.location, service_data=incorrect_service_data_3,
+                location=self.location,
+                service_data=incorrect_service_data_3,
             )
 
     def test_get_location_description(self):

@@ -1,13 +1,13 @@
 name: weather_client
 author: fetchai
-version: 0.26.0
+version: 0.26.5
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPmhswajW8dw1sJgvkCQXYMVCf9nCsHxJX3nzX21qEbN2
-  __init__.py: QmYbYtdM5Ncr641o1ufmdT4CkyswZW5M9AsRR2quypE6jF
+  __init__.py: QmWU7bcqd2wCASp7sVsm6XaxgfqchXDv8pPYHqciH3zRxH
   behaviours.py: QmNxVQanY9hn7Cp9tfTvJhF7ghLpUBDd8XUVjhfQ5xCsnj
   dialogues.py: QmXsn6zXQoqTMQaq86CAEyMJcyN9TQtKH7a5531t3y4x8J
   handlers.py: QmbjJFi15fTmvpvZMwkz83vPhw42Kv3E5eXX6yordGsMoc
@@ -16,13 +16,13 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/fipa:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/oef_search:1.1.0
-- fetchai/signing:1.1.0
+- fetchai/default:1.1.6
+- fetchai/fipa:1.1.6
+- fetchai/ledger_api:1.1.6
+- fetchai/oef_search:1.1.6
+- fetchai/signing:1.1.6
 skills:
-- fetchai/generic_buyer:0.27.0
+- fetchai/generic_buyer:0.27.5
 behaviours:
   search:
     args:
@@ -70,7 +70,7 @@ models:
         longitude: 0.127
       max_negotiations: 1
       max_quantity: 100
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       min_quantity: 1
       search_query:

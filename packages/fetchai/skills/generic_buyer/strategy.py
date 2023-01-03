@@ -156,7 +156,9 @@ class GenericStrategy(Model):
                 self._search_query["search_value"],
             ),
         )
-        query = Query([close_to_my_service, service_key_filter],)
+        query = Query(
+            [close_to_my_service, service_key_filter],
+        )
         return query
 
     def get_service_query(self) -> Query:
@@ -184,16 +186,14 @@ class GenericStrategy(Model):
         """
         result = (
             all(
-                [
-                    key in proposal.values
-                    for key in [
-                        "ledger_id",
-                        "currency_id",
-                        "price",
-                        "service_id",
-                        "quantity",
-                        "tx_nonce",
-                    ]
+                key in proposal.values
+                for key in [
+                    "ledger_id",
+                    "currency_id",
+                    "price",
+                    "service_id",
+                    "quantity",
+                    "tx_nonce",
                 ]
             )
             and proposal.values["ledger_id"] == self.ledger_id

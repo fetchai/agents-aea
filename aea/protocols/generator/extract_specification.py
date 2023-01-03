@@ -28,6 +28,7 @@ from aea.configurations.base import (
 from aea.protocols.generator.common import (
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
+    _is_compositional_type,
 )
 
 
@@ -147,18 +148,18 @@ class PythonicProtocolSpecification:  # pylint: disable=too-few-public-methods
 
     def __init__(self) -> None:
         """Instantiate a Pythonic protocol specification."""
-        self.speech_acts = dict()  # type: Dict[str, Dict[str, str]]
-        self.all_performatives = list()  # type: List[str]
-        self.all_unique_contents = dict()  # type: Dict[str, str]
-        self.all_custom_types = list()  # type: List[str]
-        self.custom_custom_types = dict()  # type: Dict[str, str]
+        self.speech_acts = {}  # type: Dict[str, Dict[str, str]]
+        self.all_performatives = []  # type: List[str]
+        self.all_unique_contents = {}  # type: Dict[str, str]
+        self.all_custom_types = []  # type: List[str]
+        self.custom_custom_types = {}  # type: Dict[str, str]
 
         # dialogue config
-        self.initial_performatives = list()  # type: List[str]
-        self.reply = dict()  # type: Dict[str, List[str]]
-        self.terminal_performatives = list()  # type: List[str]
-        self.roles = list()  # type: List[str]
-        self.end_states = list()  # type: List[str]
+        self.initial_performatives = []  # type: List[str]
+        self.reply = {}  # type: Dict[str, List[str]]
+        self.terminal_performatives = []  # type: List[str]
+        self.roles = []  # type: List[str]
+        self.end_states = []  # type: List[str]
         self.keep_terminal_state_dialogues = False  # type: bool
 
         self.typing_imports = {
@@ -212,6 +213,15 @@ def extract(
             if content_type.startswith("ct:"):
                 all_custom_types_set.add(pythonic_content_type)
 
+            for sub_type in (
+                list(_get_sub_types_of_compositional_types(content_type))
+                if _is_compositional_type(content_type)
+                else []
+            ):
+                if sub_type.startswith("ct:"):
+                    pythonic_content_type = _specification_type_to_python_type(sub_type)
+                    all_custom_types_set.add(pythonic_content_type)
+
     # sort the sets
     spec.all_performatives = sorted(all_performatives_set)
     spec.all_custom_types = sorted(all_custom_types_set)
@@ -234,12 +244,14 @@ def extract(
             )
         ]
         spec.reply = cast(
-            Dict[str, List[str]], protocol_specification.dialogue_config["reply"],
+            Dict[str, List[str]],
+            protocol_specification.dialogue_config["reply"],
         )
         spec.terminal_performatives = [
             terminal_performative.upper()
             for terminal_performative in cast(
-                List[str], protocol_specification.dialogue_config["termination"],
+                List[str],
+                protocol_specification.dialogue_config["termination"],
             )
         ]
         roles_set = cast(

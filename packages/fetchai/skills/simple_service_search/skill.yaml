@@ -1,22 +1,22 @@
 name: simple_service_search
 author: fetchai
-version: 0.11.0
+version: 0.11.5
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdwNVXwPsrA2sYiGae2koQjETVTfxLe6VXyfS3ya5KnyG
-  __init__.py: QmRbpTop4VZcJn6aiGjUwo1BHKjAdCzXLCZdrdQEeFJCVN
+  __init__.py: Qma9tbLh3jb8n7buTKsG2Vuh4TQUwmn1sYHnWUfCK48jir
   behaviours.py: QmY9bp1Wsrr5i3cnQF2o6tzk1N5UGHRm2qG9tFmCx8s4cP
   dialogues.py: QmQjau19pqHZj3iLrEsoT4uAtsYdXiAznesmrG49G8EUg8
-  handlers.py: QmREK5gZhvVyf8gxdqJJSAVYf6CAQp4nry1Zoh4T5dNyj5
+  handlers.py: QmYuMqoUZNN84kEiobg3z78c9CjbtgkMpYhTJu3Mf5woTf
   strategy.py: Qma5RcctMzNjvhHcQ1aJ3X1A4Qj3sztRjRZmqFMZEomzta
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.0
+- fetchai/oef_search:1.1.6
 skills: []
 behaviours:
   service_search:

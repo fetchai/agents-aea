@@ -38,7 +38,7 @@ from pathlib import Path
 SUPPORTED_YEARS = [str(i) for i in range(2018, datetime.datetime.now().year + 1)]
 
 
-HEADER_REGEX = fr"""(#!/usr/bin/env python3
+HEADER_REGEX = rf"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
@@ -84,7 +84,6 @@ if __name__ == "__main__":
         Path("scripts").glob("**/*.py"),
         Path("examples", "gym_ex").glob("**/*.py"),
         Path("examples", "ml_ex").glob("**/*.py"),
-        [Path("setup.py")],
     )
 
     # filter out protobuf files (*_pb2.py)

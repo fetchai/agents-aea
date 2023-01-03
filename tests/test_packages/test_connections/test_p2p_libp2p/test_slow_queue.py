@@ -126,7 +126,11 @@ class TestSlowQueue:
                 content=b"hello",
             )
 
-            envelope = Envelope(to=addr, sender=self.conn.node.address, message=msg,)
+            envelope = Envelope(
+                to=addr,
+                sender=self.conn.node.address,
+                message=msg,
+            )
             return envelope
 
         try:
@@ -142,7 +146,7 @@ class TestSlowQueue:
                 with open(self.conn.node.log_file) as f:
                     return "while sending slow envelope:" in f.read()
 
-            wait_for_condition(_check, timeout=30, period=1)
+            wait_for_condition(_check, timeout=30, period=0.1)
         finally:
             await self.conn.disconnect()
 

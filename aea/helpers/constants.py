@@ -22,7 +22,13 @@ from typing import Dict, List, Union
 
 FALSE_EQUIVALENTS = ["f", "false", "False", "0"]
 FROM_STRING_TO_TYPE = dict(
-    str=str, int=int, bool=bool, float=float, dict=dict, list=list, none=None,
+    str=str,
+    int=int,
+    bool=bool,
+    float=float,
+    dict=dict,
+    list=list,
+    none=None,
 )
 JSON_TYPES = Union[Dict, str, List, None, int, float]
 

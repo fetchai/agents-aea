@@ -101,7 +101,10 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
             callable="get_deploy_transaction",
             kwargs=strategy.get_deploy_kwargs(),
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
@@ -125,7 +128,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
                     "from_address": self.context.agent_address,
                     "spender": strategy.client_contract_address,
                     "amount": strategy.approve_amount,
-                    "gas": strategy.default_gas_approve,
+                    "gas": strategy.gas_limit_approve,
                 }
             ),
         )
@@ -153,7 +156,8 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
                     "from_address": self.context.agent_address,
                     "query_function": strategy.query_function,
                     "amount": strategy.query_oracle_fee,
-                    "gas": strategy.default_gas_query,
+                    "gas": strategy.gas_limit_query,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_query,
                 }
             ),
         )

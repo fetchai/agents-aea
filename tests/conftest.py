@@ -50,6 +50,7 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+import pytest_asyncio
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
@@ -151,7 +152,7 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
     CONFIGURATION_SCHEMA_DIR, "protocol-specification_schema.json"
 )
 
-DUMMY_ENV = gym.GoalEnv
+DUMMY_ENV = gym.GoalEnv  # type: ignore
 
 # URL to local Ganache instance
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
@@ -281,7 +282,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.28.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.28.4")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -401,9 +402,18 @@ agent_config_files = [
 ]
 
 protocol_specification_files = [
-    os.path.join(PROTOCOL_SPECS_PREF_1, "sample.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
+    os.path.join(
+        PROTOCOL_SPECS_PREF_1,
+        "sample.yaml",
+    ),
+    os.path.join(
+        PROTOCOL_SPECS_PREF_2,
+        "sample_specification.yaml",
+    ),
+    os.path.join(
+        PROTOCOL_SPECS_PREF_2,
+        "sample_specification_no_custom_types.yaml",
+    ),
 ]
 
 
@@ -758,7 +768,9 @@ def soef(
 @pytest.fixture(scope="class")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20,
+    fetchd_configuration,
+    timeout: float = 2.0,
+    max_attempts: int = 20,
 ):
     """Launch the Fetch ledger image."""
     client = docker.from_env()
@@ -865,7 +877,9 @@ def double_escape_windows_path_separator(path):
 
 
 def _make_dummy_connection() -> Connection:
-    configuration = ConnectionConfig(connection_id=DummyConnection.connection_id,)
+    configuration = ConnectionConfig(
+        connection_id=DummyConnection.connection_id,
+    )
     dummy_connection = DummyConnection(
         configuration=configuration,
         data_dir=MagicMock(),
@@ -1283,7 +1297,7 @@ def check_test_threads(request):
     assert num_threads >= new_num_threads, "Non closed threads!"
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)

@@ -33,6 +33,7 @@ from typing import (
     Awaitable,
     Callable,
     Container,
+    Coroutine,
     Generator,
     List,
     Optional,
@@ -40,6 +41,7 @@ from typing import (
     Set,
     Tuple,
     Union,
+    cast,
 )
 
 
@@ -263,7 +265,7 @@ class AnotherThreadTask:
     Provides better cancel behaviour: on cancel it will wait till cancelled completely.
     """
 
-    def __init__(self, coro: Awaitable, loop: AbstractEventLoop) -> None:
+    def __init__(self, coro: Coroutine[Any, Any, Any], loop: AbstractEventLoop) -> None:
         """
         Init the task.
 
@@ -333,7 +335,7 @@ class ThreadedAsyncRunner(Thread):
         self._loop.run_forever()
         _default_logger.debug("Asyncio loop has been stopped.")
 
-    def call(self, coro: Awaitable) -> Any:
+    def call(self, coro: Coroutine[Any, Any, Any]) -> Any:
         """
         Run a coroutine inside the event loop.
 
@@ -418,9 +420,10 @@ class Runnable(ABC):
 
         if self._threaded:
             self._thread = Thread(
-                target=self._thread_target, name=self.__class__.__name__  # type: ignore # loop was set in set_loop
+                target=self._thread_target,
+                name=self.__class__.__name__,  # type: ignore # loop was set in set_loop
+                daemon=True,
             )
-            self._thread.setDaemon(True)
             self._thread.start()
         self._stop_called = 0
         return True
@@ -480,7 +483,7 @@ class Runnable(ABC):
 
     def wait_completed(
         self, sync: bool = False, timeout: float = None, force_result: bool = False
-    ) -> Awaitable:
+    ) -> Union[Coroutine, Awaitable]:
         """
         Wait runnable execution completed.
 
@@ -520,7 +523,7 @@ class Runnable(ABC):
 
             self._got_result = True
             if self._task.exception():
-                raise self._task.exception()
+                raise cast(Exception, self._task.exception())
         else:
             self._loop.run_until_complete(
                 asyncio.wait_for(self._wait(), timeout=timeout)
@@ -542,7 +545,7 @@ class Runnable(ABC):
                 if fut.done():  # pragma: nocover
                     return
                 if task.exception():
-                    fut.set_exception(task.exception())
+                    fut.set_exception(task.exception())  # type: ignore
                 else:  # pragma: nocover
                     fut.set_result(None)
             finally:
@@ -593,7 +596,9 @@ class Runnable(ABC):
         self._was_cancelled = True
         self._task.cancel()
 
-    def start_and_wait_completed(self, *args: Any, **kwargs: Any) -> Awaitable:
+    def start_and_wait_completed(
+        self, *args: Any, **kwargs: Any
+    ) -> Union[Coroutine, Awaitable]:
         """Alias for start and wait methods."""
         self.start()
         return self.wait_completed(*args, **kwargs)

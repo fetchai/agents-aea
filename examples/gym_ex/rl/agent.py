@@ -30,7 +30,7 @@ BanditId = int
 Price = int
 
 Action = Tuple[BanditId, Price]
-Observation = None
+Observation = type(None)
 Reward = float
 Done = bool
 Info = dict
@@ -189,8 +189,8 @@ class RLAgent:
             while not done and action_counter < nb_steps:
                 action = self._pick_an_action()
                 action_counter += 1
-                obs, reward, done, info = env.step(action)
-                self._update_model(obs, reward, done, info, action)
+                obs, reward, done, info, *_ = env.step(action)  # type: ignore
+                self._update_model(obs, reward, done, info, action)  # type: ignore
                 if action_counter % 10 == 0:
                     print(
                         (
@@ -202,7 +202,7 @@ class RLAgent:
                             nb_steps,
                             episode_counter,
                             str(action),
-                            reward,
+                            reward,  # type: ignore
                         )
                     )
         env.close()

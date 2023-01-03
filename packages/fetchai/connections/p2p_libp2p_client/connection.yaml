@@ -1,6 +1,6 @@
 name: p2p_libp2p_client
 author: fetchai
-version: 0.20.0
+version: 0.20.5
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
@@ -8,13 +8,13 @@ description: The libp2p client connection implements a tcp connection to a runni
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQZQyYpobMCzc3g8x1FhuRfu2Lm7NNocDDZPsYG9nzKRQ
+  README.md: QmchaNxQavwRaKMhZYaYpDjWUiRb4CA11FSaPPJVshpi9s
   __init__.py: QmQKLUSEPVm59e3JC78zQTebbo8AKf4SBRhz1AKuV7bmCB
-  connection.py: QmUhRcuCvcXb8DNCweavvWYhsxGVDKoXSq47vKp5xT3zoB
+  connection.py: QmVTqnUhvGeyVpvVkRuKe3cX1ND9JHDS9dV7hjeLwvQPTy
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/acn:1.1.0
+- fetchai/acn:1.1.6
 class_name: P2PLibp2pClientConnection
 config:
   connect_retries: 3
@@ -29,15 +29,15 @@ cert_requests:
 - identifier: acn
   ledger_id: fetchai
   message_format: '{public_key}'
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
   save_path: .certs/acn_fetch_ai_11000.txt
 - identifier: acn
   ledger_id: fetchai
   message_format: '{public_key}'
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
   save_path: .certs/acn_fetch_ai_11001.txt
 excluded_protocols: []

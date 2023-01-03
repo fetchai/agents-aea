@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.27.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.27.5")
 
 NOT_SPECIFIED = object()
 
@@ -294,7 +294,7 @@ class SOEFChannel:
         """Get the unique page address from storage."""
         if self._token_storage_path is None:
             return None
-        with open(self._token_storage_path, "r") as f:
+        with open(self._token_storage_path, "r", encoding="utf-8") as f:
             result = f.read().strip()
         unique_page_address = (
             result if result != self.NONE_UNIQUE_PAGE_ADDRESS else None
@@ -309,7 +309,7 @@ class SOEFChannel:
             return
         if unique_page_address is None:
             unique_page_address = self.NONE_UNIQUE_PAGE_ADDRESS
-        with open(self._token_storage_path, "w") as f:
+        with open(self._token_storage_path, "w", encoding="utf-8") as f:
             f.write(unique_page_address)
 
     async def _find_around_me_processor(self) -> None:
@@ -388,7 +388,8 @@ class SOEFChannel:
         return True
 
     def _construct_personality_filter_params(
-        self, equality_constraints: List[Constraint],
+        self,
+        equality_constraints: List[Constraint],
     ) -> Dict[str, List[str]]:
         """
         Construct a dictionary of personality filters.
@@ -864,7 +865,8 @@ class SOEFChannel:
         if disclosure_accuracy:
             params = {"accuracy": disclosure_accuracy}
             await self._generic_oef_command(
-                "set_find_position_disclosure_accuracy", params,
+                "set_find_position_disclosure_accuracy",
+                params,
             )
 
         self.agent_location = agent_location
@@ -981,7 +983,11 @@ class SOEFChannel:
             target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         await self.in_queue.put(envelope)
 
     async def unregister_service(
@@ -1244,7 +1250,11 @@ class SOEFChannel:
             agents=tuple(agents.keys()),
             agents_info=AgentsInfo(agents),
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         await self.in_queue.put(envelope)
 
 

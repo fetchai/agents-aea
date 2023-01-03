@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the state_update protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.1.1`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.4`.
 """
 
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage

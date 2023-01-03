@@ -47,8 +47,8 @@ class AgentsInfo:
             raise ValueError("body must not be None")
         enforce(
             isinstance(self._body, dict)
-            and all([isinstance(key, str) for key in self._body.keys()])
-            and all([isinstance(value, dict) for value in self._body.values()]),
+            and all(isinstance(key, str) for key in self._body.keys())
+            and all(isinstance(value, dict) for value in self._body.values()),
             "Body must be dict and keys must be str and values must be dict.",
         )
 

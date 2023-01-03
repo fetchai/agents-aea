@@ -177,7 +177,7 @@ class ItemRemoveHelper:
         :yield: package ids: (type, public_id)
         """
         for item_type in map(str, ComponentType):
-            items = getattr(item, f"{item_type}s", set())
+            items: Set[PublicId] = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
                 if ignore_non_vendor and is_item_present(
                     self._ctx.cwd,
@@ -253,7 +253,7 @@ class ItemRemoveHelper:
             item, package_id
         )
         can_be_removed = set()
-        can_not_be_removed = dict()
+        can_not_be_removed = {}
 
         for dep_key, deps in item_deps.items():
             if agent_deps[dep_key] == deps:
@@ -369,7 +369,7 @@ class RemoveItem:
     @property
     def agent_items(self) -> Set[PublicId]:
         """Return items registered with agent of the same type as item."""
-        return getattr(self.agent_config, self.item_type_plural, set)
+        return getattr(self.agent_config, self.item_type_plural, set())
 
     @property
     def is_required_by(self) -> bool:

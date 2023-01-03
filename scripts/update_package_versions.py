@@ -30,7 +30,6 @@ import argparse
 import operator
 import os
 import re
-import shutil
 import subprocess  # nosec
 import sys
 from collections import Counter
@@ -38,6 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Pattern, Set
 
 import click
+import requests
 import semver
 import yaml
 from click.testing import CliRunner
@@ -66,6 +66,7 @@ TYPE_TO_CONFIG_FILE = {
 }
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
 TEST_PROTOCOLS = ["t_protocol", "t_protocol_no_ct"]
+FILE_DOWNLOAD_TIMEOUT = 180
 
 
 def get_protocol_specification_header_regex(public_id: PublicId) -> Pattern:
@@ -122,29 +123,22 @@ arguments: argparse.Namespace = None  # type: ignore
 
 def get_hashes_from_last_release() -> Dict[str, str]:
     """Get hashes from last release."""
-    svn_call = subprocess.Popen(  # nosec
-        [
-            "svn",
-            "export",
-            "https://github.com/fetchai/agents-aea.git/trunk/packages/{}".format(
-                HASHES_CSV
-            ),
-        ]
-    )
-    svn_call.wait()
     hashes = {}  # Dict[str, str]
-    with open(HASHES_CSV) as f:
-        for line in f:
-            split = line.split(",")
-            hashes[split[0]] = split[1].rstrip()
-    os.remove(HASHES_CSV)
+    resp = requests.get(
+        url="https://raw.githubusercontent.com/fetchai/agents-aea/main/packages/hashes.csv",
+        timeout=FILE_DOWNLOAD_TIMEOUT,
+    )
+    hashes_raw = resp.text
+    for line in hashes_raw.splitlines():
+        split = line.split(",")
+        hashes[split[0]] = split[1].rstrip()
     return hashes
 
 
 def get_hashes_from_current_release() -> Dict[str, str]:
     """Get hashes from last release."""
     hashes = {}  # Dict[str, str]
-    with open(os.path.join("packages", HASHES_CSV)) as f:
+    with open(os.path.join("packages", HASHES_CSV), encoding="utf-8") as f:
         for line in f:
             split = line.split(",")
             hashes[split[0]] = split[1].rstrip()
@@ -189,7 +183,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
     :return: the data.
     """
     package_type = configuration_file.parent.parent.name
-    with configuration_file.open() as fp:
+    with configuration_file.open(encoding="utf-8") as fp:
         if package_type != "agents":
             return yaml.safe_load(fp)
         # when it is an agent configuration file,
@@ -224,10 +218,15 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
     """
     runner = CliRunner()
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "search", type_, "--query", name], standalone_mode=False,
+        cli,
+        [*CLI_LOG_OPTION, "search", type_, "--query", name],
+        standalone_mode=False,
     )
     reg = r"({}/{}:{})".format("fetchai", name, PublicId.VERSION_REGEX)
-    ids = re.findall(reg, result.output,)
+    ids = re.findall(
+        reg,
+        result.output,
+    )
     p_ids = []
     highest = PublicId.from_str("fetchai/{}:0.1.0".format(name))
     for id_ in ids:
@@ -402,11 +401,11 @@ def _can_disambiguate_from_context(
     :return: if True/False, the old string can/cannot be replaced. If None, we don't know.
     """
     match = re.search(
-        fr"aea +add +(skill|protocol|connection|contract) +{old_string}", line
+        rf"aea +add +(skill|protocol|connection|contract) +{old_string}", line
     )
     if match is not None:
         return match.group(1) == type_[:-1]
-    if re.search(fr"aea +fetch +{old_string}", line) is not None:
+    if re.search(rf"aea +fetch +{old_string}", line) is not None:
         return type_ == "agents"
     match = re.search(
         "(skill|SKILL|"
@@ -441,7 +440,9 @@ def _ask_user(
     print("".join(above_rows))
     print(line.rstrip().replace(old_string, "\033[91m" + old_string + "\033[0m"))
     print("".join(below_rows))
-    answer = input(f"Replace for component ({type_}, {old_string})? [y/N]: ",)  # nosec
+    answer = input(
+        f"Replace for component ({type_}, {old_string})? [y/N]: ",
+    )  # nosec
     return answer
 
 
@@ -451,7 +452,7 @@ def replace_aea_fetch_statements(
     """Replace statements of the type: 'aea fetch <old_string>'."""
     if type_ == "agents":
         content = re.sub(
-            fr"aea +fetch +{old_string}", f"aea fetch {new_string}", content
+            rf"aea +fetch +{old_string}", f"aea fetch {new_string}", content
         )
     return content
 
@@ -462,7 +463,7 @@ def replace_aea_add_statements(
     """Replace statements of the type: 'aea add <type> <old_string>'."""
     if type_ != "agents":
         content = re.sub(
-            fr"aea +add +{type_} +{old_string}",
+            rf"aea +add +{type_} +{old_string}",
             f"aea add {type_} {new_string}",
             content,
         )
@@ -561,58 +562,57 @@ def bump_version_in_yaml(
 ) -> None:
     """Bump the package version in the package yaml."""
     loader = ConfigLoader.from_configuration_type(type_[:-1])
-    config = loader.load(configuration_file_path.open())
+    with configuration_file_path.open(encoding="utf-8") as f:
+        config = loader.load(f)
     config.version = version
-    loader.dump(config, open(configuration_file_path, "w"))
+
+    with open(configuration_file_path, "w", encoding="utf-8") as f:
+        loader.dump(config, f)
 
 
 class Updater:
-    """PAckage versions updter tool."""
+    """Package versions updter tool."""
 
-    def __init__(self, new_version, replace_by_default, context):
+    def __init__(
+        self, new_version: str, replace_by_default: bool, context: int
+    ) -> None:
         """Init updater."""
         self.option_new_version = new_version
         self.option_replace_by_default = replace_by_default
         self.option_context = context
 
     @staticmethod
-    def check_if_svn_installed():
-        """Check svn tool installed."""
-        res = shutil.which("svn")
-        if res is None:
-            raise Exception("Install svn first!")
-
-    @staticmethod
-    def run_hashing():
+    def run_hashing() -> None:
         """Run hashes update."""
         hashing_call = update_hashes()
         if hashing_call == 1:
             raise Exception("Problem when running IPFS script!")
 
     @staticmethod
-    def check_if_running_allowed():
+    def check_if_running_allowed() -> None:
         """
         Check if we can run the script.
 
         Script should only be run on a clean branch.
         """
-        git_call = subprocess.Popen(["git", "diff"], stdout=subprocess.PIPE)  # nosec
-        (stdout, _) = git_call.communicate()
-        git_call.wait()
-        if len(stdout) > 0:
-            raise Exception("Cannot run script in unclean git state.")
+        with subprocess.Popen(  # nosec
+            ["git", "diff"], stdout=subprocess.PIPE
+        ) as git_call:
+            (stdout, _) = git_call.communicate()
+            git_call.wait()
+            if len(stdout) > 0:
+                raise Exception("Cannot run script in unclean git state.")
 
-    def _checks(self):
-        self.check_if_svn_installed()
+    def _checks(self) -> None:
         self.run_hashing()
         self.check_if_running_allowed()
 
-    def run(self):
+    def run(self) -> None:
         """Run package versions update process."""
         self._checks()
         self._run_hashing()
 
-    def _run_once(self):
+    def _run_once(self) -> bool:
         """Run the upgrade logic once."""
         all_package_ids_to_update = get_public_ids_to_update()
         if len(all_package_ids_to_update) == 0:
@@ -634,7 +634,9 @@ class Updater:
             ambiguous_public_ids
         )
         print(f"Ambiguous public ids: {ambiguous_public_ids}")
-        print(f"Conflicts with public ids to update: {conflicts}",)
+        print(
+            f"Conflicts with public ids to update: {conflicts}",
+        )
 
         print("*" * 100)
         print("Start processing.")
@@ -728,12 +730,16 @@ class Updater:
                     (".py", ".yaml", ".md", ".sh")
                 ):
                     self.inplace_change(
-                        path, current_public_id, new_public_id, type_, is_ambiguous,
+                        path,
+                        current_public_id,
+                        new_public_id,
+                        type_,
+                        is_ambiguous,
                     )
 
         bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
 
-    def _run_hashing(self):
+    def _run_hashing(self) -> None:
         while self._run_once():
             self._run_hashing()
 

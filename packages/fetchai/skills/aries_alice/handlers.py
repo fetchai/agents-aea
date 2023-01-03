@@ -414,7 +414,8 @@ class OefSearchHandler(Handler):
             description = target_message.service_description
             data_model_name = description.data_model.name
             registration_behaviour = cast(
-                AliceBehaviour, self.context.behaviours.alice,
+                AliceBehaviour,
+                self.context.behaviours.alice,
             )
             if "location_agent" in data_model_name:
                 registration_behaviour.register_service()
@@ -460,7 +461,8 @@ class OefSearchHandler(Handler):
         # send invitations
         for addr in strategy.aea_addresses:
             self.context.behaviours.alice.send_http_request_message(
-                method="POST", url=strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION,
+                method="POST",
+                url=strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION,
             )
             self.context.logger.info(f"created an invitation for {addr}.")
 
@@ -488,7 +490,10 @@ class OefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            alice_behaviour = cast(AliceBehaviour, self.context.behaviours.alice,)
+            alice_behaviour = cast(
+                AliceBehaviour,
+                self.context.behaviours.alice,
+            )
             alice_behaviour.failed_registration_msg = target_message
 
     def _handle_invalid(
@@ -502,6 +507,7 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )

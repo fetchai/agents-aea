@@ -192,8 +192,12 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             if not file_path.exists():
                 continue
             py_file = Path(file_path)
-            py_file.write_text(
-                re.sub(SCAFFOLD_PUBLIC_ID, str(new_public_id), py_file.read_text())
+            py_file.write_text(  # pylint: disable=unspecified-encoding
+                re.sub(
+                    SCAFFOLD_PUBLIC_ID,
+                    str(new_public_id),
+                    py_file.read_text(),  # pylint: disable=unspecified-encoding
+                )
             )
 
         # fingerprint item.
@@ -274,7 +278,9 @@ def _scaffold_non_package_item(
         )
         ctx.agent_loader.dump(
             ctx.agent_config,
-            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
+            open_file(
+                os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w", encoding="utf-8"
+            ),
         )
 
     except Exception as e:
