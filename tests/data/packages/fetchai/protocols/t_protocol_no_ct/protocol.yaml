@@ -8,10 +8,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeihjtfji7r2x37mkiamaxl7axt2mhwtkwenl3byvyxj7oui475of2y
-  __init__.py: bafybeibdotvgu5n4lv3z6bjeyz23vcncaxaqn3ht5pyobhmkfnhwsy2r5e
-  dialogues.py: bafybeig4txxnijguyyebljilqdu6jupr77u3yzr4l4ltf7univdjheqz2y
-  message.py: bafybeihyj6dzmimfncy6it4pms7jbk5ae7db2pagwjtbkkbtuidszw4tje
-  serialization.py: bafybeiek3ouhhzsclmiulu5sb2zaelpguuglu4vr3qvkafktfs5mpj4pnq
+  __init__.py: bafybeibjqe7cavhtwspu6hv3fx7drwemu6f67k5uc7esryoh6kghexyj3u
+  dialogues.py: bafybeialxh6rperez5hpn3z27ecxqcl3e5pslhked76gqegxipgrrqkvwi
+  message.py: bafybeihhiun4cf5dz4pwvjtllretuy7zenn4elw76qedlmw7ykgkd7gkmy
+  serialization.py: bafybeieffsonloc5mbrrc6gi4cgcpukgyuxl4mhw4kv3uvwgf7ng25oz2y
   t_protocol_no_ct.proto: bafybeib3j7mpw67wuqzyetyt2jsnuxzgmjdd4aokxncvpy63qyokxclttu
   t_protocol_no_ct_pb2.py: bafybeifkxbnn7lu2jqc2l6dvu6guewn4qjaoob6czfgibfvxpxk72uylwa
 fingerprint_ignore_patterns: []
