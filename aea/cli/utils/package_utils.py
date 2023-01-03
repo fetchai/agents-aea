@@ -117,9 +117,15 @@ def validate_package_name(package_name: str) -> None:
     ...
     click.exceptions.BadParameter: this-is-not is not a valid package name.
 
+    >>> validate_package_name("This_is_not")
+    Traceback (most recent call last):
+    ...
+    click.exceptions.BadParameter: This_is_not is not a valid package name.
+
     :param package_name: the package name
     """
-    if re.fullmatch(PublicId.PACKAGE_NAME_REGEX, package_name) is None:
+
+    if not PublicId.is_package_name_valid(package_name):
         raise click.BadParameter("{} is not a valid package name.".format(package_name))
 
 
@@ -133,13 +139,17 @@ def _is_valid_author_handle(author: str) -> bool:
     >>> _is_valid_author_handle("this-is-not")
     ...
     False
+    >>> _is_valid_author_handle("Not_this_one")
+    ...
+    False
+    >>> _is_valid_author_handle("and_not_This_one")
+    ...
+    False
 
     :param author: author name
     :return: bool indicating whether author name is valid
     """
-    if re.fullmatch(PublicId.AUTHOR_REGEX, author) is None:
-        return False
-    return True
+    return PublicId.is_author_name_valid(author)
 
 
 def _is_permitted_author_handle(author: str) -> bool:

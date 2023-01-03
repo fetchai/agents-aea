@@ -251,6 +251,8 @@ class PublicId(JSONSerializable):
     IPFS_HASH_REGEX = IPFS_HASH_REGEX
     PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
 
+    _STR_ID_CLASS = SimpleId
+
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
     VERSION_REGEX = rf"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_URI_REGEX = (
@@ -269,8 +271,8 @@ class PublicId(JSONSerializable):
         package_hash: Optional[IPFSHashOrStr] = None,
     ) -> None:
         """Initialize the public identifier."""
-        self._author = SimpleId(author)
-        self._name = SimpleId(name)
+        self._author = self._STR_ID_CLASS(author)
+        self._name = self._STR_ID_CLASS(name)
         self._package_version = (
             PackageVersion(version)
             if version is not None
@@ -279,6 +281,32 @@ class PublicId(JSONSerializable):
         self._package_hash = (
             IPFSHash(package_hash) if package_hash is not None else None
         )
+
+    @classmethod
+    def is_package_name_valid(cls, name: SimpleIdOrStr) -> bool:
+        """
+        Check is package name valid.
+
+        :param name: str or SimpleID
+
+        :return: bool
+        """
+        try:
+            cls._STR_ID_CLASS(name)
+            return True
+        except ValueError:
+            return False
+
+    @classmethod
+    def is_author_name_valid(cls, name: SimpleIdOrStr) -> bool:
+        """
+        Check is author name valid.
+
+        :param name: str or SimpleID
+
+        :return: bool
+        """
+        return cls.is_package_name_valid(name)
 
     @property
     def author(self) -> str:

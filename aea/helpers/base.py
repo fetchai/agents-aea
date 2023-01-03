@@ -63,7 +63,7 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
-SIMPLE_ID_REGEX = rf"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
+SIMPLE_ID_REGEX = rf"[a-z_][a-z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 IPFS_HASH_LENGTH_LIMIT_V0 = 46
@@ -249,17 +249,27 @@ class SimpleId(RegexConstrainedString):
     >>> SimpleId("0an_identifier")
     Traceback (most recent call last):
     ...
-    ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-z_][a-z0-9_]{0,127}')
 
     >>> SimpleId("an identifier")
     Traceback (most recent call last):
     ...
-    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    ValueError: Value an identifier does not match the regular expression re.compile('[a-z_][a-z0-9_]{0,127}')
 
     >>> SimpleId("")
     Traceback (most recent call last):
     ...
-    ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    ValueError: Value  does not match the regular expression re.compile('[a-z_][a-z0-9_]{0,127}')
+
+    >>> SimpleId("An_id")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value An_id does not match the regular expression re.compile('[a-z_][a-z0-9_]{0,127}')
+
+    >>> SimpleId("an_Id")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value an_Id does not match the regular expression re.compile('[a-z_][a-z0-9_]{0,127}')
     """
 
     REGEX = re.compile(SIMPLE_ID_REGEX)
@@ -267,33 +277,38 @@ class SimpleId(RegexConstrainedString):
 
 class IPFSHash(RegexConstrainedString):
     """
-    A simple identifier.
+    A IPFSHash identifier.
 
     The allowed strings are all the strings that:
-    - have at least length 1
-    - have at most length 128
-    - the first character must be between a-z,A-Z or underscore
+    - have length 128
+    - the first character must be between a-z or underscore
     - the other characters must be either the above or digits.
 
     Examples of allowed strings:
-    >>> SimpleId("an_identifier")
-    'an_identifier'
+    >>> IPFSHash("bafybeihpjm2sgnrpuwaqicikw4aybltm7xrjmf7cscpp2cy2xdoi6pekbq")
+    'bafybeihpjm2sgnrpuwaqicikw4aybltm7xrjmf7cscpp2cy2xdoi6pekbq'
 
     Examples of not allowed strings:
-    >>> SimpleId("0an_identifier")
+    >>> IPFSHash("0an_identifier")
     Traceback (most recent call last):
     ...
-    ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    ValueError: Value 0an_identifier does not match the regular expression re.compile('((Qm[a-zA-Z0-9]{44})|(ba[a-zA-Z0-9]{57}))')
 
-    >>> SimpleId("an identifier")
+    >>> IPFSHash("an_identifier")
     Traceback (most recent call last):
     ...
-    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    ValueError: Value an_identifier does not match the regular expression re.compile('((Qm[a-zA-Z0-9]{44})|(ba[a-zA-Z0-9]{57}))')
 
-    >>> SimpleId("")
+
+    >>> IPFSHash("an identifier")
     Traceback (most recent call last):
     ...
-    ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    ValueError: Value an identifier does not match the regular expression re.compile('((Qm[a-zA-Z0-9]{44})|(ba[a-zA-Z0-9]{57}))')
+
+    >>> IPFSHash("")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value  does not match the regular expression re.compile('((Qm[a-zA-Z0-9]{44})|(ba[a-zA-Z0-9]{57}))')
     """
 
     REGEX = re.compile(IPFS_HASH_REGEX)

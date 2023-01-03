@@ -4,9 +4,9 @@ This document describes the configuration files of the different packages.
 
 The following provides a list of the relevant regex used:
 ``` yaml
-PACKAGE_REGEX: "[a-zA-Z_][a-zA-Z0-9_]*"
-AUTHOR_REGEX: "[a-zA-Z_][a-zA-Z0-9_]*"
-PUBLIC_ID_REGEX: "^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+PACKAGE_REGEX: "[a-z_][a-z0-9_]*"
+AUTHOR_REGEX: "[a-z_][a-z0-9_]*"
+PUBLIC_ID_REGEX: "^[a-z0-9_]*/[a-z_][a-z0-9_]*:(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
 LEDGER_ID_REGEX: "^[^\\d\\W]\\w*\\Z"
 ```
 
