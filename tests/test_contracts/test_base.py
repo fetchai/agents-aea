@@ -236,7 +236,7 @@ def test_scaffolded_contract_method_call():
     ctx.config["to_local_registry"] = True
     ctx.agent_config.directory = td
 
-    contract_name = "IUniswapV2ERC20"
+    contract_name = "i_uniswap_v2erc20"
     contract_abi_path = Path("tests", "test_contracts", "IUniswapV2ERC20.json")
 
     try:
