@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use the AEA framework in your research, please cite it as below:"
+title: Autonomous Economic Agent (AEA) Framework
+authors:
+  - family-names: Hosseini
+    given-names: Seyed Ali
+  - family-names: Minarsch
+    given-names: David
+  - family-names: Favorito
+    given-names: Marco
+  - family-names: Riehl
+    given-names: James
+  - family-names: Turchenkov
+    given-names: Yuri
+  - family-names: Panasevych
+    given-names: Oleg
+  - family-names: Rahmani
+    given-names: Lokman
+  - family-names: Vestfál
+    given-names: Jiří
+  - family-names: Triantafyllidis
+    given-names: Aristotelis
+  - family-names: Campbell
+    given-names: Diarmid
+  - family-names: Chen
+    given-names: Kevin
+date-released: "2019-08-21"
+url: "https://github.com/fetchai/agents-aea/"
+license: "Apache-2.0"
