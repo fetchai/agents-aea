@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -285,6 +285,10 @@ class TestHashUpdateDev(BaseAEATestCase):
             pm, "is_third_party_package", return_value=True
         ), mock.patch.object(
             pm, "is_dev_package", return_value=False
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
         ), mock.patch.object(
             pm._logger, "warning"
         ) as mock_warning:

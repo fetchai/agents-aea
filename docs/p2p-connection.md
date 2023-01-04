@@ -26,7 +26,7 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection valory/p2p_libp2p:0.1.0:bafybeif5evkmahtr2ioqi5ndjxns3w4thy2ihgsol4skatiafmn66345t4 --remote
+aea add connection valory/p2p_libp2p:0.1.0:bafybeiabusw3r7tlru57ciceqoarusmdbpubpjq63yav3kbgvrbnbzacqu --remote
 aea config set agent.default_connection valory/p2p_libp2p:0.1.0
 aea install
 aea build
@@ -58,7 +58,11 @@ Create a second AEA:
 ``` bash
 aea create my_other_aea
 cd my_other_aea
+<<<<<<< HEAD
 aea add connection valory/p2p_libp2p:0.1.0:bafybeif5evkmahtr2ioqi5ndjxns3w4thy2ihgsol4skatiafmn66345t4 --remote
+=======
+aea add connection valory/p2p_libp2p:0.1.0:bafybeiabusw3r7tlru57ciceqoarusmdbpubpjq63yav3kbgvrbnbzacqu --remote
+>>>>>>> d6c6c4d44284db7b7f7bd56bcf019bfb33999bf1
 aea config set agent.default_connection valory/p2p_libp2p:0.1.0
 aea install
 aea build

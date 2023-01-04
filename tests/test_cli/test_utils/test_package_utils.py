@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -157,9 +157,14 @@ def test_update_aea_version_range() -> None:
     """Test `update_aea_version_range`"""
 
     package_config = AgentConfig("name", "author", aea_version="0.1.0")
-    update_aea_version_range(package_configuration=package_config)
+    assert not package_config.aea_version_specifiers.contains(
+        str(get_current_aea_version())
+    )
 
-    assert str(get_current_aea_version()) in package_config.aea_version
+    update_aea_version_range(package_configuration=package_config)
+    assert package_config.aea_version_specifiers.contains(
+        str(get_current_aea_version())
+    )
 
 
 class TestItemPresentWithHash(BaseAEATestCase):
