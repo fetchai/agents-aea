@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,8 @@ import os
 import platform
 
 
-LIBP2P_CERT_NOT_BEFORE = "2022-01-01"
-LIBP2P_CERT_NOT_AFTER = "2023-01-01"
+LIBP2P_CERT_NOT_BEFORE = "2023-01-01"
+LIBP2P_CERT_NOT_AFTER = "2024-01-01"
 
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
 

@@ -12,7 +12,7 @@ fingerprint:
   __init__.py: bafybeibtknmpggpj77fflwndllcqvvbolpds7doymdp4fjd277metq6oxy
   check_dependencies.py: bafybeia3tx5v2mvoahoyz5hrrbczxh3zklll6xd57cainnucmtrxmzuu7u
   connection.py: bafybeid3g43y7wryyngns4dy2vjrx37xum2cmif2ovvsoycclny6mlrt6u
-  consts.py: bafybeigspzopex53xtzn3l4x5frllkb6acy6qd7eot7aw6qk3rkn2k6x4i
+  consts.py: bafybeifpc6on6addr4a3qruevt5ykvxd26ehj2bmfncu2aq3bubrmpmdhe
   libp2p_node/Makefile: bafybeieuy4mut3oz2aqhtgt3dtky23do7g7tjg6fni4e256i3zg2onzmim
   libp2p_node/README.md: bafybeibke3cczx7lh4cmu4w6ofggrkm32mdzj6isjq4xo7isjproqg3y4y
   libp2p_node/acn/utils.go: bafybeiaftfq27ykd5kc3qauchb3vmnt6pt5jxzmsfykes4b4wptojtdhb4
@@ -64,8 +64,8 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
-- valory/acn:1.1.0:bafybeifontek6tvaecatoauiule3j3id6xoktpjubvuqi3h2jkzqg7zh7a
+- fetchai/default:1.0.0:bafybeifdodei24xy4zsnmurg3dbbe2ysp7ii7v5bmrsgl7stt7lj22pezq
+- valory/acn:1.1.0:bafybeieldogmtf3m4jdsvt4vvyay3jh54rjn3deasymfw43vz3o42vigmq
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
@@ -82,8 +82,8 @@ cert_requests:
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
-  not_after: '2023-01-01'
-  not_before: '2022-01-01'
+  not_after: '2024-01-01'
+  not_before: '2023-01-01'
   public_key: cosmos
   save_path: .certs/conn_cert.txt
 excluded_protocols: []

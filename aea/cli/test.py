@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,7 @@ from aea.cli.utils.click_utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_package_path
-from aea.components.base import load_aea_package
+from aea.components.base import load_aea_package, perform_load_aea_package
 from aea.configurations.base import ComponentConfiguration
 from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
@@ -437,6 +437,13 @@ def load_package(
         )
         configuration.directory = package_dir
         load_aea_packages_recursively(configuration, package_path_finder, root_packages)
+    else:
+        perform_load_aea_package(
+            dir_=package_dir,
+            author=package_dir.parent.parent.name,
+            package_type_plural=PackageType(package_type).to_plural(),
+            package_name=package_dir.name,
+        )
 
     test_package_dir = package_dir / AEA_TEST_DIRNAME
     enforce(
