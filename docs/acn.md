@@ -41,11 +41,8 @@ To satisfy different resource constraints and flexible deployment the ACN is imp
 
 <img src="../assets/acn-tiers.jpg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>The <code>p2p_libp2p_mailbox</code> connection is not available yet.
-</p>
-</div>
+!!! note
+    The `p2p_libp2p_mailbox` connection is not available yet.
 
 ## Trust and security
 
@@ -57,6 +54,3 @@ An agent can choose which connection to use depending on the resource and trust 
 All communication protocols use public cryptography to ensure security (authentication, confidentiality, and availability) using TLS handshakes with pre-shared public keys.
 
 <img src="../assets/acn-trust-security.jpg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
-
-
-<br />

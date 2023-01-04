@@ -116,10 +116,8 @@ service_description = Description(
 )
 ```
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Currently, the soef does not allow for multiple registrations to be combined into a single command.
-</div>
+!!! note
+    Currently, the soef does not allow for multiple registrations to be combined into a single command.
 
 ## Perform a search
 

@@ -289,6 +289,3 @@ aea scaffold error-handler
 
 Now you will see a file called `error_handler.py` in the AEA project root.
 You can then implement your own custom logic to process messages. 
-
-
-<br />

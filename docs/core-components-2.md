@@ -67,6 +67,3 @@ Understanding the decision maker is vital to developing a goal oriented and cryp
 Understanding `Contracts` is important when developing AEAs that make commitments or use smart contracts for other purposes. You can learn more about the `Contracts` agents use in the following section:
 
 - <a href="../contract">Contracts</a>
-
-
-<br />

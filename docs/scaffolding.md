@@ -47,5 +47,3 @@ aea fingerprint [package_name] [public_id]
 ```
 
 Then you are ready to run the AEA.
-
-<br />

@@ -32,14 +32,6 @@ It optionally also contains
 
 All protocols are for point to point interactions between two agents or agent-like services.
 
-<!-- ## Interaction Protocols
-
-Protocols are not to be conflated with Interaction Protocols. The latter consist of three components in the AEA:
-
-- Protocols: which deal with the syntax and potentially semantics of the message exchange
-- Handlers: which handle incoming messages
-- Behaviours: which execute pro-active patterns of one-shot, cyclic or even finite-state-machine-like type. -->
-
 ## Metadata
 
 Each `Message` in an interaction protocol has a set of default fields:
@@ -507,6 +499,3 @@ To retrieve a dialogue for a given message, we can do the following:
 ``` python
 retrieved_dialogue = seller_dialogues.get_dialogue(cfp_msg)
 ```
-
-
-<br />

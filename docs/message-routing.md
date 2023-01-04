@@ -14,11 +14,8 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 	1. checks if `to` field can be interpreted as `skill_id`, if so uses that together with the `protocol_id` to dispatch to the protocol's `Handler` in the specified `Skill`, else
 	2. uses the `protocol_id` to dispatch to the protocol's `Handler` in all skills supporting the protocol.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>For agent-to-agent communication it is advisable to have a single skill implement a given protocol. Skills can then forward the messages via skill-to-skill communication to other skills where required. Otherwise, received agent-to-agent messages will be forwarded to all skills implementing a handler for the specified protocol and the developer needs to take care to handle them appropriately (e.g. avoid multiple replies to a single message).
-</p>
-</div>
+!!! note
+    For agent-to-agent communication it is advisable to have a single skill implement a given protocol. Skills can then forward the messages via skill-to-skill communication to other skills where required. Otherwise, received agent-to-agent messages will be forwarded to all skills implementing a handler for the specified protocol and the developer needs to take care to handle them appropriately (e.g. avoid multiple replies to a single message).
 
 ## Outgoing `Messages`
 

@@ -1,7 +1,5 @@
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This is currently an experimental feature. To try it follow this guide.</p>
-</div>
+!!! note
+    This is currently an experimental feature. To try it follow this guide.
 
 ## How to run
 
@@ -47,10 +45,8 @@ where `<language>` is a language id.
 
 The protocol buffer compiler requires a plugin to generate Go code. Install it with:
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Note the protocol buffer compiler <code>protoc</code> that the generator uses requires a plugin to produce <code>go</code> code. Follow <a href="../protocol-generator/#protocol-specification">this instruction</a>.</p>
-</div>
+!!! note
+    Note the protocol buffer compiler `protoc` that the generator uses requires a plugin to produce `go` code. Follow <a href="../protocol-generator/#protocol-specification">this instruction</a>.
 
 ## Protocol Specification
 A protocol can be described in a YAML file. This is called a _protocol specification_. The following is an example protocol specification:
@@ -226,6 +222,3 @@ aea generate protocol ../examples/protocol_specification_ex/sample.yaml
 This will generate the protocol and place it in your AEA project.
 
 Third, try generating other protocols by first defining a specification, then running the generator.
-
-
-<br />

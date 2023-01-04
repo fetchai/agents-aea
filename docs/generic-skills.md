@@ -63,33 +63,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the seller from scratch:
-``` bash
-aea create my_seller_aea
-cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/generic_seller:0.28.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create the seller from scratch:
+    ``` bash
+    aea create my_seller_aea
+    cd my_seller_aea
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/generic_seller:0.28.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 ### Create the buyer AEA
 
@@ -101,34 +96,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the buyer from scratch:
-``` bash
-aea create my_buyer_aea
-cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/generic_buyer:0.27.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
-
+??? note "Alternatively, create from scratch:"
+    The following steps create the buyer from scratch:
+    ``` bash
+    aea create my_buyer_aea
+    cd my_buyer_aea
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/generic_buyer:0.27.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 ### Add keys for the seller AEA
 

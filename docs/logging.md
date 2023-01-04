@@ -167,5 +167,3 @@ if __name__ == "__main__":
 Save the script in a file called `server.py`, install flask with `pip install flask` and run the server with `python server.py`.
 
 Third, run your AEA and visit `localhost:5000` in your browser.
-
-<br />

@@ -65,5 +65,3 @@ Furthermore, the often conflicting nature of the environment means information o
 
 * Wooldridge, M. (2009). _An Introduction to MultiAgent Systems_. Wiley, Second edition.
 * Shoham, Y. and Leyton-Brown, K. (2008). _Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations_. Cambridge University Press
-
-<br />

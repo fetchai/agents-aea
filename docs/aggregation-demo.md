@@ -25,41 +25,36 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
+??? note "Alternatively, create from scratch:"
 
-Create the AEA.
-
-``` bash
-agent_name="agg$i"
-aea create agent_name
-cd agent_name
-aea add connection fetchai/http_client:0.24.5
-aea add connection fetchai/http_server:0.23.5
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/prometheus:0.9.5
-aea add skill fetchai/advanced_data_request:0.7.5
-aea add skill fetchai/simple_aggregation:0.3.5
-
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea install
-aea build
-```
-
-Set the desired decimal precision for the quantity:
-``` bash
-aea config set --type int vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals 0
-```
-
-Disable the http server since it is not used in this demo:
-``` bash
-aea config set --type bool vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server false
-```
-
-</p>
-</details>
-
+    Create the AEA:w
+    
+    ``` bash
+    agent_name="agg$i"
+    aea create agent_name
+    cd agent_name
+    aea add connection fetchai/http_client:0.24.5
+    aea add connection fetchai/http_server:0.23.5
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/prometheus:0.9.5
+    aea add skill fetchai/advanced_data_request:0.7.5
+    aea add skill fetchai/simple_aggregation:0.3.5
+    
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea install
+    aea build
+    ```
+    
+    Set the desired decimal precision for the quantity:
+    ``` bash
+    aea config set --type int vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals 0
+    ```
+    
+    Disable the http server since it is not used in this demo:
+    ``` bash
+    aea config set --type bool vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server false
+    ```
 
 Set the cert requests for the peer-to-peer connection:
 ``` bash

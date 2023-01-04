@@ -64,34 +64,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the seller from scratch:
-``` bash
-aea create my_thermometer_aea
-cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/thermometer:0.27.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
-
+??? note "Alternatively, create from scratch:"
+    The following steps create the seller from scratch:
+    ``` bash
+    aea create my_thermometer_aea
+    cd my_thermometer_aea
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/thermometer:0.27.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 ### Create the buyer client
 
@@ -103,34 +97,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the car data client from scratch:
-``` bash
-aea create my_thermometer_client
-cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/thermometer_client:0.26.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
-
+??? note "Alternatively, create from scratch:"
+    The following steps create the car data client from scratch:
+    ``` bash
+    aea create my_thermometer_client
+    cd my_thermometer_client
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/thermometer_client:0.26.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 ### Add keys for the seller AEA
 

@@ -49,14 +49,8 @@ Command  | Description
 `deploy {using [connection, ...]}`  | Deploy the AEA to a server and run it on the Fetch.ai network with default or specified connections.
  -->
 
-<div class="admonition tip">
-  <p class="admonition-title">Tip</p>
-  <p>You can also disable a resource without deleting it by removing the entry from the configuration but leaving the package in the skills namespace.</p>
-</div>
+!!! tip 
+    You can also disable a resource without deleting it by removing the entry from the configuration but leaving the package in the skills namespace.
 
-<div class="admonition tip">
-  <p class="admonition-title">Tip</p>
-  <p>You can skip the consistency checks on the AEA project by using the flag <code>--skip-consistency-check</code>. E.g. <code>aea --skip-consistency-check run</code> will bypass the fingerprint checks.</p>
-</div>
-
-<br />
+!!! tip 
+    You can skip the consistency checks on the AEA project by using the flag `--skip-consistency-check`. E.g. `aea --skip-consistency-check run` will bypass the fingerprint checks.

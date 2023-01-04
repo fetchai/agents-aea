@@ -1,8 +1,5 @@
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This demo is incomplete and will soon be updated.
-</p>
-</div>
+!!! note
+    This demo is incomplete and will soon be updated.
 
 Demonstrating an entire decentralised identity scenario involving AEAs and instances of Aries Cloud Agents (ACAs).
 
@@ -184,21 +181,17 @@ aea fetch fetchai/aries_alice:0.32.4
 cd aries_alice
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create <b>Alice_AEA</b> from scratch:
-``` bash
-aea create aries_alice
-cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/http_client:0.24.5
-aea add connection fetchai/webhook:0.20.5
-aea add skill fetchai/aries_alice:0.26.5
-```
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create **Alice_AEA** from scratch:
+        ``` bash
+        aea create aries_alice
+        cd aries_alice
+        aea add connection fetchai/p2p_libp2p:0.27.4
+        aea add connection fetchai/soef:0.27.5
+        aea add connection fetchai/http_client:0.24.5
+        aea add connection fetchai/webhook:0.20.5
+        aea add skill fetchai/aries_alice:0.26.5
+        ```
 
 #### Configure the `aries_alice` skill:
 
@@ -268,21 +261,17 @@ aea fetch fetchai/aries_faber:0.32.4
 cd aries_faber
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create <b>Faber_AEA</b> from scratch:
-``` bash
-aea create aries_faber
-cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/http_client:0.24.5
-aea add connection fetchai/webhook:0.20.5
-aea add skill fetchai/aries_faber:0.24.4
-```
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create **Faber_AEA** from scratch:
+    ``` bash
+    aea create aries_faber
+    cd aries_faber
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/http_client:0.24.5
+    aea add connection fetchai/webhook:0.20.5
+    aea add skill fetchai/aries_faber:0.24.4
+    ```
 
 #### Configure the `aries_faber` skill:
 

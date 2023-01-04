@@ -96,7 +96,3 @@ To remove all images, run the following command.
 # mac
 docker ps -q | xargs docker stop ; docker system prune -a
 ```
-
-
-
-<br/>

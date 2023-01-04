@@ -8,5 +8,3 @@ The AEA framework development is guided by the following 8 principles:
 * **Low entry barriers**: leverages existing programming languages and web protocols.
 * **Safety**: safe for the user (economically speaking).     
 * **Goal-alignment**: seamless facilitation of users' preferences and goals.
-
-<br />

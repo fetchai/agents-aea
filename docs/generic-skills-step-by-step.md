@@ -3270,5 +3270,3 @@ The following guide provides some hints on <a href="../development-setup">AEA de
 ### Recommended
 
 We recommend you build your own AEA next. There are many helpful guides and demos in the documentation, and a developer community on <a href="https://discord.com/invite/btedfjPJTj" target="_blank">Discord</a>. Speak to you there!
-
-<br />

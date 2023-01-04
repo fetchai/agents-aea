@@ -112,6 +112,3 @@ Most of an AEA developer's time is spent on `Skill` development. `Skills` are th
 In most cases, one of the available `Connection` packages can be used. Occasionally, you might develop your own `Connection`:
 
 - <a href="../connection">Connections</a>
-
-<br />
-

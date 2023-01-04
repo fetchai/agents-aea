@@ -135,7 +135,6 @@ The following steps assume you have launched the AEA Manager Desktop app.
 8. Run the `controller`, then `participant_1` and `participant_2` (and any other participants you added).
 
 In the `controller`'s log, you should see the details of the transactions participants submit as well as changes in their scores and holdings. In participants' logs, you should see the agents trading.
-<br>
 
 ## Option 2: CLI approach
 
@@ -159,33 +158,30 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
+??? note "Alternatively, create from scratch:"
 
-The following steps create the controller from scratch:
-``` bash
-aea create tac_controller
-cd tac_controller
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/tac_control:0.25.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set agent.default_ledger fetchai
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
+    The following steps create the controller from scratch:
 
-</p>
-</details>
+    ``` bash
+    aea create tac_controller
+    cd tac_controller
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/tac_control:0.25.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_ledger fetchai
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 ### Create the TAC participant AEAs
 
@@ -201,73 +197,72 @@ cd tac_participant_two
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
+??? note "Alternatively, create from scratch:"
 
-In a separate terminal, in the root directory, create at least two tac participant AEAs:
-``` bash
-aea create tac_participant_one
-aea create tac_participant_two
-```
+    In a separate terminal, in the root directory, create at least two tac participant AEAs:
 
-Build participant one:
-``` bash
-cd tac_participant_one
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/tac_participation:0.25.5
-aea add skill fetchai/tac_negotiation:0.29.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set agent.default_ledger fetchai
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea config set --type dict agent.decision_maker_handler \
-'{
-  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
-  "file_path": null
-}'
-aea install
-aea build
-```
+    ``` bash
+    aea create tac_participant_one
+    aea create tac_participant_two
+    ```
+    
+    Build participant one:
 
-Then, build participant two:
-``` bash
-cd tac_participant_two
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/tac_participation:0.25.5
-aea add skill fetchai/tac_negotiation:0.29.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set agent.default_ledger fetchai
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea config set --type dict agent.decision_maker_handler \
-'{
-  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
-  "file_path": null
-}'
-aea install
-aea build
-```
+    ``` bash
+    cd tac_participant_one
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/tac_participation:0.25.5
+    aea add skill fetchai/tac_negotiation:0.29.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_ledger fetchai
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea config set --type dict agent.decision_maker_handler \
+    '{
+      "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+      "file_path": null
+    }'
+    aea install
+    aea build
+    ```
+    
+    Then, build participant two:
 
-</p>
-</details>
+    ``` bash
+    cd tac_participant_two
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/tac_participation:0.25.5
+    aea add skill fetchai/tac_negotiation:0.29.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_ledger fetchai
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea config set --type dict agent.decision_maker_handler \
+    '{
+      "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+      "file_path": null
+    }'
+    aea install
+    aea build
+    ```
 
 ### Add keys for all AEAs
 

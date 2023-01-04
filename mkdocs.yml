@@ -1,9 +1,13 @@
 site_name: AEA Framework
 site_url: https://docs.fetch.ai/aea
-site_description: Everything you need to know about AEAs.
+site_description: Everything you need to know about the Autonomous Economic Agents.
 repo_url: https://github.com/fetchai/agents-aea
+repo_name: fetchai/agents-aea
 edit_uri: ""
 site_author: developer@fetch.ai
+copyright: Copyright &copy; 2018 - 2023 Fetch.ai # Copyright notice in footer
+
+strict: true
 
 nav:
   - Introduction: 'index.md'
@@ -264,25 +268,22 @@ theme:
         name: Switch to light mode
   logo: assets/images/logo.png  # Set Fetch Logo top left
   favicon: assets/images/favicon.ico  # Set Fetch favicon
+  icon:
+    repo: fontawesome/brands/github
   features:
     - navigation.instant # Fast page loading
     - navigation.tracking # URL automatically updated with the currently active anchor
-#    - navigation.sections # Top level sections will be visible and grouped in sidebar
     - navigation.top # Back-to-top button
     - search.suggest # Completion for the searched word (can be accepted with ->).
     - search.highlight # Highlight all occurrences after following a search result link
     - search.share # Show share button for copying deep link to the current search query and result
+    - toc.follow # Follow the table of content
+    - content.action.view # Shows button to "view the source of this page"
+    - content.code.copy # Shows a button next to code blocks to copy the code into clipboard
 #  custom_dir: docs/overrides # Uncomment to enable announcements bar at the top
 
 extra_css:
     - css/my-styles.css
-
-#extra_javascript:
-#    - https://unpkg.com/mermaid@8.10.1/dist/mermaid.min.js
-
-copyright: Copyright &copy; 2018 - 2022 Fetch.ai # Copyright notice in footer
-
-strict: true
 
 markdown_extensions:
   - admonition # Required by admonitions
@@ -302,13 +303,13 @@ markdown_extensions:
   - pymdownx.tabbed: # Required by tabs
       alternate_style: true
   - tables # # Required by tables
+  - toc:
+        permalink: true
 
 plugins:
   - search # Enables search
-#  - markdownmermaid
 
 extra:
-  generator: false
   social:
     - icon: fontawesome/brands/twitter
       link: https://bit.ly/3oDuI3f

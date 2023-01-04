@@ -127,114 +127,108 @@ Now it is your turn to develop a simple use case which utilises the `Multiplexer
 ## Entire code listing
 If you just want to copy and paste the entire script in you can find it here:
 
-<details><summary>Click here to see full listing</summary>
-<p>
-
-``` python
-import os
-import time
-from copy import copy
-from threading import Thread
-from typing import Optional
-
-from aea.configurations.base import ConnectionConfig
-from aea.helpers.file_io import write_with_lock
-from aea.identity.base import Identity
-from aea.mail.base import Envelope
-from aea.multiplexer import Multiplexer
-
-from packages.fetchai.connections.stub.connection import StubConnection
-from packages.fetchai.protocols.default.message import DefaultMessage
-
-
-INPUT_FILE = "input.txt"
-OUTPUT_FILE = "output.txt"
-
-
-def run():
-    """Run demo."""
-
-    # Ensure the input and output files do not exist initially
-    if os.path.isfile(INPUT_FILE):
-        os.remove(INPUT_FILE)
-    if os.path.isfile(OUTPUT_FILE):
-        os.remove(OUTPUT_FILE)
-
-    # create the connection and multiplexer objects
-    configuration = ConnectionConfig(
-        input_file=INPUT_FILE,
-        output_file=OUTPUT_FILE,
-        connection_id=StubConnection.connection_id,
-    )
-    stub_connection = StubConnection(
-        configuration=configuration,
-        data_dir=".",
-        identity=Identity("some_agent", "some_address", "some_public_key"),
-    )
-    multiplexer = Multiplexer([stub_connection], protocols=[DefaultMessage])
-    try:
-        # Set the multiplexer running in a different thread
-        t = Thread(target=multiplexer.connect)
-        t.start()
-
-        # Wait for everything to start up
-        for _ in range(20):
-            if multiplexer.is_connected:
-                break
-            time.sleep(1)
-        else:
-            raise Exception("Not connected")
-
-        # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
-        message_text = (
-            "multiplexer,some_agent,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
+??? note "Click here to see full listing:"
+    ``` python
+    import os
+    import time
+    from copy import copy
+    from threading import Thread
+    from typing import Optional
+    
+    from aea.configurations.base import ConnectionConfig
+    from aea.helpers.file_io import write_with_lock
+    from aea.identity.base import Identity
+    from aea.mail.base import Envelope
+    from aea.multiplexer import Multiplexer
+    
+    from packages.fetchai.connections.stub.connection import StubConnection
+    from packages.fetchai.protocols.default.message import DefaultMessage
+    
+    
+    INPUT_FILE = "input.txt"
+    OUTPUT_FILE = "output.txt"
+    
+    
+    def run():
+        """Run demo."""
+    
+        # Ensure the input and output files do not exist initially
+        if os.path.isfile(INPUT_FILE):
+            os.remove(INPUT_FILE)
+        if os.path.isfile(OUTPUT_FILE):
+            os.remove(OUTPUT_FILE)
+    
+        # create the connection and multiplexer objects
+        configuration = ConnectionConfig(
+            input_file=INPUT_FILE,
+            output_file=OUTPUT_FILE,
+            connection_id=StubConnection.connection_id,
         )
-        with open(INPUT_FILE, "w") as f:
-            write_with_lock(f, message_text)
-
-        # Wait for the envelope to get processed
-        for _ in range(20):
-            if not multiplexer.in_queue.empty():
-                break
-            time.sleep(1)
-        else:
-            raise Exception("No message!")
-
-        # get the envelope
-        envelope = multiplexer.get()  # type: Optional[Envelope]
-        assert envelope is not None
-
-        # Inspect its contents
-        print(
-            "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(
-                envelope.sender,
-                envelope.to,
-                envelope.protocol_specification_id,
-                envelope.message,
+        stub_connection = StubConnection(
+            configuration=configuration,
+            data_dir=".",
+            identity=Identity("some_agent", "some_address", "some_public_key"),
+        )
+        multiplexer = Multiplexer([stub_connection], protocols=[DefaultMessage])
+        try:
+            # Set the multiplexer running in a different thread
+            t = Thread(target=multiplexer.connect)
+            t.start()
+    
+            # Wait for everything to start up
+            for _ in range(20):
+                if multiplexer.is_connected:
+                    break
+                time.sleep(1)
+            else:
+                raise Exception("Not connected")
+    
+            # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
+            message_text = (
+                "multiplexer,some_agent,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
             )
-        )
-
-        # Create a mirrored response envelope
-        response_envelope = copy(envelope)
-        response_envelope.to = envelope.sender
-        response_envelope.sender = envelope.to
-
-        # Send the envelope back
-        multiplexer.put(response_envelope)
-
-        # Read the output envelope generated by the multiplexer
-        with open(OUTPUT_FILE, "r") as f:
-            print("Envelope received from Multiplexer: " + f.readline())
-    finally:
-        # Shut down the multiplexer
-        multiplexer.disconnect()
-        t.join()
-
-
-if __name__ == "__main__":
-    run()
-```
-</p>
-</details>
-
-<br />
+            with open(INPUT_FILE, "w") as f:
+                write_with_lock(f, message_text)
+    
+            # Wait for the envelope to get processed
+            for _ in range(20):
+                if not multiplexer.in_queue.empty():
+                    break
+                time.sleep(1)
+            else:
+                raise Exception("No message!")
+    
+            # get the envelope
+            envelope = multiplexer.get()  # type: Optional[Envelope]
+            assert envelope is not None
+    
+            # Inspect its contents
+            print(
+                "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(
+                    envelope.sender,
+                    envelope.to,
+                    envelope.protocol_specification_id,
+                    envelope.message,
+                )
+            )
+    
+            # Create a mirrored response envelope
+            response_envelope = copy(envelope)
+            response_envelope.to = envelope.sender
+            response_envelope.sender = envelope.to
+    
+            # Send the envelope back
+            multiplexer.put(response_envelope)
+    
+            # Read the output envelope generated by the multiplexer
+            with open(OUTPUT_FILE, "r") as f:
+                print("Envelope received from Multiplexer: " + f.readline())
+        finally:
+            # Shut down the multiplexer
+            multiplexer.disconnect()
+            t.join()
+    
+    
+    if __name__ == "__main__":
+        run()
+    ```

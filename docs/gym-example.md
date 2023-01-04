@@ -59,5 +59,3 @@ if __name__ == "__main__":
     rl_agent = RLAgent(nb_goods=NB_GOODS)
     rl_agent.fit(env=proxy_env, nb_steps=NB_STEPS)
 ```
-
-<br />

@@ -23,11 +23,8 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If you already have keys in your project, the commands will prompt you for confirmation whether or not to replace the existing keys.
-</p>
-</div>
+!!! note
+    If you already have keys in your project, the commands will prompt you for confirmation whether or not to replace the existing keys.
 
 ## Using a faucet website
 
@@ -62,10 +59,5 @@ or
 aea generate-wealth ethereum
 ```
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This approach can be unreliable for non-fetchai test nets.
-</p>
-</div>
-
-<br />
+!!! note
+    This approach can be unreliable for non-fetchai test nets.

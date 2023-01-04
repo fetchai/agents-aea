@@ -1,8 +1,5 @@
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This section is incomplete and will soon be updated.
-</p>
-</div>
+!!! note
+    This section is incomplete and will soon be updated.
 
 The AEAs currently use the addresses associated with their private-public key pairs to identify themselves.
 

@@ -18,10 +18,8 @@ An AEA represents an individual, organisation or object and looks after its inte
 * <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
 * <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.</p>
-</div>
+!!! note
+    In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.
 
 ## What is the AEA Framework?
 
@@ -52,11 +50,7 @@ If you would like to develop an AEA in a language different to Python then check
 If you want to run a demo, check out the <a href="demos">demo guides</a>.
 
 
-## Help us improve
+## Help us improve
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.</p>
-</div>
-
-<br />
+!!! note
+    This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.

@@ -79,7 +79,6 @@ The following steps assume you have launched the AEA Manager Desktop app.
 6. Run the `my_weather_client`.
 
 In the AEA's logs, you should see the agent trading successfully.
-<br>
 
 ## Option 2: CLI approach
 
@@ -106,34 +105,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the weather station from scratch:
-``` bash
-aea create my_weather_station
-cd my_weather_station
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/weather_station:0.27.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
-
+??? note "Alternatively, create from scratch:"
+    The following steps create the weather station from scratch:
+    ``` bash
+    aea create my_weather_station
+    cd my_weather_station
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/weather_station:0.27.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 #### Create the weather client
 
@@ -145,34 +138,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the weather client from scratch:
-``` bash
-aea create my_weather_client
-cd my_weather_client
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/weather_client:0.26.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
-
+??? note "Alternatively, create from scratch:"
+    The following steps create the weather client from scratch:
+    ``` bash
+    aea create my_weather_client
+    cd my_weather_client
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/weather_client:0.26.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 #### Add keys for the weather station AEA
 
@@ -260,5 +247,3 @@ cd ..
 aea delete my_weather_station
 aea delete my_weather_client
 ```
-
-<br />

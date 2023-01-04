@@ -30,5 +30,3 @@ In the short-term we see AEAs primarily deployed in three areas:
 The multi-agent systems enabled by the AEA framework are technological agent-based solutions to real problems and, although there are some overlap, the framework is not designed from the outset to be used as an agent-based modelling software where the goal is scientific behavioural observation rather than practical economic gain.
 
 Moreover, there is no restriction to *multi*; single-agent applications are also supported.
-
-<br />

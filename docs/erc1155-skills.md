@@ -13,10 +13,8 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 The scope of this guide is demonstrating how you can deploy a smart contract and interact with it using AEAs. In this specific demo, you create two AEAs. One deploys and creates tokens inside a smart contract. The other signs a transaction to complete an atomic swap. The smart contract used is ERC1155 with a one-step atomic swap functionality. This means the trade between the two AEAs can be trustless.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This is only for demonstrative purposes since the AEA deploying the contract also has the ability to mint tokens. In reality, the transfer of tokens from the AEA signing the transaction is worthless.</p>
-</div>
+!!! note
+    This is only for demonstrative purposes since the AEA deploying the contract also has the ability to mint tokens. In reality, the transfer of tokens from the AEA signing the transaction is worthless.
 
 ## Demo
 
@@ -31,44 +29,39 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-Create the AEA that will deploy the contract.
-
-``` bash
-aea create erc1155_deployer
-cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/erc1155_deploy:0.31.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
-  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
-  "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
-aea install
-aea build
-```
-
-And change the default ledger:
-``` bash
-aea config set agent.default_ledger ethereum
-```
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    Create the AEA that will deploy the contract.
+    
+    ``` bash
+    aea create erc1155_deployer
+    cd erc1155_deployer
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/erc1155_deploy:0.31.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
+      "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
+      "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+    '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+    aea install
+    aea build
+    ```
+    
+    And change the default ledger:
+    ``` bash
+    aea config set agent.default_ledger ethereum
+    ```
 
 Create a private key for the deployer AEA and add it for Ethereum use:
 
@@ -101,44 +94,39 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-Create the AEA that will get some tokens from the deployer.
-
-``` bash
-aea create erc1155_client
-cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/erc1155_client:0.29.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
-  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
-  "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
-aea install
-aea build
-```
-
-And change the default ledger:
-``` bash
-aea config set agent.default_ledger ethereum
-```
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    Create the AEA that will get some tokens from the deployer.
+    
+    ``` bash
+    aea create erc1155_client
+    cd erc1155_client
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/erc1155_client:0.29.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
+      "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
+      "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+    '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+    aea install
+    aea build
+    ```
+    
+    And change the default ledger:
+    ``` bash
+    aea config set agent.default_ledger ethereum
+    ```
 
 Create a private key for the client AEA and add it for Ethereum use:
 
@@ -176,11 +164,8 @@ aea get-wealth ethereum
 
 You should get `1000000000000000000000`.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
-</div>
-
+!!! note
+    If no wealth appears after a while, then try funding the private key directly using a web faucet.
 
 ## Update SOEF configurations for both AEAs
 
@@ -234,13 +219,9 @@ aea run
 
 You will see that after discovery, the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Transactions on Ropsten can take a significant amount of time! If you run the example a second time, and the previous transaction is still pending, it can lead to a failure.
-
-  The warning message `Cannot verify whether transaction improves utility. Assuming it does!` can be ignored.
-  </p>
-</div>
+!!! note
+    Transactions on Ropsten can take a significant amount of time! If you run the example a second time, and the previous transaction is still pending, it can lead to a failure. 
+    The warning message `Cannot verify whether transaction improves utility. Assuming it does!` can be ignored.
 
 ## Delete the AEAs
 

@@ -85,12 +85,8 @@ aea run --connections fetchai/p2p_libp2p:0.27.4
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Currently <code>p2p_libp2p</code> connection limits the total message size to 3 MB.
-</p>
-</div>
-
+!!! note
+    Currently `p2p_libp2p` connection limits the total message size to 3 MB.
 
 ## Local demo with skills
 

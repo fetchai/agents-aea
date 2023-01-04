@@ -15,5 +15,3 @@ AEA users include, amongst others:
 * Students and academics
 * Crypto connoisseurs and enthusiasts
 * Web developers
-
-<br />

@@ -78,7 +78,6 @@ The following steps assume you have launched the AEA Manager Desktop app.
 6. Run the `car_data_buyer`.
 
 In the AEA's logs, you should see the agent trading successfully.
-<br>
 
 ## Option 2: CLI approach
 
@@ -102,33 +101,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the car detector from scratch:
-``` bash
-aea create car_detector
-cd car_detector
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/carpark_detection:0.27.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create the car detector from scratch:
+    ``` bash
+    aea create car_detector
+    cd car_detector
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/carpark_detection:0.27.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 #### Create car data buyer AEA
 
@@ -140,34 +134,28 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the car data client from scratch:
-``` bash
-aea create car_data_buyer
-cd car_data_buyer
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/carpark_client:0.27.5
-aea config set --type dict agent.dependencies \
-'{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
-}'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-aea install
-aea build
-```
-
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create the car data client from scratch:
+    ``` bash
+    aea create car_data_buyer
+    cd car_data_buyer
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/carpark_client:0.27.5
+    aea config set --type dict agent.dependencies \
+    '{
+      "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
+    }'
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    aea install
+    aea build
+    ```
 
 #### Add keys for the car data seller AEA
 
@@ -255,5 +243,3 @@ cd ..
 aea delete car_detector
 aea delete car_data_buyer
 ```
-
-<br />

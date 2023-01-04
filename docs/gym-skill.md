@@ -37,35 +37,36 @@ cd my_gym_aea
 aea install
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
+??? note "Alternatively, create from scratch:"
 
-### Create the AEA
-In the root directory, create the gym AEA and enter the project.
-``` bash
-aea create my_gym_aea
-cd my_gym_aea
-```
+    ### Create the AEA
 
-### Add the gym skill
-``` bash
-aea add skill fetchai/gym:0.21.5
-```
+    In the root directory, create the gym AEA and enter the project.
 
-### Set gym connection as default
-``` bash
-aea config set agent.default_connection fetchai/gym:0.20.5
-```
+    ``` bash
+    aea create my_gym_aea
+    cd my_gym_aea
+    ```
+    
+    ### Add the gym skill
 
-### Install the skill dependencies
+    ``` bash
+    aea add skill fetchai/gym:0.21.5
+    ```
+    
+    ### Set gym connection as default
 
-To install the `gym` package, a dependency of the gym skill, from PyPI run
-``` bash
-aea install
-```
+    ``` bash
+    aea config set agent.default_connection fetchai/gym:0.20.5
+    ```
+    
+    ### Install the skill dependencies
+    
+    To install the `gym` package, a dependency of the gym skill, from PyPI run
 
-</p>
-</details>
+    ``` bash
+    aea install
+    ```
 
 ### Set up the training environment
 
@@ -142,5 +143,3 @@ In this particular skill, which chiefly serves for demonstration purposes, we im
 <img src="../assets/gym-skill.jpg" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 The illustration shows how the RL agent only interacts with the proxy environment by sending it `action (A)` and receiving `observation (O)`, `reward (R)`, `done (D)` and  `info (I)`.
-
-<br/>

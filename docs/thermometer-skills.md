@@ -75,7 +75,6 @@ The following steps assume you have launched the AEA Manager Desktop app.
 6. Run the `my_thermometer_client`.
 
 In the AEA's logs, you should see the agent trading successfully.
-<br>
 
 ## Option 2: CLI approach
 
@@ -101,29 +100,24 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the thermometer AEA from scratch:
-``` bash
-aea create my_thermometer_aea
-cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/thermometer:0.27.5
-aea install
-aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-```
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create the thermometer AEA from scratch:
+    ``` bash
+    aea create my_thermometer_aea
+    cd my_thermometer_aea
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/thermometer:0.27.5
+    aea install
+    aea build
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    ```
 
 #### Create thermometer client
 
@@ -135,29 +129,24 @@ aea install
 aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-The following steps create the thermometer client from scratch:
-``` bash
-aea create my_thermometer_client
-cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add skill fetchai/thermometer_client:0.26.5
-aea install
-aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
-aea config set --type dict agent.default_routing \
-'{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
-}'
-```
-
-</p>
-</details>
+??? note "Alternatively, create from scratch:"
+    The following steps create the thermometer client from scratch:
+    ``` bash
+    aea create my_thermometer_client
+    cd my_thermometer_client
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/ledger:0.21.4
+    aea add skill fetchai/thermometer_client:0.26.5
+    aea install
+    aea build
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set --type dict agent.default_routing \
+    '{
+      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
+      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+    }'
+    ```
 
 #### Add keys for the thermometer AEA
 
@@ -245,5 +234,3 @@ cd ..
 aea delete my_thermometer_aea
 aea delete my_thermometer_client
 ```
-
-<br />

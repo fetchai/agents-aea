@@ -83,5 +83,3 @@ cert_requests: []
 - `dependencies` lists any Python dependencies of the connection package
 - `is_abstract` specifies whether this connection is only used as an abstract base class
 - `cert_requests` lists certification requests of the connection (see <a href="../por">proof of representation</a> for details)
-
-<br />

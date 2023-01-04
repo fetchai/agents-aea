@@ -49,5 +49,3 @@ And for `zsh` run:
 ``` zsh
 pip install 'aea[all]' --force --no-cache-dir
 ```
-
-<br />

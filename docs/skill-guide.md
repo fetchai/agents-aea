@@ -118,10 +118,8 @@ Searches are proactive and, as such, well placed in a <a href="../api/skills/bas
 
 We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import OefSearchDialogues` with your author handle (run `aea init` to set or check the author name).
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p> Note that the import paths to agent packages, for example <code>packages.fetchai.skills.my_search.dialogues</code> above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under <code>vendor</code> if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
-</div>
+!!! note
+    The import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details.
 
 ## Step 3: Develop a Handler
 
@@ -477,598 +475,594 @@ aea run
 
 Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
 
-<details><summary>Click here to see full code and guide for this AEA</summary>
-<p>
-
-We use a <a href="../api/skills/behaviours#tickerbehaviour-objects"><code>TickerBehaviour</code></a> to update the service registration at regular intervals. The following code is placed in <code>behaviours.py</code>.
-
-``` python
-from typing import Any, Optional, cast
-
-from aea.helpers.search.models import Description
-from aea.skills.behaviours import TickerBehaviour
-
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_service_registration.dialogues import (
-    OefSearchDialogues,
-)
-from packages.fetchai.skills.simple_service_registration.strategy import Strategy
-
-
-DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
-DEFAULT_SERVICES_INTERVAL = 30.0
-
-
-class ServiceRegistrationBehaviour(TickerBehaviour):
-    """This class implements a behaviour."""
-
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialise the behaviour."""
-        services_interval = kwargs.pop(
-            "services_interval", DEFAULT_SERVICES_INTERVAL
-        )  # type: int
-        self._max_soef_registration_retries = kwargs.pop(
-            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
-        )  # type: int
-        super().__init__(tick_interval=services_interval, **kwargs)
-
-        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
-        self._nb_retries = 0
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        self._register_agent()
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        self._retry_failed_registration()
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        self._unregister_service()
-        self._unregister_agent()
-
-    def _retry_failed_registration(self) -> None:
-        """
-        Retry a failed registration.
-
-        :return: None
-        """
-        if self.failed_registration_msg is not None:
-            self._nb_retries += 1
-            if self._nb_retries > self._max_soef_registration_retries:
-                self.context.is_active = False
-                return
-
+??? note "Click here to see full code and guide for this AEA:"
+    We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
+    
+    ``` python
+    from typing import Any, Optional, cast
+    
+    from aea.helpers.search.models import Description
+    from aea.skills.behaviours import TickerBehaviour
+    
+    from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+    from packages.fetchai.skills.simple_service_registration.dialogues import (
+        OefSearchDialogues,
+    )
+    from packages.fetchai.skills.simple_service_registration.strategy import Strategy
+    
+    
+    DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
+    DEFAULT_SERVICES_INTERVAL = 30.0
+    
+    
+    class ServiceRegistrationBehaviour(TickerBehaviour):
+        """This class implements a behaviour."""
+    
+        def __init__(self, **kwargs: Any) -> None:
+            """Initialise the behaviour."""
+            services_interval = kwargs.pop(
+                "services_interval", DEFAULT_SERVICES_INTERVAL
+            )  # type: int
+            self._max_soef_registration_retries = kwargs.pop(
+                "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+            )  # type: int
+            super().__init__(tick_interval=services_interval, **kwargs)
+    
+            self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+            self._nb_retries = 0
+    
+        def setup(self) -> None:
+            """
+            Implement the setup.
+    
+            :return: None
+            """
+            self._register_agent()
+    
+        def act(self) -> None:
+            """
+            Implement the act.
+    
+            :return: None
+            """
+            self._retry_failed_registration()
+    
+        def teardown(self) -> None:
+            """
+            Implement the task teardown.
+    
+            :return: None
+            """
+            self._unregister_service()
+            self._unregister_agent()
+    
+        def _retry_failed_registration(self) -> None:
+            """
+            Retry a failed registration.
+    
+            :return: None
+            """
+            if self.failed_registration_msg is not None:
+                self._nb_retries += 1
+                if self._nb_retries > self._max_soef_registration_retries:
+                    self.context.is_active = False
+                    return
+    
+                oef_search_dialogues = cast(
+                    OefSearchDialogues, self.context.oef_search_dialogues
+                )
+                oef_search_msg, _ = oef_search_dialogues.create(
+                    counterparty=self.failed_registration_msg.to,
+                    performative=self.failed_registration_msg.performative,
+                    service_description=self.failed_registration_msg.service_description,
+                )
+                self.context.outbox.put_message(message=oef_search_msg)
+                self.context.logger.info(
+                    f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
+                )
+    
+                self.failed_registration_msg = None
+    
+        def _register(self, description: Description, logger_msg: str) -> None:
+            """
+            Register something on the SOEF.
+    
+            :param description: the description of what is being registered
+            :param logger_msg: the logger message to print after the registration
+    
+            :return: None
+            """
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
             oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.failed_registration_msg.to,
-                performative=self.failed_registration_msg.performative,
-                service_description=self.failed_registration_msg.service_description,
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                service_description=description,
             )
             self.context.outbox.put_message(message=oef_search_msg)
-            self.context.logger.info(
-                f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
-            )
-
-            self.failed_registration_msg = None
-
-    def _register(self, description: Description, logger_msg: str) -> None:
-        """
-        Register something on the SOEF.
-
-        :param description: the description of what is being registered
-        :param logger_msg: the logger message to print after the registration
-
-        :return: None
-        """
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(logger_msg)
-
-    def _register_agent(self) -> None:
-        """
-        Register the agent's location.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_location_description()
-        self._register(description, "registering agent on SOEF.")
-
-    def register_service(self) -> None:
-        """
-        Register the agent's service.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_register_service_description()
-        self._register(description, "registering agent's service on the SOEF.")
-
-    def register_genus(self) -> None:
-        """
-        Register the agent's personality genus.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_register_personality_description()
-        self._register(
-            description, "registering agent's personality genus on the SOEF."
-        )
-
-    def register_classification(self) -> None:
-        """
-        Register the agent's personality classification.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_register_classification_description()
-        self._register(
-            description, "registering agent's personality classification on the SOEF."
-        )
-
-    def _unregister_service(self) -> None:
-        """
-        Unregister service from the SOEF.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_unregister_service_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("unregistering service from SOEF.")
-
-    def _unregister_agent(self) -> None:
-        """
-        Unregister agent from the SOEF.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_location_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("unregistering agent from SOEF.")
-```
-
-We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type strategy class and place it in <code>strategy.py</code>. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
-
-``` python
-from typing import Any
-
-from aea.exceptions import enforce
-from aea.helpers.search.generic import (
-    AGENT_LOCATION_MODEL,
-    AGENT_PERSONALITY_MODEL,
-    AGENT_REMOVE_SERVICE_MODEL,
-    AGENT_SET_SERVICE_MODEL,
-)
-from aea.helpers.search.models import Description, Location
-from aea.skills.base import Model
-
-
-DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
-DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
-DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
-DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
-
-
-class Strategy(Model):
-    """This class defines a strategy for the agent."""
-
-    def __init__(self, **kwargs: Any) -> None:
-        """
-        Initialize the strategy of the agent.
-
-        :return: None
-        """
-        location = kwargs.pop("location", DEFAULT_LOCATION)
-        self._agent_location = {
-            "location": Location(
-                latitude=location["latitude"], longitude=location["longitude"]
-            )
-        }
-        self._set_personality_data = kwargs.pop(
-            "personality_data", DEFAULT_PERSONALITY_DATA
-        )
-        enforce(
-            len(self._set_personality_data) == 2
-            and "piece" in self._set_personality_data
-            and "value" in self._set_personality_data,
-            "personality_data must contain keys `key` and `value`",
-        )
-        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
-        enforce(
-            len(self._set_classification) == 2
-            and "piece" in self._set_classification
-            and "value" in self._set_classification,
-            "classification must contain keys `key` and `value`",
-        )
-        self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        enforce(
-            len(self._set_service_data) == 2
-            and "key" in self._set_service_data
-            and "value" in self._set_service_data,
-            "service_data must contain keys `key` and `value`",
-        )
-        self._remove_service_data = {"key": self._set_service_data["key"]}
-        super().__init__(**kwargs)
-
-    def get_location_description(self) -> Description:
-        """
-        Get the location description.
-
-        :return: a description of the agent's location
-        """
-        description = Description(
-            self._agent_location, data_model=AGENT_LOCATION_MODEL,
-        )
-        return description
-
-    def get_register_service_description(self) -> Description:
-        """
-        Get the register service description.
-
-        :return: a description of the offered services
-        """
-        description = Description(
-            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
-        )
-        return description
-
-    def get_register_personality_description(self) -> Description:
-        """
-        Get the register personality description.
-
-        :return: a description of the personality
-        """
-        description = Description(
-            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
-        )
-        return description
-
-    def get_register_classification_description(self) -> Description:
-        """
-        Get the register classification description.
-
-        :return: a description of the classification
-        """
-        description = Description(
-            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
-        )
-        return description
-
-    def get_unregister_service_description(self) -> Description:
-        """
-        Get the unregister service description.
-
-        :return: a description of the to be removed service
-        """
-        description = Description(
-            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
-        )
-        return description
-```
-
-We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type dialogue class and place it in <code>dialogues.py</code>. These classes ensure that the message flow satisfies the <code>fetchai/oef_search:1.0.0</code> protocol and keep track of the individual messages being sent and received.
-
-``` python
-from typing import Any
-
-from aea.protocols.base import Address, Message
-from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.skills.base import Model
-
-from packages.fetchai.protocols.oef_search.dialogues import (
-    OefSearchDialogue as BaseOefSearchDialogue,
-)
-from packages.fetchai.protocols.oef_search.dialogues import (
-    OefSearchDialogues as BaseOefSearchDialogues,
-)
-
-
-OefSearchDialogue = BaseOefSearchDialogue
-
-
-class OefSearchDialogues(Model, BaseOefSearchDialogues):
-    """This class keeps track of all oef_search dialogues."""
-
-    def __init__(self, **kwargs: Any) -> None:
-        """
-        Initialize dialogues.
-
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
-        """
-        Model.__init__(self, **kwargs)
-
-        def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message, receiver_address: Address
-        ) -> BaseDialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
-
-            :param message: an incoming/outgoing first message
-            :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
+            self.context.logger.info(logger_msg)
+    
+        def _register_agent(self) -> None:
             """
-            return BaseOefSearchDialogue.Role.AGENT
-
-        BaseOefSearchDialogues.__init__(
-            self,
-            self_address=str(self.skill_id),
-            role_from_first_message=role_from_first_message,
-        )
-
-```
-
-Finally, we have a handler, placed in <code>handlers.py</code>. The handler deals with handling any error messages which might occur during service registration:
-
-``` python
-from typing import Optional, cast
-
-from aea.configurations.base import PublicId
-from aea.protocols.base import Message
-from aea.skills.base import Handler
-
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_service_registration.behaviours import (
-    ServiceRegistrationBehaviour,
-)
-from packages.fetchai.skills.simple_service_registration.dialogues import (
-    OefSearchDialogue,
-    OefSearchDialogues,
-)
-
-
-class OefSearchHandler(Handler):
-    """This class implements an OEF search handler."""
-
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
-
-    def setup(self) -> None:
-        """Call to setup the handler."""
-
-    def handle(self, message: Message) -> None:
-        """
-        Implement the reaction to a message.
-
-        :param message: the message
-        :return: None
-        """
-        oef_search_msg = cast(OefSearchMessage, message)
-
-        # recover dialogue
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_dialogue = cast(
-            Optional[OefSearchDialogue], oef_search_dialogues.update(oef_search_msg)
-        )
-        if oef_search_dialogue is None:
-            self._handle_unidentified_dialogue(oef_search_msg)
-            return
-
-        # handle message
-        if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
-            self._handle_success(oef_search_msg, oef_search_dialogue)
-        elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
-            self._handle_error(oef_search_msg, oef_search_dialogue)
-        else:
-            self._handle_invalid(oef_search_msg, oef_search_dialogue)
-
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-
-    def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
-        """
-        Handle an unidentified dialogue.
-
-        :param msg: the message
-        """
-        self.context.logger.info(
-            "received invalid oef_search message={}, unidentified dialogue.".format(
-                oef_search_msg
+            Register the agent's location.
+    
+            :return: None
+            """
+            strategy = cast(Strategy, self.context.strategy)
+            description = strategy.get_location_description()
+            self._register(description, "registering agent on SOEF.")
+    
+        def register_service(self) -> None:
+            """
+            Register the agent's service.
+    
+            :return: None
+            """
+            strategy = cast(Strategy, self.context.strategy)
+            description = strategy.get_register_service_description()
+            self._register(description, "registering agent's service on the SOEF.")
+    
+        def register_genus(self) -> None:
+            """
+            Register the agent's personality genus.
+    
+            :return: None
+            """
+            strategy = cast(Strategy, self.context.strategy)
+            description = strategy.get_register_personality_description()
+            self._register(
+                description, "registering agent's personality genus on the SOEF."
             )
-        )
-
-    def _handle_success(
-        self,
-        oef_search_success_msg: OefSearchMessage,
-        oef_search_dialogue: OefSearchDialogue,
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param oef_search_success_msg: the oef search message
-        :param oef_search_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.info(
-            "received oef_search success message={} in dialogue={}.".format(
-                oef_search_success_msg, oef_search_dialogue
+    
+        def register_classification(self) -> None:
+            """
+            Register the agent's personality classification.
+    
+            :return: None
+            """
+            strategy = cast(Strategy, self.context.strategy)
+            description = strategy.get_register_classification_description()
+            self._register(
+                description, "registering agent's personality classification on the SOEF."
             )
-        )
-        target_message = cast(
-            OefSearchMessage,
-            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
-        )
-        if (
-            target_message.performative
-            == OefSearchMessage.Performative.REGISTER_SERVICE
-        ):
-            description = target_message.service_description
-            data_model_name = description.data_model.name
-            registration_behaviour = cast(
-                ServiceRegistrationBehaviour, self.context.behaviours.service,
+    
+        def _unregister_service(self) -> None:
+            """
+            Unregister service from the SOEF.
+    
+            :return: None
+            """
+            strategy = cast(Strategy, self.context.strategy)
+            description = strategy.get_unregister_service_description()
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
             )
-            if "location_agent" in data_model_name:
-                registration_behaviour.register_service()
-            elif "set_service_key" in data_model_name:
-                registration_behaviour.register_genus()
-            elif (
-                "personality_agent" in data_model_name
-                and description.values["piece"] == "genus"
-            ):
-                registration_behaviour.register_classification()
-            elif (
-                "personality_agent" in data_model_name
-                and description.values["piece"] == "classification"
-            ):
-                self.context.logger.info(
-                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                service_description=description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("unregistering service from SOEF.")
+    
+        def _unregister_agent(self) -> None:
+            """
+            Unregister agent from the SOEF.
+    
+            :return: None
+            """
+            strategy = cast(Strategy, self.context.strategy)
+            description = strategy.get_location_description()
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                service_description=description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("unregistering agent from SOEF.")
+    ```
+    
+    We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type strategy class and place it in <code>strategy.py</code>. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
+    
+    ``` python
+    from typing import Any
+    
+    from aea.exceptions import enforce
+    from aea.helpers.search.generic import (
+        AGENT_LOCATION_MODEL,
+        AGENT_PERSONALITY_MODEL,
+        AGENT_REMOVE_SERVICE_MODEL,
+        AGENT_SET_SERVICE_MODEL,
+    )
+    from aea.helpers.search.models import Description, Location
+    from aea.skills.base import Model
+    
+    
+    DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
+    DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
+    DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
+    DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
+    
+    
+    class Strategy(Model):
+        """This class defines a strategy for the agent."""
+    
+        def __init__(self, **kwargs: Any) -> None:
+            """
+            Initialize the strategy of the agent.
+    
+            :return: None
+            """
+            location = kwargs.pop("location", DEFAULT_LOCATION)
+            self._agent_location = {
+                "location": Location(
+                    latitude=location["latitude"], longitude=location["longitude"]
                 )
+            }
+            self._set_personality_data = kwargs.pop(
+                "personality_data", DEFAULT_PERSONALITY_DATA
+            )
+            enforce(
+                len(self._set_personality_data) == 2
+                and "piece" in self._set_personality_data
+                and "value" in self._set_personality_data,
+                "personality_data must contain keys `key` and `value`",
+            )
+            self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+            enforce(
+                len(self._set_classification) == 2
+                and "piece" in self._set_classification
+                and "value" in self._set_classification,
+                "classification must contain keys `key` and `value`",
+            )
+            self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+            enforce(
+                len(self._set_service_data) == 2
+                and "key" in self._set_service_data
+                and "value" in self._set_service_data,
+                "service_data must contain keys `key` and `value`",
+            )
+            self._remove_service_data = {"key": self._set_service_data["key"]}
+            super().__init__(**kwargs)
+    
+        def get_location_description(self) -> Description:
+            """
+            Get the location description.
+    
+            :return: a description of the agent's location
+            """
+            description = Description(
+                self._agent_location, data_model=AGENT_LOCATION_MODEL,
+            )
+            return description
+    
+        def get_register_service_description(self) -> Description:
+            """
+            Get the register service description.
+    
+            :return: a description of the offered services
+            """
+            description = Description(
+                self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+            )
+            return description
+    
+        def get_register_personality_description(self) -> Description:
+            """
+            Get the register personality description.
+    
+            :return: a description of the personality
+            """
+            description = Description(
+                self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+            )
+            return description
+    
+        def get_register_classification_description(self) -> Description:
+            """
+            Get the register classification description.
+    
+            :return: a description of the classification
+            """
+            description = Description(
+                self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+            )
+            return description
+    
+        def get_unregister_service_description(self) -> Description:
+            """
+            Get the unregister service description.
+    
+            :return: a description of the to be removed service
+            """
+            description = Description(
+                self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+            )
+            return description
+    ```
+    
+    We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type dialogue class and place it in <code>dialogues.py</code>. These classes ensure that the message flow satisfies the <code>fetchai/oef_search:1.0.0</code> protocol and keep track of the individual messages being sent and received.
+    
+    ``` python
+    from typing import Any
+    
+    from aea.protocols.base import Address, Message
+    from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+    from aea.skills.base import Model
+    
+    from packages.fetchai.protocols.oef_search.dialogues import (
+        OefSearchDialogue as BaseOefSearchDialogue,
+    )
+    from packages.fetchai.protocols.oef_search.dialogues import (
+        OefSearchDialogues as BaseOefSearchDialogues,
+    )
+    
+    
+    OefSearchDialogue = BaseOefSearchDialogue
+    
+    
+    class OefSearchDialogues(Model, BaseOefSearchDialogues):
+        """This class keeps track of all oef_search dialogues."""
+    
+        def __init__(self, **kwargs: Any) -> None:
+            """
+            Initialize dialogues.
+    
+            :param agent_address: the address of the agent for whom dialogues are maintained
+            :return: None
+            """
+            Model.__init__(self, **kwargs)
+    
+            def role_from_first_message(  # pylint: disable=unused-argument
+                message: Message, receiver_address: Address
+            ) -> BaseDialogue.Role:
+                """Infer the role of the agent from an incoming/outgoing first message
+    
+                :param message: an incoming/outgoing first message
+                :param receiver_address: the address of the receiving agent
+                :return: The role of the agent
+                """
+                return BaseOefSearchDialogue.Role.AGENT
+    
+            BaseOefSearchDialogues.__init__(
+                self,
+                self_address=str(self.skill_id),
+                role_from_first_message=role_from_first_message,
+            )
+    
+    ```
+    
+    Finally, we have a handler, placed in <code>handlers.py</code>. The handler deals with handling any error messages which might occur during service registration:
+    
+    ``` python
+    from typing import Optional, cast
+    
+    from aea.configurations.base import PublicId
+    from aea.protocols.base import Message
+    from aea.skills.base import Handler
+    
+    from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+    from packages.fetchai.skills.simple_service_registration.behaviours import (
+        ServiceRegistrationBehaviour,
+    )
+    from packages.fetchai.skills.simple_service_registration.dialogues import (
+        OefSearchDialogue,
+        OefSearchDialogues,
+    )
+    
+    
+    class OefSearchHandler(Handler):
+        """This class implements an OEF search handler."""
+    
+        SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
+    
+        def setup(self) -> None:
+            """Call to setup the handler."""
+    
+        def handle(self, message: Message) -> None:
+            """
+            Implement the reaction to a message.
+    
+            :param message: the message
+            :return: None
+            """
+            oef_search_msg = cast(OefSearchMessage, message)
+    
+            # recover dialogue
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_dialogue = cast(
+                Optional[OefSearchDialogue], oef_search_dialogues.update(oef_search_msg)
+            )
+            if oef_search_dialogue is None:
+                self._handle_unidentified_dialogue(oef_search_msg)
+                return
+    
+            # handle message
+            if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
+                self._handle_success(oef_search_msg, oef_search_dialogue)
+            elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
+                self._handle_error(oef_search_msg, oef_search_dialogue)
             else:
-                self.context.logger.warning(
-                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                self._handle_invalid(oef_search_msg, oef_search_dialogue)
+    
+        def teardown(self) -> None:
+            """
+            Implement the handler teardown.
+    
+            :return: None
+            """
+    
+        def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
+            """
+            Handle an unidentified dialogue.
+    
+            :param msg: the message
+            """
+            self.context.logger.info(
+                "received invalid oef_search message={}, unidentified dialogue.".format(
+                    oef_search_msg
                 )
-
-    def _handle_error(
-        self,
-        oef_search_error_msg: OefSearchMessage,
-        oef_search_dialogue: OefSearchDialogue,
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param oef_search_error_msg: the oef search message
-        :param oef_search_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.info(
-            "received oef_search error message={} in dialogue={}.".format(
-                oef_search_error_msg, oef_search_dialogue
             )
-        )
-        target_message = cast(
-            OefSearchMessage,
-            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
-        )
-        if (
-            target_message.performative
-            == OefSearchMessage.Performative.REGISTER_SERVICE
-        ):
-            registration_behaviour = cast(
-                ServiceRegistrationBehaviour, self.context.behaviours.service,
+    
+        def _handle_success(
+            self,
+            oef_search_success_msg: OefSearchMessage,
+            oef_search_dialogue: OefSearchDialogue,
+        ) -> None:
+            """
+            Handle an oef search message.
+    
+            :param oef_search_success_msg: the oef search message
+            :param oef_search_dialogue: the dialogue
+            :return: None
+            """
+            self.context.logger.info(
+                "received oef_search success message={} in dialogue={}.".format(
+                    oef_search_success_msg, oef_search_dialogue
+                )
             )
-            registration_behaviour.failed_registration_msg = target_message
-
-    def _handle_invalid(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param oef_search_msg: the oef search message
-        :param oef_search_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.warning(
-            "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+            target_message = cast(
+                OefSearchMessage,
+                oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
             )
-        )
-```
-
-The associated <code>skill.yaml</code> is:
-
-``` yaml
-name: simple_service_registration
-author: fetchai
-version: 0.20.0
-type: skill
-description: The simple service registration skills is a skill to register a service.
-license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
-fingerprint:
-  README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
-  __init__.py: QmZd48HmYDr7FMxNaVeGfWRvVtieEdEV78hd7h7roTceP2
-  behaviours.py: QmQHf6QL5aBtLJ34D2tdcbjJLbzom9gaA3HWgRn3rWyigM
-  dialogues.py: QmTT9dvFhWt6qvxjwBfMFDTrgEtgWbvgANYafyRg2BXwcR
-  handlers.py: QmZqPt8toGbJgTT6NZBLxjkusrQCZ8GmUEwcmqZ1sd7DpG
-  strategy.py: QmVXfQpk4cjDw576H2ELE12tEiN5brPkwvffvcTeMbsugA
-fingerprint_ignore_patterns: []
-connections: []
-contracts: []
-protocols:
-- fetchai/oef_search:1.1.6
-skills: []
-behaviours:
-  service:
-    args:
-      max_soef_registration_retries: 5
-      services_interval: 30
-    class_name: ServiceRegistrationBehaviour
-handlers:
-  oef_search:
-    args: {}
-    class_name: OefSearchHandler
-models:
-  oef_search_dialogues:
-    args: {}
-    class_name: OefSearchDialogues
-  strategy:
-    args:
-      classification:
-        piece: classification
-        value: seller
-      location:
-        latitude: 51.5194
-        longitude: 0.127
-      personality_data:
-        piece: genus
-        value: data
-      service_data:
-        key: seller_service
-        value: generic_service
-    class_name: Strategy
-dependencies: {}
-is_abstract: false
-```
-</p>
-</details>
+            if (
+                target_message.performative
+                == OefSearchMessage.Performative.REGISTER_SERVICE
+            ):
+                description = target_message.service_description
+                data_model_name = description.data_model.name
+                registration_behaviour = cast(
+                    ServiceRegistrationBehaviour, self.context.behaviours.service,
+                )
+                if "location_agent" in data_model_name:
+                    registration_behaviour.register_service()
+                elif "set_service_key" in data_model_name:
+                    registration_behaviour.register_genus()
+                elif (
+                    "personality_agent" in data_model_name
+                    and description.values["piece"] == "genus"
+                ):
+                    registration_behaviour.register_classification()
+                elif (
+                    "personality_agent" in data_model_name
+                    and description.values["piece"] == "classification"
+                ):
+                    self.context.logger.info(
+                        "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
+                    )
+                else:
+                    self.context.logger.warning(
+                        f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                    )
+    
+        def _handle_error(
+            self,
+            oef_search_error_msg: OefSearchMessage,
+            oef_search_dialogue: OefSearchDialogue,
+        ) -> None:
+            """
+            Handle an oef search message.
+    
+            :param oef_search_error_msg: the oef search message
+            :param oef_search_dialogue: the dialogue
+            :return: None
+            """
+            self.context.logger.info(
+                "received oef_search error message={} in dialogue={}.".format(
+                    oef_search_error_msg, oef_search_dialogue
+                )
+            )
+            target_message = cast(
+                OefSearchMessage,
+                oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+            )
+            if (
+                target_message.performative
+                == OefSearchMessage.Performative.REGISTER_SERVICE
+            ):
+                registration_behaviour = cast(
+                    ServiceRegistrationBehaviour, self.context.behaviours.service,
+                )
+                registration_behaviour.failed_registration_msg = target_message
+    
+        def _handle_invalid(
+            self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+        ) -> None:
+            """
+            Handle an oef search message.
+    
+            :param oef_search_msg: the oef search message
+            :param oef_search_dialogue: the dialogue
+            :return: None
+            """
+            self.context.logger.warning(
+                "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                    oef_search_msg.performative, oef_search_dialogue,
+                )
+            )
+    ```
+    
+    The associated <code>skill.yaml</code> is:
+    
+    ``` yaml
+    name: simple_service_registration
+    author: fetchai
+    version: 0.20.0
+    type: skill
+    description: The simple service registration skills is a skill to register a service.
+    license: Apache-2.0
+    aea_version: '>=1.0.0, <2.0.0'
+    fingerprint:
+      README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
+      __init__.py: QmZd48HmYDr7FMxNaVeGfWRvVtieEdEV78hd7h7roTceP2
+      behaviours.py: QmQHf6QL5aBtLJ34D2tdcbjJLbzom9gaA3HWgRn3rWyigM
+      dialogues.py: QmTT9dvFhWt6qvxjwBfMFDTrgEtgWbvgANYafyRg2BXwcR
+      handlers.py: QmZqPt8toGbJgTT6NZBLxjkusrQCZ8GmUEwcmqZ1sd7DpG
+      strategy.py: QmVXfQpk4cjDw576H2ELE12tEiN5brPkwvffvcTeMbsugA
+    fingerprint_ignore_patterns: []
+    connections: []
+    contracts: []
+    protocols:
+    - fetchai/oef_search:1.1.6
+    skills: []
+    behaviours:
+      service:
+        args:
+          max_soef_registration_retries: 5
+          services_interval: 30
+        class_name: ServiceRegistrationBehaviour
+    handlers:
+      oef_search:
+        args: {}
+        class_name: OefSearchHandler
+    models:
+      oef_search_dialogues:
+        args: {}
+        class_name: OefSearchDialogues
+      strategy:
+        args:
+          classification:
+            piece: classification
+            value: seller
+          location:
+            latitude: 51.5194
+            longitude: 0.127
+          personality_data:
+            piece: genus
+            value: data
+          service_data:
+            key: seller_service
+            value: generic_service
+        class_name: Strategy
+    dependencies: {}
+    is_abstract: false
+    ```
 
 ## Step 9: Run the Search AEA
 
@@ -1124,5 +1118,3 @@ We recommend you continue with the next step in the 'Getting Started' series:
 ### Relevant deep-dives
 
 <a href="../generic-skills-step-by-step"> This guide </a> goes through a more elaborate scenario than the one on this page, where after finding each other, the two AEAs negotiate and trade via a ledger. 
-
-<br />

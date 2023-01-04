@@ -52,36 +52,33 @@ sudo apt install cmake golang -y
 
 For some of the more advanced AEAs that make use of SciPy, such as the Car Park Detector, you will need some additional dependencies.
 
-<details><summary>Install additional dependencies with the enclosed steps</summary>
-<p>
+??? note "Install additional dependencies with the enclosed steps:"
 
-Install additional dependencies
-``` bash
-sudo apt install gfortran libatlas-base-dev libopenblas-dev -y
-```
+    Install additional dependencies
 
-Increase the swap space for the SciPy installation:
-``` bash
-sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
-sudo /sbin/mkswap /var/swap.1
-sudo chmod 600 /var/swap.1
-sudo /sbin/swapon /var/swap.1
-```
-
-Install NumPy and scikit-image (including SciPy)
-``` bash
-pip install numpy --upgrade
-pip install scikit-image
-```
-
-Revert to default swap space
-``` bash
-sudo swapoff /var/swap.1
-sudo rm /var/swap.1
-```
-
-</p>
-</details>
+    ``` bash
+    sudo apt install gfortran libatlas-base-dev libopenblas-dev -y
+    ```
+    
+    Increase the swap space for the SciPy installation:
+    ``` bash
+    sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+    sudo /sbin/mkswap /var/swap.1
+    sudo chmod 600 /var/swap.1
+    sudo /sbin/swapon /var/swap.1
+    ```
+    
+    Install NumPy and scikit-image (including SciPy)
+    ``` bash
+    pip install numpy --upgrade
+    pip install scikit-image
+    ```
+    
+    Revert to default swap space
+    ``` bash
+    sudo swapoff /var/swap.1
+    sudo rm /var/swap.1
+    ```
 
 ## Install the AEA Framework
 

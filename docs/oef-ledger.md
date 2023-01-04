@@ -7,10 +7,8 @@ The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) a
 
 The _Open Economic Framework_ (OEF) consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralised virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>The OEF is under development. Expect frequent changes. What follows is a description of the current implementation.</p>
-</div>
+!!! note
+    The OEF is under development. Expect frequent changes. What follows is a description of the current implementation.
 
 At present, the OEF's capabilities are fulfilled by three components:
 
