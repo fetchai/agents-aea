@@ -286,6 +286,10 @@ class TestHashUpdateDev(BaseAEATestCase):
         ), mock.patch.object(
             pm, "is_dev_package", return_value=False
         ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
             pm._logger, "warning"
         ) as mock_warning:
             pm._third_party_packages[EXAMPLE_PACKAGE_ID] = EXAMPLE_PACKAGE_HASH
