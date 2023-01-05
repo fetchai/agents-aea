@@ -8,13 +8,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
-  __init__.py: QmRFPFwWaoNpyzWWfD8AMGsyphDaeEUKhdD32ZSJzsE3nw
-  behaviours.py: QmcuWLHYBAE8gM9AwrfPmaucgJsnctqmhNj38mH5H6Tbst
-  dialogues.py: QmU2S3AvctrMNKTspSm8f3CGgKpZKQ6tWhuZsqv62LeZ5e
-  game.py: QmfRHDfF91SD8BDtUomXnFWPbSrHifrGYixfYLDQaQjMdw
-  handlers.py: QmQ71eC6osB1RX4MXfEJQ9QkqEfDqHKNetiJLoeqcT3QW7
-  helpers.py: Qmf11rS9J6ezmB9QBi9AdxEsdQiMZXD1z3pSQRaaUtoB9V
-  parameters.py: QmZuXLsLVncd53KPemCvSwG16Ft7ff613yAi8uk7Nz6Qcp
+  __init__.py: QmcudXhuG63zFXbVdbdwPLpdHR2HJ2Gm7MYNhweFXNMyq4
+  behaviours.py: QmNmcawRFT6NEFCWpwECwE7bbX7ZnVVZXDLDeP5pKiQSZr
+  dialogues.py: QmQWmTQKxhNV9A8B4h2dfmy917LCut3PY7Ny61nJvdxJPH
+  game.py: QmVsUWKiNaQL3Fv58Huqf2BCTePApxkXiedqGMYgJvXyXE
+  handlers.py: QmYdCncGTRQgdi5XB6VdjKZ7oBtphXKt3atrdYM2VtHU6N
+  helpers.py: QmUgxyBHEoVvwg7ixDQ2cpxUrD3eH8BWrCbZm4JLWx8XtN
+  parameters.py: QmVuYzxPYenwTGUcswCuXC912AeZLaSYb9Sr2Tu3R4chvK
 fingerprint_ignore_patterns: []
 connections: []
 contracts:

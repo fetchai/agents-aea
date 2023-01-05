@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUBEziYn29b61higYFNsSxtnKcSNq7CRFpsQ68WjmTCcN
-  __init__.py: QmZ3tqWJFLxkJapkC8T2Wd2Jos1CPd5LnrycCs2bGPyLKb
+  __init__.py: QmYWrZY2q18XGiS8EDki97v3Gi9KHLi1YhC7e7cpbkEXU2
   build/FetchOracleTestClient.json: QmbqwQiYs8Tb2DKB1BDiigqmXxVt1BmfM5RVXHwkvysdqf
   build/oracle_client.wasm: QmXE7H9JqjJFNEzjUiMv5Sv6NyaMqB4eYDwSVym66L52xU
-  contract.py: Qmb4MB4d9p5XP3tKe4sSqreryBj14ze8DmFH9g5QBvm2Gp
+  contract.py: QmaMpUE8kLXmaGkr671TU4g84eeZLSqBbdpeQXfqfgFhQC
   contracts/FetchOracleTestClient.sol: QmWpUJ4aBrNreiyuXe6EgfSfE7T7hWz3xHDdT7fFye3WCG
 fingerprint_ignore_patterns: []
 class_name: FetchOracleClientContract

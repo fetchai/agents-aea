@@ -7,11 +7,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
-  __init__.py: QmecSKiE9yjHS4qVHUJFtQHPWaewKKGDibAfGU2Cr7BJdj
-  behaviours.py: QmQ5vHdb7hgvSYTR7gtenMF21u5GNTNhLvQMC3cxLpnohG
-  dialogues.py: Qme9GGuPFfGMNPiwtnXDK8rUuGEN7PHgKnhoZU2ehfipq2
-  handlers.py: QmNtS1FAaP3eqCWfJTCyh5uvdBPzb229g3bpzpiSyRpePH
-  strategy.py: QmbgMqaB3nqy3RQS5acEVi6iJTeMaCSyYLZfvTQ2qPP3cZ
+  __init__.py: QmWPQ8JQpyj51mZUcz76DnAAfPFYEJH94LLQR151hBArT3
+  behaviours.py: QmXyscjzvxLeJcssKgpuxqXwDyX1QGcwPPvEcMa5ymyTbH
+  dialogues.py: QmS4XJDpNXxjKewDUk6HREXrm8pa3KndTR7vzppVcAURCt
+  handlers.py: QmQm7ofZBu3HHB1ETwBzmnQiTFHNeouVFssNrfQeJ9Rpfd
+  strategy.py: QmWw9SzUtphNC1mjST5KNnT5zkjAP7EPu9n4qkeDtJXL2B
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.12.2

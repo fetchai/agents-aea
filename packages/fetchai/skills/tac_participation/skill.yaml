@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmXMADH6TxdWKhQ5EUxq7XjzHN4ECK3rD6Zj8RV2Pt9DYF
-  __init__.py: QmQSKhuDHjxdti8sHXpnUcSCCXBj4JkNABQDcQaKNxFYjz
-  behaviours.py: QmRWqVzd8jCX6WwG8W3yY3c8J23ygCy9rZEtKebyee8o54
-  dialogues.py: Qmc9moXyoYeRoz9xixNT9fuhtBbGx71Mn87yBGBuxu711F
-  game.py: Qmas2ztJL4tapAePMWdWzgLBdcCfkvtA7xuMKpm3NEMQT4
-  handlers.py: QmZJYXU6EV5T4BmfygXQwqHPSCPTquNtnQXw3WaQAuDHwc
+  __init__.py: Qmb3SUUEVRajhHhQsSt1WKTL46ekU2FSodi29NRjhtjsCY
+  behaviours.py: QmVVeGX9SfhS59k1FDxdUNTexybigvjLRPZiVkrf2yG5kd
+  dialogues.py: QmWrqCc6RpPQW8Dw4sEocGHSRHPkrnAHfPqLhZsT1H5FJB
+  game.py: QmP5j5YdYyr5oKN2zGnurzCQSm25qGHh4RG9zVqQLkmdix
+  handlers.py: QmRDG5WLmebXtahUMG4DBNVgqKZUBmPv6Whvs5ogS58YuP
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
