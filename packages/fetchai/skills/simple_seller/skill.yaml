@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmfKe4D4dyoN9hrJhQFJgDd9myNEqqU6SrZHYqYFAZ8y6Y
-  __init__.py: QmPX2mZGjV7kBjkpkAWJfcUimhF9SB2dtbTWu7J51hZaBf
-  behaviours.py: QmNr1BfBdHqbrzpNCJMAyAx42j8Kr62uprPGc57xVpAbdS
-  dialogues.py: QmUSjiRrWgxWYbmHMfEBis9hpsNukCpAWMmmXvKdyt2HbW
-  handlers.py: QmZ1ecijEqK5eihGp6FSiuZfNJuJm6cUNHXGtc696WRNcF
-  strategy.py: QmfYNauUBziBDAoirEUf4rTVoXSPnssrgf8NadhGxbbSGy
+  __init__.py: QmX5EUZ9KyWrHaaiShdf7iFMeZeu1fWEj9LQUj2nrmmBdf
+  behaviours.py: QmPjoQS4RdWpsmhh2xabtW3MDRAdRch4J2MMe8MdpSGFYp
+  dialogues.py: QmSY1VNCShSjiVuwToNvu7k5pfYEXiHjRQP5fHRkrx8UHz
+  handlers.py: QmZhWji4oE5odDoxJbWhrMS9yzj42nKhBfwM3KgG5GnrdA
+  strategy.py: QmUdEa63iofjreKba2oQc3CkACV6PYyevmTTyiit6pWnij
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.21.4
