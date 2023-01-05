@@ -8,12 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmNecTgkCBTBCsNB4B5o3YVwdAC3xozJodg8NiAWMT1zyf
-  __init__.py: QmcuiqqbmrK61yQJrmxfiyuuzNttomeMDecHvPvDyRsjcv
-  behaviours.py: QmWiYyLUczqz1AXx5iV16nHAqG9hAJ1j9Hupcym7b8eYvY
-  dialogues.py: QmeB3PdnEK5Zfb7TBh2rLZ63azwwHeNGaNH2G5vg6FkewT
-  handlers.py: QmP7tP5BicHvVNKm1ejSi1Z6ZpTL9YubeS9yMCGqgro4wx
-  registration_db.py: QmX4jTkKq1gW3q4rTphGYE8B2HK9hQ8Avuor76EPFW8ch8
-  strategy.py: QmYtFuuv1SevjmsdcvZTGszTS92wuA4RP5StJJaieEtWmi
+  __init__.py: QmX6XqvWwpXSoGxj7bjR7T53JmHs4dtixnNwKxeBkbAJXP
+  behaviours.py: QmagZNufvC8QgMRkPokWg71Gg2nbNSL5bBurxZtvgpGVhw
+  dialogues.py: QmXzPttMCTFQxh7R1BXzqFcdezGp7yybstkZDPJFzjECMM
+  handlers.py: QmSBUW5akPUegJqSAThyEtPtkhiFwTNQ7iqdadeztGAwhB
+  registration_db.py: QmPXfcm3mmJyaTfyKvEdwSVhwtrA4aTiBQLENDNUHmzMvc
+  strategy.py: QmaSrYsAtniAEpW5NrnqBqQiBfvhhSZ6aBWRFDtXowJjQJ
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.5

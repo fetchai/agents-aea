@@ -8,8 +8,8 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdgS2TuTmQaqTfKMzWb8RPRnTLbwdmqGZ8j8MA3BHyo3J
-  __init__.py: QmYVgGtC1nR4biS6G5Gi2KoNGceLEfLiccMsj9FNXgo3yi
-  connection.py: QmSS4udAiXSP2oTnR3WkE4tXT5fVkffArXWkLRVmfnEsJW
+  __init__.py: QmU3CUkFsuMuBuFtcrCkUpt7ydGXRfM5PtBmamTk3yP2uP
+  connection.py: QmfXm6BU6PGqWYc27sitUurndBPd38kQCKQtKxECU1VTje
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []

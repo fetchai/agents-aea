@@ -6,7 +6,7 @@ description: a skill for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmZfYLD7aHkPLxHPLwcx7LNNuEdVPZCRqmNZdby1nEbrcN
+  __init__.py: QmVLEKUHaEdU1fcEvwiPYogLC8FjoKaZDzmq8UXr1rf9zM
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
