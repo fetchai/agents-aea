@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@
 """This module contains the implementation of AsyncFriendlyQueue."""
 import asyncio
 import queue
+import threading
 from collections import deque
 from contextlib import suppress
 from typing import Any, Deque
@@ -33,6 +34,7 @@ class AsyncFriendlyQueue(queue.Queue):
         """Init queue."""
         super().__init__(*args, **kwargs)
         self._non_empty_waiters: Deque = deque()
+        self._lock = threading.Lock()
 
     def put(  # pylint: disable=signature-differs
         self, item: Any, *args: Any, **kwargs: Any
@@ -45,11 +47,13 @@ class AsyncFriendlyQueue(queue.Queue):
         :param kwargs: similar to queue.Queue.put
         """
         super().put(item, *args, **kwargs)
+        self._lock.acquire()
         if self._non_empty_waiters:
             waiter = self._non_empty_waiters.popleft()
             waiter._loop.call_soon_threadsafe(  # pylint: disable=protected-access
                 self._set_waiter, waiter
             )
+        self._lock.release()
 
     @staticmethod
     def _set_waiter(waiter: Any) -> None:
@@ -76,10 +80,12 @@ class AsyncFriendlyQueue(queue.Queue):
 
         :return: None
         """
+        self._lock.acquire()
         if not self.empty():
             return
         waiter = asyncio.Future()  # type: ignore
         self._non_empty_waiters.append(waiter)
+        self._lock.release()
         try:
             await waiter
         finally:

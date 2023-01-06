@@ -1176,6 +1176,7 @@ async def test_multiplexer_race_condition() -> None:
 
             :return: None
             """
+            self._lock.acquire()
             if not self.empty():
                 return
 
@@ -1185,6 +1186,7 @@ async def test_multiplexer_race_condition() -> None:
 
             waiter = asyncio.Future()  # type: ignore
             self._non_empty_waiters.append(waiter)
+            self._lock.release()
             try:
                 await waiter
             finally:
