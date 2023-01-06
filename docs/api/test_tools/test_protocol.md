@@ -4,17 +4,29 @@
 
 This module contains test case classes based on pytest for AEA protocol testing.
 
-<a id="aea.test_tools.test_protocol.BaseMessageTestCase"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase"></a>
 
-## BaseMessageTestCase Objects
+## BaseProtocolMessagesTestCase Objects
 
 ```python
-class BaseMessageTestCase(TestCase)
+class BaseProtocolMessagesTestCase(ABC)
 ```
 
-Base class to test one message encode/decode
+Base class to test messages for the protocol.
 
-<a id="aea.test_tools.test_protocol.BaseMessageTestCase.perform_message_test"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.MESSAGE_CLASS"></a>
+
+#### MESSAGE`_`CLASS
+
+```python
+@property
+@abstractmethod
+def MESSAGE_CLASS() -> Type[Message]
+```
+
+Override this property in a subclass.
+
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.perform_message_test"></a>
 
 #### perform`_`message`_`test
 
@@ -23,47 +35,6 @@ def perform_message_test(msg: Message) -> None
 ```
 
 Test message encode/decode.
-
-<a id="aea.test_tools.test_protocol.BaseProtocolMessageConstructionTestCase"></a>
-
-## BaseProtocolMessageConstructionTestCase Objects
-
-```python
-class BaseProtocolMessageConstructionTestCase(BaseMessageTestCase)
-```
-
-Base class to test message construction for the protocol.
-
-<a id="aea.test_tools.test_protocol.BaseProtocolMessageConstructionTestCase.test_run"></a>
-
-#### test`_`run
-
-```python
-def test_run() -> None
-```
-
-Run the test.
-
-<a id="aea.test_tools.test_protocol.BaseProtocolMessageConstructionTestCase.build_message"></a>
-
-#### build`_`message
-
-```python
-@abstractmethod
-def build_message() -> Message
-```
-
-Build the message to be used for testing.
-
-<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase"></a>
-
-## BaseProtocolMessagesTestCase Objects
-
-```python
-class BaseProtocolMessagesTestCase(BaseMessageTestCase)
-```
-
-Base class to test messages for the protocol.
 
 <a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.test_messages_ok"></a>
 
@@ -122,10 +93,58 @@ Build inconsistent messages to be used for testing.
 ## BaseProtocolDialoguesTestCase Objects
 
 ```python
-class BaseProtocolDialoguesTestCase(TestCase)
+class BaseProtocolDialoguesTestCase(ABC)
 ```
 
 Base class to test message construction for the protocol.
+
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.MESSAGE_CLASS"></a>
+
+#### MESSAGE`_`CLASS
+
+```python
+@property
+@abstractmethod
+def MESSAGE_CLASS() -> Type[Message]
+```
+
+Override this property in a subclass.
+
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.DIALOGUE_CLASS"></a>
+
+#### DIALOGUE`_`CLASS
+
+```python
+@property
+@abstractmethod
+def DIALOGUE_CLASS() -> Type[Dialogue]
+```
+
+Override this property in a subclass.
+
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.DIALOGUES_CLASS"></a>
+
+#### DIALOGUES`_`CLASS
+
+```python
+@property
+@abstractmethod
+def DIALOGUES_CLASS() -> Type[Dialogues]
+```
+
+Override this property in a subclass.
+
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.ROLE_FOR_THE_FIRST_MESSAGE"></a>
+
+#### ROLE`_`FOR`_`THE`_`FIRST`_`MESSAGE
+
+```python
+@property
+@abstractmethod
+def ROLE_FOR_THE_FIRST_MESSAGE() -> Dialogue.Role
+```
+
+Override this property in a subclass.
 
 <a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.role_from_first_message"></a>
 

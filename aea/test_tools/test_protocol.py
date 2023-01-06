@@ -19,9 +19,8 @@
 """This module contains test case classes based on pytest for AEA protocol testing."""
 
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import List, Type
-from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
@@ -32,12 +31,13 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-class BaseMessageTestCase(TestCase):
-    """Base class to test one message encode/decode"""
+class BaseProtocolMessagesTestCase(ABC):
+    """Base class to test messages for the protocol."""
 
-    __test__ = False
-
-    MESSAGE_CLASS: Type[Message]
+    @property
+    @abstractmethod
+    def MESSAGE_CLASS(self) -> Type[Message]:
+        """Override this property in a subclass."""
 
     def perform_message_test(self, msg: Message) -> None:  # nosec
         """Test message encode/decode."""
@@ -62,23 +62,6 @@ class BaseMessageTestCase(TestCase):
         actual_msg.sender = actual_envelope.sender
         expected_msg = msg
         assert expected_msg == actual_msg
-
-
-class BaseProtocolMessageConstructionTestCase(BaseMessageTestCase):
-    """Base class to test message construction for the protocol."""
-
-    def test_run(self) -> None:
-        """Run the test."""
-        msg = self.build_message()
-        self.perform_message_test(msg)
-
-    @abstractmethod
-    def build_message(self) -> Message:
-        """Build the message to be used for testing."""
-
-
-class BaseProtocolMessagesTestCase(BaseMessageTestCase):
-    """Base class to test messages for the protocol."""
 
     def test_messages_ok(self) -> None:
         """Run messages are ok for encode and decode."""
@@ -115,14 +98,28 @@ class BaseProtocolMessagesTestCase(BaseMessageTestCase):
         """Build inconsistent messages to be used for testing."""
 
 
-class BaseProtocolDialoguesTestCase(TestCase):
+class BaseProtocolDialoguesTestCase(ABC):
     """Base class to test message construction for the protocol."""
 
-    __test__ = False
-    MESSAGE_CLASS: Type[Message]
-    DIALOGUE_CLASS: Type[Dialogue]
-    DIALOGUES_CLASS: Type[Dialogues]
-    ROLE_FOR_THE_FIRST_MESSAGE: Dialogue.Role
+    @property
+    @abstractmethod
+    def MESSAGE_CLASS(self) -> Type[Message]:
+        """Override this property in a subclass."""
+
+    @property
+    @abstractmethod
+    def DIALOGUE_CLASS(self) -> Type[Dialogue]:
+        """Override this property in a subclass."""
+
+    @property
+    @abstractmethod
+    def DIALOGUES_CLASS(self) -> Type[Dialogues]:
+        """Override this property in a subclass."""
+
+    @property
+    @abstractmethod
+    def ROLE_FOR_THE_FIRST_MESSAGE(self) -> Dialogue.Role:
+        """Override this property in a subclass."""
 
     def role_from_first_message(  # pylint: disable=unused-argument
         self,

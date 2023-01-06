@@ -20,7 +20,6 @@
 """This module contains a test for aea.test_tools.test_protocol."""
 
 
-import unittest
 from typing import List, Type
 
 from aea.protocols.base import Message
@@ -90,58 +89,3 @@ class TestDialogues(BaseProtocolDialoguesTestCase):
             performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
             content_ct=custom_data_model,
         )
-
-
-def test_test_message_case():
-    """Test test cases run."""
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestMessages)
-    result = unittest.TextTestRunner().run(suite)
-    assert result.errors == []
-    assert result.failures == []
-    assert result.wasSuccessful()
-
-    class FailTestMessages(TestMessages):
-        """Base class to test message construction for the protocol."""
-
-        def build_inconsistent(self) -> List[Message]:
-            """Build inconsistent messages to be used for testing."""
-            return [
-                TProtocolMessage(
-                    performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
-                    content_ct=custom_data_model,
-                ),
-            ]
-
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(FailTestMessages)
-
-    result = unittest.TextTestRunner().run(suite)
-    assert result.errors == []
-    assert not result.wasSuccessful()
-    assert len(result.failures) == 1
-    assert "test_messages_inconsistent" in str(result.failures)
-
-
-def test_test_dialogues_case():
-    """Test test cases run."""
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestDialogues)
-    result = unittest.TextTestRunner().run(suite)
-    assert result.errors == []
-    assert result.failures == []
-    assert result.wasSuccessful()
-
-    class FailTestDialogues(TestDialogues):
-        """Base class to test message construction for the protocol."""
-
-        def make_message_content(self) -> dict:
-            """Make a dict with message contruction content for dialogues.create."""
-            return dict(
-                performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
-                content_ct=custom_data_model,
-            )
-
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(FailTestDialogues)
-    result = unittest.TextTestRunner().run(suite)
-    assert not result.wasSuccessful()
-    assert len(result.failures) == 0
-    assert len(result.errors) == 1
-    assert "Found performative_mt" in str(result.errors)
