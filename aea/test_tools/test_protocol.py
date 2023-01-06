@@ -31,7 +31,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-class BaseMessageTest:
+class BaseMessageTestCase:
     """Base class to test one message encode/decode"""
 
     MESSAGE_CLASS: Type[Message] = Message
@@ -61,7 +61,7 @@ class BaseMessageTest:
         assert expected_msg == actual_msg
 
 
-class BaseTestProtocolMessageConstruction(BaseMessageTest):
+class BaseProtocolMessageConstructionTestCase(BaseMessageTestCase):
     """Base class to test message construction for the protocol."""
 
     def test_run(self) -> None:
@@ -74,7 +74,7 @@ class BaseTestProtocolMessageConstruction(BaseMessageTest):
         """Build the message to be used for testing."""
 
 
-class BaseTestProtocolMessages(BaseMessageTest):
+class BaseProtocolMessagesTestCase(BaseMessageTestCase):
     """Base class to test messages for the protocol."""
 
     def test_messages_ok(self) -> None:
@@ -112,7 +112,7 @@ class BaseTestProtocolMessages(BaseMessageTest):
         """Build inconsistent messages to be used for testing."""
 
 
-class BaseTestProtocolDialogues:
+class BaseProtocolDialoguesTestCase:
     """Base class to test message construction for the protocol."""
 
     MESSAGE_CLASS: Type[Message] = Message

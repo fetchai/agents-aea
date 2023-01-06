@@ -36,8 +36,8 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues
 from aea.test_tools.test_protocol import (
-    BaseTestProtocolDialogues,
-    BaseTestProtocolMessages,
+    BaseProtocolDialoguesTestCase,
+    BaseProtocolMessagesTestCase,
 )
 
 from packages.open_aea.protocols.signing.dialogues import (
@@ -49,7 +49,7 @@ from packages.open_aea.protocols.signing.dialogues import (
 from packages.open_aea.protocols.signing.message import SigningMessage
 
 
-class TestMessages(BaseTestProtocolMessages):
+class TestMessages(BaseProtocolMessagesTestCase):
     """Base class to test message construction for the protocol."""
 
     MESSAGE_CLASS = SigningMessage
@@ -119,7 +119,7 @@ class TestMessages(BaseTestProtocolMessages):
         ]
 
 
-class TestDialogues(BaseTestProtocolDialogues):
+class TestDialogues(BaseProtocolDialoguesTestCase):
     """Test dialogues."""
 
     MESSAGE_CLASS: Type[Message] = SigningMessage

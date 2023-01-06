@@ -26,8 +26,8 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues
 from aea.test_tools.test_protocol import (
-    BaseTestProtocolDialogues,
-    BaseTestProtocolMessages,
+    BaseProtocolDialoguesTestCase,
+    BaseProtocolMessagesTestCase,
 )
 
 from tests.data.packages.fetchai.protocols.t_protocol.dialogues import (
@@ -52,7 +52,7 @@ custom_data_model = CustomDataModel(
 )
 
 
-class TestMessages(BaseTestProtocolMessages):
+class TestMessages(BaseProtocolMessagesTestCase):
     """Base class to test message construction for the protocol."""
 
     MESSAGE_CLASS = TProtocolMessage
@@ -75,7 +75,7 @@ class TestMessages(BaseTestProtocolMessages):
         ]
 
 
-class TestDialogues(BaseTestProtocolDialogues):
+class TestDialogues(BaseProtocolDialoguesTestCase):
     """Test dialogues."""
 
     MESSAGE_CLASS: Type[Message] = TProtocolMessage
