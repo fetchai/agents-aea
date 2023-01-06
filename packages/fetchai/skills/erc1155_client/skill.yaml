@@ -28,7 +28,7 @@ protocols:
 - fetchai/default:1.0.0:bafybeifdodei24xy4zsnmurg3dbbe2ysp7ii7v5bmrsgl7stt7lj22pezq
 - fetchai/fipa:1.0.0:bafybeidox4hs4wawq5raikqfdw3752xv2w4bvzxs5ezwtymdmn6gpmipla
 - fetchai/oef_search:1.0.0:bafybeifim32o7w5wkpcnict6kn6lp7rlddwlul7dfigcg4nzmqayxpvduu
-- open_aea/signing:1.0.0:bafybeibonq3om7zbfttui7gicidhpf7uaxx2ek2cdifsuc4dr4jr6prr4q
+- open_aea/signing:1.0.0:bafybeigjbda6k5ms25cb7wscwq6rqdbwtio5kn2wwwzqd6wtimrgpyq3ru
 - valory/contract_api:1.0.0:bafybeif32nchkgn6yet7e5gt4auhf7lsahxnj4t36kxbw55p3gi7qpeuxq
 - valory/ledger_api:1.0.0:bafybeigqr4y3ykz3iulrcoqmji7hy3dxaoy7zmyyzff4ivpbubcpwdknai
 skills: []

@@ -4,17 +4,17 @@
 
 This module contains test case classes based on pytest for AEA protocol testing.
 
-<a id="aea.test_tools.test_protocol.BaseMessageTest"></a>
+<a id="aea.test_tools.test_protocol.BaseMessageTestCase"></a>
 
-## BaseMessageTest Objects
+## BaseMessageTestCase Objects
 
 ```python
-class BaseMessageTest()
+class BaseMessageTestCase(TestCase)
 ```
 
 Base class to test one message encode/decode
 
-<a id="aea.test_tools.test_protocol.BaseMessageTest.perform_mesage_test"></a>
+<a id="aea.test_tools.test_protocol.BaseMessageTestCase.perform_mesage_test"></a>
 
 #### perform`_`mesage`_`test
 
@@ -24,17 +24,17 @@ def perform_mesage_test(msg: Message) -> None
 
 Test message encode/decode.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessageConstruction"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessageConstructionTestCase"></a>
 
-## BaseTestProtocolMessageConstruction Objects
+## BaseProtocolMessageConstructionTestCase Objects
 
 ```python
-class BaseTestProtocolMessageConstruction(BaseMessageTest)
+class BaseProtocolMessageConstructionTestCase(BaseMessageTestCase)
 ```
 
 Base class to test message construction for the protocol.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessageConstruction.test_run"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessageConstructionTestCase.test_run"></a>
 
 #### test`_`run
 
@@ -44,7 +44,7 @@ def test_run() -> None
 
 Run the test.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessageConstruction.build_message"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessageConstructionTestCase.build_message"></a>
 
 #### build`_`message
 
@@ -55,17 +55,17 @@ def build_message() -> Message
 
 Build the message to be used for testing.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessages"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase"></a>
 
-## BaseTestProtocolMessages Objects
+## BaseProtocolMessagesTestCase Objects
 
 ```python
-class BaseTestProtocolMessages(BaseMessageTest)
+class BaseProtocolMessagesTestCase(BaseMessageTestCase)
 ```
 
 Base class to test messages for the protocol.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessages.test_messages_ok"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.test_messages_ok"></a>
 
 #### test`_`messages`_`ok
 
@@ -75,7 +75,7 @@ def test_messages_ok() -> None
 
 Run messages are ok for encode and decode.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessages.test_messages_inconsistent"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.test_messages_inconsistent"></a>
 
 #### test`_`messages`_`inconsistent
 
@@ -85,7 +85,7 @@ def test_messages_inconsistent() -> None
 
 Run messages are inconsistent.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessages.test_messages_fail_to_encode_decode"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.test_messages_fail_to_encode_decode"></a>
 
 #### test`_`messages`_`fail`_`to`_`encode`_`decode
 
@@ -95,7 +95,7 @@ def test_messages_fail_to_encode_decode() -> None
 
 Run messages are failing to encode and decode.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessages.build_messages"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.build_messages"></a>
 
 #### build`_`messages
 
@@ -106,7 +106,7 @@ def build_messages() -> List[Message]
 
 Build the messages to be used for testing.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolMessages.build_inconsistent"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolMessagesTestCase.build_inconsistent"></a>
 
 #### build`_`inconsistent
 
@@ -117,17 +117,17 @@ def build_inconsistent() -> List[Message]
 
 Build inconsistent messages to be used for testing.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolDialogues"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase"></a>
 
-## BaseTestProtocolDialogues Objects
+## BaseProtocolDialoguesTestCase Objects
 
 ```python
-class BaseTestProtocolDialogues()
+class BaseProtocolDialoguesTestCase(TestCase)
 ```
 
 Base class to test message construction for the protocol.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolDialogues.role_from_first_message"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.role_from_first_message"></a>
 
 #### role`_`from`_`first`_`message
 
@@ -146,7 +146,7 @@ Infer the role of the agent from an incoming/outgoing first message
 
 The role of the agent
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolDialogues.make_dialogues_class"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.make_dialogues_class"></a>
 
 #### make`_`dialogues`_`class
 
@@ -156,7 +156,7 @@ def make_dialogues_class() -> Type[Dialogues]
 
 Make dialogues class with specific role.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolDialogues.make_message_content"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.make_message_content"></a>
 
 #### make`_`message`_`content
 
@@ -167,7 +167,7 @@ def make_message_content() -> dict
 
 Make a dict with message contruction content for dialogues.create.
 
-<a id="aea.test_tools.test_protocol.BaseTestProtocolDialogues.test_dialogues"></a>
+<a id="aea.test_tools.test_protocol.BaseProtocolDialoguesTestCase.test_dialogues"></a>
 
 #### test`_`dialogues
 

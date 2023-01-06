@@ -13,7 +13,7 @@ contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeifdodei24xy4zsnmurg3dbbe2ysp7ii7v5bmrsgl7stt7lj22pezq
 - fetchai/state_update:1.0.0:bafybeif2hpmks3bt2wfgmjbckk23c6pmuszqyb4dttlxjqjuhf5qebo3ye
-- open_aea/signing:1.0.0:bafybeibonq3om7zbfttui7gicidhpf7uaxx2ek2cdifsuc4dr4jr6prr4q
+- open_aea/signing:1.0.0:bafybeigjbda6k5ms25cb7wscwq6rqdbwtio5kn2wwwzqd6wtimrgpyq3ru
 skills:
 - fetchai/echo:0.19.0:bafybeigqyfnmx3yoryx3yho6aj2te4px5u242nxtbhy3wnqrz35yoj6cyu
 default_connection: fetchai/stub:0.21.0

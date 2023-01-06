@@ -9,7 +9,7 @@ This module contains tests for transaction.
 ## TestMessages Objects
 
 ```python
-class TestMessages(BaseTestProtocolMessages)
+class TestMessages(BaseProtocolMessagesTestCase)
 ```
 
 Base class to test message construction for the protocol.
@@ -39,7 +39,7 @@ Build inconsistent messages to be used for testing.
 ## TestDialogues Objects
 
 ```python
-class TestDialogues(BaseTestProtocolDialogues)
+class TestDialogues(BaseProtocolDialoguesTestCase)
 ```
 
 Test dialogues.

@@ -15,7 +15,7 @@ protocols:
 - fetchai/default:1.0.0:bafybeifdodei24xy4zsnmurg3dbbe2ysp7ii7v5bmrsgl7stt7lj22pezq
 - fetchai/gym:1.0.0:bafybeig47gwtvosvtghwbhhwqgxhz3whxbrmyicibxtzjtss3dkbygy3iq
 - fetchai/state_update:1.0.0:bafybeif2hpmks3bt2wfgmjbckk23c6pmuszqyb4dttlxjqjuhf5qebo3ye
-- open_aea/signing:1.0.0:bafybeibonq3om7zbfttui7gicidhpf7uaxx2ek2cdifsuc4dr4jr6prr4q
+- open_aea/signing:1.0.0:bafybeigjbda6k5ms25cb7wscwq6rqdbwtio5kn2wwwzqd6wtimrgpyq3ru
 skills:
 - fetchai/gym:0.20.0:bafybeidx5jg5353gqk544h4u4vivos5upwc5sfy4xjmvf6ppzinzbmpfxe
 default_connection: fetchai/gym:0.19.0
