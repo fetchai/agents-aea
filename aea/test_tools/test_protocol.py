@@ -21,6 +21,7 @@
 
 from abc import abstractmethod
 from typing import List, Type
+from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
@@ -31,8 +32,10 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-class BaseMessageTestCase:
+class BaseMessageTestCase(TestCase):
     """Base class to test one message encode/decode"""
+
+    __test__ = False
 
     MESSAGE_CLASS: Type[Message] = Message
 
@@ -112,9 +115,10 @@ class BaseProtocolMessagesTestCase(BaseMessageTestCase):
         """Build inconsistent messages to be used for testing."""
 
 
-class BaseProtocolDialoguesTestCase:
+class BaseProtocolDialoguesTestCase(TestCase):
     """Base class to test message construction for the protocol."""
 
+    __test__ = False
     MESSAGE_CLASS: Type[Message] = Message
     DIALOGUE_CLASS: Type[Dialogue] = Dialogue
     DIALOGUES_CLASS: Type[Dialogues] = Dialogues
