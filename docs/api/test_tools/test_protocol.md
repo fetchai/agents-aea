@@ -14,12 +14,12 @@ class BaseMessageTestCase(TestCase)
 
 Base class to test one message encode/decode
 
-<a id="aea.test_tools.test_protocol.BaseMessageTestCase.perform_mesage_test"></a>
+<a id="aea.test_tools.test_protocol.BaseMessageTestCase.perform_message_test"></a>
 
-#### perform`_`mesage`_`test
+#### perform`_`message`_`test
 
 ```python
-def perform_mesage_test(msg: Message) -> None
+def perform_message_test(msg: Message) -> None
 ```
 
 Test message encode/decode.

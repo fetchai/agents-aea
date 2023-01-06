@@ -16,7 +16,7 @@ fingerprint:
   signing.proto: bafybeigbzr6x5wdmqzc7eanlz5xmvaoiwb4kwozgg3cugq63b7esicusra
   signing_pb2.py: bafybeihph4sio6j7s773dbzc46qrt7hyepxo6banh3c3arwuafoekuaddy
   tests/__init__.py: bafybeiaraxpv2z6r4e5rgmvnvdfv5rlrjdwbhqyjocxm2z2wkzpluezdey
-  tests/test_signing.py: bafybeig2773b675c5qhxdj27tscicvdbzg6tvgfrnehzokoi4h67tdx2mu
+  tests/test_signing.py: bafybeicq56sbbu3ioleymrbruigtmm4tmflahdeycvinsr4v3rdge5qy4i
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

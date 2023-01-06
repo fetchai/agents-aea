@@ -38,11 +38,11 @@ Packages can be downloaded using both extended public ids and hashes
 
 Add the signing protocol using
 
-`aea add protocol open_aea/signing:1.0.0:bafybeigjbda6k5ms25cb7wscwq6rqdbwtio5kn2wwwzqd6wtimrgpyq3ru --remote`
+`aea add protocol open_aea/signing:1.0.0:bafybeiclsbgrviyxbmi2vex5ze3dhr7ywohrqedebx26jozayxvroqtegq --remote`
 
 Or
 
-`aea add protocol open_aea/signing:1.0.0:bafybeigjbda6k5ms25cb7wscwq6rqdbwtio5kn2wwwzqd6wtimrgpyq3ru --remote`
+`aea add protocol open_aea/signing:1.0.0:bafybeiclsbgrviyxbmi2vex5ze3dhr7ywohrqedebx26jozayxvroqtegq --remote`
 
 ## Publishing agents
 

@@ -52,6 +52,7 @@ from packages.open_aea.protocols.signing.message import SigningMessage
 class TestMessages(BaseProtocolMessagesTestCase):
     """Base class to test message construction for the protocol."""
 
+    __test__ = True
     MESSAGE_CLASS = SigningMessage
 
     ledger_id = CosmosCrypto.identifier
@@ -122,6 +123,7 @@ class TestMessages(BaseProtocolMessagesTestCase):
 class TestDialogues(BaseProtocolDialoguesTestCase):
     """Test dialogues."""
 
+    __test__ = True
     MESSAGE_CLASS: Type[Message] = SigningMessage
     DIALOGUE_CLASS: Type[BaseDialogue] = BaseSigningDialogue
     DIALOGUES_CLASS: Type[Dialogues] = BaseSigningDialogues

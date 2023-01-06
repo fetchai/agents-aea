@@ -12,7 +12,7 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeifdodei24xy4zsnmurg3dbbe2ysp7ii7v5bmrsgl7stt7lj22pezq
-- open_aea/signing:1.0.0:bafybeigjbda6k5ms25cb7wscwq6rqdbwtio5kn2wwwzqd6wtimrgpyq3ru
+- open_aea/signing:1.0.0:bafybeiclsbgrviyxbmi2vex5ze3dhr7ywohrqedebx26jozayxvroqtegq
 - valory/http:1.0.0:bafybeifru3qs6udfzprax7jxktbsuzn7immfvi3scgfspifq3zdxwkgvnm
 skills:
 - fetchai/http_echo:0.20.0:bafybeidwjo23py7krjrmgsae6onrgr3s7uq4kzy2epib55h5ub74yacqbm
