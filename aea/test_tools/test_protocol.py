@@ -37,7 +37,7 @@ class BaseMessageTestCase(TestCase):
 
     __test__ = False
 
-    MESSAGE_CLASS: Type[Message] = Message
+    MESSAGE_CLASS: Type[Message]
 
     def perform_message_test(self, msg: Message) -> None:  # nosec
         """Test message encode/decode."""
@@ -119,9 +119,9 @@ class BaseProtocolDialoguesTestCase(TestCase):
     """Base class to test message construction for the protocol."""
 
     __test__ = False
-    MESSAGE_CLASS: Type[Message] = Message
-    DIALOGUE_CLASS: Type[Dialogue] = Dialogue
-    DIALOGUES_CLASS: Type[Dialogues] = Dialogues
+    MESSAGE_CLASS: Type[Message]
+    DIALOGUE_CLASS: Type[Dialogue]
+    DIALOGUES_CLASS: Type[Dialogues]
     ROLE_FOR_THE_FIRST_MESSAGE: Dialogue.Role
 
     def role_from_first_message(  # pylint: disable=unused-argument
