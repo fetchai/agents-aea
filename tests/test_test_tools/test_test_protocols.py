@@ -23,8 +23,6 @@
 import unittest
 from typing import List, Type
 
-import pytest
-
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues
@@ -147,7 +145,3 @@ def test_test_dialogues_case():
     assert len(result.failures) == 0
     assert len(result.errors) == 1
     assert "Found performative_mt" in str(result.errors)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])

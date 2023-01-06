@@ -39,7 +39,7 @@ class BaseMessageTestCase(TestCase):
 
     MESSAGE_CLASS: Type[Message] = Message
 
-    def perform_mesage_test(self, msg: Message) -> None:  # nosec
+    def perform_message_test(self, msg: Message) -> None:  # nosec
         """Test message encode/decode."""
         msg.to = "receiver"
         assert msg._is_consistent()  # pylint: disable=protected-access
@@ -70,7 +70,7 @@ class BaseProtocolMessageConstructionTestCase(BaseMessageTestCase):
     def test_run(self) -> None:
         """Run the test."""
         msg = self.build_message()
-        self.perform_mesage_test(msg)
+        self.perform_message_test(msg)
 
     @abstractmethod
     def build_message(self) -> Message:
@@ -83,7 +83,7 @@ class BaseProtocolMessagesTestCase(BaseMessageTestCase):
     def test_messages_ok(self) -> None:
         """Run messages are ok for encode and decode."""
         for msg in self.build_messages():
-            self.perform_mesage_test(msg)
+            self.perform_message_test(msg)
 
     def test_messages_inconsistent(self) -> None:
         """Run messages are inconsistent."""
