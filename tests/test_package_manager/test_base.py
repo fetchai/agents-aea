@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ DUMMY_PACKAGE_ID = PackageId(
     package_type=PackageType.SKILL,
     public_id=PublicId(author="dummy", name="name"),
 )
-EXAMPLE_PACKAGE_HASH = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44"
+EXAMPLE_PACKAGE_HASH = "bafybeihgwrowgtegpe4ixe3iy5jx65u7pxebl5btrkywzmx7g52gjtbnpi"
 DUMMY_PACKAGE_HASH = "bafybei0000000000000000000000000000000000000000000000000000"
 PACKAGE_JSON_FILE = Path(ROOT_DIR, PACKAGES, "packages.json")
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,7 +91,7 @@ def test_setup_aea():
 
 def test_act():
     """Tests the act function of the AEA."""
-    agent_name = "MyAgent"
+    agent_name = "my_agent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
@@ -116,7 +116,7 @@ def test_act():
 
 def test_start_stop():
     """Tests the act function of the AEA."""
-    agent_name = "MyAgent"
+    agent_name = "my_agent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
@@ -137,7 +137,7 @@ def test_start_stop():
 
 def test_double_start():
     """Tests the act function of the AEA."""
-    agent_name = "MyAgent"
+    agent_name = "my_agent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
@@ -166,7 +166,7 @@ def test_double_start():
 def test_react():
     """Tests income messages."""
     with LocalNode() as node:
-        agent_name = "MyAgent"
+        agent_name = "my_agent"
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
@@ -230,7 +230,7 @@ def test_react():
 def test_handle():
     """Tests handle method of an agent."""
     with LocalNode() as node:
-        agent_name = "MyAgent"
+        agent_name = "my_agent"
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
@@ -347,7 +347,7 @@ def test_handle():
 def test_initialize_aea_programmatically():
     """Test that we can initialize an AEA programmatically."""
     with LocalNode() as node:
-        agent_name = "MyAgent"
+        agent_name = "my_agent"
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
@@ -429,7 +429,7 @@ def test_initialize_aea_programmatically_build_resources():
     try:
         temp = tempfile.mkdtemp(prefix="test_aea_resources")
         with LocalNode() as node:
-            agent_name = "MyAgent"
+            agent_name = "my_agent"
             private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
             wallet = Wallet({DEFAULT_LEDGER: private_key_path})
             identity = Identity(
@@ -526,7 +526,7 @@ def test_initialize_aea_programmatically_build_resources():
 
 def test_add_behaviour_dynamically():
     """Test that we can add a behaviour dynamically."""
-    agent_name = "MyAgent"
+    agent_name = "my_agent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     wallet = Wallet({DEFAULT_LEDGER: private_key_path})
     data_dir = MagicMock()
@@ -581,7 +581,7 @@ def test_add_behaviour_dynamically():
 
 def test_no_handlers_registered():
     """Test no handlers are registered for message processing."""
-    agent_name = "MyAgent"
+    agent_name = "my_agent"
     builder = AEABuilder()
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
@@ -661,7 +661,7 @@ class TestContextNamespace:
 
 def test_start_stop_and_start_stop_again():
     """Tests AEA can be started/stopped twice."""
-    agent_name = "MyAgent"
+    agent_name = "my_agent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
@@ -712,7 +712,7 @@ class TestAeaExceptionPolicy:
 
     def setup(self) -> None:
         """Set test cae instance."""
-        agent_name = "MyAgent"
+        agent_name = "my_agent"
 
         builder = AEABuilder()
         builder.set_name(agent_name)
@@ -889,7 +889,7 @@ class BaseTimeExecutionCase(TestCase):
         :param function: function be called on react handle or/and Behaviour.act
         :return: None
         """
-        agent_name = "MyAgent"
+        agent_name = "my_agent"
 
         builder = AEABuilder()
         builder.set_name(agent_name)
@@ -1002,7 +1002,7 @@ def test_skill2skill_message():
     """Tests message can be sent directly to any skill."""
     with tempfile.TemporaryDirectory() as dir_name:
         with cd(dir_name):
-            agent_name = "MyAgent"
+            agent_name = "my_agent"
             private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
             builder = AEABuilder(registry_dir=Path(ROOT_DIR, "packages"))
             builder.set_name(agent_name)

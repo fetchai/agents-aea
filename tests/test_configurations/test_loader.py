@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -119,7 +119,7 @@ def test_config_loader_load_service_config(*_mocks):
         def pop(self, item):
             return self.json.pop(item)
 
-    dummy_service_config = DummyServiceConfig(name="Service", author="valory")
+    dummy_service_config = DummyServiceConfig(name="service", author="valory")
 
     with TemporaryDirectory() as temp_dir:
         schema_file = Path(temp_dir, "schema.json").absolute()

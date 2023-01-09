@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,7 +48,7 @@ class BaseTestRuntime:
 
     def setup(self):
         """Set up case."""
-        agent_name = "MyAgent"
+        agent_name = "my_agent"
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
