@@ -13,7 +13,8 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+      - Framework application areas: 'introduction/framework-application-areas.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
