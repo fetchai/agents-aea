@@ -1,4 +1,3 @@
-
 # Libp2p Node
 
 The `libp2p_node` is an integral part of the ACN.
