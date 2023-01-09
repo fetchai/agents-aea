@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,10 +108,10 @@ def sign_txs(
 
     if ledger_id == "fetchai":
         with patch(
-            "aea_ledger_fetchai._cosmos._CosmosApi._try_get_account_number_and_sequence",
+            "aea_ledger_fetchai.fetchai._CosmosApi._try_get_account_number_and_sequence",
             return_value=(987, 0),
         ), patch(
-            "aea_ledger_fetchai._cosmos._CosmosApi.get_balance", return_value=100000
+            "aea_ledger_fetchai.fetchai._CosmosApi.get_balance", return_value=100000
         ):
             transfer_transaction = ledger_api.get_transfer_transaction(
                 sender_address=sender_address,
