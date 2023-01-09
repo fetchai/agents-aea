@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@ import time
 import unittest.mock
 from pathlib import Path
 from threading import Thread
+from typing import cast
 from unittest import mock
 from unittest.mock import MagicMock, Mock, call, patch
 
@@ -38,6 +39,7 @@ import aea
 from aea.cli.core import cli
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import ConnectionStates
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
@@ -62,6 +64,7 @@ from .conftest import (
     _make_stub_connection,
     logger,
 )
+from .data.dummy_connection.connection import DummyConnection
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.common.utils import wait_for_condition
 
@@ -1145,3 +1148,84 @@ async def test_stops_on_connectionerror_during_connect():
             await multiplexer.connect()
 
     assert multiplexer.connection_status.is_disconnected
+
+
+@pytest.mark.asyncio
+async def test_multiplexer_race_condition() -> None:
+    """
+    A test to showcase a race condition in the AsyncMultiplexer when multiple threads are used.
+
+    Under normal circumstances the connection -> skill message routing should be handled in the following way:
+    1. MainThread calls AsyncMultiplexer.async_get.
+    2. AsyncMultiplexer.async_get,
+        2.a. Returns immediately if there's a message already in the AsyncMultiplexer.in_queue.
+        2.b. If not, it creates a waiter that will be notified when a message is received.
+
+    Let's assume 2.b., when a message is received AsyncFriendlyQueue.put() will wake up the waiter.
+    Now there exists a race condition such that, a message arrives before a waiter is added to the queue, but after
+    the check of queue emptiness has been made.
+    """
+    block_amount = 1
+
+    class SlowAsyncFriendlyQueue(AsyncFriendlyQueue):
+        """An implementation of the AsyncFriendlyQueue that is blocks before adding waiters."""
+
+        async def async_wait(self) -> None:
+            """
+            Wait an item appears in the queue.
+
+            :return: None
+            """
+            with self._lock:
+                if not self.empty():
+                    return
+
+                # the following will make it easier
+                # to simulate the race condition
+                time.sleep(block_amount)
+
+                waiter = asyncio.Future()  # type: ignore
+                self._non_empty_waiters.append(waiter)
+            try:
+                await waiter
+            finally:
+                try:
+                    self._non_empty_waiters.remove(waiter)
+                except ValueError:
+                    pass
+
+    connection = cast(DummyConnection, _make_dummy_connection())
+    multiplexer = AsyncMultiplexer([connection], threaded=True)
+    # we replace the in_queue with the special implementation
+    multiplexer._in_queue = SlowAsyncFriendlyQueue()
+    await multiplexer.connect()
+    # in the begging the queue should be empty
+    assert multiplexer.in_queue.empty()
+
+    def dummy_main_thread():
+        """A dummy main thread, representing the MainThread at agent runtime."""
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(multiplexer.async_get())
+
+    # the main thread (usually skills) call async_get
+    thread = Thread(target=dummy_main_thread)
+    thread.start()
+
+    # some time passes
+    await asyncio.sleep(block_amount / 2)
+
+    # a message is received in the multiplexer by a connection
+    # this is done through by the "AsyncMultiplexer" thread
+    dummy_envelope = Envelope(
+        to="",
+        sender="",
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
+        message=b"",
+        context=EnvelopeContext(connection_id=UNKNOWN_CONNECTION_PUBLIC_ID),
+    )
+    connection.put(dummy_envelope)
+    # we give twice the block amount to the connection to wake up the waiter
+    await asyncio.sleep(2 * block_amount)
+    # the message has been processed, no more active waiters should be present
+    assert len(multiplexer.in_queue._non_empty_waiters) == 0
+    thread.join(timeout=1)
