@@ -7,7 +7,7 @@ description: The stub connection implements a connection stub which reads/writes
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmdgS2TuTmQaqTfKMzWb8RPRnTLbwdmqGZ8j8MA3BHyo3J
+  README.md: Qmam3xmWZWFfCMLrDZR5m5u7r5yYP4gb26Qg94TG4S1YA8
   __init__.py: QmU3CUkFsuMuBuFtcrCkUpt7ydGXRfM5PtBmamTk3yP2uP
   connection.py: QmfXm6BU6PGqWYc27sitUurndBPd38kQCKQtKxECU1VTje
 fingerprint_ignore_patterns: []

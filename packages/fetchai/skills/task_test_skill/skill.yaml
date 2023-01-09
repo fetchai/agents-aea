@@ -6,7 +6,7 @@ description: Skill with simple task to run.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmYkiShbUg3zyT8SMxh9ty2MLg7LMgVwEJAAGxVEXyjRk8
+  README.md: QmcXGDniXKQgNuoKwYor6mb5qXMWRHSvFT8cppxTj66Ngz
   __init__.py: QmS8m3SjyMuVtDN7H5gCszTa4EqnKgqjR5kxvJtgTQxXTH
   behaviours.py: QmSV3NmWaVLDF5GvCLXMjYSxUqZ5dAT5vXtazNZUtiquV8
   tasks.py: QmUA5k1vGCXVfBA5RTcJZXnbQgy5YL7ZWtVViiJiBVmLiF

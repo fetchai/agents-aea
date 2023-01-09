@@ -6,7 +6,7 @@ description: Retrieve data from an API
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQEKGxJfUy6vg3aPg6jRNHQ4vzr4rUHYVac5eYG5C6Uxb
+  README.md: QmaibnVqk95FVuhSXKCsYvUQFAkLCwYtPyWDmaNVDSFWvp
   __init__.py: Qma4ivubRLou6uMtfYwuqMzRymYWmYGNS4CZEZXMxHGZR5
   api_spec.yaml: QmUPhCYr6tWDMysdMCQxT67oAKRdMbGpgqDfAA5wpei12s
   behaviours.py: QmNubn8GCjV2d12FQu2Zv3FjXyoxoEsKzAg3fbskhtL3S2

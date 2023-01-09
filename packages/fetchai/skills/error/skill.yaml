@@ -6,7 +6,7 @@ description: The error skill implements basic error handling required by all AEA
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmXqqMwZhZWcrUFxQ4S9FsFsUw5RmMaDQwR9LcKUrRTpH7
+  README.md: QmNw5XkR9DfMycuD3j7dpGdvnyQEZTBRoYdraFiTXYTLkv
   __init__.py: QmW5BcBz9ynfV4SDCx2QMLwHfns1EJqSiEJf7U7BfoBn6e
   handlers.py: QmfEqAzS2PTcxrgh7crVrvuDVkjF3Fa2GndRyUu8UPUSq4
 fingerprint_ignore_patterns: []

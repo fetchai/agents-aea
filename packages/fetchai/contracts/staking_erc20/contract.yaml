@@ -7,7 +7,7 @@ description: The staking_erc20 contract contains the main staking contract of Fe
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmR5xGpZ8gZkUyWxz6EBkVpsYGuULcN13yNEALoxmDTx6t
+  README.md: QmXcVNZrAEX5Ja2fPKBYDVV77s5JKXtyGP19pgZfJNerrw
   __init__.py: QmdKarQHWsEyedE8E3X6my3zLZkdTGGrbmyJaidti3Sqyx
   build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE
   build/staking_erc20.json: QmVf2BuDDJPoCHDwEQKHdgfph4CbTFpqJJvcDLaM9tyoQq
