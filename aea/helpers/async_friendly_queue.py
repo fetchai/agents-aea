@@ -47,13 +47,12 @@ class AsyncFriendlyQueue(queue.Queue):
         :param kwargs: similar to queue.Queue.put
         """
         super().put(item, *args, **kwargs)
-        self._lock.acquire()
-        if self._non_empty_waiters:
-            waiter = self._non_empty_waiters.popleft()
-            waiter._loop.call_soon_threadsafe(  # pylint: disable=protected-access
-                self._set_waiter, waiter
-            )
-        self._lock.release()
+        with self._lock:
+            if self._non_empty_waiters:
+                waiter = self._non_empty_waiters.popleft()
+                waiter._loop.call_soon_threadsafe(  # pylint: disable=protected-access
+                    self._set_waiter, waiter
+                )
 
     @staticmethod
     def _set_waiter(waiter: Any) -> None:
@@ -80,12 +79,11 @@ class AsyncFriendlyQueue(queue.Queue):
 
         :return: None
         """
-        self._lock.acquire()
-        if not self.empty():
-            return
-        waiter = asyncio.Future()  # type: ignore
-        self._non_empty_waiters.append(waiter)
-        self._lock.release()
+        with self._lock:
+            if not self.empty():
+                return
+            waiter = asyncio.Future()  # type: ignore
+            self._non_empty_waiters.append(waiter)
         try:
             await waiter
         finally:
