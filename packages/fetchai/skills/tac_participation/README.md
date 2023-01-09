@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai TAC demo. It searches for a TAC on the sOEF, 
 
 ## Behaviours
 
-- `tac_search`: searches for a TAC 
+- `tac_search`: searches for a TAC
 - `transaction_processing`: processes transactions during the competition
 
 ## Handlers

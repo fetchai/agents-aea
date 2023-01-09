@@ -14,6 +14,7 @@ The scope of this specific demo is to demonstrate how the agents negotiate auton
 ## Communication
 
 There are two types of interactions:
+
 - between the participants and the controller, the game communication
 - between the participants, the negotiation
 
@@ -110,33 +111,33 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 5. Run the `controller` AEA. Navigate to its logs and copy the multiaddress displayed. Stop the `controller`.
 
-5. Navigate to the settings of `participant_1` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+6. Navigate to the settings of `participant_1` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 
-``` bash
-{
-  "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
-  "local_uri": "127.0.0.1:9001",
-  "log_file": "libp2p_node.log",
-  "public_uri": "127.0.0.1:9001"
-}
-```
+    ``` bash
+    {
+      "delegate_uri": "127.0.0.1:11001",
+      "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+      "local_uri": "127.0.0.1:9001",
+      "log_file": "libp2p_node.log",
+      "public_uri": "127.0.0.1:9001"
+    }
+    ```
 
-6. Navigate to the settings of `participant_2` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+7. Navigate to the settings of `participant_2` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 
-``` bash
-{
-  "delegate_uri": "127.0.0.1:11002",
-  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
-  "local_uri": "127.0.0.1:9002",
-  "log_file": "libp2p_node.log",
-  "public_uri": "127.0.0.1:9002"
-}
-```
+    ``` bash
+    {
+      "delegate_uri": "127.0.0.1:11002",
+      "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+      "local_uri": "127.0.0.1:9002",
+      "log_file": "libp2p_node.log",
+      "public_uri": "127.0.0.1:9002"
+    }
+    ```
 
-7. You may add more participants by repeating steps 3 (with an updated name) and 6 (bumping the port numbers. See the difference between steps 5 and 6).
+8. You may add more participants by repeating steps 3 (with an updated name) and 6 (bumping the port numbers. See the difference between steps 5 and 6).
 
-8. Run the `controller`, then `participant_1` and `participant_2` (and any other participants you added).
+9. Run the `controller`, then `participant_1` and `participant_2` (and any other participants you added).
 
 In the `controller`'s log, you should see the details of the transactions participants submit as well as changes in their scores and holdings. In participants' logs, you should see the agents trading.
 
@@ -211,7 +212,7 @@ aea build
     aea create tac_participant_one
     aea create tac_participant_two
     ```
-    
+
     Build participant one:
 
     ``` bash

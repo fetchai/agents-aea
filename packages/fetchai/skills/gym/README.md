@@ -10,7 +10,6 @@ This skill is part of the Fetch.ai Gym demo. It trains a reinforcement learning 
 
 - `gym`: handles `gym` messages for interactions with a gym environment.
 
-
 ## Links
 
 - <a href="https://docs.fetch.ai/aea/gym-skill/" target="_blank">Gym Demo</a>

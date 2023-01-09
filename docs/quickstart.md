@@ -55,7 +55,7 @@ We provide a script to automatically install all framework dependencies and the 
     chmod +x install.sh
     ./install.sh
     ```
-    
+
     On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
 
 ### Option 3: Using Docker
@@ -67,19 +67,19 @@ We also provide a Docker image with all the needed dependencies.
     To use the image, you will first have to pull it, then run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
 
     To pull:
-    
+
     ``` bash
     docker pull fetchai/aea-user:latest
     ```
     
     To run the image on Linux and MacOs:
-    
+
     ``` bash
     docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
     ```
-    
+
     And on Windows:
-    
+
     ``` bash
     docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
     ```
@@ -319,9 +319,9 @@ info: Echo Behaviour: act method called.
     ``` bash
     echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
     ```
-    
+
     You will see the <code>Echo Handler</code> dealing with the envelope and responding with the same message to the <code>output_file</code>, and also decoding the Base64 encrypted message in this case.
-    
+
     ``` bash
     info: Echo Behaviour: act method called.
     Echo Handler: message=Message(sender=sender_aea,to=my_first_aea,content=b'hello',dialogue_reference=('1', ''),message_id=1,performative=bytes,target=0), sender=sender_aea
@@ -354,11 +354,11 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
     The following test class replicates the preceding demo and tests its correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
     First, get the `packages` directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
-    
+
     ``` bash
     svn export https://github.com/fetchai/agents-aea.git/trunk/packages
     ```
-    
+
     Then write the test:
     
     ``` python
@@ -436,7 +436,7 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
     Place the above code into a file <code>test.py</code> in your AEA project directory (the same level as the <code>aea-config.yaml</code> file).
     
     To run, execute the following:
-    
+
     ``` bash
     pytest test.py
     ```

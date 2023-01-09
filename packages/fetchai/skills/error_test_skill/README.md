@@ -4,7 +4,7 @@
 
 Skill raises an exception on behaviour's act
 
-## Behaviours 
+## Behaviours
 
 - RaiseError - just raises an error on act
 

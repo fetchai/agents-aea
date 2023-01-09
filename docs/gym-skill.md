@@ -2,7 +2,7 @@
 
 The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.dev/" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
-### Discussion
+## Discussion
 
 The gym skills demonstrate how to wrap a Reinforcement Learning agent in a skill.
 The example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
@@ -48,7 +48,7 @@ aea install
     aea create my_gym_aea
     cd my_gym_aea
     ```
-    
+
     ### Add the gym skill
 
     ``` bash
@@ -60,7 +60,7 @@ aea install
     ``` bash
     aea config set agent.default_connection fetchai/gym:0.20.5
     ```
-    
+
     ### Install the skill dependencies
     
     To install the `gym` package, a dependency of the gym skill, from PyPI run

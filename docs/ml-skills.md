@@ -115,6 +115,7 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the data provider from scratch:
+
     ``` bash
     aea create ml_data_provider
     cd ml_data_provider
@@ -149,6 +150,7 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the model trainer from scratch:
+
     ``` bash
     aea create ml_model_trainer
     cd ml_model_trainer

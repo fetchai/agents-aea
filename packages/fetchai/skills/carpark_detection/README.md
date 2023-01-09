@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai car park demo. It registers the "car park ava
 
 ## Behaviours
 
-- `service_registration`: registers car park info selling service on the sOEF 
+- `service_registration`: registers car park info selling service on the sOEF
 
 ## Handlers
 

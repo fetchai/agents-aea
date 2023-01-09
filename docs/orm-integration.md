@@ -69,7 +69,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the seller from scratch:
-    ``` bashash
+
+    ``` bash
     aea create my_thermometer_aea
     cd my_thermometer_aea
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -103,7 +104,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the car data client from scratch:
-    ``` bashash
+
+    ``` bash
     aea create my_thermometer_client
     cd my_thermometer_client
     aea add connection fetchai/p2p_libp2p:0.27.4

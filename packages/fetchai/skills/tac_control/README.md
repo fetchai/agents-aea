@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai TAC demo. It manages the progression of the c
 
 ## Behaviours
 
-- `tac`: manages progression of the competition 
+- `tac`: manages progression of the competition
 
 ## Handlers
 

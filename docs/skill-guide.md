@@ -675,7 +675,7 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
             self.context.outbox.put_message(message=oef_search_msg)
             self.context.logger.info("unregistering agent from SOEF.")
     ```
-    
+
     We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type strategy class and place it in <code>strategy.py</code>. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
     
     ``` python
@@ -845,7 +845,7 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
             )
     
     ```
-    
+
     Finally, we have a handler, placed in <code>handlers.py</code>. The handler deals with handling any error messages which might occur during service registration:
     
     ``` python

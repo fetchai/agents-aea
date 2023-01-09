@@ -18,7 +18,6 @@ This skill is part of the Fetch.ai weather demo. It finds an agent which sells w
 - `oef_search`: handles `oef_search` messages to manage the sellers found
 - `signing`: handles `signing` messages for transaction signing by the decision maker
 
-
 ## Links
 
 - <a href="https://docs.fetch.ai/aea/weather-skills/" target="_blank">Weather Demo</a>

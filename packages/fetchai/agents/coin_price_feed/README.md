@@ -1,6 +1,6 @@
 # Coin Price Feed AEA
 
-An agent that fetches a coin price from an API and makes it available by http request. 
+An agent that fetches a coin price from an API and makes it available by http request.
 
 ## Description
 

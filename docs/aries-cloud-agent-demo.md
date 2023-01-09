@@ -186,7 +186,8 @@ cd aries_alice
 
 ??? note "Alternatively, create from scratch:"
     The following steps create **Alice_AEA** from scratch:
-        ``` bashash
+
+        ``` bash
         aea create aries_alice
         cd aries_alice
         aea add connection fetchai/p2p_libp2p:0.27.4
@@ -267,7 +268,8 @@ cd aries_faber
 
 ??? note "Alternatively, create from scratch:"
     The following steps create **Faber_AEA** from scratch:
-    ``` bashash
+
+    ``` bash
     aea create aries_faber
     cd aries_faber
     aea add connection fetchai/p2p_libp2p:0.27.4

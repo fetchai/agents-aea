@@ -8,7 +8,7 @@ This skill registers some data selling service on the sOEF. It can be requested 
 
 ## Behaviours
 
-- `service_registration`: registers data selling service on the sOEF 
+- `service_registration`: registers data selling service on the sOEF
 
 ## Handlers
 

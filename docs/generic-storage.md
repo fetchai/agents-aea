@@ -129,14 +129,14 @@ class TestBehaviour(TickerBehaviour):
     def act(self) -> None:
         """Make an action."""
         if not (self.context.storage and self.context.storage.is_connected):
-        	return
+            return
         collection = self.context.storage.get_sync_collection('my_collection')
         first_call_datetime = collection.get("first_call_ts")
         if not first_call_ts:
             # there is no object with "first_call_ts" id.
             first_call_datetime = str(datetime.datetime.now())
-	        col.put(first_call_ts, first_call_datetime)
-	    print("Act was called for the first time on:", first_call_datetime)
+            col.put(first_call_ts, first_call_datetime)
+        print("Act was called for the first time on:", first_call_datetime)
 ```
 
 Please, pay attention: `datetime` object is not JSON friendly and can not be stored directly. it should be transformed to `timestamp` or string before put into the storage.

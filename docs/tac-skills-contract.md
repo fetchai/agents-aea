@@ -20,6 +20,7 @@ In the following video we discuss the framework and TAC in more detail:
 ## Communication
 
 There are two types of interactions:
+
 - between the controller and participants (game management communication)
 - between the participants (negotiations)
 
@@ -116,7 +117,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the controller from scratch:
-    ``` bashash
+
+    ``` bash
     aea create tac_controller_contract
     cd tac_controller_contract
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -162,12 +164,14 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     In a separate terminal, in the root directory, create at least two tac participant AEAs:
-    ``` bashash
+
+    ``` bash
     aea create tac_participant_one
     aea create tac_participant_two
     ```
 
     Build participant one:
+
     ``` bash
     cd tac_participant_one
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -201,8 +205,9 @@ aea build
     aea install
     aea build
     ```
-    
+
     Then, build participant two:
+
     ``` bash
     cd tac_participant_two
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -282,7 +287,7 @@ Update the connection parameters of the TAC participants to allow them to connec
 
 First, retrieve controller's local ACN address by running the following in the controller agent's project terminal:
 
-``` bashash
+``` bash
 aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri
 ```
 
@@ -316,7 +321,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 
 Retrieve the address of each agent (in each terminal):
 
-``` bashash
+``` bash
 aea get-address fetchai
 ```
 
@@ -375,7 +380,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the controller from scratch:
-    ``` bashash
+
+    ``` bash
     aea create tac_controller_contract
     cd tac_controller_contract
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -421,12 +427,14 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     In a separate terminal, in the root directory, create at least two tac participant AEAs:
-    ``` bashash
+
+    ``` bash
     aea create tac_participant_one
     aea create tac_participant_two
     ```
 
     Build participant one:
+
     ``` bash
     cd tac_participant_one
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -462,6 +470,7 @@ aea build
     ```
     
     Then, build participant two:
+
     ``` bash
     cd tac_participant_two
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -500,7 +509,7 @@ aea build
 
 Run the following in every AEA's terminal:
 
-``` bashash
+``` bash
 aea config set agent.default_ledger ethereum
 json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
@@ -552,7 +561,7 @@ Update the connection parameters of the TAC participants to allow them to connec
 
 First, retrieve controller's local ACN address by running the following in the controller agent's project terminal:
 
-``` bashash
+``` bash
 aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri
 ```
 

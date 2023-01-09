@@ -8,8 +8,8 @@ This skill is part of the Fetch.ai TAC demo. It manages registration and searchi
 
 ## Behaviours
 
-- `clean_up`: updates and cleans up confirmed and pending transactions 
-- `tac_negotiation`: registers/unregisters the agent and its buying/selling services on the sOEF 
+- `clean_up`: updates and cleans up confirmed and pending transactions
+- `tac_negotiation`: registers/unregisters the agent and its buying/selling services on the sOEF
 
 ## Handlers
 

@@ -23,7 +23,7 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 
 Also, install `aea-ledger-fetchai` plug-in:
 
-``` bashash
+``` bash
 pip install aea-ledger-fetchai
 ```
 

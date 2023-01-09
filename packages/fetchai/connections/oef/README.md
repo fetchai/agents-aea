@@ -1,6 +1,6 @@
 # OEF connection
 
-Connection to interact with an OEF node (https://fetchai.github.io/oef-sdk-python/user/introduction.html).
+Connection to interact with an OEF node (<https://fetchai.github.io/oef-sdk-python/user/introduction.html>).
 
 ## Usage
 

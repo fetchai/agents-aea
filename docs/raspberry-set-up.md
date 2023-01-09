@@ -61,8 +61,9 @@ For some of the more advanced AEAs that make use of SciPy, such as the Car Park 
     ``` bash
     sudo apt install gfortran libatlas-base-dev libopenblas-dev -y
     ```
-    
+
     Increase the swap space for the SciPy installation:
+
     ``` bash
     sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
     sudo /sbin/mkswap /var/swap.1
@@ -71,12 +72,14 @@ For some of the more advanced AEAs that make use of SciPy, such as the Car Park 
     ```
     
     Install NumPy and scikit-image (including SciPy)
+
     ``` bash
     pip install numpy --upgrade
     pip install scikit-image
     ```
-    
+
     Revert to default swap space
+
     ``` bash
     sudo swapoff /var/swap.1
     sudo rm /var/swap.1

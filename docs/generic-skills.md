@@ -68,7 +68,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the seller from scratch:
-    ``` bashash
+
+    ``` bash
     aea create my_seller_aea
     cd my_seller_aea
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -102,7 +103,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the buyer from scratch:
-    ``` bashash
+
+    ``` bash
     aea create my_buyer_aea
     cd my_buyer_aea
     aea add connection fetchai/p2p_libp2p:0.27.4

@@ -2,7 +2,7 @@
 
 The `gym` example demonstrates the AEA framework's flexibility with respect to Reinforcement Learning using OpenAI's `gym` framework.
 
-### Discussion
+## Discussion
 
 There is no immediate use case for this example as you can train an RL agent without the AEA proxy layer just fine (and faster).
 

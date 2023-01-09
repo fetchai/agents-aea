@@ -65,15 +65,15 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 5. Navigate to the settings of the `my_thermometer_client` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 
-``` bash
-{
-  "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
-  "local_uri": "127.0.0.1:9001",
-  "log_file": "libp2p_node.log",
-  "public_uri": "127.0.0.1:9001"
-}
-```
+    ``` bash
+    {
+      "delegate_uri": "127.0.0.1:11001",
+      "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+      "local_uri": "127.0.0.1:9001",
+      "log_file": "libp2p_node.log",
+      "public_uri": "127.0.0.1:9001"
+    }
+    ```
 
 6. Run the `my_thermometer_client`.
 
@@ -106,7 +106,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the thermometer AEA from scratch:
-    ``` bashash
+
+    ``` bash
     aea create my_thermometer_aea
     cd my_thermometer_aea
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -136,7 +137,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the thermometer client from scratch:
-    ``` bashash
+
+    ``` bash
     aea create my_thermometer_client
     cd my_thermometer_client
     aea add connection fetchai/p2p_libp2p:0.27.4

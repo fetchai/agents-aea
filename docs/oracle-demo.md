@@ -45,23 +45,27 @@ aea install
     aea config set agent.default_connection fetchai/ledger:0.21.4
     aea install
     ```
-    
+
     Set the URL for the data request skill:
+
     ``` bash
     aea config set --type str vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd"
     ```
     
     Specify the name and JSON path of the data to fetch from the API:
+
     ``` bash
     aea config set --type list vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs '[{"name": "price", "json_path": "fetch-ai.usd"}]'
     ```
-    
+
     Set the name of the oracle value in the simple oracle skill:
+
     ``` bash
     aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price
     ```
     
     Then update the agent configuration with the default routing:
+
     ``` bash
     aea config set --type dict agent.default_routing \
     '{
@@ -70,13 +74,15 @@ aea install
     "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4"
     }'
     ```
-    
+
     Update the default ledger.
+
     ``` bash
     aea config set agent.default_ledger fetchai
     ```
     
     Set the following configuration for the oracle skill:
+
     ``` bash
     aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
     aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
@@ -89,16 +95,19 @@ LEDGER_ID=fetchai
 ```
 
 ??? note "Alternatively, configure the agent to use an ethereum ledger:"
-    ``` bashash
+
+    ``` bash
     LEDGER_ID=ethereum
     ```
 
     Update the default ledger.
+
     ``` bash
     aea config set agent.default_ledger ethereum
     ```
-    
+
     Set the following configuration for the oracle skill:
+
     ``` bash
     aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id ethereum
     aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function updateOracleValue
@@ -145,6 +154,7 @@ aea install
     ```
     
     Then update the agent configuration with the default routing:
+
     ``` bash
     aea config set --type dict agent.default_routing \
     '{
@@ -153,12 +163,14 @@ aea install
     "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4"
     }'
     ```
-    
+
     Set the default ledger:
+
     ``` bash
     aea config set agent.default_ledger fetchai
     ```
     Set the following configuration for the oracle client skill:
+
     ``` bash
     aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id fetchai
     aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function query_oracle_value
@@ -168,11 +180,14 @@ Similar to above, set a temporary variable `LEDGER_ID=fetchai` or `LEDGER_ID=eth
 
 ??? note "Follow these steps to configure for an ethereum ledger:"
     Set the default ledger:
-        ``` bashash
+
+        ``` bash
         aea config set agent.default_ledger ethereum
         ```
+
         Set the following configuration for the oracle client skill:
-        ``` bashash
+
+        ``` bash
         aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id ethereum
         aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
         ```
@@ -199,7 +214,7 @@ The oracle AEAs require either a locally running ledger node or a connection to 
     ``` bash
     docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
     ```
-    
+
     Run the following Python script (with <code>web3</code> installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.
     
     ``` python
@@ -255,13 +270,17 @@ The oracle AEAs require either a locally running ledger node or a connection to 
     ```
     
     Set the ERC20 contract address for the oracle AEA
+
     ``` bash
     aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address $ERC20_ADDRESS
     ```
+
     as well as for the oracle client AEA
+
     ``` bash
     aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address $ERC20_ADDRESS
     ```
+
     where `ERC20_ADDRESS` is in the output of the script above.
 
 ### Run the Oracle AEA

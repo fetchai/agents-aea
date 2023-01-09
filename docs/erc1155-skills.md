@@ -59,8 +59,9 @@ aea build
     aea install
     aea build
     ```
-    
+
     And change the default ledger:
+
     ``` bash
     aea config set agent.default_ledger ethereum
     ```
@@ -126,6 +127,7 @@ aea build
     ```
     
     And change the default ledger:
+
     ``` bash
     aea config set agent.default_ledger ethereum
     ```

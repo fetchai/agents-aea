@@ -4,7 +4,7 @@
 
 This skill sends back the contents of any message it receives.
 
-## Behaviours 
+## Behaviours
 
 - `echo`: outputs messages
 

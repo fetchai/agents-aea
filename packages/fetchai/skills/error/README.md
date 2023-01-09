@@ -10,7 +10,6 @@ It handles the following cases:
 - AEA experiences a decoding error when reading an envelope,
 - AEA receives an envelope referencing a protocol for which no skill is active.
 
-
 ## Handlers
 
 - `error_handler`: handles `default` messages for problematic envelopes/messages.

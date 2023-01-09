@@ -31,7 +31,7 @@ aea build
 ??? note "Alternatively, create from scratch:"
 
     Create the AEA:
-    
+
     ``` bash
     agent_name="agg$i"
     aea create agent_name
@@ -48,13 +48,15 @@ aea build
     aea install
     aea build
     ```
-    
+   
     Set the desired decimal precision for the quantity:
+
     ``` bash
     aea config set --type int vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals 0
     ```
-    
+
     Disable the http server since it is not used in this demo:
+
     ``` bash
     aea config set --type bool vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server false
     ```

@@ -18,7 +18,6 @@ This skill is part of the Fetch.ai thermometer demo. It finds an agent which sel
 - `oef_search`: handles `oef_search` messages to manage the sellers found
 - `signing`: handles `signing` messages for transaction signing by the decision maker
 
-
 ## Links
 
 - <a href="https://docs.fetch.ai/aea/thermometer-skills/" target="_blank">Thermometer Demo</a>

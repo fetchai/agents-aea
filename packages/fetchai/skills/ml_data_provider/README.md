@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai ML skill demo. It registers its "ML data sell
 
 ## Behaviours
 
-- `service_registration`: registers service on the sOEF search service 
+- `service_registration`: registers service on the sOEF search service
 
 ## Handlers
 

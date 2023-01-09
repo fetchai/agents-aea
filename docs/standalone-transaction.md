@@ -4,7 +4,7 @@ In this guide, we will generate some wealth for the Fetch.ai testnet and create 
 
 This guide requires the `aea-ledger-fetchai` plug-in installed in your Python environment:
 
-``` bashash
+``` bash
 pip install aea-ledger-fetchai
 ```
 

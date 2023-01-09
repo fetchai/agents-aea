@@ -1,3 +1,4 @@
+# AEA Framework Documentation
 
 The AEA framework provides the tools for creating Autonomous Economic Agents (AEA).
 

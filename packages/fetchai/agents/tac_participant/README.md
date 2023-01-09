@@ -4,7 +4,7 @@ This is an agent that participates in a Trading Agent Competition (TAC).
 
 ## Description
 
-This agent is part of the Fetch.ai TAC demo. 
+This agent is part of the Fetch.ai TAC demo.
 
 It uses its `fetchai/tac_participation` skill to find and register with a TAC by communicating with a controller agent.
 

@@ -6,7 +6,7 @@ The `confirmation_aw1` skill is for handling registrations in Agent World 1.
 
 ## Behaviours
 
-- `transaction`: sequentially processes transactions' settlements on a blockchain 
+- `transaction`: sequentially processes transactions' settlements on a blockchain
 
 ## Handlers
 

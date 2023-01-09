@@ -109,7 +109,7 @@ aea build
 
     The following steps create the car detector from scratch:
 
-    ``` bashash
+    ``` bash
     aea create car_detector
     cd car_detector
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -143,7 +143,8 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the car data client from scratch:
-    ``` bashash
+
+    ``` bash
     aea create car_data_buyer
     cd car_data_buyer
     aea add connection fetchai/p2p_libp2p:0.27.4

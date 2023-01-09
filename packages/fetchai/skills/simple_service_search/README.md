@@ -6,7 +6,7 @@ This skill searches for services on the sOEF.
 
 ## Behaviours
 
-- `service_search`: sends search queries to the sOEF using the `oef_search` protocol. 
+- `service_search`: sends search queries to the sOEF using the `oef_search` protocol.
 
 ## Handlers
 

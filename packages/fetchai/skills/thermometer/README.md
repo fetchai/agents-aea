@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai thermometer demo. It can be requested (for ex
 
 ## Behaviours
 
-- `service_registration`: registers thermometer data selling service on the sOEF 
+- `service_registration`: registers thermometer data selling service on the sOEF
 
 ## Handlers
 
