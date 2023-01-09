@@ -1176,15 +1176,16 @@ async def test_multiplexer_race_condition() -> None:
 
             :return: None
             """
-            if not self.empty():
-                return
+            with self._lock:
+                if not self.empty():
+                    return
 
-            # the following will make it easier
-            # to simulate the race condition
-            time.sleep(block_amount)
+                # the following will make it easier
+                # to simulate the race condition
+                time.sleep(block_amount)
 
-            waiter = asyncio.Future()  # type: ignore
-            self._non_empty_waiters.append(waiter)
+                waiter = asyncio.Future()  # type: ignore
+                self._non_empty_waiters.append(waiter)
             try:
                 await waiter
             finally:
