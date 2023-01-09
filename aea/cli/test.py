@@ -456,7 +456,7 @@ def load_package(
 def _call_pytest_in_subprocess(args: List[str]) -> NoReturn:
     """Perform call of pytest in a subprocess with pytest return code."""
     exit_code = pytest.main(args)
-    sys.exit(exit_code)
+    sys.exit(int(exit_code))
 
 
 def _call_pytest(args: List[str], timeout: int = 60 * 60) -> Optional[int]:
