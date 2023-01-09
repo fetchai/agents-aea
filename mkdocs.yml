@@ -13,12 +13,12 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+    - Understanding agent-oriented development: 'agent-oriented-development.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
     - Language Agnostic Definition: 'language-agnostic-definition.md'
-    - Agent-oriented development: 'agent-oriented-development.md'
     - Vision: 'vision.md'
     - Application areas: 'app-areas.md'
     - Relation to OEF and Ledger: 'oef-ledger.md'
