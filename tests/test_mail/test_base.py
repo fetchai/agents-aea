@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,8 +66,8 @@ def test_uri_eq():
 
 def test_envelope_initialisation():
     """Testing the envelope initialisation."""
-    agent_address = "Agent0"
-    receiver_address = "Agent1"
+    agent_address = "agent0"
+    receiver_address = "agent1"
     msg = DefaultMessage(
         performative=DefaultMessage.Performative.BYTES, content="hello"
     )
@@ -102,8 +102,8 @@ def test_inbox_empty():
 
 def test_inbox_nowait():
     """Tests the inbox without waiting."""
-    agent_address = "Agent0"
-    receiver_address = "Agent1"
+    agent_address = "agent0"
+    receiver_address = "agent1"
     msg = DefaultMessage(
         performative=DefaultMessage.Performative.BYTES, content="hello"
     )
@@ -123,8 +123,8 @@ def test_inbox_nowait():
 
 def test_inbox_get():
     """Tests for a envelope on the in queue."""
-    agent_address = "Agent0"
-    receiver_address = "Agent1"
+    agent_address = "agent0"
+    receiver_address = "agent1"
     msg = DefaultMessage(
         performative=DefaultMessage.Performative.BYTES, content="hello"
     )
@@ -163,8 +163,8 @@ def test_inbox_get_nowait_returns_none():
 
 def test_outbox_put():
     """Tests that an envelope is putted into the queue."""
-    agent_address = "Agent0"
-    receiver_address = "Agent1"
+    agent_address = "agent0"
+    receiver_address = "agent1"
     msg = DefaultMessage(
         dialogue_reference=("", ""),
         message_id=1,
@@ -198,8 +198,8 @@ def test_outbox_put():
 
 def test_outbox_put_message():
     """Tests that an envelope is created from the message is in the queue."""
-    agent_address = "Agent0"
-    receiver_address = "Agent1"
+    agent_address = "agent0"
+    receiver_address = "gent1"
     msg = DefaultMessage(
         dialogue_reference=("", ""),
         message_id=1,

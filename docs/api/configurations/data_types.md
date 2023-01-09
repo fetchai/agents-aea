@@ -273,6 +273,46 @@ def __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[Packa
 
 Initialize the public identifier.
 
+<a id="aea.configurations.data_types.PublicId.is_package_name_valid"></a>
+
+#### is`_`package`_`name`_`valid
+
+```python
+@classmethod
+def is_package_name_valid(cls, name: SimpleIdOrStr) -> bool
+```
+
+Check is package name valid.
+
+**Arguments**:
+
+
+- `name`: str or SimpleID
+
+**Returns**:
+
+bool
+
+<a id="aea.configurations.data_types.PublicId.is_author_name_valid"></a>
+
+#### is`_`author`_`name`_`valid
+
+```python
+@classmethod
+def is_author_name_valid(cls, name: SimpleIdOrStr) -> bool
+```
+
+Check is author name valid.
+
+**Arguments**:
+
+
+- `name`: str or SimpleID
+
+**Returns**:
+
+bool
+
 <a id="aea.configurations.data_types.PublicId.author"></a>
 
 #### author

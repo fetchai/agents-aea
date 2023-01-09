@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
         ("0", False),
         ("_0", True),
         ("-", False),
-        ("ABCDE", True),
+        ("ABCDE", False),
         ("author/package:0.1.0", True),
         ("author/package:0.1.", False),
         ("0author/package:0.1.0", False),
