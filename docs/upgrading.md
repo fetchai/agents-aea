@@ -1,3 +1,5 @@
+# Upgrading
+
 This page provides some tips on how to upgrade AEA projects between different versions of the AEA framework. For full release notes check the <a href="https://github.com/fetchai/agents-aea/tags" target="_blank">AEA repo</a>.
 
 The primary tool for upgrading AEA projects is the `aea upgrade` command in the <a href="../cli-commands/">CLI</a>.
@@ -19,7 +21,6 @@ Ensure you update the plugins to their latest version (all plugins are changed i
 Update the packages to the latest versions (especially protocols).
 
 Regenerate your own written protocols (protocol generator was updated)
-
 
 ## `v1.1.1` to `v1.2.0`
 
@@ -89,7 +90,7 @@ Take special care when upgrading to `v0.11.0`. We introduced several breaking ch
 
 We removed the CLI GUI. It was not used by anyone as far as we know and needs to be significantly improved. Soon we will release the AEA Manager App to make up for this.
 
-### Message routing
+### Message Routing
 
 Routing has been completely revised and simplified. The new message routing logic is described <a href="../message-routing/">here</a>.
 
@@ -99,7 +100,7 @@ When upgrading take the following steps:
 
 - For component-to-component communication: there is now only one single way to route component to component (skill to skill, skill to connection, connection to skill) messages, this is by specifying the component id in string form in the `sender`/`to` field. The `EnvelopeContext` can no longer be used, messages are routed based on their target (`to` field). Ensure that dialogues in skills set the `skill_id` as the `self_address` (in connections they need to set the `connection_id`).
 
-### Agent configuration and ledger plugins
+### Agent Configuration and Ledger Plugins
 
 Agent configuration files have a new optional field, `dependencies`,  analogous to `dependencies` field in other AEA packages. The default value is the empty object `{}`. The field will be made mandatory in the next release.
 
@@ -110,7 +111,8 @@ Crypto modules have been extracted and released as independent plug-ins, release
 - Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
 
 If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers ranging from the latest minor and the latest minor + 1 (excluded). E.g. if the latest version if `0.1.0`, the version specifier should be `<0.2.0,>=0.1.0`:
-```yaml
+
+``` yaml
 dependencies:
   aea-ledger-cosmos:
     version: <2.0.0,>=1.0.0
@@ -119,6 +121,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ```
+
 The version specifier sets are important, as these plug-ins, at version `0.1.0`, depend on a specific range of the `aea` package.
 
 Then, running `aea install` inside the AEA project should install them in the current Python environment.
@@ -131,7 +134,7 @@ No backwards incompatible changes for skill and connection development.
 
 ## `v0.9.2` to `v0.10.0`
 
-Skill development sees no backward incompatible changes. 
+Skill development sees no backward incompatible changes.
 
 Connection development requires updating the keyword arguments of the constructor: the new `data_dir` argument must be defined.
 
@@ -208,10 +211,10 @@ from aea.configurations.base import PublicId
 
 PUBLIC_ID = PublicId.from_str("author/name:0.1.0")
 ```
+
 - The `fetchai/http` protocol's `bodyy` field has been renamed to `body`.
 
 - Skills can now specify `connections` as dependencies in the configuration YAML.
-
 
 ## `v0.6.2` to `v0.6.3`
 
@@ -227,11 +230,12 @@ The `soef` connection and `oef_search` protocol have backward incompatible chang
 
 ## `v0.5.4` to `v0.6.0`
 
-### `Dialogue` and `Dialogues` API updates
+### `Dialogue` and `Dialogues` API Updates
 
 The dialogue and dialogues APIs have changed significantly. The constructor is different for both classes and there are now four primary methods for the developer:
 
 - `Dialogues.create`: this method is used to create a new dialogue and message:
+
 ``` python
 cfp_msg, fipa_dialogue = fipa_dialogues.create(
     counterparty=opponent_address,
@@ -239,26 +243,32 @@ cfp_msg, fipa_dialogue = fipa_dialogues.create(
     query=query,
 )
 ```
+
 The method will raise if the provided arguments are inconsistent.
 
 - `Dialogues.create_with_message`: this method is used to create a new dialogue from a message:
+
 ``` python
 fipa_dialogue = fipa_dialogues.create_with_message(
     counterparty=opponent_address,
     initial_message=cfp_msg
 )
 ```
+
 The method will raise if the provided arguments are inconsistent.
 
 - `Dialogues.update`: this method is used to handle messages passed by the framework:
+
 ``` python
 fipa_dialogue = fipa_dialogues.update(
     message=cfp_msg
 )
 ```
+
 The method will return a valid dialogue if it is a valid message, otherwise it will return `None`.
 
 - `Dialogue.reply`: this method is used to reply within a dialogue:
+
 ``` python
 proposal_msg = fipa_dialogue.reply(
     performative=FipaMessage.Performative.PROPOSE,
@@ -266,23 +276,24 @@ proposal_msg = fipa_dialogue.reply(
     proposal=proposal,
 )
 ```
+
 The method will raise if the provided arguments are inconsistent.
 
 The new methods significantly reduce the lines of code needed to maintain a dialogue. They also make it easier for the developer to construct valid dialogues and messages.
 
-### `FetchAICrypto` - default crypto
+### `FetchAICrypto` - Default Crypto
 
 The `FetchAICrypto` has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
 
-### Private key file naming
+### Private Key File Naming
 
 The private key files are now consistently named with the `ledger_id` followed by `_private_key.txt` (e.g. `fetchai_private_key.txt`). Rename your existing files to match this pattern.
 
-### Type in package YAML
+### Type in Package YAML
 
 The package YAML files now contain a type field. This must be added for the loading mechanism to work properly.
 
-### Moved address type
+### Moved Address Type
 
 The address type has moved to `aea.common`. The import paths must be updated.
 

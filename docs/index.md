@@ -13,10 +13,10 @@ An AEA represents an individual, organisation or object and looks after its inte
 
 ### What is not an AEA
 
-* Any <a href="https://en.wikipedia.org/wiki/Software_agent" target="_blank">agent</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
-* APIs or sensors which do not have agency.
-* <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
-* <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
+- Any <a href="https://en.wikipedia.org/wiki/Software_agent" target="_blank">agent</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
+- APIs or sensors which do not have agency.
+- <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactivity and are purely reactive to external requests (=contract calls and transactions).
+- <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
 
 !!! note
     In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.
@@ -27,19 +27,17 @@ The AEA framework is a development suite, currently implemented in Python, which
 
 AEAs achieve their goals with the help of a search & discovery service for AEAs -- the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a> -- a decentralized agent communication system -- the <a href="acn">Agent Communication Network (ACN)</a> -- and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
 
-
-## Why build with the AEA Framework?
+## Why Build with the AEA Framework?
 
 The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
 
-* The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
-* The search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs to find other AEAs.
-* The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
-* The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
-* The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts in Fetch.ai and other third-party decentralised ledgers. 
+- The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
+- The search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs to find other AEAs.
+- The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
+- The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
+- The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts in Fetch.ai and other third-party decentralized ledgers.
 
-
-## Next steps
+## Next Steps
 
 To get started developing your own AEA, check out the <a href="quickstart">getting started</a> section.
 
@@ -49,8 +47,7 @@ If you would like to develop an AEA in a language different to Python then check
 
 If you want to run a demo, check out the <a href="demos">demo guides</a>.
 
-
-## Help us improve
+## Help us Improve
 
 !!! note
     This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.

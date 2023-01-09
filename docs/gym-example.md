@@ -1,18 +1,21 @@
+# Gym Example
+
 The `gym` example demonstrates the AEA framework's flexibility with respect to Reinforcement Learning using OpenAI's `gym` framework.
 
 ### Discussion
 
-There is no immediate use case for this example as you can train an RL agent without the AEA proxy layer just fine (and faster). 
+There is no immediate use case for this example as you can train an RL agent without the AEA proxy layer just fine (and faster).
 
 However, the example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
 
-## Preparation instructions
+## Preparation Instructions
 
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 Download the necessary directories into your working directory:
+
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
@@ -24,15 +27,15 @@ Install the `gym` and `numpy` library.
 pip install numpy gym
 ```
 
-## Demo instructions
+## Demo Instructions
 
-### Run the example
+### Run the Example
 
 ``` bash
 python examples/gym_ex/train.py
 ```
 
-Notice the usual RL setup, i.e. the fit method of the RL agent has the typical signature and a familiar implementation. 
+Notice the usual RL setup, i.e. the fit method of the RL agent has the typical signature and a familiar implementation.
 
 Note how `train.py` demonstrates how easy it is to use an AEA agent as a proxy layer between an OpenAI `gym.Env` and a standard RL agent.
 

@@ -1,11 +1,13 @@
+# Generic Skills
+
 The AEA generic buyer and seller skills demonstrate an interaction between two AEAs:
 
-* An AEA that provides a (data selling) service.
-* An AEA that demands this service.
+- An AEA that provides a (data selling) service.
+- An AEA that demands this service.
 
 ## Discussion
 
-The scope of this guide is demonstrating how to create easily configurable AEAs. The buyer AEA finds the seller, negotiates the terms of trade, and if successful purchases the data by sending payment. The seller AEA sells the service specified in its `skill.yaml` file, delivering it to the buyer upon receiving payment. 
+The scope of this guide is demonstrating how to create easily configurable AEAs. The buyer AEA finds the seller, negotiates the terms of trade, and if successful purchases the data by sending payment. The seller AEA sells the service specified in its `skill.yaml` file, delivering it to the buyer upon receiving payment.
 
 Note that these agents do not utilize a smart contract but interact with a ledger to complete a transaction. Moreover, in this setup, the buyer agent has to trust the seller to send the data upon successful payment.
 
@@ -45,17 +47,18 @@ The following diagram shows the communication between various entities in this i
         deactivate Blockchain 
 ```
 
-## Preparation instructions
- 
+## Preparation Instructions
+
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-## Demo instructions
+## Demo Instructions
 
-### Create the seller AEA
+### Create the Seller AEA
 
 First, fetch the seller AEA:
+
 ``` bash
 aea fetch fetchai/generic_seller:0.29.4 --alias my_seller_aea
 cd my_seller_aea
@@ -65,7 +68,7 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the seller from scratch:
-    ``` bash
+    ``` bashash
     aea create my_seller_aea
     cd my_seller_aea
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -86,9 +89,10 @@ aea build
     aea build
     ```
 
-### Create the buyer AEA
+### Create the Buyer AEA
 
 Then, in another terminal fetch the buyer AEA:
+
 ``` bash
 aea fetch fetchai/generic_buyer:0.30.4 --alias my_buyer_aea
 cd my_buyer_aea
@@ -98,7 +102,7 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     The following steps create the buyer from scratch:
-    ``` bash
+    ``` bashash
     aea create my_buyer_aea
     cd my_buyer_aea
     aea add connection fetchai/p2p_libp2p:0.27.4
@@ -119,58 +123,66 @@ aea build
     aea build
     ```
 
-### Add keys for the seller AEA
+### Add Keys for the Seller AEA
 
 Create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
-### Add keys and generate wealth for the buyer AEA
+### Add Keys and Generate Wealth for the Buyer AEA
 
 The buyer needs to have some wealth to purchase the data from the seller.
 
 First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `Dorado` network:
+
 ``` bash
 aea generate-wealth fetchai
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
-### Update the skill configurations
+### Update the Skill Configurations
 
 The default skill configurations assume that the transaction is settled against the Fetch.ai ledger.
 
 In the generic seller's skill configuration file (`my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml`) the `data_for_sale` is the data the seller AEA is offering for sale. In the following case, this is a one item dictionary where key is `generic` and value is `data`.
 
-Furthermore, the `service_data` is used to register the seller's service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable. 
+Furthermore, the `service_data` is used to register the seller's service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable.
+
 ``` yaml
 models:
   ...
@@ -218,7 +230,7 @@ models:
     class_name: GenericStrategy
 ```
 
-### Update the skill configurations
+### Update the Skill Configurations
 
 Both skills are abstract skills, make them instantiable:
 
@@ -244,6 +256,7 @@ Once you see a message of the form `To join its network use multiaddr 'SOME_ADDR
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the seller.
 
 Then, configure the buyer to connect to this same local ACN by running the following command in the buyer terminal, replacing `SOME_ADDRESS` with the value you noted above:
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -267,7 +280,7 @@ You will see that the AEAs negotiate and then transact using the Fetch.ai testne
 
 When you're done, stop the agents (`CTRL+C`), go up a level and delete the AEAs.
 
-``` bash 
+``` bash
 cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea

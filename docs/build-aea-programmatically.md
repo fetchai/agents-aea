@@ -1,16 +1,18 @@
+# Build an AEA Programmatically
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
 ## Preparation
 
-Get the packages directory from the AEA repository:
+Get the `packages` directory from the AEA repository:
 
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 Also, install `aea-ledger-fetchai` plug-in:
-```bash
+
+``` bashash
 pip install aea-ledger-fetchai
 ```
 
@@ -36,7 +38,8 @@ from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
 ```
 
-Set up a variable pointing to where the packages directory is located - this should be our current directory - and where the input and output files are located.
+Set up a variable pointing to where the `packages` directory is located - this should be our current directory - and where the input and output files are located.
+
 ``` python
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
@@ -44,15 +47,19 @@ OUTPUT_FILE = "output_file"
 FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 ```
 
-## Create a private key
+## Create a Private Key
+
 We need a private key to populate the AEA's wallet.
+
 ``` python
     # Create a private key
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 ```
 
-## Clearing the input and output files
+## Clearing the Input and Output Files
+
 We will use the stub connection to pass envelopes in and out of the AEA. Ensure that any input and output text files are removed before we start.
+
 ``` python
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -62,7 +69,9 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
+
 We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:1.1.6`, `fetchai/state_update:1.1.6` and `fetchai/signing:1.1.6` protocols.
+
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -70,6 +79,7 @@ We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to r
 ```
 
 We set the name, add the private key for the AEA to use and set the ledger configurations for the AEA to use.
+
 ``` python
     builder.set_name("my_aea")
 
@@ -77,18 +87,21 @@ We set the name, add the private key for the AEA to use and set the ledger confi
 ```
 
 Next, we add the `fetchai/stub:0.15.0` connection which will read/write messages from file:
+
 ``` python
     # Add the stub connection (assuming it is present in the local directory 'packages')
     builder.add_connection("./packages/fetchai/connections/stub")
 ```
 
 Next, we add the echo skill which will bounce our messages back to us. We first need to place the echo skill into a relevant directory (see path), either by downloading the `packages` directory from the AEA repo or by getting the package from the registry.
+
 ``` python
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
 ```
 
 Also, we can add a component that was instantiated programmatically. :
+
 ``` python
     # create skill and handler manually
     from aea.protocols.base import Message
@@ -121,13 +134,16 @@ Also, we can add a component that was instantiated programmatically. :
 ```
 
 Finally, we can build our AEA:
+
 ``` python
     # Create our AEA
     my_aea = builder.build()
 ```
 
 ## Start the AEA
+
 We run the AEA from a different thread so that we can still use the main thread to pass it messages.
+
 ``` python
     # Set the AEA running in a different thread
     try:
@@ -138,8 +154,10 @@ We run the AEA from a different thread so that we can still use the main thread 
         time.sleep(4)
 ```
 
-## Send and receive an envelope
+## Send and Receive an Envelope
+
 We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
+
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = b"my_aea,other_agent,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
@@ -156,7 +174,9 @@ We use the input and output text files to send an envelope to our AEA and receiv
 ```
 
 ## Shutdown
-Finally stop our AEA and wait for it to finish
+
+Finally, stop our AEA and wait for it to finish
+
 ``` python
     finally:
         # Shut down the AEA
@@ -166,21 +186,25 @@ Finally stop our AEA and wait for it to finish
 ```
 
 ## Running the AEA
+
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
-    output message: other_agent,my_aea,fetchai/default:1.0.0,...\x05hello
+``` text
+input message: my_aea,other_agent,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
+output message: other_agent,my_aea,fetchai/default:1.0.0,...\x05hello
+```
 
+## Entire Code Listing
 
-## Entire code listing
 If you just want to copy and past the entire script in you can find it here:
 
 ??? note "Click here to see full listing:"
+
     ``` python
     import os
     import time
     from threading import Thread
-    
+
     from aea_ledger_fetchai import FetchAICrypto
     
     from aea.aea_builder import AEABuilder

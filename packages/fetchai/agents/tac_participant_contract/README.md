@@ -12,4 +12,4 @@ It then uses its `fetchai/tac_negotiation` skill to find trading partners, negot
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/tac-skills-contract/" target="_blank">TAC Demo</a>
+- <a href="https://docs.fetch.ai/aea/tac-skills-contract/" target="_blank">TAC Demo</a>

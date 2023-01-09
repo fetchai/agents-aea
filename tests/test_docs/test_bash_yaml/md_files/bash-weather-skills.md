@@ -7,12 +7,14 @@
   "public_uri": "127.0.0.1:9001"
 }
 ```
+
 ``` bash
 aea fetch fetchai/weather_station:0.32.4 --alias my_weather_station
 cd my_weather_station
 aea install
 aea build
 ```
+
 ``` bash
 aea create my_weather_station
 cd my_weather_station
@@ -33,12 +35,14 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/weather_client:0.33.4 --alias my_weather_client
 cd my_weather_client
 aea install
 aea build
 ```
+
 ``` bash
 aea create my_weather_client
 cd my_weather_client
@@ -59,35 +63,44 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
+
 ``` bash
 aea generate-wealth fetchai
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -98,14 +111,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 cd ..
 aea delete my_weather_station
 aea delete my_weather_client
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

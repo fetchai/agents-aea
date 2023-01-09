@@ -1,6 +1,9 @@
+# Use Multiplexer Stand-Alone
+
 The `Multiplexer` can be used stand-alone. This way a developer can utilise the protocols and connections independent of the `Agent` or `AEA` classes.
 
-First, import the Python and application specific libraries and set the static variables. (Get the packages directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
+First, import the Python and application specific libraries and set the static variables. (Get the `packages` directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
+
 ``` python
 import os
 import time
@@ -49,7 +52,7 @@ A `Multiplexer` only needs a list of connections. The `StubConnection` is a simp
 
 ## Start the `Multiplexer`
 
-We can run a multiplexer by calling, `connect()` which starts the receive and sending loops. We run the multiplexer from a different thread so that we can still use the main thread to pass it messages.
+We can run a multiplexer by calling, `connect()` which starts the 'receive' and 'send' loops. We run the multiplexer from a different thread so that we can still use the main thread to pass it messages.
 
 ``` python
     try:
@@ -66,8 +69,10 @@ We can run a multiplexer by calling, `connect()` which starts the receive and se
             raise Exception("Not connected")
 ```
 
-## Send and receive an envelope
+## Send and Receive an Envelope
+
 We use the input and output text files to send an envelope to our agent and receive a response
+
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
@@ -112,7 +117,9 @@ We use the input and output text files to send an envelope to our agent and rece
 ```
 
 ## Shutdown
-Finally stop our multiplexer and wait for it to finish
+
+Finally, stop our multiplexer and wait for it to finish
+
 ``` python
     finally:
         # Shut down the multiplexer
@@ -120,21 +127,23 @@ Finally stop our multiplexer and wait for it to finish
         t.join()
 ```
 
-## Your turn
+## Your Turn
 
 Now it is your turn to develop a simple use case which utilises the `Multiplexer` to send and receive Envelopes.
 
-## Entire code listing
+## Entire Code Listing
+
 If you just want to copy and paste the entire script in you can find it here:
 
 ??? note "Click here to see full listing:"
+
     ``` python
     import os
     import time
     from copy import copy
     from threading import Thread
     from typing import Optional
-    
+
     from aea.configurations.base import ConnectionConfig
     from aea.helpers.file_io import write_with_lock
     from aea.identity.base import Identity

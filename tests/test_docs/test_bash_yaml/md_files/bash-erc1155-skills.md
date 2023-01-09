@@ -4,6 +4,7 @@ cd erc1155_deployer
 aea install
 aea build
 ```
+
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
@@ -29,26 +30,32 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
+
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea fetch fetchai/erc1155_client:0.34.4
 cd erc1155_client
 aea install
 aea build
 ```
+
 ``` bash
 aea create erc1155_client
 cd erc1155_client
@@ -74,35 +81,45 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
+
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000" --account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
 ```
+
 ``` bash
 aea get-wealth ethereum
 ```
+
 ``` bash
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 registering service on SOEF.
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -113,26 +130,31 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 cd ..
 aea delete erc1155_deployer
 aea delete erc1155_client
 ```
+
 ``` yaml
 default_routing:
   fetchai/contract_api:1.1.6: fetchai/ledger:0.21.4
   fetchai/ledger_api:1.1.6: fetchai/ledger:0.21.4
   fetchai/oef_search:1.1.6: fetchai/soef:0.27.5
 ```
+
 ``` yaml
 default_routing:
   fetchai/contract_api:1.1.6: fetchai/ledger:0.21.4
   fetchai/ledger_api:1.1.6: fetchai/ledger:0.21.4
   fetchai/oef_search:1.1.6: fetchai/soef:0.27.5
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

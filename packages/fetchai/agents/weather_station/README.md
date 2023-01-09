@@ -12,4 +12,4 @@ Once such a request is made, this agent negotiates the terms of trade using the 
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/weather-skills/" target="_blank">Weather Demo</a>
+- <a href="https://docs.fetch.ai/aea/weather-skills/" target="_blank">Weather Demo</a>

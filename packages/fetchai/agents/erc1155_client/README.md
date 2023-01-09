@@ -10,4 +10,4 @@ This agent uses its primary skill, the `fetchai/erc1155_client` skill, to find a
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/erc1155-skills/" target="_blank">Contract Deployment Guide</a>
+- <a href="https://docs.fetch.ai/aea/erc1155-skills/" target="_blank">Contract Deployment Guide</a>

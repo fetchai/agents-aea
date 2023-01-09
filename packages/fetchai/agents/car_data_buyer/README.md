@@ -10,4 +10,4 @@ Once found, it requests this data, negotiates the price using the `fetchai/fipa`
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>
+- <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>

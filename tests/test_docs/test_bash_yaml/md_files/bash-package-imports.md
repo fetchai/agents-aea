@@ -27,6 +27,7 @@ aea_name/
       skills/           Directory containing all the added skills from author_1
         ...             ...
 ```
+
 ``` yaml
 connections:
 - fetchai/stub:0.21.2

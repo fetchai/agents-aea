@@ -1,3 +1,5 @@
+# The Query Language
+
 We recommend reading <a href="../defining-data-models">Defining a Data Model</a> before reading this section.
 
 Along with the Data Model language, the AEA framework offers the possibility to specify _queries_ defined over data models.
@@ -17,22 +19,22 @@ That is, it imposes some limitations on the values the attribute can assume.
 
 We have different types of constraints:
 
-* _relation_ constraints:
+- _relation_ constraints:
 
-  * the author of the book must be _Stephen King_
-  * the publication year must be greater than 1990
+  - the author of the book must be _Stephen King_
+  - the publication year must be greater than 1990
 
-* _set_ constraints:
+- _set_ constraints:
 
-  * the genre must fall into the following set of genres: _Horror_, _Science fiction_, _Non-fiction_.
+  - the genre must fall into the following set of genres: _Horror_, _Science fiction_, _Non-fiction_.
 
-* _range_ constraints:
+- _range_ constraints:
 
-  * the average rating must be between 3.5 and 4.5
+  - the average rating must be between 3.5 and 4.5
 
-* _distance_ constraints:
+- _distance_ constraints:
 
-  * the nearest bookshop must be within a distance from a given location.
+  - the nearest bookshop must be within a distance from a given location.
 
 The class that implements the constraint concept is `Constraint`
 In the following, we show how to define them.
@@ -43,14 +45,14 @@ There are several <a href="../api/helpers/search/models#constrainttype-objects">
 
 The types of relation constraints are:
 
-* Equal: `==`
-* Not Equal: `!=`
-* Less than: `<`
-* Less than or Equal: `<=`
-* Greater than: `>`
-* Greater than or Equal: `>=`
+- Equal: `==`
+- Not Equal: `!=`
+- Less than: `<`
+- Less than or Equal: `<=`
+- Greater than: `>`
+- Greater than or Equal: `>=`
 
-**Examples**: using the attributes we used before: 
+**Examples**: using the attributes we used before:
 
 ``` python
 from aea.helpers.search.models import Constraint, ConstraintType
@@ -80,9 +82,8 @@ The _set_ is a constraint type that allows you to restrict the values of the att
 
 There are two kind of _set_ constraints:
 
-* In (a set of values): `in`
-* Not in (a set of values): `not_in`
-
+- In (a set of values): `in`
+- Not in (a set of values): `not_in`
 
 **Examples**:
 
@@ -99,7 +100,6 @@ Constraint("year", ConstraintType("not_in", (1990, 1995, 2000)))
 ## Range
 
 The _range_ is a constraint type that allows you to restrict the values of the attribute in a given range.
-
 
 **Examples**:
 
@@ -139,12 +139,12 @@ close_to_tour_eiffel.check(Description({"position": colosseum}))  # gives `False
 
 ## Constraint Expressions
 
-The constraints above mentioned can be combined with the common logical operators (i.e. and, or and not), yielding more complex expression.
+The constraints mentioned above can be combined with the common logical operators (i.e. and, or and not), yielding more complex expression.
 
-In particular we can specify any conjunction/disjunction/negations of the previous constraints or composite <a href="../api/helpers/search/models#constraintexpression-objects">`ConstraintExpressions`</a>, e.g.:
+In particular, we can specify any conjunction/disjunction/negations of the previous constraints or composite <a href="../api/helpers/search/models#constraintexpression-objects">`ConstraintExpressions`</a>, e.g.:
 
-* books that belong to _Horror_ **and** has been published after 2000, but **not** published by _Stephen King_.
-* books whose author is **either** _J. K. Rowling_ **or** _J. R. R. Tolkien_
+- books that belong to _Horror_ **and** has been published after 2000, but **not** published by _Stephen King_.
+- books whose author is **either** _J. K. Rowling_ **or** _J. R. R. Tolkien_
 
 The classes that implement these operators are `Not`, `And` and `Or`.
 
@@ -211,7 +211,7 @@ Query([
 Where `book_model` is the `DataModel` object. However, the data model is
 an optional parameter, but to avoid ambiguity is recommended to include it.
 
-### The ``check`` method
+### The ``check`` Method
 
 The `Query` class supports a way to check whether a `Description` matches with the query. This method is called `Query.check`.
 
@@ -241,11 +241,10 @@ A `Query` object must satisfy some conditions in order to be instantiated.
 
     - For every constraint expression that constitute the query, check if they are _valid with respect to the data model_.
 
-
 A `ConstraintExpr` `c` (that is, one of `And`, `Or`, `Not`, `Constraint`) is _valid with respect to a_ `DataModel` if:
 
 - If `c` is an instance of `And`, `Or` or `Not`, then
-  every subexpression of `c` must be valid (with respect to to the data model);
+  every subexpression of `c` must be valid (with respect to the data model);
 - If `c` is an instance of `Constraint`, then:
     - if the constraint type is one of `<`, `<=`, `>`,
       `>=`, the value in the constructor must be one of `str`, `int` or `float`.
@@ -263,4 +262,3 @@ Constraint("foo", ConstraintType("==", True))
 ```
 
 Consider a `DataModel` where there is an `Attribute` `"foo"` of type `str`. Then the constraint is not compatible with the mentioned data model, because the constraint expect an equality comparison with a boolean `True`, instead of a `str`.
-

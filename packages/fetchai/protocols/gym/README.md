@@ -51,4 +51,4 @@ keep_terminal_state_dialogues: false
 
 ## Links
 
-* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>
+- <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>

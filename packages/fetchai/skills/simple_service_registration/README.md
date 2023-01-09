@@ -8,12 +8,12 @@ This skill is used in the "Guide on Writing a Skill" section in the documentatio
 
 ## Behaviours
 
-* `service`: registers and unregisters a service on the sOEF 
+- `service`: registers and unregisters a service on the sOEF 
 
 ## Handlers
 
-* `oef_search`: handles `oef_search` messages if interactions with the sOEF is erratic
+- `oef_search`: handles `oef_search` messages if interactions with the sOEF is erratic
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/skill-guide/" target="_blank">Guide on Building a Skill</a>
+- <a href="https://docs.fetch.ai/aea/skill-guide/" target="_blank">Guide on Building a Skill</a>

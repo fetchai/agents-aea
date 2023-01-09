@@ -1,4 +1,6 @@
-## Scaffold generator
+# Scaffolding Packages
+
+## Scaffold Generator
 
 The scaffold generator builds out the directory structure required when adding new skills, protocols, contracts and connections to the AEA.
 
@@ -11,28 +13,25 @@ cd my_aea
 
 Then, enter into your project directory and scaffold your project skill, protocol, or connection.
 
-
-### Scaffold a skill
+### Scaffold a Skill
 
 ``` bash
 aea scaffold skill my_skill
 ```
 
-
-### Scaffold a protocol
+### Scaffold a Protocol
 
 ``` bash
 aea scaffold protocol my_protocol
 ```
 
-
-### Scaffold a contract
+### Scaffold a Contract
 
 ``` bash
 aea scaffold contract my_contract
 ```
 
-### Scaffold a connection
+### Scaffold a Connection
 
 ``` bash
 aea scaffold connection my_connection

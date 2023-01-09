@@ -7,12 +7,14 @@
   "public_uri": "127.0.0.1:9001"
 }
 ```
+
 ``` bash
 aea fetch fetchai/car_detector:0.32.4
 cd car_detector
 aea install
 aea build
 ```
+
 ``` bash
 aea create car_detector
 cd car_detector
@@ -33,12 +35,14 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/car_data_buyer:0.33.4
 cd car_data_buyer
 aea install
 aea build
 ```
+
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
@@ -59,35 +63,44 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
+
 ``` bash
 aea generate-wealth fetchai
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -98,14 +111,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 cd ..
 aea delete car_detector
 aea delete car_data_buyer
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

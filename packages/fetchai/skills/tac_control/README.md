@@ -8,13 +8,13 @@ This skill is part of the Fetch.ai TAC demo. It manages the progression of the c
 
 ## Behaviours
 
-* `tac`: manages progression of the competition 
+- `tac`: manages progression of the competition 
 
 ## Handlers
 
-* `tac`: handles `tac` messages for managing the competition
-* `oef`: handles `oef_search` messages if registration or unregistration on the sOEF is unsuccessful
+- `tac`: handles `tac` messages for managing the competition
+- `oef`: handles `oef_search` messages if registration or unregistration on the sOEF is unsuccessful
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/tac-skills-contract/" target="_blank">TAC Demo</a>
+- <a href="https://docs.fetch.ai/aea/tac-skills-contract/" target="_blank">TAC Demo</a>

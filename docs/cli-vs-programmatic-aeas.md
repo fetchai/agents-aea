@@ -1,3 +1,5 @@
+# CLI vs Programmatic AEAs
+
 The AEA framework enables us to create agents either from the CLI tool or programmatically.
 
 The following demo demonstrates an interaction between two AEAs.
@@ -11,24 +13,25 @@ The scope of the specific demo is to demonstrate how a CLI based AEA can interac
 to achieve this we are going to use the weather station skills.
 This demo does not utilize a smart contract or a ledger interaction.
 
-## Get required packages
+## Get Required Packages
 
-Copy the packages directory into your local working directory:
+Copy the `packages` directory into your local working directory:
 
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 Also, install `aea-ledger-fetchai` plug-in:
-```bash
+
+``` bashash
 pip install aea-ledger-fetchai
 ```
 
-## Demo instructions
+## Demo Instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>
 
-### Create the weather station AEA
+### Create the Weather Station AEA
 
 Fetch the weather station AEA with the following command :
 
@@ -39,41 +42,47 @@ aea install
 aea build
 ```
 
-### Update the AEA configurations
+### Update the AEA Configurations
 
 In the terminal change the configuration:
+
 ``` bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
 ```
+
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
-### Add keys
+### Add Keys
 
 Add a private key for the weather station.
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
-### Run the weather station AEA
+### Run the Weather Station AEA
+
 ``` bash
 aea run
 ```
 
 Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
-### Create the weather client AEA
+### Create the Weather Client AEA
 
 Since we want to show the interaction between a programmatically created AEA with a CLI based AEA we are going to write some code for the client.
 
@@ -314,9 +323,10 @@ Now replace `ENTRY_PEER_ADDRESS` with the peer address (`SOME_ADDRESS`) noted ab
 
 For more details on how to create an agent programmatically follow this guide <a href='/build-aea-programmatically/'>here</a>.
 
-### Run the weather station AEA
+### Run the Weather Client AEA
 
 In a new terminal window, navigate to the folder that you created the script and run:
+
 ``` bash
 python weather_client.py
 ```

@@ -1,3 +1,5 @@
+# AEA Quick Start
+
 If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective, you can use the AEA framework.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -10,13 +12,14 @@ The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
-​GCC installation is required:
-* Ubuntu: `apt-get install gcc`
-* Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
- installed): `choco install mingw`
-* MacOS X (with home brew): `brew install gcc`
+GCC installation is required:
 
-### Option 1: Manual system preparation
+- Ubuntu: `apt-get install gcc`
+- Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
+ installed): `choco install mingw`
+- MacOS X (with home brew): `brew install gcc`
+
+### Option 1: Manual System Preparation
 
 Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
 
@@ -40,13 +43,13 @@ Install a compatible Python and Go version on your system (see <a href="https://
 
     - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
-### Option 2: Using an automated install script
+### Option 2: Using an 'Automated Install' Script
 
 We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the <a href="../quickstart#installation">installation step</a> that comes later on this page.
 
-??? note "Automated install script approach:"
-    On MacOS or Ubuntu run the following commands to download and install:
-    
+??? note "The 'Automated install' script approach:"
+    On macOS or Ubuntu run the following commands to download and install:
+
     ``` bash
     curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
     chmod +x install.sh
@@ -56,12 +59,13 @@ We provide a script to automatically install all framework dependencies and the 
     On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
 
 ### Option 3: Using Docker
+
 ​
 We also provide a Docker image with all the needed dependencies.
 
 ??? note "Docker approach:"
-    To use the image you will first have to pull it and than run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
-    
+    To use the image, you will first have to pull it, then run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
+
     To pull:
     
     ``` bash
@@ -110,32 +114,34 @@ Once installed, create a new environment and open it (here we use Python 3.7 but
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
-
 ## Installation
 
-The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
+The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the 'install script' above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
 ``` bash
 pip install aea[all]
 ```
 
 If you are using `zsh` rather than `bash` type
+
 ``` zsh
 pip install 'aea[all]'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
-## Setup author name
+## Setup Author Name
 
 You can set up your author name using the `init` command:
+
 ``` bash
 aea init
 ```
 
-## Register as an AEA author (optional)
+## Register as an AEA Author (optional)
 
-AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To publish packages to the registry, we need to register an author name:
+AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To publish packages to the registry, we need to register an author name:
+
 ``` bash
 aea register
 ```
@@ -143,6 +149,7 @@ aea register
 This is your unique author (or developer) name in the AEA ecosystem.
 
 You should see a similar output (with your input instead of the sample username and email):
+
 ``` bash
 Do you have a Registry account? [y/N]: n
 Create a new account on the Registry now:
@@ -165,9 +172,9 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 !!! note
     If you would rather not create an account on the registry at this point, then run `aea init --local` instead.
 
-## Echo skill demo
+## Echo Skill Demo
 
-This is a simple demo that introduces you to the main components of an AEA. 
+This is a simple demo that introduces you to the main components of an AEA.
 
 The fastest way to have your first AEA is to fetch one that already exists!
 
@@ -206,17 +213,17 @@ To learn more about the folder structure of an AEA project read on <a href="../p
 
     This copies the <code>fetchai/echo:0.20.5</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.20.5</code> consists of the name of the author of the skill, followed by the skill name and its version.
 
-### Echo skill
+### Echo Skill
 
 Just like humans, AEAs can have _skills_ to achieve their tasks. As an agent developer, you can create skills to add to your own AEAs. You can also choose to publish your skills so others add them to their AEAs. More details on skills can be found on <a href="../skill/"> this page </a>.
 
 The above agent has an <a href="https://aea-registry.fetch.ai/details/skill/fetchai/echo/latest" target="_blank">echo skill</a>, fetched from <a href="https://aea-registry.fetch.ai" target="_blank">the registry</a>, which simply echoes any messages it receives back to its sender.
 
-### Communication via envelopes and messages
+### Communication via Envelopes and Messages
 
 AEAs use envelopes containing messages for communication. To learn more, check out the <a href="../core-components-1/">next section</a>.
 
-### Stub connection
+### Stub Connection
 
 Besides skills, AEAs may have one or more _connections_ enabling them to interface with entities in the outside world. For example, an HTTP client connection allows an AEA to communicate with HTTP servers. To read more about connections see <a href="../connection/">this page</a>.
 
@@ -238,13 +245,13 @@ For example:
 recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
-### Install AEA dependencies
+### Install AEA Dependencies
 
 ``` bash
 aea install
 ```
 
-### Add and create a private key
+### Add and Create a Private Key
 
 All AEAs need a private key to run. Add one now:
 
@@ -284,7 +291,7 @@ info: Echo Behaviour: act method called.
 
 The framework first calls the `setup` methods in the skill's `Handler` and `Behaviour` classes in that order; after which it repeatedly calls the `act` method of `Behaviour` class. This is the main agent loop in action.
 
-#### Add a message to the input file
+#### Add a Message to the Input File
 
 You can send the AEA a message wrapped in an envelope using the CLI's `interact` command.
 
@@ -295,7 +302,7 @@ cd my_first_aea
 aea interact
 ```
 
-You can now send messages to this AEA via an interactive tool by typing anything into the prompt and hitting enter twice (once to send the message and once more to check for a response). 
+You can now send messages to this AEA via an interactive tool by typing anything into the prompt and hitting enter twice (once to send the message and once more to check for a response).
 
 Let us send `hello` to this AEA (type `hello` and press enter twice). In the original terminal, you will see the `Echo Handler` dealing with this envelope and its contained message. You should see an output similar to the one below but with a different `dialogue_reference`.
 
@@ -308,7 +315,7 @@ info: Echo Behaviour: act method called.
 
 ??? note "Manual approach:"
     Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), you can send the AEA a message wrapped in an envelope via the input file.
-    
+
     ``` bash
     echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
     ```
@@ -339,14 +346,14 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 
-### Write a test for the AEA
+### Write a Test for the AEA
 
 We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
 
 ??? note "Writing tests:"
-    The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
-    
-    First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
+    The following test class replicates the preceding demo and tests its correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
+
+    First, get the `packages` directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
     
     ``` bash
     svn export https://github.com/fetchai/agents-aea.git/trunk/packages
@@ -442,13 +449,13 @@ Delete the AEA from the parent directory (`cd ..` to go to the parent directory)
 aea delete my_first_aea
 ```
 
-## Next steps
+## Next Steps
 
 To gain an understanding of the core components of the framework, please continue to the next page:
 
 - <a href="../core-components-1/">Core components - Part 1</a>
 
-For more demos, use cases or step by step guides, please check the following:
+For more demos, use cases or step-by-step guides, please check the following:
 
 - <a href="../generic-skills">Generic skill use case</a>
 - <a href='../weather-skills/'>Weather skill demo</a>

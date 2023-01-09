@@ -10,4 +10,4 @@ Once found, it requests weather data for specific dates, negotiates the price us
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/weather-skills/" target="_blank">Weather Demo</a>
+- <a href="https://docs.fetch.ai/aea/weather-skills/" target="_blank">Weather Demo</a>

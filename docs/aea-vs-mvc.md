@@ -1,3 +1,5 @@
+# AEA and Web Frameworks
+
 The AEA framework borrows several concepts from popular web frameworks like <a href="https://www.djangoproject.com/" target="_blank">Django</a> and <a href="https://rubyonrails.org/" target="_blank">Ruby on Rails</a>.
 
 ## MVC
@@ -8,7 +10,7 @@ Both aforementioned web frameworks use the <a href="https://en.wikipedia.org/wik
 - View: contain the HTML templates
 - Controller: deals with the request-response handling
 
-## Comparison to AEA framework
+## Comparison with the AEA Framework
 
 The AEA framework is based on <a href="https://en.wikipedia.org/wiki/Asynchronous_communication" target="_blank">asynchronous messaging</a> and other <a href="../agent-oriented-development" target="_blank">agent-oriented development assumptions</a>. Hence, there is not a direct one-to-one relationship between MVC based architectures and the AEA framework. Nevertheless, there are some parallels which can help a developer familiar with MVC make quick progress in the AEA framework, in particular the development of `Skills`:
 
@@ -21,7 +23,7 @@ The AEA framework is based on <a href="https://en.wikipedia.org/wiki/Asynchronou
 
 The `View` concept is probably best compared to the `Message` of a given `Protocol` in the AEA framework. Whilst views represent information to the client, messages represent information sent to other agents, other agent components and services.
 
-## Next steps
+## Next Steps
 
 We recommend you continue with the next step in the 'Getting Started' series:
 

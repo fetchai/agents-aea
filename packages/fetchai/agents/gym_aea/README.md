@@ -10,6 +10,6 @@ It demonstrate how an RL agent can be wrapped inside a skill by decoupling the R
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/gym-skill/" target="_blank">Gym Demo</a>
-* <a href="https://docs.fetch.ai/aea/gym-example/" target="_blank">Gym Example</a>
-* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>
+- <a href="https://docs.fetch.ai/aea/gym-skill/" target="_blank">Gym Demo</a>
+- <a href="https://docs.fetch.ai/aea/gym-example/" target="_blank">Gym Example</a>
+- <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>

@@ -1,3 +1,4 @@
+# Multi Agent Manager
 
 The <a href="../api/manager/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
 
@@ -16,7 +17,7 @@ manager = MultiAgentManager(WORKING_DIR)
 manager.start_manager()
 ```
 
-## Adding projects
+## Adding Projects
 
 We first add a couple of finished AEA project:
 
@@ -31,10 +32,10 @@ weather_station_name = weather_station_id.name
 weather_client_name = weather_client_id.name
 ```
 
-## Adding agent instances
-
+## Adding Agent Instances
 
 Add the agent instances
+
 ``` python
 agent_overrides = {
     "private_key_paths": {"fetchai": "fetchai_private_key.txt"},
@@ -98,8 +99,8 @@ component_overrides = [{
 manager.add_agent(weather_client_id, component_overrides=component_overrides, agent_overrides=agent_overrides)
 ```
 
-
 Save the following private keys in the respective files.
+
 ``` python
 FET_PRIVATE_KEY_STATION = b"72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87"
 FET_PRIVATE_KEY_PATH_STATION = Path(manager.data_dir, weather_station_name, "fetchai_private_key.txt").absolute()
@@ -118,7 +119,7 @@ FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT = Path(manager.data_dir, weather_client_n
 FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_CONNECTION_PRIVATE_KEY_CLIENT)
 ```
 
-## Running the agents:
+## Running the Agents
 
 ``` python
 import time
@@ -133,7 +134,7 @@ manager.start_agent(weather_client_id.name)
 time.sleep(5.0)
 ```
 
-## Stopping the agents:
+## Stopping the Agents
 
 ``` python
 manager.stop_all_agents()

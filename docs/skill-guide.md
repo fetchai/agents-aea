@@ -1,3 +1,5 @@
+# Build your First Skill - Search & Discovery
+
 This guide will take you through the development of your first skill. It will teach you, how to connect the AEA to the digital world, register the AEA and search for other AEAs.
 
 Although one can imagine scenarios where a single AEA pursues its goals in isolation without interacting with other AEAs, there is no doubt that by working together, AEAs can achieve much more. To do so, an AEA must be seen and found by other AEAs so that they can trade and do other useful things. Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short) lets your agents register, be discovered, and find other agents. You can then negotiate using the AEA framework’s <a href="../acn">peer-to-peer network (ACN)</a> and trade. This guide covers getting your AEA connected to the SOEF, and describing your AEA to make itself visible.
@@ -9,8 +11,6 @@ The more you describe your AEA, the easier it is for others to find it using spe
 ## Dependencies (Required)
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-
 
 ## Step 1: Setup
 
@@ -119,7 +119,7 @@ Searches are proactive and, as such, well placed in a <a href="../api/skills/bas
 We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import OefSearchDialogues` with your author handle (run `aea init` to set or check the author name).
 
 !!! note
-    The import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details.
+    The import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom-built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details.
 
 ## Step 3: Develop a Handler
 
@@ -262,7 +262,7 @@ class MySearchHandler(Handler):
         )
 ```
 
-We create a handler which is registered for the `oef_search` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
+We create a handler which is registered for the `oef_search` protocol. Whenever it receives a search result, we log the number of agents returned by the search - the agents matching the search query - and update the counter of received searches.
 
 We also implement a trivial check on the difference between the amount of search requests sent and responses received.
 
@@ -272,7 +272,7 @@ Also note, how we have access to other objects in the skill via `self.context`, 
 
 We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import (` with your author handle (run `aea init` to set or check the author name).
 
-## Step 4: Add dialogues model
+## Step 4: Add Dialogues Model
 
 We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:1.0.0` protocol and keep track of the individual messages being sent and received.
 
@@ -324,7 +324,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then rename `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
 
-## Step 5: Create the configuration file
+## Step 5: Create the Configuration File
 
 Based on our skill components above, we create the following configuration file.
 
@@ -406,19 +406,23 @@ from aea.configurations.base import PublicId
 PUBLIC_ID = PublicId.from_str("fetchai/my_search:0.1.0")
 
 ```
+
 Again, ensure the author field matches your own.
 
-## Step 6: Update fingerprint
+## Step 6: Update Fingerprint
 
 To run an AEA with new or modified code, you need to update the fingerprint of the new/modified components. In this case, we need to fingerprint our skill:
+
 ``` bash
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
+
 Ensure, you use the correct author name to reference your skill (here we use `fetchai` as the author.)
 
-## Step 7: Add the OEF protocol and connection
+## Step 7: Add the OEF Protocol and Connection
 
 Our AEA does not have the OEF protocol yet so let's add it.
+
 ``` bash
 aea add protocol fetchai/oef_search:1.1.6
 ```
@@ -426,6 +430,7 @@ aea add protocol fetchai/oef_search:1.1.6
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
+
 ``` bash
 aea add connection fetchai/soef:0.27.5
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -440,11 +445,12 @@ aea config set --type dict agent.default_routing \
 
 The last command will ensure that search requests are processed by the correct connection.
 
-## Step 8: Run a service provider AEA
+## Step 8: Run a Service Provider AEA
 
-In order for this AEA to find another AEA when searching, the second AEA (let's call it the service provider AEA) must exist and have been registered with the SOEF. 
+In order for this AEA to find another AEA when searching, the second AEA (let's call it the service provider AEA) must exist and have been registered with the SOEF.
 
 From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
+
 ``` bash
 aea fetch fetchai/simple_service_registration:0.32.4 && cd simple_service_registration && aea install && aea build
 ```
@@ -452,23 +458,27 @@ aea fetch fetchai/simple_service_registration:0.32.4 && cd simple_service_regist
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
 
 We first create the private key for the service provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
 Then we run the AEA:
+
 ``` bash
 aea run
 ```
@@ -477,7 +487,7 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 
 ??? note "Click here to see full code and guide for this AEA:"
     We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
-    
+
     ``` python
     from typing import Any, Optional, cast
     
@@ -1067,23 +1077,27 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 ## Step 9: Run the Search AEA
 
 First, create the private key for the search AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
 Then, in the search AEA, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -1094,6 +1108,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 This allows the search AEA to connect to the same local agent communication network as the service registration AEA.
 
 We can then launch our AEA.
@@ -1106,8 +1121,7 @@ We can see that the AEA sends search requests to the <a href="../simple-oef">SOE
 
 We stop the AEA with `CTRL + C`.
 
-## Next steps
-
+## Next Steps
 
 ### Recommended
 
@@ -1115,6 +1129,6 @@ We recommend you continue with the next step in the 'Getting Started' series:
 
 - <a href="../core-components-2">Core components (Part 2)</a>
 
-### Relevant deep-dives
+### Relevant Deep-Dives
 
-<a href="../generic-skills-step-by-step"> This guide </a> goes through a more elaborate scenario than the one on this page, where after finding each other, the two AEAs negotiate and trade via a ledger. 
+<a href="../generic-skills-step-by-step"> This guide </a> goes through a more elaborate scenario than the one on this page, where after finding each other, the two AEAs negotiate and trade via a ledger.

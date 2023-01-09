@@ -29,7 +29,7 @@ nav:
     - Gym skill: 'gym-skill.md'
     - ML skills: 'ml-skills.md'
     - Oracle skills: 'oracle-demo.md'
-    - Aggegation skill: 'aggregation-demo.md'
+    - Aggregation skill: 'aggregation-demo.md'
     - TAC skills: 'tac-skills.md'
     - TAC skills ledger-based: 'tac-skills-contract.md'
     - Thermometer skills: 'thermometer-skills.md'
@@ -241,7 +241,7 @@ nav:
             - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Development - Use Case:
     - Generic skills: 'generic-skills.md'
-    - Front-end intergration: 'connect-a-frontend.md'
+    - Front-end integration: 'connect-a-frontend.md'
     - HTTP Connection: 'http-connection-and-skill.md'
     - ORM integration: 'orm-integration.md'
     - Contract deploy and interact: 'erc1155-skills.md'
@@ -322,7 +322,7 @@ extra:
       name: fetch.ai on discord
     - icon: fontawesome/brands/github
       link: https://bit.ly/3AFCWxl
-      name: fetch.ai on githubs
+      name: fetch.ai on github
     - icon: fontawesome/brands/reddit
       link: https://bit.ly/30zS1Tg
       name: fetch.ai on reddit

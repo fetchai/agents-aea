@@ -1,3 +1,4 @@
+# Relation to OEF and Ledger
 
 The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) allow AEAs to create value through their interaction with other AEAs. The following diagram illustrates the relation of AEAs to the OEF and DLTs.
 
@@ -5,7 +6,7 @@ The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) a
 
 ## Open Economic Framework (OEF)
 
-The _Open Economic Framework_ (OEF) consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralised virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
+The _Open Economic Framework_ (OEF) consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralized virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
 
 !!! note
     The OEF is under development. Expect frequent changes. What follows is a description of the current implementation.
@@ -28,7 +29,7 @@ Agents can receive messages from other agents if they are both connected to the 
 
 ### Search and Discovery
 
-A <a href="../simple-oef">simple OEF (sOEF) node</a> allows agents to discover each other. In particular, agents can register themselves and the services they offer, and can search for agents who offer specific services. 
+A <a href="../simple-oef">simple OEF (sOEF) node</a> allows agents to discover each other. In particular, agents can register themselves and the services they offer, and can search for agents who offer specific services.
 
 For two agents to be able to find each other, at least one must register itself on the sOEF and the other must query the sOEF node for it. Detailed documentation is provided <a href="../simple-oef">here</a>.
 
@@ -46,7 +47,7 @@ The Python implementation of the AEA Framework currently integrates with three l
 
 However, the framework makes it straightforward for any developer to add support for other ledgers.
 
-### AEAs as second layer technology
+### AEAs as Second Layer Technology
 
 The following presentation discusses how AEAs can be seen as second layer technology to ledgers.
 

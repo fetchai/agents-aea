@@ -10,4 +10,4 @@ Once such a request is made, this agent negotiates the terms of trade using the 
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/erc1155-skills/" target="_blank">Contract Deployment Guide</a>
+- <a href="https://docs.fetch.ai/aea/erc1155-skills/" target="_blank">Contract Deployment Guide</a>

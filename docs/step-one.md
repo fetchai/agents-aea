@@ -1,3 +1,5 @@
+# Ways to Build an AEA
+
 There are a number of ways to build an AEA:
 
 - To start with, we recommended you build an AEA project step-by-step with the CLI tool as demonstrated in the <a href="../quickstart/" target="_blank">quick start</a> guide and described <a href="../build-aea-step-by-step/" target="_blank">here</a>.

@@ -1,7 +1,10 @@
+# Create Stand-Alone Transaction
+
 In this guide, we will generate some wealth for the Fetch.ai testnet and create a standalone transaction. After the completion of the transaction, we get the transaction digest. With this we can search for the transaction on the <a href='https://explore-dorado.fetch.ai/' target="_blank">block explorer</a>
 
 This guide requires the `aea-ledger-fetchai` plug-in installed in your Python environment:
-```bash
+
+``` bashash
 pip install aea-ledger-fetchai
 ```
 
@@ -24,7 +27,7 @@ FETCHAI_PRIVATE_KEY_FILE_1 = "fetchai_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
 ```
 
-## Create the private keys
+## Create the Private Keys
 
 ``` python
     # Create a private keys
@@ -36,7 +39,7 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
     )
 ```
 
-## Create the wallets
+## Create the Wallets
 
 Once we created the private keys we need to generate the wallets.
 
@@ -46,10 +49,11 @@ Once we created the private keys we need to generate the wallets.
     wallet_2 = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 ```
 
-## Generate wealth
+## Generate Wealth
 
 Since we want to send funds from `wallet_1` to `wallet_2`, we need to generate some wealth for the `wallet_1`. We can
 do this with the following code
+
 ``` python
     # Generate some wealth
     try_generate_testnet_wealth(
@@ -57,7 +61,7 @@ do this with the following code
     )
 ```
 
-## Send transaction
+## Send Transaction
 
 Finally, we create a transaction that sends the funds to the `wallet_2`
 
@@ -90,7 +94,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 ??? note "Stand-alone transaction full code:"
     ``` python
     import logging
-    
+
     from aea_ledger_fetchai import FetchAICrypto
     
     from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth

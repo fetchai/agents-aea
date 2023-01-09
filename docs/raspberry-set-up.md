@@ -1,9 +1,11 @@
+# Build an AEA on a Raspberry Pi
+
 This guide explains how to run an AEA inside a Raspberry Pi.
 
 ## Prerequisites
 
-* <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE" target="_blank">Raspberry Pi 4</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
-* Internet connection (preferably wireless to minimise the number of wires connecting into your device)
+- <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE" target="_blank">Raspberry Pi 4</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
+- Internet connection (preferably wireless to minimise the number of wires connecting into your device)
 
 ## Preparing the Raspberry Pi
 
@@ -20,7 +22,7 @@ First download the tool from <a href="https://www.raspberrypi.com/software/" tar
 Then follow <a href="https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up" target="_blank">this guide</a> to set up your SD card.
 When you get to the step of choosing an operating system, select the downloaded and unzipped AEA Raspberry Pi Image (`AEA_RPI.IMG`), or for a manual installation, select the latest Raspberry Pi OS.
 
-Once you have set up your SD card, plug it into your Raspberry Pi, connect the power and boot up. 
+Once you have set up your SD card, plug it into your Raspberry Pi, connect the power and boot up.
 
 ## Booting up with the AEA Raspberry Pi Image
 
@@ -28,13 +30,13 @@ After booting up, you may be prompted to log in as the `aea` user and the passwo
 Next, navigate to settings menu to set up your internet connection.
 Your Raspberry Pi is now ready to run an AEA!
 You can find some preloaded demos in the folder `~/aea/demos`.
-To run these demos, navigate to one of the subfolders and enter `aea run`.
+To run these demos, navigate to one of the sub-folders and enter `aea run`.
 
-## Booting up with the Raspberry Pi OS for manual installation
+## Booting up with the Raspberry Pi OS for Manual Installation
 
-When you first boot your Raspberry Pi, you will be prompted to enter a password for the Raspberry Pi and your WiFi password so the device can access the internet. You may also be given the option to update the operating system and software. We recommend that you let the system update. Once finished you will be prompted to restart.
+When you first boot your Raspberry Pi, you will be prompted to enter a password for the Raspberry Pi and your Wi-Fi password so the device can access the internet. You may also be given the option to update the operating system and software. We recommend that you let the system update. Once finished you will be prompted to restart.
 
-Even if your Raspberry Pi updated itself, we recommend that you make sure it is completely up to date using the terminal. Open a Terminal window (your Raspberry Pi might restart a few times during this process):
+Even if your Raspberry Pi updated itself, we recommend that you make sure it is completely up-to-date using the terminal. Open a Terminal window (your Raspberry Pi might restart a few times during this process):
 
 ``` bash
 sudo apt update -y 
@@ -42,13 +44,13 @@ sudo apt-get update
 sudo apt-get dist-upgrade 
 ```
 
-## Install common dependencies
+## Install Common Dependencies
 
 ``` bash
 sudo apt install cmake golang -y
 ```
 
-## Install less common dependencies (optional)
+## Install Less Common Dependencies (optional)
 
 For some of the more advanced AEAs that make use of SciPy, such as the Car Park Detector, you will need some additional dependencies.
 
@@ -82,17 +84,20 @@ For some of the more advanced AEAs that make use of SciPy, such as the Car Park 
 
 ## Install the AEA Framework
 
-Add to the local `PATH` environment variable (this will happen automatically the next time you login):
+Add to the local `PATH` environment variable (this will happen automatically the next time you log in):
+
 ``` bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
 Finally, install the AEA framework from PyPI:
+
 ``` bash
 pip install aea[all]
 ```
 
 Check to make sure installation was successful:
+
 ``` bash
 aea --version
 ```

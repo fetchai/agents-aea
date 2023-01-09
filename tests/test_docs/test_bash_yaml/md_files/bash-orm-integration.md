@@ -4,6 +4,7 @@ cd my_thermometer_aea
 aea install
 aea build
 ```
+
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
@@ -24,12 +25,14 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/thermometer_client:0.32.4 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
 ```
+
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
@@ -50,44 +53,56 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea generate-wealth fetchai
 ```
+
 ``` bash
 aea install
 aea build
 ```
+
 ``` bash
 aea eject skill fetchai/thermometer:0.27.5
 ```
+
 ``` bash
 aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -98,14 +113,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
-``` bash 
+
+``` bash
 cd ..
 aea delete my_thermometer_aea
 aea delete my_thermometer_client
 ```
+
 ``` yaml
 models:
   ...
@@ -129,6 +147,7 @@ models:
 dependencies:
   SQLAlchemy: {}
 ```
+
 ``` yaml
 models:
   ...
@@ -151,6 +170,7 @@ models:
       service_id: thermometer_data
     class_name: Strategy
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

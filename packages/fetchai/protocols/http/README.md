@@ -43,4 +43,4 @@ keep_terminal_state_dialogues: false
 
 ## Links
 
-* <a href="https://www.w3.org/Protocols/rfc2616/rfc2616.html" target="_blank">HTTP Specification</a>
+- <a href="https://www.w3.org/Protocols/rfc2616/rfc2616.html" target="_blank">HTTP Specification</a>

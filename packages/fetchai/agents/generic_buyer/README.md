@@ -10,5 +10,5 @@ Once found, it requests specific data, negotiates the price using the `fetchai/f
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/generic-skills/" target="_blank">Generic Skills</a>
-* <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank">Generic Skill Step by Step Guide</a>
+- <a href="https://docs.fetch.ai/aea/generic-skills/" target="_blank">Generic Skills</a>
+- <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank">Generic Skill Step by Step Guide</a>

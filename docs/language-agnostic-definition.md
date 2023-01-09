@@ -1,13 +1,15 @@
+# Language Agnostic Definition
+
 Currently, there is an implementation of the AEA framework in Python which enables the development of AEAs in Python, and allows AEAs which are built with it to run.
 
-However, AEAs can be developed in different programming languages. This is further backed by the idea that agent-based solutions are suited for multi-stakeholder environments where the different AEAs may be developed independently of one another, resulting in heterogeneous systems. 
+However, AEAs can be developed in different programming languages. This is further backed by the idea that agent-based solutions are suited for multi-stakeholder environments where the different AEAs may be developed independently of one another, resulting in heterogeneous systems.
 
 This means that in principle, there could be different implementations of the AEA framework, in various programming languages and for different platforms. However, to ensure that AEAs under any implementation are compatible with one another and able to interact, they must satisfy specific definitions. In this page, we compile a set of definitions which any AEA independent of its implementation must satisfy in order to be able to interact with other AEAs.
 
 An AEA, in technical terms, must satisfy the following requirements:
 
 - It MUST be capable of receiving and sending `Envelopes` which satisfy the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
-    
+
     ``` proto
     syntax = "proto3";
     
@@ -21,7 +23,7 @@ An AEA, in technical terms, must satisfy the following requirements:
       string uri = 5;
     }
     ```
-    
+
     The format for the above fields are as follows:
 
     - `to` and `sender`: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">secp256k1</a>-compatible elliptic curve
@@ -62,6 +64,7 @@ An AEA, in technical terms, must satisfy the following requirements:
       string uri = 5;
     }
     ```
+
      where `content` is replaced with the protocol specific content (see <a href="../protocol-generator">here</a> for details).
 
 - It MUST implement protocols according to their specification (see <a href="../protocol-generator/#full-mode-vs-protobuf-only-mode">here</a> for details).
@@ -116,7 +119,6 @@ An AEA, in technical terms, must satisfy the following requirements:
 - It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
 - It SHOULD implement handling of errors using the `fetchai/default:1.1.6` protocol. The protobuf schema is given above.
 - It MUST implement the following principles when handling messages:
-
     - It MUST ALWAYS handle incoming envelopes/messages and NEVER raise an exception when decoding and validating the message. This ensures another AEA cannot cause the agent to fail by sending a malicious envelope/message.
     - It MUST NEVER handle outgoing messages and ALWAYS raise an exception when validating the message. An exception implies that the handler is resolving a bug in the implementation.
 

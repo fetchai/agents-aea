@@ -12,4 +12,4 @@ Once such a request is made and the terms of trade are agreed by both agents, it
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/ml-skills/" target="_blank">ML Demo</a>
+- <a href="https://docs.fetch.ai/aea/ml-skills/" target="_blank">ML Demo</a>

@@ -1,3 +1,5 @@
+# Known Limitations
+
 The AEA framework makes a multitude of tradeoffs.
 
 Here we present an incomplete list of known limitations:

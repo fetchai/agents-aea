@@ -10,4 +10,4 @@ Once found, it requests specific data samples. If both parties agree with the te
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/ml-skills/" target="_blank">ML Demo</a>
+- <a href="https://docs.fetch.ai/aea/ml-skills/" target="_blank">ML Demo</a>

@@ -1,3 +1,5 @@
+# Gym Skill
+
 The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.dev/" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
 ### Discussion
@@ -5,8 +7,7 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that u
 The gym skills demonstrate how to wrap a Reinforcement Learning agent in a skill.
 The example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
 
-
-## Preparation instructions
+## Preparation Instructions
 
 ### Dependencies
 
@@ -25,12 +26,12 @@ Install the `gym` and `numpy` library.
 pip install numpy gym
 ```
 
-## Demo instructions
-
+## Demo Instructions
 
 ### Create the AEA
 
 First, fetch the gym AEA:
+
 ``` bash
 aea fetch fetchai/gym_aea:0.26.4 --alias my_gym_aea
 cd my_gym_aea
@@ -68,27 +69,29 @@ aea install
     aea install
     ```
 
-### Set up the training environment
+### Set up the Training Environment
 
-#### Copy the gym environment to the AEA directory
+#### Copy the Gym Environment to the AEA Directory
+
 ``` bash
 mkdir gyms
 cp -a ../examples/gym_ex/gyms/. gyms/
 ```
 
-#### Update the connection configuration
+#### Update the Connection Configuration
+
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 
-#### Create and add a private key
+#### Create and Add a Private Key
 
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai
 ```
 
-### Run the AEA with the gym connection
+### Run the AEA with the Gym Connection
 
 ``` bash
 aea run
@@ -96,9 +99,7 @@ aea run
 
 You will see the gym training logs.
 
-
 <img src="../assets/gym-training.png" alt="AEA gym training logs" class="center">
-
 
 ### Delete the AEA
 
@@ -110,6 +111,7 @@ aea delete my_gym_aea
 ```
 
 ## Communication
+
 This diagram shows the communication between the AEA and the gym environment
 
 ``` mermaid

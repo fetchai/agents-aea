@@ -1,6 +1,8 @@
+# Decision Maker
+
 The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the wallet's private keys.
 
-## Interaction with skills
+## Interaction with Skills
 
 Skills communicate with the decision maker via <a href="../api/protocols/base#message-objects">`Messages`</a>. At present, the decision maker processes messages of two protocols:
 
@@ -9,7 +11,8 @@ Skills communicate with the decision maker via <a href="../api/protocols/base#me
 - <a href="../api/protocols/state_update/message#stateupdatemessage-objects">`StateUpdateMessage`</a>: it is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place.
 
 A message, say `msg`, is sent to the decision maker like so from any skill:
-```
+
+``` python
 self.context.decision_maker_message_queue.put_nowait(msg)
 ```
 
@@ -20,15 +23,15 @@ To process `Messages` from the decision maker in a given skill you need to creat
 ``` python
 class SigningHandler(Handler):
 
-	protocol_id = SigningMessage.protocol_id
+    protocol_id = SigningMessage.protocol_id
 
-	def handle(self, message: Message):
-		"""
-		Handle a signing message.
+    def handle(self, message: Message):
+        """
+        Handle a signing message.
 
-		:param message: the signing message from the decision maker.
-		"""
-		# code to handle the message
+        :param message: the signing message from the decision maker.
+        """
+        # code to handle the message
 ```
 
 ## Custom `DecisionMaker`
@@ -50,7 +53,7 @@ The easiest way to add a custom decision maker handler is to run the following c
 aea scaffold decision-maker-handler
 ```
 
-You can then implement your own custom logic to process messages and interact with the `Wallet`. 
+You can then implement your own custom logic to process messages and interact with the `Wallet`.
 
 !!! note
     For examples how to use these concepts have a look at the `tac_` skills. These functionalities are experimental and subject to change.

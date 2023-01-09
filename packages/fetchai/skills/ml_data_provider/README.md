@@ -8,14 +8,14 @@ This skill is part of the Fetch.ai ML skill demo. It registers its "ML data sell
 
 ## Behaviours
 
-* `service_registration`: registers service on the sOEF search service 
+- `service_registration`: registers service on the sOEF search service 
 
 ## Handlers
 
-* `ml_trade`: handles `ml_trade` messages for negotiating the terms of trade
-* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
-* `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
+- `ml_trade`: handles `ml_trade` messages for negotiating the terms of trade
+- `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+- `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/ml-skills/" target="_blank">ML Demo</a>
+- <a href="https://docs.fetch.ai/aea/ml-skills/" target="_blank">ML Demo</a>

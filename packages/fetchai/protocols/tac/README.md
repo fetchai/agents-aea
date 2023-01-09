@@ -86,4 +86,4 @@ keep_terminal_state_dialogues: true
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/tac-skills/" target="_blank">TAC skill in the AEA framework</a>
+- <a href="https://docs.fetch.ai/aea/tac-skills/" target="_blank">TAC skill in the AEA framework</a>

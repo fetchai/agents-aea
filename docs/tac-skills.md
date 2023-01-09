@@ -1,13 +1,15 @@
+# TAC Skills
+
 The AEA TAC - trading agent competition - skills demonstrate an interaction between multiple AEAs in a game.
 
 There are two types of AEAs:
 
-* The `tac_controller` which coordinates the game.
-* The `tac_participant` AEAs which compete in the game. The `tac_participant` AEAs trade tokens with each other to maximize their utility.
+- The `tac_controller` which coordinates the game.
+- The `tac_participant` AEAs which compete in the game. The `tac_participant` AEAs trade tokens with each other to maximize their utility.
 
 ## Discussion
 
-The scope of this specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC. Another AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid. Transactions are settled with the controller agent rather than against a public ledger.
+The scope of this specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC. Another AEA has the role of the controller, responsible for calculating the revenue for each participant and checking if the transaction messages are valid. Transactions are settled with the controller agent rather than against a public ledger.
 
 ## Communication
 
@@ -15,9 +17,9 @@ There are two types of interactions:
 - between the participants and the controller, the game communication
 - between the participants, the negotiation
 
-### Registration communication
+### Registration Communication
 
-This diagram shows the communication between the various entities during the registration phase. 
+This diagram shows the communication between the various entities during the registration phase.
 
 ``` mermaid
     sequenceDiagram
@@ -48,7 +50,7 @@ This diagram shows the communication between the various entities during the reg
         deactivate Controller
 ```
 
-### Transaction communication
+### Transaction Communication
 
 This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as `Seller_Agent`. We also have an AEA in the role of the buyer, referred to as `Buyer_Agent`. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
 
@@ -84,17 +86,17 @@ This diagram shows the communication between two AEAs and the controller. In thi
 
 In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The buyer AEA needs to determine if this is a good deal for them and if so, it accepts.
 
-There is an equivalent diagram for seller AEAs set up to search for buyers and their interaction with AEAs which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
+There is an equivalent diagram for seller AEAs set up to search for buyers and their interaction with AEAs which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.
 
-## Option 1: AEA Manager approach
+## Option 1: AEA Manager Approach
 
-Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below. 
+Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below.
 
-### Preparation instructions
+### Preparation Instructions
 
 Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
 
-### Demo instructions
+### Demo Instructions
 
 The following steps assume you have launched the AEA Manager Desktop app.
 
@@ -109,6 +111,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 5. Run the `controller` AEA. Navigate to its logs and copy the multiaddress displayed. Stop the `controller`.
 
 5. Navigate to the settings of `participant_1` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11001",
@@ -120,6 +123,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 ```
 
 6. Navigate to the settings of `participant_2` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11002",
@@ -130,27 +134,28 @@ The following steps assume you have launched the AEA Manager Desktop app.
 }
 ```
 
-7. You may add more participants by repeating steps 3 (with an updated name) and 6 (bumping the port numbers. See the difference between steps 5 and 6). 
+7. You may add more participants by repeating steps 3 (with an updated name) and 6 (bumping the port numbers. See the difference between steps 5 and 6).
 
 8. Run the `controller`, then `participant_1` and `participant_2` (and any other participants you added).
 
 In the `controller`'s log, you should see the details of the transactions participants submit as well as changes in their scores and holdings. In participants' logs, you should see the agents trading.
 
-## Option 2: CLI approach
+## Option 2: CLI Approach
 
 Follow this approach when using the `aea` CLI.
 
-## Preparation instructions
+## Preparation Instructions
 
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-## Demo instructions:
+## Demo Instructions
 
-### Create TAC controller AEA
+### Create TAC Controller AEA
 
 In the root directory, fetch the controller AEA:
+
 ``` bash
 aea fetch fetchai/tac_controller:0.30.4
 cd tac_controller
@@ -183,9 +188,10 @@ aea build
     aea build
     ```
 
-### Create the TAC participant AEAs
+### Create the TAC Participant AEAs
 
 In a separate terminal, in the root directory, fetch at least two participants:
+
 ``` bash
 aea fetch fetchai/tac_participant:0.32.4 --alias tac_participant_one
 cd tac_participant_one
@@ -264,26 +270,29 @@ aea build
     aea build
     ```
 
-### Add keys for all AEAs
+### Add Keys for All AEAs
 
 Create the private key for the AEA for Fetch.ai `Dorado`:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
-### Update the game parameters in the controller
+### Update the Game Parameters in the Controller
 
 Navigate to the tac controller project, then use the command line to get and set the start time (set it to at least two minutes in the future):
 
@@ -293,11 +302,12 @@ aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registra
 ```
 
 To set the registration time, you may find handy the following command:
+
 ``` bash
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
 ```
 
-### Update the connection parameters
+### Update the Connection Parameters
 
 Briefly run the controller AEA:
 
@@ -308,6 +318,7 @@ aea run
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri` to retrieve the address.)
 
 Then, in the participant one, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -320,6 +331,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 ```
 
 Do the same in participant two (beware of the different port numbers):
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -333,10 +345,10 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 
 This allows the TAC participants to connect to the same local agent communication network as the TAC controller.
 
-
 ### Run the AEAs
 
 First, launch the `tac_controller`:
+
 ``` bash
 aea run
 ```
@@ -346,6 +358,7 @@ at once.
 
 For example, assuming you followed the tutorial, you
 can launch both the TAC agents as follows from the root directory:
+
 ``` bash
 aea launch tac_participant_one tac_participant_two
 ```
@@ -357,6 +370,7 @@ in the same process.
 ### Cleaning up
 
 When you're finished, delete your AEAs:
+
 ``` bash
 aea delete tac_controller
 aea delete tac_participant_one

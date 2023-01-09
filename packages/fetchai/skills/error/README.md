@@ -13,4 +13,4 @@ It handles the following cases:
 
 ## Handlers
 
-* `error_handler`: handles `default` messages for problematic envelopes/messages.
+- `error_handler`: handles `default` messages for problematic envelopes/messages.

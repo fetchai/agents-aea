@@ -10,4 +10,4 @@ Once such a request is made, this agent negotiates the terms of trade using the 
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>
+- <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>

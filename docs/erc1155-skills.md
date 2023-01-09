@@ -1,10 +1,12 @@
+# Contract Deploy and Interact
+
 The AEA `erc1155_deploy` and `erc1155_client` skills demonstrate an interaction between two AEAs which use a smart contract.
 
-* The `erc1155_deploy` skill deploys the smart contract, creates and mints items. 
-* The `erc1155_client` skill signs a transaction to complete a trustless trade with its counterparty.
+- The `erc1155_deploy` skill deploys the smart contract, creates and mints items.
+- The `erc1155_client` skill signs a transaction to complete a trustless trade with its counterparty.
 
-## Preparation instructions
- 
+## Preparation Instructions
+
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
@@ -18,7 +20,7 @@ The scope of this guide is demonstrating how you can deploy a smart contract and
 
 ## Demo
 
-### Create the deployer AEA
+### Create the Deployer AEA
 
 Fetch the AEA that will deploy the contract:
 
@@ -31,7 +33,7 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     Create the AEA that will deploy the contract.
-    
+
     ``` bash
     aea create erc1155_deployer
     cd erc1155_deployer
@@ -83,7 +85,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Create the client AEA
+### Create the Client AEA
 
 In another terminal, fetch the client AEA which will receive some tokens from the deployer.
 
@@ -96,7 +98,7 @@ aea build
 
 ??? note "Alternatively, create from scratch:"
     Create the AEA that will get some tokens from the deployer.
-    
+
     ``` bash
     aea create erc1155_client
     cd erc1155_client
@@ -143,6 +145,7 @@ aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
@@ -150,6 +153,7 @@ aea issue-certificates
 ## Run Ganache
 
 Execute the following command to run Ganache:
+
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000" --account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
 ```
@@ -167,9 +171,10 @@ You should get `1000000000000000000000`.
 !!! note
     If no wealth appears after a while, then try funding the private key directly using a web faucet.
 
-## Update SOEF configurations for both AEAs
+## Update SOEF Configurations for both AEAs
 
 Update the SOEF configuration in both AEA projects:
+
 ``` bash
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
@@ -178,11 +183,11 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 
 First, run the deployer AEA:
 
-``` bash 
+``` bash
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. 
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address.
 
 Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri` to retrieve the address. The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
 
@@ -190,16 +195,18 @@ This is the entry peer address for the local <a href="../acn">agent communicatio
 
 This AEA then performs the following steps:
 
- * deploys the smart contract
- * creates a batch of items in the smart contract
- * mints a batch of items in the smart contract
+- deploys the smart contract
+- creates a batch of items in the smart contract
+- mints a batch of items in the smart contract
 
 At some point you should see the log output:
+
 ``` bash
 registering service on SOEF.
 ```
 
 At this point, configure the client AEA to connect to the same local ACN created by the deployer by running the following command in the client's terminal, replacing `SOME_ADDRESS` with the value you noted above:
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -213,21 +220,21 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 
 Then, run the client AEA:
 
-``` bash 
+``` bash
 aea run
 ```
 
 You will see that after discovery, the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.
 
 !!! note
-    Transactions on Ropsten can take a significant amount of time! If you run the example a second time, and the previous transaction is still pending, it can lead to a failure. 
+    Transactions on Ropsten can take a significant amount of time! If you run the example a second time, and the previous transaction is still pending, it can lead to a failure.
     The warning message `Cannot verify whether transaction improves utility. Assuming it does!` can be ignored.
 
 ## Delete the AEAs
 
 When you're done, stop the agents (`CTRL+C`), go up a level and delete the AEAs.
 
-``` bash 
+``` bash
 cd ..
 aea delete erc1155_deployer
 aea delete erc1155_client

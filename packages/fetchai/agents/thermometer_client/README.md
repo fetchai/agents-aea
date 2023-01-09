@@ -10,4 +10,4 @@ Once found, it requests data from a thermometer reading, negotiates the price us
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/thermometer-skills/" target="_blank">Thermometer Demo</a>
+- <a href="https://docs.fetch.ai/aea/thermometer-skills/" target="_blank">Thermometer Demo</a>

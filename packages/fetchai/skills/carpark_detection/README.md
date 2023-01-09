@@ -8,14 +8,14 @@ This skill is part of the Fetch.ai car park demo. It registers the "car park ava
 
 ## Behaviours
 
-* `service_registration`: registers car park info selling service on the sOEF 
+- `service_registration`: registers car park info selling service on the sOEF 
 
 ## Handlers
 
-* `fipa`: handles `fipa` messages for negotiation
-* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
-* `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
+- `fipa`: handles `fipa` messages for negotiation
+- `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+- `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>
+- <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>

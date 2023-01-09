@@ -8,11 +8,11 @@ This skill is part of the Fetch.ai Gym demo. It trains a reinforcement learning 
 
 ## Handlers
 
-* `gym`: handles `gym` messages for interactions with a gym environment.
+- `gym`: handles `gym` messages for interactions with a gym environment.
 
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/gym-skill/" target="_blank">Gym Demo</a>
-* <a href="https://docs.fetch.ai/aea/gym-example/" target="_blank">Gym Example</a>
-* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>
+- <a href="https://docs.fetch.ai/aea/gym-skill/" target="_blank">Gym Demo</a>
+- <a href="https://docs.fetch.ai/aea/gym-example/" target="_blank">Gym Example</a>
+- <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>

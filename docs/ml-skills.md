@@ -1,18 +1,20 @@
-The AEA ML (machine learning) skills demonstrate an interaction between two AEAs, one purchasing data from the other and training a machine learning model with it. 
+# ML Skills
+
+The AEA ML (machine learning) skills demonstrate an interaction between two AEAs, one purchasing data from the other and training a machine learning model with it.
 
 There are two types of AEAs:
 
-* The `ml_data_provider` which sells training data.
-* The `ml_model_trainer` which purchases data and trains a model
+- The `ml_data_provider` which sells training data.
+- The `ml_model_trainer` which purchases data and trains a model
 
 ## Discussion
 
-This demo aims to demonstrate the integration of a simple AEA with machine learning using the AEA framework. The `ml_data_provider` AEA provides some sample data and delivers to the client upon payment. 
+This demo aims to demonstrate the integration of a simple AEA with machine learning using the AEA framework. The `ml_data_provider` AEA provides some sample data and delivers to the client upon payment.
 Once the client receives the data, it trains a model. This process can be found in `tasks.py`.
 This demo does not utilize a smart contract. As a result, the ledger interaction is only for completing a transaction.
 
 Since the AEA framework enables using third-party libraries from PyPI, we can directly reference any external dependencies.
-The `aea install` command installs all dependencies an AEA needs that is listed in one of its skills' YAML file. 
+The `aea install` command installs all dependencies an AEA needs that is listed in one of its skills' YAML file.
 
 ## Communication
 
@@ -49,16 +51,16 @@ This diagram shows the communication between the two AEAs.
         deactivate Ledger
 ```
 
-## Option 1: AEA Manager approach
+## Option 1: AEA Manager Approach
 
-Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below. 
+Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below.
 
-### Preparation instructions
+### Preparation Instructions
 
-* Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
-* Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
+- Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+- Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
 
-### Demo instructions
+### Demo Instructions
 
 The following steps assume you have launched the AEA Manager Desktop app.
 
@@ -71,37 +73,39 @@ The following steps assume you have launched the AEA Manager Desktop app.
 4. Run the `ml_data_provider` AEA. Navigate to its logs and copy the multiaddress displayed.
 
 5. Navigate to the settings of the `ml_model_trainer` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
-``` bash
-{
-  "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
-  "local_uri": "127.0.0.1:9001",
-  "log_file": "libp2p_node.log",
-  "public_uri": "127.0.0.1:9001"
-}
-```
+
+    ``` bash
+    {
+      "delegate_uri": "127.0.0.1:11001",
+      "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+      "local_uri": "127.0.0.1:9001",
+      "log_file": "libp2p_node.log",
+      "public_uri": "127.0.0.1:9001"
+    }
+    ```
 
 6. Run the `ml_model_trainer`.
 
-In the AEA's logs, you should see the agents trading successfully, and the training agent training its machine learning model using the data purchased. 
+In the AEA's logs, you should see the agents trading successfully, and the training agent training its machine learning model using the data purchased.
 The trainer keeps purchasing data and training its model until stopped.  
 
-## Option 2: CLI approach
+## Option 2: CLI Approach
 
 Follow this approach when using the `aea` CLI.
 
-### Preparation instructions
+### Preparation Instructions
 
 #### Dependencies
 
-* Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-* Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
+- Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+- Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
 
-### Demo instructions
+### Demo Instructions
 
-#### Create data provider AEA
+#### Create Data Provider AEA
 
 First, fetch the data provider AEA:
+
 ``` bash
 aea fetch fetchai/ml_data_provider:0.32.4
 cd ml_data_provider
@@ -132,9 +136,10 @@ aea build
     aea build
     ```
 
-#### Create model trainer AEA
+#### Create Model Trainer AEA
 
 Then, fetch the model trainer AEA:
+
 ``` bash
 aea fetch fetchai/ml_model_trainer:0.33.4
 cd ml_model_trainer
@@ -165,47 +170,54 @@ aea build
     aea build
     ```
 
-#### Add keys for the data provider AEA
+#### Add Keys for the Data Provider AEA
 
 First, create the private key for the data provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
 
-#### Add keys and generate wealth for the model trainer AEA
+#### Add Keys and Generate Wealth for the Model Trainer AEA
 
 The model trainer needs to have some wealth to purchase the data from the data provider.
 
 First, create the private key for the model trainer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
 Then, create some wealth for your model trainer based on the network you want to transact with. On the Fetch.ai `Dorado` network:
+
 ``` bash
 aea generate-wealth fetchai
 ```
 
 Next, create a private key used to secure the AEA's communications:
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
+
 ``` bash
 aea issue-certificates
 ```
@@ -224,6 +236,7 @@ Once you see a message of the form `To join its network use multiaddr 'SOME_ADDR
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the ML data provider.
 
 Then, in the ML model trainer, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -234,20 +247,22 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 This allows the model trainer to connect to the same local agent communication network as the data provider.
 
-
 Then run the model trainer AEA:
+
 ``` bash
 aea run
 ```
 
-You can see that the AEAs find each other, negotiate and eventually trade. After the trade, the model trainer AEA trains its ML model using the data it has purchased. 
+You can see that the AEAs find each other, negotiate and eventually trade. After the trade, the model trainer AEA trains its ML model using the data it has purchased.
 This AEA keeps purchasing data and training its model until stopped.
 
 #### Cleaning up
 
 When you're finished, delete your AEAs:
+
 ``` bash
 cd ..
 aea delete ml_data_provider

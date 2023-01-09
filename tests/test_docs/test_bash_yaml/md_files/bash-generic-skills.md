@@ -4,6 +4,7 @@ cd my_seller_aea
 aea install
 aea build
 ```
+
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
@@ -24,12 +25,14 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/generic_buyer:0.30.4 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 aea build
 ```
+
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
@@ -50,43 +53,54 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
+
 ``` bash
 aea generate-wealth fetchai
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 cd my_seller_aea
 aea config set vendor.fetchai.skills.generic_seller.is_abstract false --type bool
 ```
+
 ``` bash
 cd my_buyer_aea
 aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -97,14 +111,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea
 ```
+
 ``` yaml
 models:
   ...
@@ -126,6 +143,7 @@ models:
       unit_price: 10
     class_name: GenericStrategy
 ```
+
 ``` yaml
 models:
   ...
@@ -148,6 +166,7 @@ models:
       service_id: generic_service
     class_name: GenericStrategy
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

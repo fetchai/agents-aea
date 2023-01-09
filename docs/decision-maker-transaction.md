@@ -1,6 +1,8 @@
+# Create Decision-Maker Transaction
+
 This guide can be considered as a part 2 of the <a href="../standalone-transaction/">the stand-alone transaction demo</a>. The main difference is that now we are going to use the decision-maker to sign the transaction.
 
-First, import the libraries and the set the constant values. (Get the packages directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
+First, import the libraries and the set the constant values. (Get the `packages` directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
 
 ``` python
 import logging
@@ -37,9 +39,9 @@ FETCHAI_PRIVATE_KEY_FILE_1 = "fetchai_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
 ```
 
-## Create a private key and an AEA
+## Create a Private Key and an AEA
 
-To have access to the decision-maker, which is responsible for signing transactions, we need to create an AEA. We can create a an AEA with the builder, providing it with a private key we generate first.
+To have access to the decision-maker, which is responsible for signing transactions, we need to create an AEA. We can create an AEA with the builder, providing it with a private key we generate first.
 
 ``` python
     # Create a private key
@@ -59,7 +61,7 @@ To have access to the decision-maker, which is responsible for signing transacti
     my_aea = builder.build()
 ```
 
-## Add a simple skill
+## Add a Simple Skill
 
 Add a simple skill with a signing handler and the signing dialogues.
 
@@ -85,7 +87,8 @@ Add a simple skill with a signing handler and the signing dialogues.
     my_aea.resources.add_skill(simple_skill)
 ```
 
-## Create a second identity
+## Create a Second Identity
+
 ``` python
     # create a second identity
     create_private_key(
@@ -103,9 +106,10 @@ Add a simple skill with a signing handler and the signing dialogues.
     )
 ```
 
-## Create the signing message
+## Create the Signing Message
 
-Next, we are creating the signing message and we send it to the decision-maker.
+Next, we are creating the signing message and sending it to the decision-maker.
+
 ``` python
     # create signing message for decision maker to sign
     terms = Terms(
@@ -143,9 +147,10 @@ Next, we are creating the signing message and we send it to the decision-maker.
 
 ```
 
-## Run the agent
+## Run the Agent
 
-Finally, we are running the agent and we expect the signed transaction to be printed in the terminal.
+Finally, we are running the agent and expect the signed transaction to be printed in the terminal.
+
 ``` python
     # Set the AEA running in a different thread
     try:
@@ -164,9 +169,10 @@ Finally, we are running the agent and we expect the signed transaction to be pri
 
 After the completion of the signing, we get the signed transaction.
 
-## More details
+## More Details
 
 To be able to register a handler that reads the internal messages, we have to create a class at the end of the file which processes the signing messages.
+
 ``` python
 class SigningDialogues(Model, BaseSigningDialogues):
     """Signing dialogues model."""
@@ -299,12 +305,13 @@ class SigningHandler(Handler):
 You can find the full code for this example below:
 
 ??? note "Transaction via decision-maker full code:"
+
     ``` python
     import logging
     import time
     from threading import Thread
     from typing import Optional, cast
-    
+
     from aea_ledger_fetchai import FetchAICrypto
     
     from aea.aea_builder import AEABuilder

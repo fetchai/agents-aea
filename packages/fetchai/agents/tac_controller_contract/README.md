@@ -10,4 +10,4 @@ It uses its `fetchai/tac_control` skill to manage the progression of a competiti
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/tac-skills-contract/" target="_blank">TAC Demo</a>
+- <a href="https://docs.fetch.ai/aea/tac-skills-contract/" target="_blank">TAC Demo</a>
