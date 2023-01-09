@@ -29,30 +29,3 @@ In the <a href="../http-connection-and-skill">http connection guide</a> we demon
 The `fetchai/http_client` connection can be used to make requests to third party servers. In this case, a skill containing the logic for the production of http requests would create messages conforming with the `fetchai/http` protocol and sends it to the `fetchai/http_client` connection which in turn translates it into http payload and sends it to the destination server. 
 
 Note that in general, third party SDKs can be wrapped in a connection and shared with other developers as a package. Often this also involves creating a custom protocol to enforce the type of interactions permitted between skills and the connection wrapping the SDK.
-
-
-## Next steps
-
-### Recommended
-
-We recommend you continue with the next step in the 'Getting Started' series:
-
-- <a href="../generic-skills-step-by-step/">Trade between two AEAs</a>
-
-### Relevant deep-dives
-
-Most AEA development focuses on developing the `Skills` and `Protocols` necessary for an AEA to deliver against its economic objectives and implement interaction protocols.
-
-Understanding `Protocols` is core to developing your own agent. You can learn more about the `Protocols` agents use to communicate with each other and how they are created in the following section:
-
-- <a href="../protocol">Protocols</a>
-
-Most of an AEA developer's time is spent on `Skill` development. `Skills` are the core business logic components of an AEA. Check out the following guide to learn more:
-
-- <a href="../skill">Skills</a>
-
-In most cases, one of the available `Connection` packages can be used. Occasionally, you might develop your own `Connection`:
-
-- <a href="../connection">Connections</a>
-
-<br />

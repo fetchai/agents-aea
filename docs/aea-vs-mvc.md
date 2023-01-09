@@ -20,11 +20,3 @@ The AEA framework is based on <a href="https://en.wikipedia.org/wiki/Asynchronou
 <img src="../assets/skill-components.jpg" alt="AEA Skill Components" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 The `View` concept is probably best compared to the `Message` of a given `Protocol` in the AEA framework. Whilst views represent information to the client, messages represent information sent to other agents, other agent components and services.
-
-## Next steps
-
-We recommend you continue with the next step in the 'Getting Started' series:
-
-- <a href="../skill-guide">Build a skill for an AEA</a>
-
-<br />
