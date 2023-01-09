@@ -296,7 +296,6 @@ nav:
             - Constants: api/plugins/aea_ledger_fetchai/test_tools/constants.md
             - Docker Images: api/plugins/aea_ledger_fetchai/test_tools/docker_images.md
             - HashFuncs: 'api/plugins/aea_ledger_fetchai/hashfuncs.md'
-            - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Registries:
     - IPFS: ipfs_registry.md
     - Package list: 'package_list.md'

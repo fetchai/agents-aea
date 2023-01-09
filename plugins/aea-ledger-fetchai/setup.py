@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,13 +42,7 @@ setup(
             "test_tools/data/*",
         ]
     },
-    install_requires=[
-        "open-aea>=1.0.0, <2.0.0",
-        "ecdsa>=0.15,<0.17.0",
-        "bech32==1.2.0",
-        "pycryptodome>=3.10.1,<4.0.0",
-        "cosmpy>=0.2.0",
-    ],
+    install_requires=["open-aea-ledger-cosmos>=1.27.0,<1.28.0"],
     tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["fetchai = aea_ledger_fetchai:FetchAICrypto"],

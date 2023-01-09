@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,7 +187,7 @@ def test_construct_sign_and_submit_transfer_transaction():
         sender_address=account.address,
         destination_address=fc2.address,
         amount=amount,
-        tx_fee=1000,
+        tx_fee=1550000000000000,
         tx_nonce="something",
     )
     assert (
@@ -278,8 +278,8 @@ def test_get_wealth_positive(caplog):
 
 
 @pytest.mark.ledger
-@mock.patch("aea_ledger_fetchai._cosmos.requests.get")
-@mock.patch("aea_ledger_fetchai._cosmos.requests.post")
+@mock.patch("aea_ledger_cosmos.cosmos.requests.get")
+@mock.patch("aea_ledger_cosmos.cosmos.requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
     """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
@@ -321,8 +321,8 @@ def test_successful_faucet_operation(mock_post, mock_get):
 
 
 @pytest.mark.ledger
-@mock.patch("aea_ledger_fetchai._cosmos.requests.get")
-@mock.patch("aea_ledger_fetchai._cosmos.requests.post")
+@mock.patch("aea_ledger_cosmos.cosmos.requests.get")
+@mock.patch("aea_ledger_cosmos.cosmos.requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
@@ -768,7 +768,7 @@ def test_decrypt_error():
     password = "test"
     encrypted_data = ec.encrypt(password=password)
     with patch(
-        "aea_ledger_fetchai._cosmos.DataEncrypt.decrypt",
+        "aea_ledger_cosmos.cosmos.DataEncrypt.decrypt",
         side_effect=UnicodeDecodeError("expected", b"", 2, 3, ""),
     ):
         with pytest.raises(ValueError, match="bad password?"):
