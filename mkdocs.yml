@@ -18,7 +18,7 @@ nav:
       - How do AEAs create value?:
         - Open Economic Framework (OEF): 'introduction/core-concepts/how-do-aeas-create-value/oef.md'
         - Agent Communication Network (ACN): 'introduction/core-concepts/how-do-aeas-create-value/acn.md'
-          - ACN Internals: 'acn-internals.md' 
+          - ACN Internals: 'acn-internals.md'
         - Search and Discovery (SOEF): 'introduction/core-concepts/how-do-aeas-create-value/search-and-discovery.md'
           - Simple OEF: 'introduction/core-concepts/how-do-aeas-create-value/soef/simple-oef.md'
           - Defining Data Models: 'defining-data-models.md'
