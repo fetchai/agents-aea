@@ -336,7 +336,6 @@ class CoverageContext:
 
         if self.append:
             args.append("--cov-append")
-
         return args
 
     def __enter__(
