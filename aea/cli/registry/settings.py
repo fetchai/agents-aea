@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,8 +28,9 @@ REGISTRY_CONFIG_KEY: str = "registry_config"
 
 REGISTRY_REMOTE = "remote"
 REGISTRY_LOCAL = "local"
+REGISTRY_MIXED = "mixed"
 
-REGISTRY_TYPES: Tuple[str, ...] = (REGISTRY_LOCAL, REGISTRY_REMOTE)
+REGISTRY_TYPES: Tuple[str, ...] = (REGISTRY_LOCAL, REGISTRY_REMOTE, REGISTRY_MIXED)
 
 REMOTE_HTTP = "http"
 REMOTE_IPFS = "ipfs"

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +42,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner
+from tests.conftest import CLI_LOG_OPTION, CliRunner, TEST_IPFS_REGISTRY_CONFIG
 from tests.test_cli.tools_for_testing import (
     ContextMock,
     PublicIdMock,
@@ -160,9 +160,27 @@ class ValidatePkpTestCase(TestCase):
         private_key_paths.read_all.assert_called_once()
 
 
-@mock.patch("aea.cli.publish.MixedRegistry.check_item_present")
-class TestPublishMixedMode(AEATestCaseEmpty):
-    """Test the execution branch with in mixed mode."""
+@mock.patch("aea.cli.publish.RemoteRegistry.check_item_present")
+@mock.patch("aea.cli.registry.utils.check_is_author_logged_in")
+@mock.patch("aea.cli.registry.publish.check_is_author_logged_in")
+@mock.patch("aea.cli.registry.utils.request_api")
+@mock.patch("aea.cli.registry.publish.request_api")
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch(
+    "aea.manager.manager.MultiAgentManager._project_install_and_build",
+    return_value=REMOTE_HTTP,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+@mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+@mock.patch(
+    "aea.configurations.base.ComponentConfiguration.check_fingerprint",
+    return_value=True,
+)
+class TestPublishHTTPdMode(AEATestCaseEmpty):
+    """Test the execution branch with in HTTP mode."""
 
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
@@ -170,8 +188,16 @@ class TestPublishMixedMode(AEATestCaseEmpty):
         self.run_cli_command("publish", cwd=self._get_cwd())
 
 
-@pytest.mark.skip  # need remote registry
-def test_negative_check_is_item_in_remote_registry():
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch(
+    "aea.manager.manager.MultiAgentManager._project_install_and_build",
+    return_value=REMOTE_HTTP,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+def test_negative_check_is_item_in_remote_registry(*_):
     """Test the utility function (negative) to check if an item is in the remote registry"""
     with pytest.raises(click.ClickException, match="Not found in Registry."):
         RemoteRegistry(mock.Mock()).check_item_present(
@@ -194,8 +220,16 @@ def test_negative_check_is_item_in_registry_mixed():
         )
 
 
-@pytest.mark.skip  # need remote registry
-def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch(
+    "aea.manager.manager.MultiAgentManager._project_install_and_build",
+    return_value=REMOTE_HTTP,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely(*_):
     """Check if item in registry, mixed mode, when not in local registry but only in remote."""
     ctx = mock.Mock()
     ctx.registry_path = "some-registry-path"

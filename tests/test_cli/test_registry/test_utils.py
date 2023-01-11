@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,6 +51,8 @@ from aea.helpers.base import cd
 
 from packages.fetchai.protocols.default import DefaultMessage
 
+from tests.conftest import TEST_IPFS_REGISTRY_CONFIG
+
 
 def _raise_connection_error(*args, **kwargs):
     raise ConnectionError()
@@ -64,12 +66,15 @@ def _raise_json_decode_error(*args):
     raise JSONDecodeError(None, "None", 1)  # args requied for JSONDecodeError raising
 
 
-@pytest.mark.skip  # need remote registry
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
 @mock.patch("aea.cli.registry.utils.requests.request")
 class RequestAPITestCase(TestCase):
     """Test case for request_api method."""
 
-    def test_request_api_positive(self, request_mock):
+    def test_request_api_positive(self, request_mock, *_):
         """Test for request_api method positive result."""
         REGISTRY_API_URL = "https://agents-registry.prod.fetch-ai.com/api/v1"
         expected_result = {"correct": "json"}
@@ -93,7 +98,7 @@ class RequestAPITestCase(TestCase):
         result = request_api("GET", "/path", return_code=True)
         self.assertEqual(result, (expected_result, 200))
 
-    def test_request_api_404(self, request_mock):
+    def test_request_api_404(self, request_mock, *_):
         """Test for request_api method 404 server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 404
@@ -101,7 +106,7 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    def test_request_api_500(self, request_mock):
+    def test_request_api_500(self, request_mock, *_):
         """Test for request_api method 500 server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 500
@@ -110,7 +115,7 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    def test_request_api_201(self, request_mock):
+    def test_request_api_201(self, request_mock, *_):
         """Test for request_api method 201 server response."""
         expected_result = {"correct": "json"}
 
@@ -121,7 +126,7 @@ class RequestAPITestCase(TestCase):
         result = request_api("GET", "/path")
         self.assertEqual(result, expected_result)
 
-    def test_request_api_403(self, request_mock):
+    def test_request_api_403(self, request_mock, *_):
         """Test for request_api method notauthorized server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 403
@@ -129,7 +134,7 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    def test_request_api_400(self, request_mock):
+    def test_request_api_400(self, request_mock, *_):
         """Test for request_api method 400 code server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 400
@@ -137,7 +142,7 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    def test_request_api_409(self, request_mock):
+    def test_request_api_409(self, request_mock, *_):
         """Test for request_api method conflict server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 409
@@ -146,7 +151,7 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    def test_request_api_unexpected_response(self, request_mock):
+    def test_request_api_unexpected_response(self, request_mock, *_):
         """Test for request_api method unexpected server response."""
         resp_mock = mock.Mock()
         status_code = 501
@@ -165,7 +170,7 @@ class RequestAPITestCase(TestCase):
 
     @mock.patch("aea.cli.registry.utils.get_or_create_cli_config", return_value={})
     def test_request_api_no_auth_data(
-        self, get_or_create_cli_config_mock, request_mock
+        self, get_or_create_cli_config_mock, request_mock, *_
     ):
         """Test for request_api method no auth data."""
         with self.assertRaises(ClickException):
@@ -176,7 +181,7 @@ class RequestAPITestCase(TestCase):
         return_value={AUTH_TOKEN_KEY: "key"},
     )
     def test_request_api_with_auth_positive(
-        self, get_or_create_cli_config_mock, request_mock
+        self, get_or_create_cli_config_mock, request_mock, *_
     ):
         """Test for request_api method with auth positive result."""
         expected_result = {"correct": "json"}
@@ -190,7 +195,7 @@ class RequestAPITestCase(TestCase):
         self.assertEqual(result, expected_result)
 
     @mock.patch("builtins.open", mock.mock_open())
-    def test_request_api_with_files_positive(self, request_mock):
+    def test_request_api_with_files_positive(self, request_mock, *_):
         """Test for request_api method with file positive result."""
         expected_result = {"correct": "json"}
 
@@ -376,9 +381,12 @@ def test_clean_tarfiles_error():
             assert not tarfile_path.exists()
 
 
-@pytest.mark.skip  # need remote registry
 @pytest.mark.integration
-def test_get_package_meta():
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+def test_get_package_meta(*_):
     """Test get package meta."""
     package_meta = get_package_meta("protocol", DefaultMessage.protocol_id.to_latest())
     assert isinstance(package_meta, dict)

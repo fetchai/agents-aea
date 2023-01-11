@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,6 +72,13 @@ from cosmpy.crypto.keypairs import PrivateKey
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
+from aea.cli.registry.settings import (
+    AUTH_TOKEN_KEY,
+    REGISTRY_LOCAL,
+    REGISTRY_REMOTE,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
+)
 from aea.cli.utils.config import _init_cli_config
 from aea.cli.utils.constants import CLI_CONFIG_PATH, DEFAULT_CLI_CONFIG
 from aea.cli.utils.generic import load_yaml
@@ -241,6 +248,26 @@ FETCHD_CONFIGURATION = dict(
     genesis_account=DEFAULT_GENESIS_ACCOUNT,
     denom=DEFAULT_DENOMINATION,
 )
+
+
+TEST_IPFS_REGISTRY_CONFIG: Dict = {
+    "registry_config": {
+        "default": REGISTRY_REMOTE,
+        "settings": {
+            REGISTRY_REMOTE: {
+                "default": REMOTE_IPFS,
+                REMOTE_HTTP: {
+                    AUTH_TOKEN_KEY: "some key",  # auth token for registry
+                    "registry_api_url": "https://agents-registry.prod.fetch-ai.com/api/v1",  # registry url
+                },
+                REMOTE_IPFS: {
+                    "ipfs_node": "/dns/registry.autonolas.tech/tcp/443/https"
+                },  # IPFS url (in multiaddr format)
+            },
+            REGISTRY_LOCAL: {"default_packages_path": None},
+        },
+    }
+}
 
 
 contract_config_files = [
