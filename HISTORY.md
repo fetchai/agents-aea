@@ -1,5 +1,19 @@
 # Release History - open AEA
 
+## 1.28.0 (2023-01-11)
+
+AEA:
+- Adds checks to make sure the author name and the package name are in snake case only
+- Adds tools for automating the protocol tests
+- Updates the test command to spawn a process for running the pytest command to make sure there are no issues with the test coverage
+- Fixes a race condition found in the `AsyncMultiplexer`
+
+Plugins:
+- Makes the fetchai ledger plugin dependent on the cosmos plugin to prevent code duplication
+
+Tests:
+- Adds a test to showcase a race condition in `AsyncMultiplexer`
+
 ## 1.27.0 (2022-12-27)
 
 AEA:
