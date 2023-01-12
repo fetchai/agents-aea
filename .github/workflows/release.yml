@@ -1,12 +1,5 @@
 name: Release Flow
 
-.publish_base: &publish
-  uses: pypa/gh-action-pypi-publish@release/v1
-  with: &pypi-config
-    user: __token__
-    password: ${{ secrets.PYPI_API_TOKEN }}
-    skip_existing: true
-
 # Controls when the action will run.
 on:
   release:
@@ -69,32 +62,52 @@ jobs:
 
 
       - name: Publish Package to PyPI
-        <<: *publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: dist/
 
       - name: Publish cli-benchmark Plugin to PyPI
-        <<: *publish
-          <<: *pypi-config
-            packages_dir: plugins/aea-cli-benchmark/dist
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-cli-benchmark/dist/
 
       - name: Publish cli-ipfs Plugin to PyPI
-        <<: *publish
-          <<: *pypi-config
-            packages_dir: plugins/aea-cli-ipfs/dist
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-cli-ipfs/dist/
       
       - name: Publish aea-ledger-cosmos Plugin to PyPI
-        <<: *publish
-          <<: *pypi-config
-            packages_dir: plugins/aea-ledger-cosmos/dist
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-cosmos/dist/
       
       - name: Publish aea-ledger-ethereum Plugin to PyPI
-        <<: *publish
-          <<: *pypi-config
-            packages_dir: plugins/aea-ledger-ethereum/dist
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-ethereum/dist/
       
       - name: Publish aea-ledger-fetchai Plugin to PyPI
-        <<: *publish
-          <<: *pypi-config
-            packages_dir: plugins/aea-ledger-fetchai/dist
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-fetchai/dist/
 
   publish-aea-packages:
     name: Push Autonomy Packages
