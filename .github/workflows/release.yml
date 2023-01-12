@@ -112,7 +112,8 @@ jobs:
   publish-aea-packages:
     name: Push Autonomy Packages
     runs-on: ubuntu-20.04
-    depends-on: publish-pip-packages
+    needs:
+      - publish-pip-packages
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -132,6 +133,8 @@ jobs:
   publish-images:
     name: Publish docker images
     runs-on: ubuntu-latest
+    needs:
+      - publish-aea-packages
     steps:
     - uses: actions/checkout@v2
     - name: Set up tag
