@@ -30,6 +30,8 @@ setup(
     author="Valory AG",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
+    long_description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
+    long_description_content_type="text/markdown",
     packages=find_packages(include=["aea_ledger_cosmos*"]),
     package_data={
         "aea_ledger_cosmos": [

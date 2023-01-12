@@ -32,6 +32,8 @@ setup(
     author="Valory AG",
     license="Apache-2.0",
     description="CLI extension for open AEA framework wrapping IPFS functionality.",
+    long_description="CLI extension for open AEA framework wrapping IPFS functionality.",
+    long_description_content_type="text/markdown",
     packages=["aea_cli_ipfs"],
     entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
     install_requires=[

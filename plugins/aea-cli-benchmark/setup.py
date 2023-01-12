@@ -30,6 +30,8 @@ setup(
     author="Valory AG",
     license="Apache-2.0",
     description="CLI extension for AEA framework benchmarking.",
+    long_description="CLI extension for AEA framework benchmarking.",
+    long_description_content_type="text/markdown",
     packages=find_packages(
         where=".", include=["aea_cli_benchmark", "aea_cli_benchmark.*"]
     ),
