@@ -35,38 +35,36 @@ jobs:
           python -m pip install --upgrade pip
           pip install pipenv twine
 
-      - name: New Environment
-        run: |
-          make new_env
-
       - name: Build wheels and source tarball
         run: >-
+          pipenv --python 3.10
+
           echo Processing open-aea
-          make dist
+          pipenv run make dist
 
           echo Processing aea-cli-benchmark
           cd plugins/aea-cli-benchmark
-          python setup.py sdist bdist_wheel
+          pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
           echo Processing aea-cli-ipfs
           cd plugins/aea-cli-ipfs
-          python setup.py sdist bdist_wheel
+          pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
           echo Processing aea-ledger-cosmos
           cd plugins/aea-ledger-cosmos
-          python setup.py sdist bdist_wheel
+          pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
           echo Processing aea-ledger-ethereum
           cd plugins/aea-ledger-ethereum
-          python setup.py sdist bdist_wheel
+          pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
           echo Processing aea-ledger-fetchai
           cd plugins/aea-ledger-fetchai
-          python setup.py sdist bdist_wheel
+          pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
 
