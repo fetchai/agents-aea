@@ -41,17 +41,34 @@ jobs:
 
       - name: Build wheels and source tarball
         run: >-
-          pipenv run make dist
-          for plugin in (
-            aea-cli-benchmark,
-            aea-cli-ipfs,
-            aea-ledger-cosmos,
-            aea-ledger-ethereum,
-            aea-ledger-fetchai
-          ); do;
-            echo processing $plugin;
-            cd $plugin && \
-              python setup.py sdist bdist_wheel || exit 1
+          echo Processing open-aea
+          make dist
+
+          echo Processing aea-cli-benchmark
+          cd plugins/aea-cli-benchmark
+          python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-cli-ipfs
+          cd plugins/aea-cli-ipfs
+          python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-ledger-cosmos
+          cd plugins/aea-ledger-cosmos
+          python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-ledger-ethereum
+          cd plugins/aea-ledger-ethereum
+          python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-ledger-fetchai
+          cd plugins/aea-ledger-fetchai
+          python setup.py sdist bdist_wheel
+          cd ../..
+
 
       - name: Publish Package to PyPI
         <<: *publish
@@ -59,12 +76,12 @@ jobs:
       - name: Publish cli-benchmark Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/cli-benchmark
+            packages_dir: plugins/aea-cli-benchmark
 
       - name: Publish cli-ipfs Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/cli-ipfs
+            packages_dir: plugins/aea-cli-ipfs
       
       - name: Publish aea-ledger-cosmos Plugin to PyPI
         <<: *publish
@@ -102,18 +119,12 @@ jobs:
           aea push-all
 
   publish-images:
+    name: Publish docker images
     runs-on: ubuntu-latest
-    depends-on: publish-aea-packages 
     steps:
     - uses: actions/checkout@v2
     - name: Set up tag
       run: echo export TAG=$(python3 -c "from setup import about; print(about[\"__version__\"])") > env.sh
-    - name: docker login
-      env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build version tagged images
       run: |
         source env.sh
@@ -121,8 +132,6 @@ jobs:
         docker build -t valory/open-aea-develop:$TAG -f develop-image/Dockerfile . && \
         docker build -t valory/open-aea-user:$TAG -f user-image/Dockerfile . && \
         docker build -t valory/open-aea-deploy:$TAG -f deploy-image/Dockerfile . 
-
-
     - name: Tag to latest
       run:  |
         source env.sh
@@ -130,7 +139,12 @@ jobs:
         docker tag valory/open-aea-develop:$TAG valory/open-aea-develop:latest
         docker tag valory/open-aea-user:$TAG valory/open-aea-user:latest
         docker tag valory/open-aea-deploy:$TAG valory/open-aea-deploy:latest
-
+    - name: docker login
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Docker Push
       run: |
         source env.sh
@@ -145,4 +159,3 @@ jobs:
       
         docker push valory/open-aea-deploy:$TAG 
         docker push valory/open-aea-deploy:latest
-
