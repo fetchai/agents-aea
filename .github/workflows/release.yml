@@ -76,27 +76,27 @@ jobs:
       - name: Publish cli-benchmark Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/aea-cli-benchmark
+            packages_dir: plugins/aea-cli-benchmark/dist
 
       - name: Publish cli-ipfs Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/aea-cli-ipfs
+            packages_dir: plugins/aea-cli-ipfs/dist
       
       - name: Publish aea-ledger-cosmos Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/aea-ledger-cosmos
+            packages_dir: plugins/aea-ledger-cosmos/dist
       
       - name: Publish aea-ledger-ethereum Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/aea-ledger-ethereum
+            packages_dir: plugins/aea-ledger-ethereum/dist
       
       - name: Publish aea-ledger-fetchai Plugin to PyPI
         <<: *publish
           <<: *pypi-config
-            packages_dir: plugins/aea-ledger-fetchai
+            packages_dir: plugins/aea-ledger-fetchai/dist
 
   publish-aea-packages:
     name: Push Autonomy Packages
