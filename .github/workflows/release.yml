@@ -32,9 +32,7 @@ jobs:
           pip install pipenv twine
 
       - name: Build wheels and source tarball
-        run: >-
-          pipenv --python 3.10
-
+        run: |
           echo Processing open-aea
           pipenv run make dist
 
