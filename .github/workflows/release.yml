@@ -19,12 +19,15 @@ jobs:
         run: |
           echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
         shell: bash
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-versions }}
       - name: Install dependencies
         run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
           python -m pip install --upgrade pip
           pip install pipenv twine
 
@@ -120,8 +123,15 @@ jobs:
         python-version: ["3.10"]
 
     steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-versions }}
       - name: Install dependencies
         run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
           python -m pip install --upgrade pip
           pip install open-aea[all] --no-cache
 
