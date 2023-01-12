@@ -6,10 +6,110 @@ on:
     types: [published]
 
 jobs:
+  publish-pip-packages:
+    name: Create Framework & Plugin Releases
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-versions }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          python -m pip install --upgrade pip
+          pip install pipenv twine
+
+      - name: Build wheels and source tarball
+        run: |
+          echo Processing open-aea
+          pipenv run make dist
+
+          echo Processing aea-cli-benchmark
+          cd plugins/aea-cli-benchmark
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-cli-ipfs
+          cd plugins/aea-cli-ipfs
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-ledger-cosmos
+          cd plugins/aea-ledger-cosmos
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-ledger-ethereum
+          cd plugins/aea-ledger-ethereum
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
+          echo Processing aea-ledger-fetchai
+          cd plugins/aea-ledger-fetchai
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
+      - name: Publish open-aea Framework to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: dist/
+
+      - name: Publish open-aea-cli-benchmark Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-cli-benchmark/dist/
+
+      - name: Publish open-aea-cli-ipfs Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-cli-ipfs/dist/
+
+      - name: Publish open-aea-ledger-cosmos Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-cosmos/dist/
+
+      - name: Publish open-aea-ledger-ethereum Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-ethereum/dist/
+
+      - name: Publish open-aea-ledger-fetchai Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-fetchai/dist/
+
 
   publish-aea-packages:
     name: Push Open AEA Packages
     runs-on: ubuntu-latest
+    needs:
+      - publish-pip-packages
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -35,7 +135,7 @@ jobs:
           aea push-all
 
   publish-images:
-    name: Publish docker images
+    name: Publish Docker Images
     runs-on: ubuntu-latest
     needs:
       - publish-aea-packages
@@ -57,7 +157,7 @@ jobs:
         docker tag valory/open-aea-develop:$TAG valory/open-aea-develop:latest
         docker tag valory/open-aea-user:$TAG valory/open-aea-user:latest
         docker tag valory/open-aea-deploy:$TAG valory/open-aea-deploy:latest
-    - name: docker login
+    - name: Docker login
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
         DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
