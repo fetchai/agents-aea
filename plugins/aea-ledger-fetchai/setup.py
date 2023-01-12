@@ -35,6 +35,8 @@ setup(
     author="Valory AG",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
+    long_description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
+    long_description_content_type="text/markdown",
     packages=find_packages(include=["aea_ledger_fetchai*"]),
     package_data={
         "aea_ledger_fetchai": [
