@@ -536,9 +536,9 @@ class TestAddConnectionMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
 
     COMPONENT_ID = PublicId(
         "valory",
-        "abci",
-        "0.1.0",
-        "bafybeifln72jkbha5xtkafjj4swrwrktck4ziwk6j7plmzecskhlyamgu4",
+        "http_client",
+        "0.23.0",
+        "bafybeihz3tubwado7j3wlivndzzuj3c6fdsp4ra5r3nqixn3ufawzo3wii",
     )
     COMPONENT_TYPE = PackageType.CONNECTION
 
@@ -558,8 +558,8 @@ class TestAddConnectionMode(BaseTestAddRemoteMode):
 
     COMPONENT_ID = PublicId(
         "valory",
-        "abci",
-        "0.1.0",
-        "bafybeifln72jkbha5xtkafjj4swrwrktck4ziwk6j7plmzecskhlyamgu4",
+        "http_client",
+        "0.23.0",
+        "bafybeihz3tubwado7j3wlivndzzuj3c6fdsp4ra5r3nqixn3ufawzo3wii",
     )
     COMPONENT_TYPE = PackageType.CONNECTION

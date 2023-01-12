@@ -20,7 +20,6 @@
 
 
 """This test module contains the tests for the `aea add skill` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -34,6 +33,7 @@ from jsonschema import ValidationError
 import aea
 from aea.cli import cli
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
+from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -542,10 +542,10 @@ class TestAddSkillMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
     """Test add skill in mixed mode that fails with local falls back to remote registry."""
 
     COMPONENT_ID = PublicId(
-        "valory",
-        "test_abci",
-        "0.1.0",
-        "bafybeigb5myrmvjbfcdcwodoxn7ijdinntza3fagwwjbiho7kjdcr5lbmm",
+        "fetchai",
+        "echo",
+        "0.19.0",
+        "bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
     )
     COMPONENT_TYPE = PackageType.SKILL
 
@@ -555,9 +555,36 @@ class TestAddSkillRemoteMode(BaseTestAddRemoteMode):
     """Test case for add skill, --remote mode."""
 
     COMPONENT_ID = PublicId(
-        "valory",
-        "test_abci",
-        "0.1.0",
-        "bafybeigb5myrmvjbfcdcwodoxn7ijdinntza3fagwwjbiho7kjdcr5lbmm",
+        "fetchai",
+        "echo",
+        "0.19.0",
+        "bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
     )
     COMPONENT_TYPE = PackageType.SKILL
+
+
+@pytest.mark.integration
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS)
+class TestAddSkillWithLatestVersionByHash(AEATestCaseEmpty):
+    """Test case for add skill from hash."""
+
+    SKILL_ID = PublicId.from_json(
+        {
+            **DUMMY_PACKAGE_ID.json,
+            "package_hash": "bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
+        }
+    )
+    SKILL_NAME = "echo"
+
+    def test_add_skill_latest_version(self, *_):
+        """Test add skill with latest version."""
+        self.add_item("skill", str(self.SKILL_ID), local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = self.SKILL_NAME
+        assert item_name in items_folders

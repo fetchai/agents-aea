@@ -120,9 +120,9 @@ class TestAddContractRemoteMode(BaseTestAddRemoteMode):
     """Test case for add contract, --remote mode."""
 
     COMPONENT_ID = PublicId(
-        "valory",
-        "service_registry",
-        "0.1.0",
-        "bafybeif4mgymtachjdhyzemxp7oj2i7itusjvrsxw7cheuvhtypizutu5e",
+        "fetchai",
+        "erc1155",
+        "0.22.0",
+        "bafybeieq5xpb6k52csnzscdqrzo4yizoqxeim46pa5jltrmg7zhihcgspe",
     )
     COMPONENT_TYPE = PackageType.CONTRACT

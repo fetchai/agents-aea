@@ -67,7 +67,7 @@ try:
     from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
     IS_IPFS_PLUGIN_INSTALLED = True
-except ImportError:
+except ImportError:  # pragma: nocover
     IS_IPFS_PLUGIN_INSTALLED = False
 
 

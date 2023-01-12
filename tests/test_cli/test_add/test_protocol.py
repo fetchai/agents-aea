@@ -514,9 +514,9 @@ class TestAddProtocolRemoteMode(BaseTestAddRemoteMode):
     """Test case for add protocol, --remote mode."""
 
     COMPONENT_ID = PublicId(
-        "valory",
-        "tendermint",
-        "0.1.0",
-        "bafybeid6b2wlb24g6d3godmqms44qvnpkhlvb27icotuobvnscmdmlhaha",
+        "fetchai",
+        "fipa",
+        "1.0.0",
+        "bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei",
     )
     COMPONENT_TYPE = PackageType.PROTOCOL
