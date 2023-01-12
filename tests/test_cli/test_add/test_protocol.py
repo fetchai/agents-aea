@@ -509,6 +509,7 @@ class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 class TestAddProtocolRemoteMode(BaseTestAddRemoteMode):
     """Test case for add protocol, --remote mode."""

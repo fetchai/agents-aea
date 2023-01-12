@@ -35,7 +35,7 @@ from aea.configurations.data_types import PackageType, PublicId
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty, CLI_LOG_OPTION
 
-from tests.conftest import AUTHOR, ROOT_DIR, TEST_IPFS_REGISTRY_CONFIG
+from tests.conftest import AUTHOR, MAX_FLAKY_RERUNS, ROOT_DIR, TEST_IPFS_REGISTRY_CONFIG
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -54,6 +54,7 @@ class AddItemDepsTestCase(TestCase):
         _add_item_deps(ctx, "skill", item_config)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 class BaseTestAddRemoteMode(AEATestCaseEmpty):
     """Base test case for add component, --remote mode."""

@@ -281,6 +281,7 @@ class TestFetchLatestVersion(AEATestCaseMany):
 class TestFetchAgentMixed(BaseAEATestCase):
     """Test 'aea fetch' in mixed mode."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     @pytest.mark.integration
     @mock.patch("aea.cli.fetch.fetch_agent_remote")
     @mock.patch(
@@ -312,6 +313,7 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
         """Mock 'add_item' so to always fail."""
         raise click.ClickException(BaseTestFetchAgentError.ERROR_MESSAGE)
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     @pytest.mark.integration
     @mock.patch("aea.cli.fetch.add_item", side_effect=_mock_raise_click_exception)
     @mock.patch("aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_HTTP)

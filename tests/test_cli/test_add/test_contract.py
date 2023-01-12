@@ -115,6 +115,7 @@ class TestAddContractWithLatestVersion(AEATestCaseEmptyFlaky):
         assert item_name in items_folders
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 class TestAddContractRemoteMode(BaseTestAddRemoteMode):
     """Test case for add contract, --remote mode."""

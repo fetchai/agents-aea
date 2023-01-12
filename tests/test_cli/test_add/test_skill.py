@@ -550,6 +550,7 @@ class TestAddSkillMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
     COMPONENT_TYPE = PackageType.SKILL
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 class TestAddSkillRemoteMode(BaseTestAddRemoteMode):
     """Test case for add skill, --remote mode."""
@@ -563,6 +564,7 @@ class TestAddSkillRemoteMode(BaseTestAddRemoteMode):
     COMPONENT_TYPE = PackageType.SKILL
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @mock.patch(
     "aea.cli.registry.utils.get_or_create_cli_config",

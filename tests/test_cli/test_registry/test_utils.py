@@ -51,7 +51,7 @@ from aea.helpers.base import cd
 
 from packages.fetchai.protocols.default import DefaultMessage
 
-from tests.conftest import TEST_IPFS_REGISTRY_CONFIG
+from tests.conftest import MAX_FLAKY_RERUNS, TEST_IPFS_REGISTRY_CONFIG
 
 
 def _raise_connection_error(*args, **kwargs):
@@ -381,6 +381,7 @@ def test_clean_tarfiles_error():
             assert not tarfile_path.exists()
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @mock.patch(
     "aea.cli.registry.utils.get_or_create_cli_config",

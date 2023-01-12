@@ -552,6 +552,7 @@ class TestAddConnectionLocalWhenNoLocalRegistryExists(
     COMPONENT_TYPE = PackageType.CONNECTION
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 class TestAddConnectionMode(BaseTestAddRemoteMode):
     """Test case for add connection, --remote mode."""
