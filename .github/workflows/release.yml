@@ -1,0 +1,148 @@
+name: Release Flow
+
+.publish_base: &publish
+  uses: pypa/gh-action-pypi-publish@release/v1
+  with: &pypi-config
+    user: __token__
+    password: ${{ secrets.PYPI_API_TOKEN }}
+    skip_existing: true
+
+# Controls when the action will run.
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-pip-packages:
+    name: Create Release
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+    steps:
+      - name: Get version from tag
+        id: tag_name
+        run: |
+          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+        shell: bash
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv twine
+
+      - name: New Environment
+        run: |
+          make new_env
+
+      - name: Build wheels and source tarball
+        run: >-
+          pipenv run make dist
+          for plugin in (
+            aea-cli-benchmark,
+            aea-cli-ipfs,
+            aea-ledger-cosmos,
+            aea-ledger-ethereum,
+            aea-ledger-fetchai
+          ); do;
+            echo processing $plugin;
+            cd $plugin && \
+              python setup.py sdist bdist_wheel || exit 1
+
+      - name: Publish Package to PyPI
+        <<: *publish
+
+      - name: Publish cli-benchmark Plugin to PyPI
+        <<: *publish
+          <<: *pypi-config
+            packages_dir: plugins/cli-benchmark
+
+      - name: Publish cli-ipfs Plugin to PyPI
+        <<: *publish
+          <<: *pypi-config
+            packages_dir: plugins/cli-ipfs
+      
+      - name: Publish aea-ledger-cosmos Plugin to PyPI
+        <<: *publish
+          <<: *pypi-config
+            packages_dir: plugins/aea-ledger-cosmos
+      
+      - name: Publish aea-ledger-ethereum Plugin to PyPI
+        <<: *publish
+          <<: *pypi-config
+            packages_dir: plugins/aea-ledger-ethereum
+      
+      - name: Publish aea-ledger-fetchai Plugin to PyPI
+        <<: *publish
+          <<: *pypi-config
+            packages_dir: plugins/aea-ledger-fetchai
+
+  publish-aea-packages:
+    name: Push Autonomy Packages
+    runs-on: ubuntu-20.04
+    depends-on: publish-pip-packages
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+
+    steps:
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install open-aea[all] --no-cache
+
+      - name: Push Packages
+        run: |
+          aea init --reset --author valory --ipfs --remote
+          aea push-all
+
+  publish-images:
+    runs-on: ubuntu-latest
+    depends-on: publish-aea-packages 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up tag
+      run: echo export TAG=$(python3 -c "from setup import about; print(about[\"__version__\"])") > env.sh
+    - name: docker login
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+    - name: Build version tagged images
+      run: |
+        source env.sh
+        docker build -t valory/open-aea-docs:$TAG -f docs-image/Dockerfile . && \
+        docker build -t valory/open-aea-develop:$TAG -f develop-image/Dockerfile . && \
+        docker build -t valory/open-aea-user:$TAG -f user-image/Dockerfile . && \
+        docker build -t valory/open-aea-deploy:$TAG -f deploy-image/Dockerfile . 
+
+
+    - name: Tag to latest
+      run:  |
+        source env.sh
+        docker tag valory/open-aea-docs:$TAG valory/open-aea-docs:latest
+        docker tag valory/open-aea-develop:$TAG valory/open-aea-develop:latest
+        docker tag valory/open-aea-user:$TAG valory/open-aea-user:latest
+        docker tag valory/open-aea-deploy:$TAG valory/open-aea-deploy:latest
+
+    - name: Docker Push
+      run: |
+        source env.sh
+        docker push valory/open-aea-docs:$TAG 
+        docker push valory/open-aea-docs:latest
+      
+        docker push valory/open-aea-develop:$TAG 
+        docker push valory/open-aea-develop:latest
+      
+        docker push valory/open-aea-user:$TAG 
+        docker push valory/open-aea-user:latest
+      
+        docker push valory/open-aea-deploy:$TAG 
+        docker push valory/open-aea-deploy:latest
+
