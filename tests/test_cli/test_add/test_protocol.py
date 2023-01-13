@@ -34,7 +34,7 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
-from aea.configurations.data_types import PackageType
+from aea.configurations.data_types import PackageId, PackageType
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -48,6 +48,7 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS,
     TEST_IPFS_REGISTRY_CONFIG,
     double_escape_windows_path_separator,
+    get_package_id_with_hash,
 )
 from tests.test_cli.test_add.test_generic import BaseTestAddRemoteMode
 
@@ -514,10 +515,15 @@ class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
 class TestAddProtocolRemoteMode(BaseTestAddRemoteMode):
     """Test case for add protocol, --remote mode."""
 
-    COMPONENT_ID = PublicId(
-        "fetchai",
-        "fipa",
-        "1.0.0",
-        "bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei",
-    )
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.PROTOCOL,
+            public_id=PublicId(
+                "fetchai",
+                "fipa",
+                "1.0.0",
+            ),
+        )
+    ).public_id
+
     COMPONENT_TYPE = PackageType.PROTOCOL

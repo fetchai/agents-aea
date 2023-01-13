@@ -122,7 +122,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     dest_path = get_package_path(ctx.cwd, item_type, item_public_id)
     ctx.clean_paths.append(dest_path)
 
-    package_path = find_item(ctx, item_type, item_public_id, dest_path)
+    package_path = fetch_item(ctx, item_type, item_public_id, dest_path)
 
     if from_hash:
         (package_path_temp,) = list(package_path.parent.iterdir())
@@ -159,11 +159,11 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     click.echo(f"Successfully added {item_type} '{item_config.public_id}'.")
 
 
-def find_item(
+def fetch_item(
     ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
 ) -> Path:
     """
-    Unify find item locally, remotely or mixed.
+    Unify fetch item locally, remotely or mixed.
 
     :param ctx: the CLI context.
     :param item_type: the item type.

@@ -40,7 +40,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.configurations.data_types import PackageType
+from aea.configurations.data_types import PackageId, PackageType
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_PUBLIC_ID
@@ -56,6 +56,7 @@ from tests.conftest import (
     ROOT_DIR,
     TEST_IPFS_REGISTRY_CONFIG,
     double_escape_windows_path_separator,
+    get_package_id_with_hash,
 )
 from tests.test_cli.test_add.test_generic import (
     BaseTestAddRemoteMode,
@@ -555,12 +556,16 @@ class TestAddSkillMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
 class TestAddSkillRemoteMode(BaseTestAddRemoteMode):
     """Test case for add skill, --remote mode."""
 
-    COMPONENT_ID = PublicId(
-        "fetchai",
-        "echo",
-        "0.19.0",
-        "bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
-    )
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId(
+                "fetchai",
+                "echo",
+                "0.19.0",
+            ),
+        )
+    ).public_id
     COMPONENT_TYPE = PackageType.SKILL
 
 
@@ -577,7 +582,7 @@ class TestAddSkillWithLatestVersionByHash(AEATestCaseEmpty):
     SKILL_ID = PublicId.from_json(
         {
             **DUMMY_PACKAGE_ID.json,
-            "package_hash": "bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
+            "package_hash": TestAddSkillRemoteMode.COMPONENT_ID.hash,
         }
     )
     SKILL_NAME = "echo"

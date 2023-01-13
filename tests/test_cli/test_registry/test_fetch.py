@@ -26,7 +26,7 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.registry.fetch import fetch_agent_http
+from aea.cli.registry.fetch import fetch_agent
 
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -68,7 +68,7 @@ class TestFetchAgent(TestCase):
     ):
         """Test for fetch_agent method positive result."""
         public_id_mock = PublicIdMock()
-        fetch_agent_http(ContextMock(), public_id_mock, alias="alias")
+        fetch_agent(ContextMock(), public_id_mock, alias="alias")
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -97,7 +97,7 @@ class TestFetchAgent(TestCase):
         ctx_mock = ContextMock(
             connections=["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)]
         )
-        fetch_agent_http(ctx_mock, public_id_mock)
+        fetch_agent(ctx_mock, public_id_mock)
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -125,7 +125,7 @@ class TestFetchAgent(TestCase):
             connections=["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)]
         )
         with self.assertRaises(ClickException):
-            fetch_agent_http(ctx_mock, PublicIdMock())
+            fetch_agent(ctx_mock, PublicIdMock())
 
     @classmethod
     def teardown_class(cls):

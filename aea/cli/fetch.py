@@ -27,7 +27,7 @@ from typing import Optional, Union, cast
 import click
 
 from aea.cli.add import add_item
-from aea.cli.registry.fetch import fetch_agent_http
+from aea.cli.registry.fetch import fetch_agent
 from aea.cli.registry.settings import REGISTRY_LOCAL, REGISTRY_REMOTE, REMOTE_IPFS
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import (
@@ -125,7 +125,7 @@ def fetch_agent_remote(
     else:
         # http
 
-        fetch_agent_http(ctx, public_id, alias=alias, target_dir=target_dir)
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:

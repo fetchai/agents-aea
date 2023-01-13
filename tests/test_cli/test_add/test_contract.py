@@ -26,7 +26,7 @@ import pytest
 
 from aea.cli import cli
 from aea.cli.registry.settings import REMOTE_HTTP
-from aea.configurations.data_types import PackageType, PublicId
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmptyFlaky
 
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
@@ -36,6 +36,7 @@ from tests.conftest import (
     CliRunner,
     MAX_FLAKY_RERUNS,
     TEST_IPFS_REGISTRY_CONFIG,
+    get_package_id_with_hash,
 )
 from tests.test_cli.test_add.test_generic import BaseTestAddRemoteMode
 
@@ -120,10 +121,14 @@ class TestAddContractWithLatestVersion(AEATestCaseEmptyFlaky):
 class TestAddContractRemoteMode(BaseTestAddRemoteMode):
     """Test case for add contract, --remote mode."""
 
-    COMPONENT_ID = PublicId(
-        "fetchai",
-        "erc1155",
-        "0.22.0",
-        "bafybeieq5xpb6k52csnzscdqrzo4yizoqxeim46pa5jltrmg7zhihcgspe",
-    )
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.CONTRACT,
+            public_id=PublicId(
+                "fetchai",
+                "erc1155",
+                "0.22.0",
+            ),
+        )
+    ).public_id
     COMPONENT_TYPE = PackageType.CONTRACT

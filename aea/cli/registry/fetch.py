@@ -44,7 +44,7 @@ from aea.helpers.io import open_file
 
 
 @clean_after
-def fetch_agent_http(
+def fetch_agent(
     ctx: Context,
     public_id: PublicId,
     alias: Optional[str] = None,

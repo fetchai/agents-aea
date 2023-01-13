@@ -33,7 +33,7 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
-from aea.configurations.data_types import PackageType
+from aea.configurations.data_types import PackageId, PackageType
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.connections.local.connection import (
@@ -51,6 +51,7 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS,
     TEST_IPFS_REGISTRY_CONFIG,
     double_escape_windows_path_separator,
+    get_package_id_with_hash,
 )
 from tests.test_cli.test_add.test_generic import (
     BaseTestAddConnectionLocalWhenNoLocalRegistryExists,
@@ -534,12 +535,16 @@ class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
 class TestAddConnectionMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
     """Test add skill in mixed mode that fails with local falls back to remote registry."""
 
-    COMPONENT_ID = PublicId(
-        "valory",
-        "http_client",
-        "0.23.0",
-        "bafybeihz3tubwado7j3wlivndzzuj3c6fdsp4ra5r3nqixn3ufawzo3wii",
-    )
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.CONNECTION,
+            public_id=PublicId(
+                "valory",
+                "http_client",
+                "0.23.0",
+            ),
+        )
+    ).public_id
     COMPONENT_TYPE = PackageType.CONNECTION
 
 
@@ -557,10 +562,5 @@ class TestAddConnectionLocalWhenNoLocalRegistryExists(
 class TestAddConnectionMode(BaseTestAddRemoteMode):
     """Test case for add connection, --remote mode."""
 
-    COMPONENT_ID = PublicId(
-        "valory",
-        "http_client",
-        "0.23.0",
-        "bafybeihz3tubwado7j3wlivndzzuj3c6fdsp4ra5r3nqixn3ufawzo3wii",
-    )
+    COMPONENT_ID = TestAddConnectionMixedModeFallsBack.COMPONENT_ID
     COMPONENT_TYPE = PackageType.CONNECTION

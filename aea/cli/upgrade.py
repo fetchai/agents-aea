@@ -29,7 +29,7 @@ import click
 import aea
 from aea.cli.add import add_item
 from aea.cli.eject import _eject_item
-from aea.cli.registry.fetch import fetch_agent_http
+from aea.cli.registry.fetch import fetch_agent
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
     ItemRemoveHelper,
@@ -303,7 +303,7 @@ class ProjectUpgrader:
                 f"Cannot remote path {current_path}. Error: {str(e)}."
             )
 
-        fetch_agent_http(self.ctx, new_item, alias=self._TEMP_ALIAS)
+        fetch_agent(self.ctx, new_item, alias=self._TEMP_ALIAS)
         self.ctx.cwd = str(current_path)
         self._unpack_fetched_agent()
         return True
