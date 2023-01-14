@@ -60,7 +60,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Set up the test class."""
         super(TestCliTransferFetchAINetwork, cls).setup_class()
         cls.agent_name2 = "agent_" + "".join(
-            random.choices(string.ascii_lowercase, k=5)
+            random.choices(string.ascii_lowercase, k=5)  # nosec
         )
         cls.create_agents(cls.agent_name2)
 
