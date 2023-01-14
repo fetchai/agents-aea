@@ -138,7 +138,7 @@ class DataEncrypt:
         password: str, salt: Optional[bytes] = None
     ) -> Tuple[bytes, bytes]:
         salt = salt or get_random_bytes(16)
-        key = scrypt(password, salt, 16, N=2 ** 14, r=8, p=1)  # type: ignore
+        key = scrypt(password, salt, 16, N=2**14, r=8, p=1)  # type: ignore
         return key, salt  # type: ignore
 
     @classmethod
