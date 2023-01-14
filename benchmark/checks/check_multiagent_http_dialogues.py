@@ -185,8 +185,8 @@ def run(
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
-    for agent in agents:
-        wait_for_condition(lambda: agent.is_running, timeout=5)
+    for agent_ in agents:
+        wait_for_condition(lambda a=agent_: a.is_running, timeout=5)
     wait_for_condition(lambda: runner.is_running, timeout=5)
     time.sleep(1)
 

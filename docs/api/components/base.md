@@ -9,7 +9,7 @@ This module contains definitions of agent components.
 ## Component Objects
 
 ```python
-class Component(ABC,  WithLogger)
+class Component(ABC, WithLogger)
 ```
 
 Abstract class for an agent component.
@@ -19,7 +19,9 @@ Abstract class for an agent component.
 #### `__`init`__`
 
 ```python
-def __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs: Any, ,) -> None
+def __init__(configuration: Optional[ComponentConfiguration] = None,
+             is_vendor: bool = False,
+             **kwargs: Any) -> None
 ```
 
 Initialize a package.
@@ -191,7 +193,8 @@ Get string from package id prefix.
 #### perform`_`load`_`aea`_`package
 
 ```python
-def perform_load_aea_package(dir_: Path, author: str, package_type_plural: str, package_name: str) -> None
+def perform_load_aea_package(dir_: Path, author: str, package_type_plural: str,
+                             package_name: str) -> None
 ```
 
 Load the AEA package from values provided.
@@ -199,8 +202,8 @@ Load the AEA package from values provided.
 It adds all the __init__.py modules into `sys.modules`.
 
 This function also checks that:
-- all packages declared as dependencies are used in package modules;
-- all imports correspond to a package declared as dependency.
+ - all packages declared as dependencies are used in package modules;
+ - all imports correspond to a package declared as dependency.
 
 **Arguments**:
 

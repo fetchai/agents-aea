@@ -175,7 +175,8 @@ Contains context information of an envelope.
 #### `__`init`__`
 
 ```python
-def __init__(connection_id: Optional[PublicId] = None, uri: Optional[URI] = None) -> None
+def __init__(connection_id: Optional[PublicId] = None,
+             uri: Optional[URI] = None) -> None
 ```
 
 Initialize the envelope context.
@@ -369,7 +370,11 @@ The top level message class for agent to agent communication.
 #### `__`init`__`
 
 ```python
-def __init__(to: Address, sender: Address, message: Union[Message, bytes], context: Optional[EnvelopeContext] = None, protocol_specification_id: Optional[PublicId] = None) -> None
+def __init__(to: Address,
+             sender: Address,
+             message: Union[Message, bytes],
+             context: Optional[EnvelopeContext] = None,
+             protocol_specification_id: Optional[PublicId] = None) -> None
 ```
 
 Initialize a Message object.
@@ -559,7 +564,9 @@ the encoded envelope.
 
 ```python
 @classmethod
-def decode(cls, envelope_bytes: bytes, serializer: Optional[EnvelopeSerializer] = None) -> "Envelope"
+def decode(cls,
+           envelope_bytes: bytes,
+           serializer: Optional[EnvelopeSerializer] = None) -> "Envelope"
 ```
 
 Decode the envelope.

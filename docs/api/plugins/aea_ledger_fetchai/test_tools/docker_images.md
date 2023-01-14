@@ -19,7 +19,11 @@ Wrapper to Fetch ledger Docker image.
 #### `__`init`__`
 
 ```python
-def __init__(client: DockerClient, addr: str, port: int, tag: str, config: Optional[Dict] = None)
+def __init__(client: DockerClient,
+             addr: str,
+             port: int,
+             tag: str,
+             config: Optional[Dict] = None)
 ```
 
 Initialize the Fetch ledger Docker image.

@@ -19,15 +19,16 @@ Utility class to store and retrieve crypto objects.
 #### `__`init`__`
 
 ```python
-def __init__(crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None) -> None
+def __init__(crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None,
+             password: Optional[str] = None) -> None
 ```
 
 Initialize the crypto store.
 
 **Arguments**:
 
-    to the private key.
 - `crypto_id_to_path`: dictionary from crypto id to an (optional) path
+to the private key.
 - `password`: the password to encrypt/decrypt the private key.
 
 <a id="aea.crypto.wallet.CryptoStore.public_keys"></a>
@@ -94,7 +95,11 @@ The cryptos are separated into two categories:
 #### `__`init`__`
 
 ```python
-def __init__(private_key_paths: Dict[str, Optional[str]], connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None)
+def __init__(
+        private_key_paths: Dict[str, Optional[str]],
+        connection_private_key_paths: Optional[Dict[str,
+                                                    Optional[str]]] = None,
+        password: Optional[str] = None)
 ```
 
 Instantiate a wallet object.
@@ -176,7 +181,9 @@ Get the connection crypto store.
 #### sign`_`message
 
 ```python
-def sign_message(crypto_id: str, message: bytes, is_deprecated_mode: bool = False) -> Optional[str]
+def sign_message(crypto_id: str,
+                 message: bytes,
+                 is_deprecated_mode: bool = False) -> Optional[str]
 ```
 
 Sign a message.

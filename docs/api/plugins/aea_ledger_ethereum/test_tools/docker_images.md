@@ -19,7 +19,11 @@ Wrapper to Ganache Docker image.
 #### `__`init`__`
 
 ```python
-def __init__(client: DockerClient, addr: str, port: int, config: Optional[Dict] = None, gas_limit: str = "0x9184e72a000")
+def __init__(client: DockerClient,
+             addr: str,
+             port: int,
+             config: Optional[Dict] = None,
+             gas_limit: str = "0x9184e72a000")
 ```
 
 Initialize the Ganache Docker image.

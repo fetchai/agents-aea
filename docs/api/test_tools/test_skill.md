@@ -19,7 +19,8 @@ A metaclass that validates BaseSkillTestCase's class.
 #### `__`new`__`
 
 ```python
-def __new__(mcs, name: str, bases: Tuple, namespace: Dict, **kwargs: Any) -> Type
+def __new__(mcs, name: str, bases: Tuple, namespace: Dict,
+            **kwargs: Any) -> Type
 ```
 
 Initialize the class.
@@ -131,13 +132,14 @@ Assert the quantity of messages in the decision maker queue.
 
 ```python
 @staticmethod
-def message_has_attributes(actual_message: Message, message_type: Type[Message], **kwargs: Any, ,) -> Tuple[bool, str]
+def message_has_attributes(actual_message: Message,
+                           message_type: Type[Message],
+                           **kwargs: Any) -> Tuple[bool, str]
 ```
 
 Evaluates whether a message's attributes match the expected attributes provided.
 
 **Arguments**:
-
 
 - `actual_message`: the actual message
 - `message_type`: the expected message type
@@ -152,7 +154,16 @@ boolean result of the evaluation and accompanied message
 #### build`_`incoming`_`message
 
 ```python
-def build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Optional[Address] = None, is_agent_to_agent_messages: Optional[bool] = None, **kwargs: Any, ,) -> Message
+def build_incoming_message(message_type: Type[Message],
+                           performative: Message.Performative,
+                           dialogue_reference: Optional[Tuple[str,
+                                                              str]] = None,
+                           message_id: Optional[int] = None,
+                           target: Optional[int] = None,
+                           to: Optional[Address] = None,
+                           sender: Optional[Address] = None,
+                           is_agent_to_agent_messages: Optional[bool] = None,
+                           **kwargs: Any) -> Message
 ```
 
 Quickly create an incoming message with the provided attributes.
@@ -160,7 +171,6 @@ Quickly create an incoming message with the provided attributes.
 For any attribute not provided, the corresponding default value in message is used.
 
 **Arguments**:
-
 
 - `message_type`: the type of the message
 - `dialogue_reference`: the dialogue_reference
@@ -181,7 +191,16 @@ the created incoming message
 #### build`_`incoming`_`message`_`for`_`skill`_`dialogue
 
 ```python
-def build_incoming_message_for_skill_dialogue(dialogue: Dialogue, performative: Message.Performative, message_type: Optional[Type[Message]] = None, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Optional[Address] = None, **kwargs: Any, ,) -> Message
+def build_incoming_message_for_skill_dialogue(
+        dialogue: Dialogue,
+        performative: Message.Performative,
+        message_type: Optional[Type[Message]] = None,
+        dialogue_reference: Optional[Tuple[str, str]] = None,
+        message_id: Optional[int] = None,
+        target: Optional[int] = None,
+        to: Optional[Address] = None,
+        sender: Optional[Address] = None,
+        **kwargs: Any) -> Message
 ```
 
 Quickly create an incoming message with the provided attributes for a dialogue.
@@ -194,7 +213,6 @@ which is being tested. Because for any unspecified attribute, a "correct" value 
 the test will be, by design, insured to pass on these values.
 
 **Arguments**:
-
 
 - `dialogue`: the dialogue to which the incoming message is intended
 - `performative`: the performative of the message
@@ -215,7 +233,11 @@ the created incoming message
 #### prepare`_`skill`_`dialogue
 
 ```python
-def prepare_skill_dialogue(dialogues: Dialogues, messages: Tuple[DialogueMessage, ...], counterparty: Optional[Address] = None, is_agent_to_agent_messages: Optional[bool] = None) -> Dialogue
+def prepare_skill_dialogue(
+        dialogues: Dialogues,
+        messages: Tuple[DialogueMessage, ...],
+        counterparty: Optional[Address] = None,
+        is_agent_to_agent_messages: Optional[bool] = None) -> Dialogue
 ```
 
 Quickly create a dialogue.
@@ -228,7 +250,6 @@ For every DialogueMessage (performative, contents, is_incoming, target):
     for any other message, it is the index of the message before it in the tuple of messages + 1.
 
 **Arguments**:
-
 
 - `dialogues`: a dialogues class
 - `counterparty`: the message_id

@@ -104,7 +104,11 @@ Wrapper to Ganache Docker image.
 #### `__`init`__`
 
 ```python
-def __init__(client: DockerClient, addr: str, port: int, config: Optional[Dict] = None, gas_limit: int = 10000000000000)
+def __init__(client: DockerClient,
+             addr: str,
+             port: int,
+             config: Optional[Dict] = None,
+             gas_limit: int = 10000000000000)
 ```
 
 Initialize the Ganache Docker image.
@@ -163,7 +167,11 @@ Wrapper to Fetch ledger Docker image.
 #### `__`init`__`
 
 ```python
-def __init__(client: DockerClient, addr: str, port: int, tag: str, config: Optional[Dict] = None)
+def __init__(client: DockerClient,
+             addr: str,
+             port: int,
+             tag: str,
+             config: Optional[Dict] = None)
 ```
 
 Initialize the Fetch ledger Docker image.

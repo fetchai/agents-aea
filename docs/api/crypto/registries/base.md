@@ -30,7 +30,7 @@ Get the id name.
 ## EntryPoint Objects
 
 ```python
-class EntryPoint(Generic[ItemType],  RegexConstrainedString)
+class EntryPoint(Generic[ItemType], RegexConstrainedString)
 ```
 
 The entry point for a resource.
@@ -100,7 +100,10 @@ A specification for a particular instance of an object.
 #### `__`init`__`
 
 ```python
-def __init__(id_: ItemId, entry_point: EntryPoint[ItemType], class_kwargs: Optional[Dict[str, Any]] = None, **kwargs: Dict, ,) -> None
+def __init__(id_: ItemId,
+             entry_point: EntryPoint[ItemType],
+             class_kwargs: Optional[Dict[str, Any]] = None,
+             **kwargs: Dict) -> None
 ```
 
 Initialize an item specification.
@@ -180,7 +183,10 @@ Get the supported item ids.
 #### register
 
 ```python
-def register(id_: Union[ItemId, str], entry_point: Union[EntryPoint[ItemType], str], class_kwargs: Optional[Dict[str, Any]] = None, **kwargs: Any, ,) -> None
+def register(id_: Union[ItemId, str],
+             entry_point: Union[EntryPoint[ItemType], str],
+             class_kwargs: Optional[Dict[str, Any]] = None,
+             **kwargs: Any) -> None
 ```
 
 Register an item type.
@@ -197,23 +203,25 @@ Register an item type.
 #### make
 
 ```python
-def make(id_: Union[ItemId, str], module: Optional[str] = None, **kwargs: Any) -> ItemType
+def make(id_: Union[ItemId, str],
+         module: Optional[str] = None,
+         **kwargs: Any) -> ItemType
 ```
 
 Create an instance of the associated type item id.
 
 **Arguments**:
 
-    before calling this function.
-    whether a module should be loaded before creating the object.
-    this argument is useful when the item might not be registered
-    beforehand, and loading the specified module will make the registration.
-    E.g. suppose the call to 'register' for a custom object
-    is located in some_package/__init__.py. By providing module="some_package",
-    the call to 'register' in such module gets triggered and
-    the make can then find the identifier.
 - `id_`: the id of the item class. Make sure it has been registered earlier
+before calling this function.
 - `module`: dotted path to a module.
+whether a module should be loaded before creating the object.
+this argument is useful when the item might not be registered
+beforehand, and loading the specified module will make the registration.
+E.g. suppose the call to 'register' for a custom object
+is located in some_package/__init__.py. By providing module="some_package",
+the call to 'register' in such module gets triggered and
+the make can then find the identifier.
 - `kwargs`: keyword arguments to be forwarded to the object.
 
 **Returns**:
@@ -225,23 +233,24 @@ the new item instance.
 #### make`_`cls
 
 ```python
-def make_cls(id_: Union[ItemId, str], module: Optional[str] = None) -> Type[ItemType]
+def make_cls(id_: Union[ItemId, str],
+             module: Optional[str] = None) -> Type[ItemType]
 ```
 
 Load a class of the associated type item id.
 
 **Arguments**:
 
-    before calling this function.
-    whether a module should be loaded before creating the object.
-    this argument is useful when the item might not be registered
-    beforehand, and loading the specified module will make the registration.
-    E.g. suppose the call to 'register' for a custom object
-    is located in some_package/__init__.py. By providing module="some_package",
-    the call to 'register' in such module gets triggered and
-    the make can then find the identifier.
 - `id_`: the id of the item class. Make sure it has been registered earlier
+before calling this function.
 - `module`: dotted path to a module.
+whether a module should be loaded before creating the object.
+this argument is useful when the item might not be registered
+beforehand, and loading the specified module will make the registration.
+E.g. suppose the call to 'register' for a custom object
+is located in some_package/__init__.py. By providing module="some_package",
+the call to 'register' in such module gets triggered and
+the make can then find the identifier.
 
 **Returns**:
 

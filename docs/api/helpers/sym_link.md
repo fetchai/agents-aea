@@ -47,7 +47,7 @@ symbolic link directory to the target directory.
 
 So:
 1) from link_path, extract the number of jumps to the parent directory
-in order to reach the repository root directory, and chain many "../" paths.
+  in order to reach the repository root directory, and chain many "../" paths.
 2) from target_path, compute the relative path to the root
 3) relative_target_path is just the concatenation of the results from step (1) and (2).
 

@@ -27,7 +27,8 @@ the component class
 #### load`_`component`_`from`_`config
 
 ```python
-def load_component_from_config(configuration: ComponentConfiguration, *args, **kwargs) -> Component
+def load_component_from_config(configuration: ComponentConfiguration, *args,
+                               **kwargs) -> Component
 ```
 
 Load a component from a directory.

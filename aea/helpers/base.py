@@ -350,7 +350,9 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
 
 
 def try_decorator(
-    error_message: str, default_return: Callable = None, logger_method: Any = "error"
+    error_message: str,
+    default_return: Optional[Callable] = None,
+    logger_method: Any = "error",
 ) -> Callable:
     """
     Run function, log and return default value on exception.

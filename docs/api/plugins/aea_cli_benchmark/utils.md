@@ -9,7 +9,9 @@ Performance checks utils.
 #### wait`_`for`_`condition
 
 ```python
-def wait_for_condition(condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout") -> None
+def wait_for_condition(condition_checker: Callable,
+                       timeout: int = 2,
+                       error_msg: str = "Timeout") -> None
 ```
 
 Wait for condition occurs in selected timeout.
@@ -19,7 +21,13 @@ Wait for condition occurs in selected timeout.
 #### make`_`agent
 
 ```python
-def make_agent(agent_name: str = "my_agent", runtime_mode: str = "threaded", resources: Optional[Resources] = None, wallet: Optional[Wallet] = None, identity: Optional[Identity] = None, packages_dir=PACKAGES_DIR, default_ledger=None) -> AEA
+def make_agent(agent_name: str = "my_agent",
+               runtime_mode: str = "threaded",
+               resources: Optional[Resources] = None,
+               wallet: Optional[Wallet] = None,
+               identity: Optional[Identity] = None,
+               packages_dir=PACKAGES_DIR,
+               default_ledger=None) -> AEA
 ```
 
 Make AEA instance.
@@ -29,7 +37,9 @@ Make AEA instance.
 #### make`_`envelope
 
 ```python
-def make_envelope(sender: str, to: str, message: Optional[Message] = None) -> Envelope
+def make_envelope(sender: str,
+                  to: str,
+                  message: Optional[Message] = None) -> Envelope
 ```
 
 Make an envelope.
@@ -191,7 +201,10 @@ Generate an envelope.
 #### make`_`skill
 
 ```python
-def make_skill(agent: AEA, handlers: Optional[Dict[str, Type[Handler]]] = None, behaviours: Optional[Dict[str, Type[Behaviour]]] = None, skill_id: Optional[PublicId] = None) -> Skill
+def make_skill(agent: AEA,
+               handlers: Optional[Dict[str, Type[Handler]]] = None,
+               behaviours: Optional[Dict[str, Type[Behaviour]]] = None,
+               skill_id: Optional[PublicId] = None) -> Skill
 ```
 
 Construct skill instance for agent from behaviours.
@@ -211,13 +224,13 @@ Get memory usage of the current process in megabytes.
 #### multi`_`run
 
 ```python
-def multi_run(num_runs: int, fn: Callable, args: Tuple) -> List[Tuple[str, Any, Any, Any]]
+def multi_run(num_runs: int, fn: Callable,
+              args: Tuple) -> List[Tuple[str, Any, Any, Any]]
 ```
 
 Perform multiple test runs.
 
 **Arguments**:
-
 
 - `num_runs`: host many times to run
 - `fn`: callable  that returns list of tuples with result
@@ -232,7 +245,9 @@ list of tuples of results
 #### print`_`results
 
 ```python
-def print_results(output_format: str, parameters: Dict, result_fn: Callable[..., List[Tuple[str, Any, Any, Any]]]) -> Any
+def print_results(
+        output_format: str, parameters: Dict,
+        result_fn: Callable[..., List[Tuple[str, Any, Any, Any]]]) -> Any
 ```
 
 Print result for multi_run response.
@@ -253,7 +268,8 @@ Make indentity for ledger id and wallet specified.
 
 ```python
 @contextmanager
-def with_packages(packages: List[Tuple[str, str]], packages_dir: Optional[Path] = None)
+def with_packages(packages: List[Tuple[str, str]],
+                  packages_dir: Optional[Path] = None)
 ```
 
 Download and install packages context manager.

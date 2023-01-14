@@ -19,7 +19,9 @@ Load yaml file.
 #### dump`_`yaml
 
 ```python
-def dump_yaml(file_path: Path, data: Dict, extra_data: Optional[List[Dict]] = None) -> None
+def dump_yaml(file_path: Path,
+              data: Dict,
+              extra_data: Optional[List[Dict]] = None) -> None
 ```
 
 Dump yaml file.
@@ -81,7 +83,8 @@ Returns a list of all available dependencies.
 
 ```python
 @classmethod
-def resolve_tree(cls, dependency_list: Dict[PackageId, List[PackageId]]) -> Dict
+def resolve_tree(cls, dependency_list: Dict[PackageId,
+                                            List[PackageId]]) -> Dict
 ```
 
 Resolve dependency tree.
@@ -100,7 +103,8 @@ the dependency tree
 
 ```python
 @classmethod
-def flatten_tree(cls, dependency_tree: Dict, flat_tree: List[List[PackageId]], level: int) -> None
+def flatten_tree(cls, dependency_tree: Dict, flat_tree: List[List[PackageId]],
+                 level: int) -> None
 ```
 
 Flatten tree.
@@ -122,7 +126,8 @@ Find packages in an AEA project.
 
 ```python
 @staticmethod
-def find_packages_in_a_local_repository(packages_dir: Path) -> List[Tuple[str, Path]]
+def find_packages_in_a_local_repository(
+        packages_dir: Path) -> List[Tuple[str, Path]]
 ```
 
 Find packages in a local repository.
@@ -133,7 +138,9 @@ Find packages in a local repository.
 
 ```python
 @classmethod
-def generate(cls, packages_dir: Path, from_project: bool = False) -> List[List[PackageId]]
+def generate(cls,
+             packages_dir: Path,
+             from_project: bool = False) -> List[List[PackageId]]
 ```
 
 Returns PublicId to hash mapping.

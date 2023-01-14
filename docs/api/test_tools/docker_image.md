@@ -94,7 +94,9 @@ True if the wait was successful, False otherwise.
 #### launch`_`image
 
 ```python
-def launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10) -> Generator
+def launch_image(image: DockerImage,
+                 timeout: float = 2.0,
+                 max_attempts: int = 10) -> Generator
 ```
 
 Launch image.

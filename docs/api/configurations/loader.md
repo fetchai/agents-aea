@@ -73,7 +73,7 @@ list of required fields.
 ## ConfigLoader Objects
 
 ```python
-class ConfigLoader(Generic[T],  BaseConfigLoader)
+class ConfigLoader(Generic[T], BaseConfigLoader)
 ```
 
 Parsing, serialization and validation for package configuration files.
@@ -83,7 +83,9 @@ Parsing, serialization and validation for package configuration files.
 #### `__`init`__`
 
 ```python
-def __init__(schema_filename: str, configuration_class: Type[T], skip_aea_validation: bool = True) -> None
+def __init__(schema_filename: str,
+             configuration_class: Type[T],
+             skip_aea_validation: bool = True) -> None
 ```
 
 Initialize the parser for configuration files.
@@ -136,13 +138,13 @@ Load an agent configuration file.
 
 - `file_pointer`: the file pointer to the configuration file
 
-**Returns**:
-
-the configuration object.
-
 **Raises**:
 
 - `ValueError`: If there are incorrect number of YAML documents provided
+
+**Returns**:
+
+the configuration object.
 
 <a id="aea.configurations.loader.ConfigLoader.load"></a>
 
@@ -183,7 +185,10 @@ Dump a configuration.
 
 ```python
 @classmethod
-def from_configuration_type(cls, configuration_type: Union[PackageType, str], package_type_config_class: Optional[Dict] = None, **kwargs: Any, ,) -> "ConfigLoader"
+def from_configuration_type(cls,
+                            configuration_type: Union[PackageType, str],
+                            package_type_config_class: Optional[Dict] = None,
+                            **kwargs: Any) -> "ConfigLoader"
 ```
 
 Get the configuration loader from the type.
@@ -203,13 +208,13 @@ the configuration loader
 #### load`_`agent`_`config`_`from`_`json
 
 ```python
-def load_agent_config_from_json(configuration_json: List[Dict], validate: bool = True) -> AgentConfig
+def load_agent_config_from_json(configuration_json: List[Dict],
+                                validate: bool = True) -> AgentConfig
 ```
 
 Load agent configuration from configuration json data.
 
 **Arguments**:
-
 
 - `configuration_json`: list of dicts with agent configuration
 - `validate`: whether to validate or not
@@ -234,7 +239,10 @@ Configuration Loader class to load any package type.
 
 ```python
 @classmethod
-def from_package_type(cls, configuration_type: Union[PackageType, str], package_type_config_class: Optional[Dict] = None, **kwargs: Any, ,) -> "ConfigLoader"
+def from_package_type(cls,
+                      configuration_type: Union[PackageType, str],
+                      package_type_config_class: Optional[Dict] = None,
+                      **kwargs: Any) -> "ConfigLoader"
 ```
 
 Get a config loader from the configuration type.
@@ -254,7 +262,11 @@ configuration loader
 #### load`_`component`_`configuration
 
 ```python
-def load_component_configuration(component_type: ComponentType, directory: Path, skip_consistency_check: bool = False, skip_aea_validation: bool = True) -> ComponentConfiguration
+def load_component_configuration(
+        component_type: ComponentType,
+        directory: Path,
+        skip_consistency_check: bool = False,
+        skip_aea_validation: bool = True) -> ComponentConfiguration
 ```
 
 Load configuration and check that it is consistent against the directory.
@@ -275,7 +287,11 @@ the configuration object.
 #### load`_`package`_`configuration
 
 ```python
-def load_package_configuration(package_type: PackageType, directory: Path, skip_consistency_check: bool = False, skip_aea_validation: bool = True) -> PackageConfiguration
+def load_package_configuration(
+        package_type: PackageType,
+        directory: Path,
+        skip_consistency_check: bool = False,
+        skip_aea_validation: bool = True) -> PackageConfiguration
 ```
 
 Load configuration and check that it is consistent against the directory.
@@ -296,7 +312,11 @@ the configuration object.
 #### load`_`configuration`_`object
 
 ```python
-def load_configuration_object(package_type: PackageType, directory: Path, package_type_config_class: Optional[Dict] = None, skip_aea_validation: bool = True) -> PackageConfiguration
+def load_configuration_object(
+        package_type: PackageType,
+        directory: Path,
+        package_type_config_class: Optional[Dict] = None,
+        skip_aea_validation: bool = True) -> PackageConfiguration
 ```
 
 Load the configuration object, without consistency checks.
@@ -308,20 +328,21 @@ Load the configuration object, without consistency checks.
 - `package_type_config_class`: PackageType to config file mappings
 - `skip_aea_validation`: if True, the validation of the AEA version is skipped.
 
-**Returns**:
-
-the configuration object.
-
 **Raises**:
 
 - `FileNotFoundError`: if the configuration file is not found.
+
+**Returns**:
+
+the configuration object.
 
 <a id="aea.configurations.loader.load_protocol_specification_from_string"></a>
 
 #### load`_`protocol`_`specification`_`from`_`string
 
 ```python
-def load_protocol_specification_from_string(specification_content: str) -> ProtocolSpecification
+def load_protocol_specification_from_string(
+        specification_content: str) -> ProtocolSpecification
 ```
 
 Load a protocol specification from string.

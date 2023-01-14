@@ -91,7 +91,9 @@ class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
     def __init__(
-        self, loop: AbstractEventLoop = None, logger: logging.Logger = _default_logger
+        self,
+        loop: Optional[AbstractEventLoop] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a local (i.e. non-networked) implementation of an OEF Node.

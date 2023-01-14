@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 """Classes to handle AEA configurations."""
 import pprint
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import OrderedDict
 from copy import copy, deepcopy
 from operator import attrgetter
@@ -167,6 +167,7 @@ class Configuration(JSONSerializable, ABC):
         self._key_order: List[str] = []
 
     @classmethod
+    @abstractmethod
     def from_json(cls, obj: Dict) -> "Configuration":
         """Build from a JSON object."""
 

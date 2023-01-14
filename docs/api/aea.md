@@ -19,7 +19,35 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
-def __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, error_handler_config: Optional[Dict[str, Any]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, decision_maker_handler_config: Optional[Dict[str, Any]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, task_manager_mode: Optional[str] = None, **kwargs: Any, ,) -> None
+def __init__(
+        identity: Identity,
+        wallet: Wallet,
+        resources: Resources,
+        data_dir: str,
+        loop: Optional[AbstractEventLoop] = None,
+        period: float = 0.05,
+        execution_timeout: float = 0,
+        max_reactions: int = 20,
+        error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
+        error_handler_config: Optional[Dict[str, Any]] = None,
+        decision_maker_handler_class: Optional[
+            Type[DecisionMakerHandler]] = None,
+        decision_maker_handler_config: Optional[Dict[str, Any]] = None,
+        skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.
+    propagate,
+        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.
+    propagate,
+        loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
+        default_ledger: Optional[str] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
+        default_connection: Optional[PublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
+        storage_uri: Optional[str] = None,
+        task_manager_mode: Optional[str] = None,
+        **kwargs: Any) -> None
 ```
 
 Instantiate the agent.
@@ -173,7 +201,8 @@ None
 #### get`_`periodic`_`tasks
 
 ```python
-def get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
+def get_periodic_tasks(
+) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
 ```
 
 Get all periodic tasks for agent.
@@ -207,7 +236,6 @@ def exception_handler(exception: Exception, function: Callable) -> bool
 Handle exception raised during agent main loop execution.
 
 **Arguments**:
-
 
 - `exception`: exception raised
 - `function`: a callable exception raised in.
@@ -253,7 +281,9 @@ async result for task_id
 #### enqueue`_`task
 
 ```python
-def enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
+def enqueue_task(func: Callable,
+                 args: Sequence = (),
+                 kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the task manager.

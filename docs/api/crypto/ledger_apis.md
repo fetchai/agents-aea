@@ -62,13 +62,15 @@ the token balance
 
 ```python
 @classmethod
-def get_transfer_transaction(cls, identifier: str, sender_address: str, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs: Any, ,) -> Optional[Any]
+def get_transfer_transaction(cls, identifier: str, sender_address: str,
+                             destination_address: str, amount: int,
+                             tx_fee: int, tx_nonce: str,
+                             **kwargs: Any) -> Optional[Any]
 ```
 
 Get a transaction to transfer from self to destination.
 
 **Arguments**:
-
 
 - `identifier`: the identifier of the ledger
 - `sender_address`: the address of the sender
@@ -88,7 +90,8 @@ tx
 
 ```python
 @classmethod
-def send_signed_transaction(cls, identifier: str, tx_signed: Any) -> Optional[str]
+def send_signed_transaction(cls, identifier: str,
+                            tx_signed: Any) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -108,7 +111,8 @@ the tx_digest, if present
 
 ```python
 @classmethod
-def get_transaction_receipt(cls, identifier: str, tx_digest: str) -> Optional[Any]
+def get_transaction_receipt(cls, identifier: str,
+                            tx_digest: str) -> Optional[Any]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -148,7 +152,8 @@ the tx, if present
 
 ```python
 @staticmethod
-def get_contract_address(identifier: str, tx_receipt: Any) -> Optional[Address]
+def get_contract_address(identifier: str,
+                         tx_receipt: Any) -> Optional[Address]
 ```
 
 Get the contract address from a transaction receipt.
@@ -188,7 +193,8 @@ True if correctly settled, False otherwise
 
 ```python
 @staticmethod
-def is_transaction_valid(identifier: str, tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+def is_transaction_valid(identifier: str, tx: Any, seller: Address,
+                         client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether the transaction is valid.
@@ -212,7 +218,8 @@ True if is valid , False otherwise
 
 ```python
 @staticmethod
-def generate_tx_nonce(identifier: str, seller: Address, client: Address) -> str
+def generate_tx_nonce(identifier: str, seller: Address,
+                      client: Address) -> str
 ```
 
 Generate a random str message.
@@ -233,7 +240,10 @@ return the hash in hex.
 
 ```python
 @staticmethod
-def recover_message(identifier: str, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+def recover_message(identifier: str,
+                    message: bytes,
+                    signature: str,
+                    is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.

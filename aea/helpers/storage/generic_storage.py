@@ -177,7 +177,7 @@ class Storage(Runnable):
     def __init__(
         self,
         storage_uri: str,
-        loop: asyncio.AbstractEventLoop = None,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
         threaded: bool = False,
     ) -> None:
         """

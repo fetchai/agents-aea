@@ -39,18 +39,22 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
-def __init__(performative: Performative, dialogue_reference: Tuple[str, str] = ("", ""), message_id: int = 1, target: int = 0, **kwargs: Any, ,)
+def __init__(performative: Performative,
+             dialogue_reference: Tuple[str, str] = ("", ""),
+             message_id: int = 1,
+             target: int = 0,
+             **kwargs: Any)
 ```
 
 Initialise an instance of SigningMessage.
 
 **Arguments**:
 
-:param **kwargs: extra options.
 - `message_id`: the message id.
 - `dialogue_reference`: the dialogue reference.
 - `target`: the message target.
 - `performative`: the message performative.
+- `**kwargs`: extra options.
 
 <a id="packages.open_aea.protocols.signing.message.SigningMessage.valid_performatives"></a>
 

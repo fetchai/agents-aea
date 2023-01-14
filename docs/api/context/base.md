@@ -19,7 +19,22 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
-def __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, data_dir: str, storage_callable: Callable[[], Optional[Storage]] = lambda: None, send_to_skill: Optional[Callable] = None, **kwargs: Any) -> None
+def __init__(identity: Identity,
+             connection_status: MultiplexerStatus,
+             outbox: OutBox,
+             decision_maker_message_queue: Queue,
+             decision_maker_handler_context: SimpleNamespace,
+             task_manager: TaskManager,
+             default_ledger_id: str,
+             currency_denominations: Dict[str, str],
+             default_connection: Optional[PublicId],
+             default_routing: Dict[PublicId, PublicId],
+             search_service_address: Address,
+             decision_maker_address: Address,
+             data_dir: str,
+             storage_callable: Callable[[], Optional[Storage]] = lambda: None,
+             send_to_skill: Optional[Callable] = None,
+             **kwargs: Any) -> None
 ```
 
 Initialize an agent context.
@@ -48,7 +63,8 @@ Initialize an agent context.
 #### send`_`to`_`skill
 
 ```python
-def send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+def send_to_skill(message_or_envelope: Union[Message, Envelope],
+                  context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Send message or envelope to another skill.

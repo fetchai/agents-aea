@@ -99,8 +99,8 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies
 Merge two groups of dependencies.
 
 If some of them are not "simple" (see above), and there is no risk
-of conflict because there is no other package with the same name,
-we leave them; otherwise we raise an error.
+  of conflict because there is no other package with the same name,
+  we leave them; otherwise we raise an error.
 
 **Arguments**:
 

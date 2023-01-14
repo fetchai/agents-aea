@@ -73,7 +73,7 @@ Return is disconnected.
 ## AsyncMultiplexer Objects
 
 ```python
-class AsyncMultiplexer(Runnable,  WithLogger)
+class AsyncMultiplexer(Runnable, WithLogger)
 ```
 
 This class can handle multiple connections at once.
@@ -83,17 +83,26 @@ This class can handle multiple connections at once.
 #### `__`init`__`
 
 ```python
-def __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, threaded: bool = False, agent_name: str = "standalone", default_routing: Optional[Dict[PublicId, PublicId]] = None, default_connection: Optional[PublicId] = None, protocols: Optional[List[Union[Protocol, Message]]] = None) -> None
+def __init__(
+        connections: Optional[Sequence[Connection]] = None,
+        default_connection_index: int = 0,
+        loop: Optional[AbstractEventLoop] = None,
+        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
+        threaded: bool = False,
+        agent_name: str = "standalone",
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
+        protocols: Optional[List[Union[Protocol, Message]]] = None) -> None
 ```
 
 Initialize the connection multiplexer.
 
 **Arguments**:
 
-    This information is used for envelopes which don't specify any routing context.
-    If connections is None, this parameter is ignored.
 - `connections`: a sequence of connections.
 - `default_connection_index`: the index of the connection to use as default.
+This information is used for envelopes which don't specify any routing context.
+If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
 - `exception_policy`: the exception policy used for connections.
 - `threaded`: if True, run in threaded mode, else async
@@ -254,7 +263,8 @@ Disconnect the multiplexer.
 #### get
 
 ```python
-def get(block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]
+def get(block: bool = False,
+        timeout: Optional[float] = None) -> Optional[Envelope]
 ```
 
 Get an envelope within a timeout.
@@ -443,17 +453,16 @@ Check for a envelope on the in queue.
 
 **Arguments**:
 
-
 - `block`: make the call blocking (ignore the timeout).
 - `timeout`: times out the block after timeout seconds.
-
-**Returns**:
-
-the envelope object.
 
 **Raises**:
 
 - `Empty`: if the attempt to get an envelope fails.
+
+**Returns**:
+
+the envelope object.
 
 <a id="aea.multiplexer.InBox.get_nowait"></a>
 
@@ -550,7 +559,8 @@ Put an envelope into the queue.
 #### put`_`message
 
 ```python
-def put_message(message: Message, context: Optional[EnvelopeContext] = None) -> None
+def put_message(message: Message,
+                context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Put a message in the outbox.

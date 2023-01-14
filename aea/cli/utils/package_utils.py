@@ -885,7 +885,9 @@ def list_available_packages(
         ComponentType.CONTRACT,
         ComponentType.SKILL,
     ):
-        components = getattr(agent_config, component_type.to_plural(), set())
+        components: Set[PublicId] = getattr(
+            agent_config, component_type.to_plural(), set()
+        )
         for public_id in components:
             package_path = Path(
                 get_package_path(

@@ -29,14 +29,14 @@ Load a module.
 - `dotted_path`: the dotted save_path of the package/module.
 - `filepath`: the file to the package/module.
 
-**Returns**:
-
-module type
-
 **Raises**:
 
 - `ValueError`: if the filepath provided is not a module.  # noqa: DAR402
 - `Exception`: if the execution of the module raises exception.  # noqa: DAR402
+
+**Returns**:
+
+module type
 
 <a id="aea.helpers.base.load_env_file"></a>
 
@@ -95,7 +95,8 @@ windows popen kwargs
 #### send`_`control`_`c
 
 ```python
-def send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None
+def send_control_c(process: subprocess.Popen,
+                   kill_group: bool = False) -> None
 ```
 
 Send ctrl-C cross-platform to terminate a subprocess.
@@ -232,7 +233,8 @@ Change working directory temporarily.
 #### get`_`logger`_`method
 
 ```python
-def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable
+def get_logger_method(fn: Callable,
+                      logger_method: Union[str, Callable]) -> Callable
 ```
 
 Get logger method for function.
@@ -241,7 +243,6 @@ Get logger in `fn` definition module or creates logger is module.__name__.
 Or return logger_method if it's callable.
 
 **Arguments**:
-
 
 - `fn`: function to get logger for.
 - `logger_method`: logger name or callable.
@@ -255,7 +256,9 @@ callable to write log with
 #### try`_`decorator
 
 ```python
-def try_decorator(error_message: str, default_return: Callable = None, logger_method: Any = "error") -> Callable
+def try_decorator(error_message: str,
+                  default_return: Optional[Callable] = None,
+                  logger_method: Any = "error") -> Callable
 ```
 
 Run function, log and return default value on exception.
@@ -287,7 +290,10 @@ Exception for retry decorator.
 #### retry`_`decorator
 
 ```python
-def retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method: str = "error") -> Callable
+def retry_decorator(number_of_retries: int,
+                    error_message: str,
+                    delay: float = 0,
+                    logger_method: str = "error") -> Callable
 ```
 
 Run function with several attempts.
@@ -318,16 +324,21 @@ Run code in context to log and re raise exception.
 
 **Arguments**:
 
-:yield: the generator
 - `log_method`: function to print log
 - `message`: message template to add error text.
+
+**Returns**:
+
+the generator
 
 <a id="aea.helpers.base.recursive_update"></a>
 
 #### recursive`_`update
 
 ```python
-def recursive_update(to_update: Dict, new_values: Dict, allow_new_values: bool = False) -> None
+def recursive_update(to_update: Dict,
+                     new_values: Dict,
+                     allow_new_values: bool = False) -> None
 ```
 
 Update a dictionary by replacing conflicts with the new values.
@@ -351,7 +362,9 @@ It does side-effects to the first dictionary.
 #### perform`_`dict`_`override
 
 ```python
-def perform_dict_override(component_id: Any, overrides: Dict, updated_configuration: Dict, new_configuration: Dict) -> None
+def perform_dict_override(component_id: Any, overrides: Dict,
+                          updated_configuration: Dict,
+                          new_configuration: Dict) -> None
 ```
 
 Perform recursive dict override.
@@ -377,20 +390,21 @@ Compute the topological order of a graph (using Kahn's algorithm).
 
 - `adjacency_list`: the adjacency list of the graph.
 
-**Returns**:
-
-the topological order for the graph (as a sequence of nodes)
-
 **Raises**:
 
 - `ValueError`: if the graph contains a cycle.
+
+**Returns**:
+
+the topological order for the graph (as a sequence of nodes)
 
 <a id="aea.helpers.base.reachable_nodes"></a>
 
 #### reachable`_`nodes
 
 ```python
-def reachable_nodes(adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]) -> Dict[T, Set[T]]
+def reachable_nodes(adjacency_list: Dict[T, Set[T]],
+                    starting_nodes: Set[T]) -> Dict[T, Set[T]]
 ```
 
 Find the reachable subgraph induced by a set of starting nodes.
@@ -459,7 +473,9 @@ Check if dir_path is a directory or create it.
 #### dict`_`to`_`path`_`value
 
 ```python
-def dict_to_path_value(data: Mapping, path: Optional[List] = None) -> Iterable[Tuple[List[str], Any]]
+def dict_to_path_value(
+        data: Mapping,
+        path: Optional[List] = None) -> Iterable[Tuple[List[str], Any]]
 ```
 
 Convert dict to sequence of terminal path build of  keys and value.
@@ -489,7 +505,9 @@ Certificate request for proof of representation.
 #### `__`init`__`
 
 ```python
-def __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, save_path: str) -> None
+def __init__(public_key: str, identifier: SimpleIdOrStr,
+             ledger_id: SimpleIdOrStr, not_before: str, not_after: str,
+             message_format: str, save_path: str) -> None
 ```
 
 Initialize the certificate request.
@@ -669,7 +687,9 @@ Get the message to sign.
 
 ```python
 @classmethod
-def construct_message(cls, public_key: str, identifier: SimpleIdOrStr, not_before_string: str, not_after_string: str, message_format: str) -> bytes
+def construct_message(cls, public_key: str, identifier: SimpleIdOrStr,
+                      not_before_string: str, not_after_string: str,
+                      message_format: str) -> bytes
 ```
 
 Construct message for singning.

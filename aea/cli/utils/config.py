@@ -69,7 +69,7 @@ from aea.helpers.io import open_file
 
 
 def try_to_load_agent_config(
-    ctx: Context, is_exit_on_except: bool = True, agent_src_path: str = None
+    ctx: Context, is_exit_on_except: bool = True, agent_src_path: Optional[str] = None
 ) -> None:
     """
     Load agent config to a click context object.

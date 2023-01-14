@@ -33,7 +33,9 @@ The dialogue label class acts as an identifier for dialogues.
 #### `__`init`__`
 
 ```python
-def __init__(dialogue_reference: Tuple[str, str], dialogue_opponent_addr: Address, dialogue_starter_addr: Address) -> None
+def __init__(dialogue_reference: Tuple[str,
+                                       str], dialogue_opponent_addr: Address,
+             dialogue_starter_addr: Address) -> None
 ```
 
 Initialize a dialogue label.
@@ -219,7 +221,7 @@ Construct a new type.
 ## Dialogue Objects
 
 ```python
-class Dialogue(, metaclass=_DialogueMeta)
+class Dialogue(metaclass=_DialogueMeta)
 ```
 
 The dialogue class maintains state of a dialogue and manages it.
@@ -239,7 +241,11 @@ This class defines the rules for the dialogue.
 #### `__`init`__`
 
 ```python
-def __init__(initial_performatives: FrozenSet[Message.Performative], terminal_performatives: FrozenSet[Message.Performative], valid_replies: Dict[Message.Performative, FrozenSet[Message.Performative]]) -> None
+def __init__(
+    initial_performatives: FrozenSet[Message.Performative],
+    terminal_performatives: FrozenSet[Message.Performative],
+    valid_replies: Dict[Message.Performative, FrozenSet[Message.Performative]]
+) -> None
 ```
 
 Initialize a dialogue.
@@ -286,7 +292,8 @@ the valid performatives of an terminal message
 
 ```python
 @property
-def valid_replies() -> Dict[Message.Performative, FrozenSet[Message.Performative]]
+def valid_replies(
+) -> Dict[Message.Performative, FrozenSet[Message.Performative]]
 ```
 
 Get all the valid performatives which are a valid replies to performatives.
@@ -300,7 +307,8 @@ the full valid reply structure.
 #### get`_`valid`_`replies
 
 ```python
-def get_valid_replies(performative: Message.Performative) -> FrozenSet[Message.Performative]
+def get_valid_replies(
+        performative: Message.Performative) -> FrozenSet[Message.Performative]
 ```
 
 Given a `performative`, return the list of performatives which are its valid replies in a dialogue.
@@ -358,7 +366,8 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
-def __init__(dialogue_label: DialogueLabel, message_class: Type[Message], self_address: Address, role: Role) -> None
+def __init__(dialogue_label: DialogueLabel, message_class: Type[Message],
+             self_address: Address, role: Role) -> None
 ```
 
 Initialize a dialogue.
@@ -416,7 +425,6 @@ def from_json(cls, message_class: Type[Message], data: dict) -> "Dialogue"
 Create a dialogue instance with all messages from json data.
 
 **Arguments**:
-
 
 - `message_class`: type of message used with this dialogue
 - `data`: dict with data exported with Dialogue.to_json() method
@@ -610,7 +618,10 @@ True if empty, False otherwise
 #### reply
 
 ```python
-def reply(performative: Message.Performative, target_message: Optional[Message] = None, target: Optional[int] = None, **kwargs: Any, ,) -> Message
+def reply(performative: Message.Performative,
+          target_message: Optional[Message] = None,
+          target: Optional[int] = None,
+          **kwargs: Any) -> Message
 ```
 
 Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
@@ -618,7 +629,6 @@ Reply to the 'target_message' in this dialogue with a message with 'performative
 Note if no target_message is provided, the last message in the dialogue will be replied to.
 
 **Arguments**:
-
 
 - `target_message`: the message to reply to.
 - `target`: the id of the message to reply to.
@@ -724,7 +734,8 @@ Get the stats dictionary on other initiated dialogues.
 #### add`_`dialogue`_`endstate
 
 ```python
-def add_dialogue_endstate(end_state: Dialogue.EndState, is_self_initiated: bool) -> None
+def add_dialogue_endstate(end_state: Dialogue.EndState,
+                          is_self_initiated: bool) -> None
 ```
 
 Add dialogue endstate stats.
@@ -919,7 +930,8 @@ Check dialogue label presents in list of incomplete.
 #### set`_`incomplete`_`dialogue
 
 ```python
-def set_incomplete_dialogue(incomplete_dialogue_label: DialogueLabel, complete_dialogue_label: DialogueLabel) -> None
+def set_incomplete_dialogue(incomplete_dialogue_label: DialogueLabel,
+                            complete_dialogue_label: DialogueLabel) -> None
 ```
 
 Set incomplete dialogue label.
@@ -1081,7 +1093,13 @@ The dialogues class keeps track of all dialogues for an agent.
 #### `__`init`__`
 
 ```python
-def __init__(self_address: Address, end_states: FrozenSet[Dialogue.EndState], message_class: Type[Message], dialogue_class: Type[Dialogue], role_from_first_message: Callable[[Message, Address], Dialogue.Role], keep_terminal_state_dialogues: Optional[bool] = None) -> None
+def __init__(self_address: Address,
+             end_states: FrozenSet[Dialogue.EndState],
+             message_class: Type[Message],
+             dialogue_class: Type[Dialogue],
+             role_from_first_message: Callable[[Message, Address],
+                                               Dialogue.Role],
+             keep_terminal_state_dialogues: Optional[bool] = None) -> None
 ```
 
 Initialize dialogues.
@@ -1210,13 +1228,13 @@ the next nonce
 #### create
 
 ```python
-def create(counterparty: Address, performative: Message.Performative, **kwargs: Any, ,) -> Tuple[Message, Dialogue]
+def create(counterparty: Address, performative: Message.Performative,
+           **kwargs: Any) -> Tuple[Message, Dialogue]
 ```
 
 Create a dialogue with 'counterparty', with an initial message whose performative is 'performative' and contents are from 'kwargs'.
 
 **Arguments**:
-
 
 - `counterparty`: the counterparty of the dialogue.
 - `performative`: the performative of the initial message.
@@ -1231,13 +1249,13 @@ the initial message and the dialogue.
 #### create`_`with`_`message
 
 ```python
-def create_with_message(counterparty: Address, initial_message: Message) -> Dialogue
+def create_with_message(counterparty: Address,
+                        initial_message: Message) -> Dialogue
 ```
 
 Create a dialogue with 'counterparty', with an initial message provided.
 
 **Arguments**:
-
 
 - `counterparty`: the counterparty of the dialogue.
 - `initial_message`: the initial_message.
@@ -1291,7 +1309,8 @@ the dialogue, or None in case such a dialogue does not exist
 #### get`_`dialogue`_`from`_`label
 
 ```python
-def get_dialogue_from_label(dialogue_label: DialogueLabel) -> Optional[Dialogue]
+def get_dialogue_from_label(
+        dialogue_label: DialogueLabel) -> Optional[Dialogue]
 ```
 
 Retrieve a dialogue based on its label.

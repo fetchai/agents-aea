@@ -19,7 +19,8 @@ Envelopes generation speed for Behaviour act test.
 @runtime_mode_deco
 @number_of_runs_deco
 @output_format_deco
-def main(duration: int, runtime_mode: str, number_of_runs: int, output_format: str) -> Any
+def main(duration: int, runtime_mode: str, number_of_runs: int,
+         output_format: str) -> Any
 ```
 
 Check envelopes send/receive rate within behaviour.

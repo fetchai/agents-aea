@@ -24,7 +24,12 @@ It includes:
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, address: Optional[str] = None, public_key: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, public_keys: Optional[Dict[str, str]] = None, default_address_key: str = DEFAULT_LEDGER) -> None
+def __init__(name: SimpleIdOrStr,
+             address: Optional[str] = None,
+             public_key: Optional[str] = None,
+             addresses: Optional[Dict[str, Address]] = None,
+             public_keys: Optional[Dict[str, str]] = None,
+             default_address_key: str = DEFAULT_LEDGER) -> None
 ```
 
 Instantiate the identity.

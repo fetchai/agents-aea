@@ -19,7 +19,8 @@ This class implements the filter of an AEA.
 #### `__`init`__`
 
 ```python
-def __init__(resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue) -> None
+def __init__(resources: Resources,
+             decision_maker_out_queue: AsyncFriendlyQueue) -> None
 ```
 
 Instantiate the filter.
@@ -56,7 +57,8 @@ Get decision maker (out) queue.
 #### get`_`active`_`handlers
 
 ```python
-def get_active_handlers(protocol_id: PublicId, skill_id: Optional[PublicId] = None) -> List[Handler]
+def get_active_handlers(protocol_id: PublicId,
+                        skill_id: Optional[PublicId] = None) -> List[Handler]
 ```
 
 Get active handlers based on protocol id and optional skill id.

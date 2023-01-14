@@ -19,7 +19,8 @@ A metaclass that validates BaseContractTestCase's class.
 #### `__`new`__`
 
 ```python
-def __new__(mcs, name: str, bases: Tuple, namespace: Dict, **kwargs: Any) -> Type
+def __new__(mcs, name: str, bases: Tuple, namespace: Dict,
+            **kwargs: Any) -> Type
 ```
 
 Initialize the class.
@@ -89,7 +90,8 @@ contract address
 
 ```python
 @staticmethod
-def refill_from_faucet(ledger_api: LedgerApi, faucet_api: FaucetApi, address: str) -> None
+def refill_from_faucet(ledger_api: LedgerApi, faucet_api: FaucetApi,
+                       address: str) -> None
 ```
 
 Refill from faucet.
@@ -100,7 +102,11 @@ Refill from faucet.
 
 ```python
 @staticmethod
-def sign_send_confirm_receipt_multisig_transaction(tx: JSONLike, ledger_api: LedgerApi, cryptos: List[Crypto], sleep_time: float = 2.0) -> JSONLike
+def sign_send_confirm_receipt_multisig_transaction(
+        tx: JSONLike,
+        ledger_api: LedgerApi,
+        cryptos: List[Crypto],
+        sleep_time: float = 2.0) -> JSONLike
 ```
 
 Sign, send and confirm settlement of a transaction with multiple signatures.
@@ -122,7 +128,11 @@ The transaction receipt
 
 ```python
 @classmethod
-def sign_send_confirm_receipt_transaction(cls, tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto, sleep_time: float = 2.0) -> JSONLike
+def sign_send_confirm_receipt_transaction(cls,
+                                          tx: JSONLike,
+                                          ledger_api: LedgerApi,
+                                          crypto: Crypto,
+                                          sleep_time: float = 2.0) -> JSONLike
 ```
 
 Sign, send and confirm settlement of a transaction with multiple signatures.
