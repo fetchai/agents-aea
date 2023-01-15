@@ -88,7 +88,7 @@ We use the input and output text files to send an envelope to our agent and rece
             "multiplexer,some_agent,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
-            write_with_lock(f, message_text)
+            write_with_lock(f, message_text)  # type: ignore[arg-type]
 
         # Wait for the envelope to get processed
         for _ in range(20):
@@ -99,12 +99,12 @@ We use the input and output text files to send an envelope to our agent and rece
             raise Exception("No message!")
 
         # get the envelope
-        envelope = multiplexer.get()  # type: Optional[Envelope]
+        envelope: Optional[Envelope] = multiplexer.get()
         assert envelope is not None
 
         # Inspect its contents
         print(
-            "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(
+            "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(  # type: ignore[str-bytes-safe]
                 envelope.sender,
                 envelope.to,
                 envelope.protocol_specification_id,
@@ -165,7 +165,7 @@ INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 
 
-def run():
+def run() -> None:
     """Run demo."""
 
     # Ensure the input and output files do not exist initially
@@ -204,7 +204,7 @@ def run():
             "multiplexer,some_agent,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
-            write_with_lock(f, message_text)
+            write_with_lock(f, message_text)  # type: ignore[arg-type]
 
         # Wait for the envelope to get processed
         for _ in range(20):
@@ -215,12 +215,12 @@ def run():
             raise Exception("No message!")
 
         # get the envelope
-        envelope = multiplexer.get()  # type: Optional[Envelope]
+        envelope: Optional[Envelope] = multiplexer.get()
         assert envelope is not None
 
         # Inspect its contents
         print(
-            "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(
+            "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(  # type: ignore[str-bytes-safe]
                 envelope.sender,
                 envelope.to,
                 envelope.protocol_specification_id,
