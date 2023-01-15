@@ -26,6 +26,7 @@ from typing import Any, AsyncGenerator, Dict, Generator, cast
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import (
     ETHEREUM_TESTNET_CONFIG as _DEFAULT_ETHEREUM_TESTNET_CONFIG,
@@ -126,7 +127,7 @@ def make_ledger_api_connection(
     return connection
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture()
 async def ledger_apis_connection(
     request: Any, ethereum_testnet_config: Dict
 ) -> AsyncGenerator:
