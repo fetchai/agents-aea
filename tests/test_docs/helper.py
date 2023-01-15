@@ -74,7 +74,7 @@ def extract_python_code(filepath):
     return python_str
 
 
-def compile_and_exec(code: str, locals_dict: Dict = None) -> Dict:
+def compile_and_exec(code: str, locals_dict: Optional[Dict] = None) -> Dict:
     """
     Compile and exec the code.
 

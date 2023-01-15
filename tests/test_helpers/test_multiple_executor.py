@@ -36,7 +36,7 @@ class Task(AbstractExecutorTask):
         """Implement stop task function here."""
         pass
 
-    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
+    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:  # type: ignore[empty-body]
         """
         Create asyncio task for task run in asyncio loop.
 

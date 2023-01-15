@@ -1170,7 +1170,7 @@ def method_scope(cls):
     return cls
 
 
-def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
+def get_wealth_if_needed(address: Address, fetchai_api: Optional[FetchAIApi] = None):
     """
      Get wealth from fetch.ai faucet to specific address
 

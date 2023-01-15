@@ -384,7 +384,7 @@ class TestTopologicalOrder:
             find_topological_order({0: {1, 0}, 1: {0, 1}})
 
     @pytest.mark.parametrize("chain_length", [3, 5, 10, 100])
-    def test_chain(self, chain_length):
+    def test_chain(self, chain_length: int) -> None:
         """Test the function with a chain."""
         adj_list: Dict[int, Set[int]] = {}
         for i in range(chain_length - 1):

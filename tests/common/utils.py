@@ -178,7 +178,7 @@ class AeaTool:
         to: str = "test",
         sender: str = "test",
         protocol_specification_id: PublicId = DefaultMessage.protocol_specification_id,
-        message: Message = None,
+        message: Optional[Message] = None,
     ) -> Envelope:
         """
         Create envelope, if message is not passed use .dummy_message method.

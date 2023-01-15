@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +40,9 @@ from packages.fetchai.protocols.default.serialization import DefaultSerializer
 class AEATestWrapper:
     """A testing wrapper to run and control an agent."""
 
-    def __init__(self, name: str = "my_aea", components: List[Component] = None):
+    def __init__(
+        self, name: str = "my_aea", components: Optional[List[Component]] = None
+    ):
         """
         Make an agency with optional name and skills.
 
@@ -54,7 +57,7 @@ class AEATestWrapper:
         self._thread = None  # type: Optional[Thread]
 
     def make_aea(
-        self, name: Optional[str] = None, components: List[Component] = None
+        self, name: Optional[str] = None, components: Optional[List[Component]] = None
     ) -> AEA:
         """
         Create AEA from name and already loaded components.
@@ -80,8 +83,8 @@ class AEATestWrapper:
     @classmethod
     def make_skill(
         cls,
-        config: SkillConfig = None,
-        context: SkillContext = None,
+        config: Optional[SkillConfig] = None,
+        context: Optional[SkillContext] = None,
         handlers: Optional[Dict[str, Type[Handler]]] = None,
     ) -> Skill:
         """
@@ -145,7 +148,7 @@ class AEATestWrapper:
         cls,
         to: str = "test",
         sender: str = "test",
-        message: Message = None,
+        message: Optional[Message] = None,
     ) -> Envelope:
         """
         Create envelope, if message is not passed use .dummy_message method.

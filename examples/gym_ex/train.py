@@ -23,7 +23,7 @@
 import argparse
 
 from gyms.env import BanditNArmedRandom  # noqa: I201
-from proxy.env import ProxyEnv  # noqa: I201
+from proxy.env import ProxyEnv  # type: ignore # noqa: I201
 from rl.agent import RLAgent  # noqa: I201
 
 

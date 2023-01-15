@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,7 +79,7 @@ class AEAInstanceTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.start_and_wait_completed())
+        return loop.create_task(self._agent.runtime.start_and_wait_completed())  # type: ignore
 
 
 class AEARunner(AbstractMultipleRunner):

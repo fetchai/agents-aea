@@ -966,7 +966,7 @@ class TestDialogueBase:
 class TestDialogueStats:
     """Test for DialogueStats."""
 
-    def setup(self):
+    def setup(self) -> None:
         """Initialise the environment to test DialogueStats."""
         self.agent_address = "agent 1"
         self.opponent_address = "agent 2"
