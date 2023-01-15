@@ -50,8 +50,10 @@ def check_ipfs_hash_pushed(ipfs_hash: str, retries: int = 5) -> Tuple[str, bool]
             )
             return ipfs_hash, False
 
-    while not (found := check_ipfs()[1]) and retries:  # type: ignore
+    found = check_ipfs()[1]
+    while not found and retries:
         retries -= 1
+        found = check_ipfs()[1]
 
     return ipfs_hash, found
 
