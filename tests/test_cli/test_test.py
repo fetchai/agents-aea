@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI test command."""
 import shutil
+import subprocess  # nosec
 import sys
 from pathlib import Path
 from textwrap import dedent
@@ -30,7 +31,7 @@ import pytest
 from _pytest.config import ExitCode  # type: ignore
 
 from aea.cli import cli
-from aea.cli.test import _call_pytest_in_subprocess, get_packages_list
+from aea.cli.test import get_packages_list
 from aea.cli.utils.package_utils import get_package_path
 from aea.configurations.constants import AEA_TEST_DIRNAME
 from aea.configurations.data_types import (
@@ -42,8 +43,6 @@ from aea.configurations.data_types import (
 from aea.helpers.base import cd
 from aea.package_manager.v1 import PackageManagerV1
 from aea.test_tools.test_cases import AEATestCaseEmpty, CLI_LOG_OPTION
-
-from tests.conftest import ROOT_DIR
 
 
 OK_PYTEST_EXIT_CODE = ExitCode.OK
@@ -75,6 +74,20 @@ def _parametrize_class(test_cls: Type) -> Type:
     test_cls.teardown = teardown
 
     return test_cls
+
+
+def mock_pytest_main() -> Any:
+    """
+    Mock pytest main so to run in a subprocess.
+
+    This is necessary as otherwise the in-process subcall to pytest will conflict with the current pytest runtime.
+    """
+
+    def fun(args) -> int:
+        result = subprocess.call(["pytest", *args])  # nosec
+        return result
+
+    return mock.patch("aea.cli.test.pytest.main", side_effect=fun)
 
 
 class BaseAEATestCommand(AEATestCaseEmpty):
@@ -254,9 +267,9 @@ class TestPackageTestByType(BaseAEATestCommand):
         """Assert that the exit code is equal to 0 (tests are run successfully)."""
         self._configure_package_for_testing(package_type)
         public_id = self._public_id(package_type)
-
-        result = self.run_test_command(str(package_type.value), str(public_id))
-        assert result.exit_code == OK_PYTEST_EXIT_CODE
+        with mock_pytest_main():
+            result = self.run_test_command(str(package_type.value), str(public_id))
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
 
 
 @_parametrize_class
@@ -285,13 +298,14 @@ class TestVendorPackageTestByType(BaseAEATestCommand):
         self._configure_package_for_testing(package_type)
         public_id = self._public_id(package_type)
         self._vendorize(package_type, public_id)
-        result = self.run_test_command(str(package_type.value), str(public_id))
-        assert result.exit_code == OK_PYTEST_EXIT_CODE
-        # assert the module packages have been loaded
-        assert (
-            f"packages.default_author.{package_type.to_plural()}.dummy_{package_type.value}"
-            in sys.modules
-        )
+        with mock_pytest_main():
+            result = self.run_test_command(str(package_type.value), str(public_id))
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
+            # assert the module packages have been loaded
+            assert (
+                f"packages.default_author.{package_type.to_plural()}.dummy_{package_type.value}"
+                in sys.modules
+            )
 
 
 @_parametrize_class
@@ -304,11 +318,12 @@ class TestPackageTestByPathEmptyTestSuite(BaseAEATestCommand):
         self._scaffold_item(package_type)
         test_package_name = self._get_dummy_package_name(package_type)
         package_dirpath = self.dummy_package_dirpath(package_type, test_package_name)
-        result = self.run_test_command(
-            "by-path",
-            str(package_dirpath),
-        )
-        assert result.exit_code == NO_TESTS_COLLECTED_PYTEST_EXIT_CODE
+        with mock_pytest_main():
+            result = self.run_test_command(
+                "by-path",
+                str(package_dirpath),
+            )
+            assert result.exit_code == NO_TESTS_COLLECTED_PYTEST_EXIT_CODE
 
 
 @_parametrize_class
@@ -323,12 +338,12 @@ class TestPackageTestByPath(BaseAEATestCommand):
         self._configure_package_for_testing(package_type)
         test_package_name = self._get_dummy_package_name(package_type)
         package_dirpath = self.dummy_package_dirpath(package_type, test_package_name)
-
-        result = self.run_test_command(
-            "by-path",
-            str(package_dirpath),
-        )
-        assert result.exit_code == OK_PYTEST_EXIT_CODE
+        with mock_pytest_main():
+            result = self.run_test_command(
+                "by-path",
+                str(package_dirpath),
+            )
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
 
 
 @_parametrize_class
@@ -343,19 +358,19 @@ class TestPackageTestByPathWithCov(BaseAEATestCommand):
         self._configure_package_for_testing(package_type)
         test_package_name = self._get_dummy_package_name(package_type)
         package_dirpath = self.dummy_package_dirpath(package_type, test_package_name)
+        with mock_pytest_main():
+            result = self.run_test_command(
+                "--cov",
+                "by-path",
+                str(package_dirpath),
+            )
+            assert result.exit_code == OK_PYTEST_EXIT_CODE
 
-        result = self.run_test_command(
-            "--cov",
-            "by-path",
-            str(package_dirpath),
-        )
-        assert result.exit_code == OK_PYTEST_EXIT_CODE
+            agent_path = self.t / self.agent_name
 
-        agent_path = self.t / self.agent_name
-
-        assert (agent_path / "coverage.xml").exists()
-        assert (agent_path / "htmlcov").exists()
-        assert (agent_path / ".coverage").exists()
+            assert (agent_path / "coverage.xml").exists()
+            assert (agent_path / "htmlcov").exists()
+            assert (agent_path / ".coverage").exists()
 
 
 def test_get_packages_list() -> None:
@@ -396,7 +411,7 @@ class TestPackageTestPackages(BaseAEATestCommand):
     def test_packages_all_dev(self) -> None:
         """Check test pacakges --all  flag on/off."""
 
-        with mock.patch(
+        with mock_pytest_main(), mock.patch(
             "aea.cli.test.get_packages_list", return_value=[]
         ) as get_packages_list_mock:
             result = self.run_test_command(
@@ -407,7 +422,7 @@ class TestPackageTestPackages(BaseAEATestCommand):
                 packages_dir=mock.ANY, packages_filter="dev"
             )
 
-        with mock.patch(
+        with mock_pytest_main(), mock.patch(
             "aea.cli.test.get_packages_list", return_value=[]
         ) as get_packages_list_mock:
             result = self.run_test_command("packages", "--all")
@@ -415,21 +430,3 @@ class TestPackageTestPackages(BaseAEATestCommand):
             get_packages_list_mock.assert_called_once_with(
                 packages_dir=mock.ANY, packages_filter="all"
             )
-
-
-def test_call_pytest_in_subprocess():
-    """Test pytest called in subprocess and pytesm works properly."""
-    with mock.patch("sys.exit") as sys_exit_mock:
-        _call_pytest_in_subprocess(
-            [
-                str(
-                    Path(ROOT_DIR)
-                    / "tests/test_configurations/test_data_types.py::test_type_comparison"
-                )
-            ]
-        )
-        sys_exit_mock.assert_called_once_with(0)
-
-    with mock.patch("sys.exit") as sys_exit_mock:
-        _call_pytest_in_subprocess([str(Path(ROOT_DIR) / "not_exists")])
-        sys_exit_mock.assert_called_once_with(4)
