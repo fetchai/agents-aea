@@ -695,7 +695,8 @@ a dictionary with the gas data.
 #### update`_`with`_`gas`_`estimate
 
 ```python
-def update_with_gas_estimate(transaction: JSONLike, raise_on_try: bool = False) -> JSONLike
+def update_with_gas_estimate(transaction: JSONLike,
+                             raise_on_try: bool = False) -> JSONLike
 ```
 
 Attempts to update the transaction with a gas estimate
