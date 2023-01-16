@@ -452,16 +452,39 @@ def load_package(
     )
 
 
-def _call_pytest_in_subprocess(args: List[str]) -> NoReturn:
+def _call_pytest_in_subprocess(
+    package_dir: Path,
+    aea_project_path: Optional[Path],
+    packages_dir: Optional[Path],
+    skip_consistency_check: bool,
+    args: List[str],
+) -> NoReturn:
     """Perform call of pytest in a subprocess with pytest return code."""
+    load_package(package_dir, aea_project_path, packages_dir, skip_consistency_check)
     exit_code = pytest.main(args)
     sys.exit(int(exit_code))
 
 
-def _call_pytest(args: List[str], timeout: int = 60 * 60) -> Optional[int]:
+def _call_pytest(
+    package_dir: Path,
+    aea_project_path: Optional[Path],
+    packages_dir: Optional[Path],
+    skip_consistency_check: bool,
+    args: List[str],
+    timeout: int = 60 * 60,
+) -> Optional[int]:
     """Perform pytest call and return returncode."""
     ctx = multiprocessing.get_context("spawn")  # to have clean python instance
-    proc = ctx.Process(target=_call_pytest_in_subprocess, args=[args])  # type: ignore
+    proc = ctx.Process(
+        target=_call_pytest_in_subprocess,
+        args=(
+            package_dir,
+            aea_project_path,
+            packages_dir,
+            skip_consistency_check,
+            args,
+        ),
+    )  # type: ignore
     proc.start()
     proc.join(timeout=timeout)
     return proc.exitcode
@@ -508,7 +531,13 @@ def test_package_by_path(
             ),
             *pytest_arguments,
         ]
-        exit_code = _call_pytest(runtime_args)
+        exit_code = _call_pytest(
+            package_dir,
+            aea_project_path,
+            packages_dir,
+            skip_consistency_check,
+            runtime_args,
+        )
         if cov:
             coverage_context.generate()
 
@@ -541,12 +570,16 @@ def test_package_collection(
         )
         click.echo(f"Running tests for {package_dir.name} of type {package_type}")
         exit_code = _call_pytest(
+            package_dir,
+            None,
+            packages_dir,
+            False,
             [
                 *get_pytest_args(
                     package_dir=package_dir, cov=cov, coverage_context=coverage_context
                 ),
                 *pytest_args,
-            ]
+            ],
         )
 
         if exit_code:
