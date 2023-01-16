@@ -20,12 +20,11 @@
 
 """Implementation of the 'aea test' command."""
 import contextlib
-import multiprocessing
 import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Callable, List, NoReturn, Optional, Sequence, Set, Tuple, cast
+from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, cast
 
 import click
 import pytest
@@ -358,6 +357,7 @@ class CoverageContext:
         self,
     ) -> None:
         """Generate coverage report."""
+
         coverage(argv=["html", f"--rcfile={self.coveragerc_file}"])
         coverage(argv=["xml", f"--rcfile={self.coveragerc_file}"])
 
@@ -452,21 +452,6 @@ def load_package(
     )
 
 
-def _call_pytest_in_subprocess(args: List[str]) -> NoReturn:
-    """Perform call of pytest in a subprocess with pytest return code."""
-    exit_code = pytest.main(args)
-    sys.exit(int(exit_code))
-
-
-def _call_pytest(args: List[str], timeout: int = 60 * 60) -> Optional[int]:
-    """Perform pytest call and return returncode."""
-    ctx = multiprocessing.get_context("spawn")  # to have clean python instance
-    proc = ctx.Process(target=_call_pytest_in_subprocess, args=[args])  # type: ignore
-    proc.start()
-    proc.join(timeout=timeout)
-    return proc.exitcode
-
-
 def test_package_by_path(
     package_dir: Path,
     pytest_arguments: Sequence[str],
@@ -508,7 +493,7 @@ def test_package_by_path(
             ),
             *pytest_arguments,
         ]
-        exit_code = _call_pytest(runtime_args)
+        exit_code = pytest.main(runtime_args)
         if cov:
             coverage_context.generate()
 
@@ -540,7 +525,7 @@ def test_package_collection(
             package_dir, packages_dir=packages_dir, skip_consistency_check=True
         )
         click.echo(f"Running tests for {package_dir.name} of type {package_type}")
-        exit_code = _call_pytest(
+        exit_code = pytest.main(
             [
                 *get_pytest_args(
                     package_dir=package_dir, cov=cov, coverage_context=coverage_context

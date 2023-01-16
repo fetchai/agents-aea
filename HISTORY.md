@@ -1,5 +1,18 @@
 # Release History - open AEA
 
+
+## 1.28.0.post1 (2023-01-16)
+
+AEA:
+- Fixes the module import issue on the `aea test` command by removing the usage of spawned process to run the pytest command
+
+Plugins:
+- Pins proper version for cosmos plugin on the ledger plugin
+- Updates the `LedgerApi.update_with_gas_estimation` method to raise instead of logging the error if specified by the user
+
+Chores:
+- Pins `pywin32` to `>=304`
+
 ## 1.28.0 (2023-01-11)
 
 AEA:
