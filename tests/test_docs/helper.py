@@ -67,7 +67,7 @@ def extract_dicts(dictionary: Dict, collection_dict: List[Dict]) -> List[Dict]:
 
 def flatten_blocks(blocks: List[Dict]) -> List[Dict]:
     """Convert a list of dicts with nested dicts, into a list containing all dicts."""
-    new_blocks = []
+    new_blocks: List[Dict] = []
     if isinstance(blocks, list):
         for el in blocks:
             if isinstance(el, dict):
@@ -78,7 +78,7 @@ def flatten_blocks(blocks: List[Dict]) -> List[Dict]:
 def extract_inner_code_blocks(block: Dict, code_blocks: List[Dict]) -> None:
     """Replace code_block with any sub code_blocks it may have"""
     text = cast(str, block["text"])
-    indexes = [m.start() for m in re.finditer('```', text)]
+    indexes = [m.start() for m in re.finditer("```", text)]
     if indexes:
         if len(indexes) % 2 != 0:
             raise SyntaxError(f"un-matching ``` found in the block: {text}")
@@ -86,8 +86,11 @@ def extract_inner_code_blocks(block: Dict, code_blocks: List[Dict]) -> None:
             starting_index = indexes.pop(0)
             ending_index = indexes.pop(0) + 3
             sub_string = text[starting_index:ending_index]
-            # type_ = text[starting_index + 4:text.find("\n", starting_index + 4)]
-            new_dict = {'type': block['type'], 'text': sub_string, 'info': block['info']}
+            new_dict = {
+                "type": block["type"],
+                "text": sub_string,
+                "info": block["info"],
+            }
             code_blocks.insert(code_blocks.index(block), new_dict)
         code_blocks.remove(block)
 
@@ -106,8 +109,8 @@ def extract_code_blocks(filepath, filter_=None):
 
     for block in code_blocks:
         if block["text"].startswith("``` "):
-            type_ = block["text"][4:block["text"].find("\n")]
-            block["text"] = block["text"].strip()[block["text"].find("\n")+1:]
+            type_ = block["text"][4 : block["text"].find("\n")]
+            block["text"] = block["text"].strip()[block["text"].find("\n") + 1 :]
             if block["text"].endswith("```"):
                 block["text"] = block["text"].strip()[:-3]
             block["info"] = f"{type_}"
