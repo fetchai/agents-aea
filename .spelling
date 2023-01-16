@@ -365,6 +365,7 @@ output_file
 gitleaks
 1.18.0.post1
 aea-cli-ipfs
+1.28.0.post1
  - docs/creating-contracts.md
 ABI
 ERC20
