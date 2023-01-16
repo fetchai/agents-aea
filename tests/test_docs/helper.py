@@ -66,7 +66,7 @@ def extract_dicts(dictionary: Dict, collection_dict: List[Dict]) -> List[Dict]:
 
 
 def flatten_blocks(blocks: List[Dict]) -> List[Dict]:
-    """Flatten a list of dicts with nested dicts, into a list of all dicts."""
+    """Convert a list of dicts with nested dicts, into a list containing all dicts."""
     new_blocks = []
     if isinstance(blocks, list):
         for el in blocks:
@@ -75,9 +75,8 @@ def flatten_blocks(blocks: List[Dict]) -> List[Dict]:
     return new_blocks
 
 
-def expand_block(block: Dict, code_blocks: List[Dict]) -> None:
-    """Replace block with any sub-blocks it may have"""
-    # import pdb;pdb.set_trace()
+def extract_inner_code_blocks(block: Dict, code_blocks: List[Dict]) -> None:
+    """Replace code_block with any sub code_blocks it may have"""
     text = cast(str, block["text"])
     indexes = [m.start() for m in re.finditer('```', text)]
     if indexes:
@@ -87,8 +86,8 @@ def expand_block(block: Dict, code_blocks: List[Dict]) -> None:
             starting_index = indexes.pop(0)
             ending_index = indexes.pop(0) + 3
             sub_string = text[starting_index:ending_index]
-            type_ = text[starting_index + 4:text.find("\n", starting_index + 4)]
-            new_dict = {'type': 'block_code', 'text': sub_string, 'info': type_}
+            # type_ = text[starting_index + 4:text.find("\n", starting_index + 4)]
+            new_dict = {'type': block['type'], 'text': sub_string, 'info': block['info']}
             code_blocks.insert(code_blocks.index(block), new_dict)
         code_blocks.remove(block)
 
@@ -101,19 +100,18 @@ def extract_code_blocks(filepath, filter_=None):
     flat_blocks = flatten_blocks(blocks)
     actual_type_filter = partial(type_filter, filter_)
     code_blocks = list(filter(block_code_filter, flat_blocks))
+
+    for code_block in code_blocks:
+        extract_inner_code_blocks(code_block, code_blocks)
+
     for block in code_blocks:
-        expand_block(block, code_blocks)
-    for block in code_blocks:
-        if block["text"].startswith("``` python"):
-            block["text"] = cast(str, block["text"]).strip()[11:]
+        if block["text"].startswith("``` "):
+            type_ = block["text"][4:block["text"].find("\n")]
+            block["text"] = block["text"].strip()[block["text"].find("\n")+1:]
             if block["text"].endswith("```"):
-                block["text"] = cast(str, block["text"]).strip()[:-3]
-            block["info"] = " python"
-        elif block["text"].startswith("``` bash"):
-            block["text"] = cast(str, block["text"]).strip()[9:]
-            if block["text"].endswith("```"):
-                block["text"] = cast(str, block["text"]).strip()[:-3]
-            block["info"] = " bash"
+                block["text"] = block["text"].strip()[:-3]
+            block["info"] = f"{type_}"
+
     bash_code_blocks = filter(actual_type_filter, code_blocks)
     return list(b["text"] for b in bash_code_blocks)
 

@@ -92,6 +92,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 ```
 
 ??? note "Stand-alone transaction full code:"
+
     ``` python
     import logging
 
