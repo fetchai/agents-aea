@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,7 +59,7 @@ from requests import HTTPError
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 from web3.datastructures import AttributeDict
-from web3.exceptions import SolidityError
+from web3.exceptions import ContractLogicError, SolidityError
 
 from aea.common import JSONLike
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
@@ -1068,3 +1068,52 @@ def test_get_gas_price_strategy() -> None:
         side_effect=requests.exceptions.RequestException(Mock()),
     ):
         assert strategy(Mock(), Mock()) == {"gasPrice": 12}
+
+
+@pytest.mark.ledger
+def test_update_with_gas_estimate_method_raise_on_try(
+    ethereum_testnet_config, ganache, ethereum_private_key_file, caplog
+):
+    """Test the balance is zero for a new account."""
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    # The exception will be intercepted and logged
+    with mock.patch.object(
+        ethereum_api.api.eth, "estimate_gas", side_effect=ContractLogicError
+    ), caplog.at_level(logging.WARNING):
+        ethereum_api.update_with_gas_estimate(
+            transaction={
+                "value": 0,
+                "chainId": 1337,
+                "from": "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+                "gas": 291661,
+                "maxPriorityFeePerGas": 3000000000,
+                "maxFeePerGas": 4000000000,
+                "to": "0x68FCdF52066CcE5612827E872c45767E5a1f6551",
+                "data": "",
+            }
+        )
+
+        assert (
+            "Unable to estimate gas with default state , ContractLogicError"
+            in caplog.text
+        )
+
+    # The exception won't be intercepted
+    with pytest.raises(ContractLogicError):
+        with mock.patch.object(
+            ethereum_api.api.eth, "estimate_gas", side_effect=ContractLogicError
+        ):
+            ethereum_api.update_with_gas_estimate(
+                transaction={
+                    "value": 0,
+                    "chainId": 1337,
+                    "from": "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+                    "gas": 291661,
+                    "maxPriorityFeePerGas": 3000000000,
+                    "maxFeePerGas": 4000000000,
+                    "to": "0x68FCdF52066CcE5612827E872c45767E5a1f6551",
+                    "data": "",
+                },
+                raise_on_try=True,
+            )
