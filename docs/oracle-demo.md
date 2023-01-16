@@ -181,16 +181,16 @@ Similar to above, set a temporary variable `LEDGER_ID=fetchai` or `LEDGER_ID=eth
 ??? note "Follow these steps to configure for an ethereum ledger:"
     Set the default ledger:
 
-        ``` bash
-        aea config set agent.default_ledger ethereum
-        ```
+    ``` bash
+    aea config set agent.default_ledger ethereum
+    ```
 
-        Set the following configuration for the oracle client skill:
+    Set the following configuration for the oracle client skill:
 
-        ``` bash
-        aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id ethereum
-        aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
-        ```
+    ``` bash
+    aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id ethereum
+    aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
+    ```
 
 Create the private key for the oracle client AEA. Generate and add a key for use on the ledger:
 

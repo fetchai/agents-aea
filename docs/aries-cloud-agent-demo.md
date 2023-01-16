@@ -185,17 +185,18 @@ cd aries_alice
 ```
 
 ??? note "Alternatively, create from scratch:"
+
     The following steps create **Alice_AEA** from scratch:
 
-        ``` bash
-        aea create aries_alice
-        cd aries_alice
-        aea add connection fetchai/p2p_libp2p:0.27.4
-        aea add connection fetchai/soef:0.27.5
-        aea add connection fetchai/http_client:0.24.5
-        aea add connection fetchai/webhook:0.20.5
-        aea add skill fetchai/aries_alice:0.26.5
-        ```
+    ``` bash
+    aea create aries_alice
+    cd aries_alice
+    aea add connection fetchai/p2p_libp2p:0.27.4
+    aea add connection fetchai/soef:0.27.5
+    aea add connection fetchai/http_client:0.24.5
+    aea add connection fetchai/webhook:0.20.5
+    aea add skill fetchai/aries_alice:0.26.5
+    ```
 
 #### Configure the `aries_alice` Skill
 

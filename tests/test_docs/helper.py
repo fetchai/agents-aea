@@ -109,7 +109,7 @@ def extract_code_blocks(filepath, filter_=None):
 
     for block in code_blocks:
         if block["text"].startswith("``` "):
-            type_ = block["text"][4 : block["text"].find("\n")]
+            type_ = block["text"][4:block["text"].find("\n")]
             block["text"] = block["text"].strip()[block["text"].find("\n") + 1 :]
             if block["text"].endswith("```"):
                 block["text"] = block["text"].strip()[:-3]
