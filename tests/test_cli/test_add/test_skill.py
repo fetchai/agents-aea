@@ -32,6 +32,7 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli import cli
+from aea.cli.add import fetch_item_remote
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.configurations.base import (
@@ -574,6 +575,10 @@ class TestAddSkillRemoteMode(BaseTestAddRemoteMode):
 @mock.patch(
     "aea.cli.registry.utils.get_or_create_cli_config",
     return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch(
+    "aea.cli.add.fetch_item",
+    wraps=fetch_item_remote,
 )
 @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS)
 class TestAddSkillWithLatestVersionByHash(AEATestCaseEmpty):
