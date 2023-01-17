@@ -55,42 +55,42 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 aea run --connections fetchai/p2p_libp2p:0.27.4
 ```
 
-  ``` bash
-  svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
-  cd p2p_libp2p
-  go build
-  chmod +x libp2p_node
-  ```
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
+cd p2p_libp2p
+go build
+chmod +x libp2p_node
+```
 
-  ``` bash
-  docker build -t acn_node_standalone -f scripts/acn/Dockerfile .
-  ```
+``` bash
+docker build -t acn_node_standalone -f scripts/acn/Dockerfile .
+```
 
-  ``` bash
-  python3 run_acn_node_standalone.py libp2p_node --config-from-env
-  ```
+``` bash
+python3 run_acn_node_standalone.py libp2p_node --config-from-env
+```
 
-  ``` bash
-  python3 run_acn_node_standalone.py libp2p_node --config-from-file <env-file-path>
-  ```
+``` bash
+python3 run_acn_node_standalone.py libp2p_node --config-from-file <env-file-path>
+```
 
-  ``` bash
-  docker run -v <acn_config_file>:/acn/acn_config -it acn_node_standalone --config-from-file /acn/acn_config
-  ```
+``` bash
+docker run -v <acn_config_file>:/acn/acn_config -it acn_node_standalone --config-from-file /acn/acn_config
+```
 
-  ``` bash
-  python3 run_acn_node_standalone.py libp2p_node --key-file <node_private_key.txt> \
-    --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
-    --uri-delegate <AEA_P2P_DELEGATE_URI> \
-    --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
-  ```
+``` bash
+python3 run_acn_node_standalone.py libp2p_node --key-file <node_private_key.txt> \
+  --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
+  --uri-delegate <AEA_P2P_DELEGATE_URI> \
+  --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
+```
 
-  ``` bash
-  docker run -v <node_private_key.txt>:/acn/key.txt -it acn_node_standalone --key-file /acn/key.txt \
-    --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
-    --uri-delegate <AEA_P2P_DELEGATE_URI> \
-    --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
-  ```
+``` bash
+docker run -v <node_private_key.txt>:/acn/key.txt -it acn_node_standalone --key-file /acn/key.txt \
+  --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
+  --uri-delegate <AEA_P2P_DELEGATE_URI> \
+  --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
+```
 
 ``` yaml
 /dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx

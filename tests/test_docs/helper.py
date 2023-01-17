@@ -75,6 +75,26 @@ def flatten_blocks(blocks: List[Dict]) -> List[Dict]:
     return new_blocks
 
 
+def correct_spacing(string: str) -> str:
+    """Convert a list of dicts with nested dicts, into a list containing all dicts."""
+    new_string = ""
+    string_no_back_quote = string[:-3]
+    last_new_line = string.rfind("\n")
+    last_none_space = len(string_no_back_quote.strip(' ')) - 1
+
+    if last_new_line != -1 and last_new_line == last_none_space:
+        number_of_trailing_spaces = (len(string_no_back_quote) - 1) - last_none_space
+        for line in string.splitlines():
+            number_of_leading_spaces = len(line) - len(line.lstrip(' '))
+            if number_of_leading_spaces >= number_of_trailing_spaces:
+                new_line = line[number_of_trailing_spaces:]
+                new_string += new_line
+            else:
+                new_string += line
+        return new_string
+    return string
+
+
 def extract_inner_code_blocks(block: Dict, code_blocks: List[Dict]) -> None:
     """Replace code_block with any sub code_blocks it may have"""
     text = cast(str, block["text"])
@@ -86,9 +106,10 @@ def extract_inner_code_blocks(block: Dict, code_blocks: List[Dict]) -> None:
             starting_index = indexes.pop(0)
             ending_index = indexes.pop(0) + 3
             sub_string = text[starting_index:ending_index]
+            new_substring = correct_spacing(sub_string)
             new_dict = {
                 "type": block["type"],
-                "text": sub_string,
+                "text": new_substring,
                 "info": block["info"],
             }
             code_blocks.insert(code_blocks.index(block), new_dict)

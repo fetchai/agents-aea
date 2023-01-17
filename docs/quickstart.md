@@ -30,16 +30,16 @@ Install a compatible Python and Go version on your system (see <a href="https://
     - To install Go, follow the official guide, depending on your platform <a href="https://go.dev/doc/install" target="_blank">here</a>
     - Python is already included by default on many Linux distributions (e.g. Ubuntu), as well as MacOS. To check you have the right version, open a terminal and run:
 
-      ``` bash
-      python3 --version
-      ```
+        ``` bash
+        python3 --version
+        ```
 
     - To install Python on Windows machines, you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
     - Ubuntu/Debian systems only: install Python headers, depending on the Python version you have installed on your machine. E.g. for Python 3.7: 
 
-      ``` bash
-      sudo apt-get install python3.7-dev
-      ```
+        ``` bash
+        sudo apt-get install python3.7-dev
+        ```
 
     - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
@@ -86,7 +86,6 @@ We also provide a Docker image with all the needed dependencies.
     
     Once successfully logged into the docker container, 
     you can follow the rest of the guide the same way as if not using docker.
-    ​
 
 ## Preliminaries
 
