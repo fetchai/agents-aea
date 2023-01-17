@@ -49,7 +49,9 @@ Handle incoming message.
 #### run
 
 ```python
-def run(duration: int, runtime_mode: str, runner_mode: str, start_messages: int, num_of_agents: int) -> List[Tuple[str, Union[int, float]]]
+def run(duration: int, runtime_mode: str, runner_mode: str,
+        start_messages: int,
+        num_of_agents: int) -> List[Tuple[str, Union[int, float]]]
 ```
 
 Test multiagent message exchange.

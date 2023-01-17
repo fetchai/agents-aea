@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,8 +36,8 @@ def get_all_extras() -> Dict:
         "pyyaml>=4.2b1,<6.0",
         "jsonschema>=3.0.0,<4.0.0",
         "packaging>=20.3,<22.0",
-        "pytest>=7.0.0,<7.2.0",
-        "coverage>=6.4.4,<7.0.0",
+        "pytest>=7.0.0,<7.3.0",
+        "coverage>=6.4.4,<8.0.0",
         "semver>=2.9.1,<3.0.0",
     ]
 
@@ -70,12 +70,8 @@ base_deps = [
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
-    if sys.version_info[1] > 9 and sys.version_info[0] == 3:
-        base_deps.append("pywin32==304")
-    elif sys.version_info[1] <= 9 and sys.version_info[0] == 3:
-        base_deps.append("pywin32==300")
-    else:
-        raise Exception("Must be using Python 3")
+    base_deps.append("pywin32>=304")
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 about: Dict[str, str] = {}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +46,7 @@ from web3.datastructures import AttributeDict
 from web3.exceptions import ContractLogicError, SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.middleware import geth_poa_middleware
-from web3.types import LatestBlockParam, TxData, TxParams, TxReceipt, Wei
+from web3.types import TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -1078,20 +1078,28 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return nonce
 
-    def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
+    def update_with_gas_estimate(  # pylint: disable=arguments-differ
+        self, transaction: JSONLike, raise_on_try: bool = False
+    ) -> JSONLike:
         """
         Attempts to update the transaction with a gas estimate
 
         :param transaction: the transaction
+        :param raise_on_try: whether the method will raise or log on error
         :return: the updated transaction
         """
-        gas_estimate = self._try_get_gas_estimate(transaction)
+        gas_estimate = self._try_get_gas_estimate(
+            transaction,
+            raise_on_try=raise_on_try,
+        )
         if gas_estimate is not None:
             transaction["gas"] = gas_estimate
         return transaction
 
     @try_decorator("Unable to retrieve gas estimate: {}", logger_method="warning")
-    def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
+    def _try_get_gas_estimate(
+        self, transaction: JSONLike, **_kwargs: Any
+    ) -> Optional[int]:
         """Try get the gas estimate."""
         gas_estimate: Optional[int] = None
         transaction = deepcopy(transaction)
@@ -1115,7 +1123,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
                 transaction=cast(
                     TxParams, AttributeDictTranslator.from_dict(transaction)
                 ),
-                block_identifier=LatestBlockParam,
+                block_identifier="latest",
             )
 
         return gas_estimate
@@ -1401,7 +1409,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return Web3.isAddress(address)
 
     @classmethod
-    def contract_method_call(
+    def contract_method_call(  # pylint: disable=arguments-differ
         cls,
         contract_instance: Any,
         method_name: str,
@@ -1477,7 +1485,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         tx = tx.buildTransaction(tx_params)
         if self._is_gas_estimation_enabled:
-            tx = self.update_with_gas_estimate(tx)
+            tx = self.update_with_gas_estimate(tx, raise_on_try=raise_on_try)
 
         return tx
 

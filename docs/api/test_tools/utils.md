@@ -9,7 +9,10 @@ Helpful utilities.
 #### wait`_`for`_`condition
 
 ```python
-def wait_for_condition(condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout", period: float = 0.001) -> None
+def wait_for_condition(condition_checker: Callable,
+                       timeout: int = 2,
+                       error_msg: str = "Timeout",
+                       period: float = 0.001) -> None
 ```
 
 Wait for condition to occur in selected timeout.
@@ -50,7 +53,8 @@ Copy a class. Useful for testing class setup configurations
 #### remove`_`test`_`directory
 
 ```python
-def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool
+def remove_test_directory(directory: Union[str, Path],
+                          retries: int = 3) -> bool
 ```
 
 Destroy a directory once tests are done, change permissions if needed.

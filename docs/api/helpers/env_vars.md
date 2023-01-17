@@ -29,7 +29,10 @@ Conver export path to environment variable string.
 #### replace`_`with`_`env`_`var
 
 ```python
-def replace_with_env_var(value: str, env_variables: dict, default_value: Any = NotSet, default_var_name: Optional[str] = None) -> JSON_TYPES
+def replace_with_env_var(value: str,
+                         env_variables: dict,
+                         default_value: Any = NotSet,
+                         default_var_name: Optional[str] = None) -> JSON_TYPES
 ```
 
 Replace env var with value.
@@ -39,7 +42,10 @@ Replace env var with value.
 #### apply`_`env`_`variables
 
 ```python
-def apply_env_variables(data: Union[Dict, List[Dict]], env_variables: Mapping[str, Any], path: Optional[List[str]] = None, default_value: Any = NotSet) -> JSON_TYPES
+def apply_env_variables(data: Union[Dict, List[Dict]],
+                        env_variables: Mapping[str, Any],
+                        path: Optional[List[str]] = None,
+                        default_value: Any = NotSet) -> JSON_TYPES
 ```
 
 Create new resulting dict with env variables applied.
@@ -59,7 +65,8 @@ Convert value by type name to native python type.
 #### apply`_`env`_`variables`_`on`_`agent`_`config
 
 ```python
-def apply_env_variables_on_agent_config(data: List[Dict], env_variables: Mapping[str, Any]) -> List[Dict]
+def apply_env_variables_on_agent_config(
+        data: List[Dict], env_variables: Mapping[str, Any]) -> List[Dict]
 ```
 
 Create new resulting dict with env variables applied.
@@ -78,17 +85,17 @@ The data list contains a mapping object we need to process it as an
 object containing configurable parameters. For example
 
 cert_requests:
-- public_key: example_public_key
+  - public_key: example_public_key
 
 This will get exported as `CONNECTION_NAME_CERT_REQUESTS_0_PUBLIC_KEY=example_public_key`
 
 Where as
 
 parameters:
-- hello
-- world
+ - hello
+ - world
 
-will get exported as `SKILL_NAME_PARAMETERS=["hello", "world"]`
+ will get exported as `SKILL_NAME_PARAMETERS=["hello", "world"]`
 
 **Arguments**:
 
@@ -103,7 +110,8 @@ Boolean specifying whether it's a strict list or not
 #### generate`_`env`_`vars`_`recursively
 
 ```python
-def generate_env_vars_recursively(data: Union[Dict, List], export_path: List[str]) -> Dict
+def generate_env_vars_recursively(data: Union[Dict, List],
+                                  export_path: List[str]) -> Dict
 ```
 
 Generate environment variables recursively.

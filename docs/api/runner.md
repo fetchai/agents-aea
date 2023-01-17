@@ -92,7 +92,12 @@ Run multiple AEA instances.
 #### `__`init`__`
 
 ```python
-def __init__(agents: Sequence[AEA], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate) -> None
+def __init__(
+    agents: Sequence[AEA],
+    mode: str,
+    fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.
+    propagate
+) -> None
 ```
 
 Init AEARunner.

@@ -9,7 +9,9 @@ Module wrapping the helpers of public and private key cryptography.
 #### try`_`validate`_`private`_`key`_`path
 
 ```python
-def try_validate_private_key_path(ledger_id: str, private_key_path: str, password: Optional[str] = None) -> None
+def try_validate_private_key_path(ledger_id: str,
+                                  private_key_path: str,
+                                  password: Optional[str] = None) -> None
 ```
 
 Try validate a private key path.
@@ -25,7 +27,10 @@ Try validate a private key path.
 #### create`_`private`_`key
 
 ```python
-def create_private_key(ledger_id: str, private_key_file: str, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
+def create_private_key(ledger_id: str,
+                       private_key_file: str,
+                       password: Optional[str] = None,
+                       extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Create a private key for the specified ledger identifier.
@@ -42,7 +47,10 @@ Create a private key for the specified ledger identifier.
 #### try`_`generate`_`testnet`_`wealth
 
 ```python
-def try_generate_testnet_wealth(identifier: str, address: str, url: Optional[str] = None, _sync: bool = True) -> None
+def try_generate_testnet_wealth(identifier: str,
+                                address: str,
+                                url: Optional[str] = None,
+                                _sync: bool = True) -> None
 ```
 
 Try generate wealth on a testnet.
@@ -59,7 +67,9 @@ Try generate wealth on a testnet.
 #### private`_`key`_`verify
 
 ```python
-def private_key_verify(aea_conf: AgentConfig, aea_project_path: Path, password: Optional[str] = None) -> None
+def private_key_verify(aea_conf: AgentConfig,
+                       aea_project_path: Path,
+                       password: Optional[str] = None) -> None
 ```
 
 Check key.
@@ -75,7 +85,11 @@ Check key.
 #### make`_`certificate
 
 ```python
-def make_certificate(ledger_id: str, crypto_private_key_path: str, message: bytes, output_path: str, password: Optional[str] = None) -> str
+def make_certificate(ledger_id: str,
+                     crypto_private_key_path: str,
+                     message: bytes,
+                     output_path: str,
+                     password: Optional[str] = None) -> str
 ```
 
 Create certificate.
@@ -97,7 +111,8 @@ the signature/certificate
 #### get`_`wallet`_`from`_`agent`_`config
 
 ```python
-def get_wallet_from_agent_config(agent_config: AgentConfig, password: Optional[str] = None) -> Wallet
+def get_wallet_from_agent_config(agent_config: AgentConfig,
+                                 password: Optional[str] = None) -> Wallet
 ```
 
 Get wallet from agent_cofig provided.
@@ -156,7 +171,11 @@ Convert hex string to bytes with error handling.
 #### generate`_`multiple`_`keys
 
 ```python
-def generate_multiple_keys(n: int, type_: str, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "", file: Optional[str] = None) -> None
+def generate_multiple_keys(n: int,
+                           type_: str,
+                           password: Optional[str] = None,
+                           extra_entropy: Union[str, bytes, int] = "",
+                           file: Optional[str] = None) -> None
 ```
 
 Generate n key pairs.

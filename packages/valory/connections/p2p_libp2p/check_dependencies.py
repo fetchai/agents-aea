@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,11 +27,12 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
-from distutils.dir_util import copy_tree
+from distutils.dir_util import copy_tree  # pylint: disable=deprecated-module
 from itertools import islice
 from subprocess import Popen, TimeoutExpired  # nosec
 from typing import Iterable, List, Optional, Pattern, Tuple
 
+from aea.exceptions import AEAException
 from aea.helpers.base import ensure_dir
 
 
@@ -51,8 +52,6 @@ except ImportError:  # pragma: nocover
         LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
     )
-
-from aea.exceptions import AEAException
 
 
 ERROR_MESSAGE_TEMPLATE_BINARY_NOT_FOUND = "'{command}' is required by the libp2p connection, but it is not installed, or it is not accessible from the system path."

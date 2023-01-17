@@ -29,7 +29,9 @@ Instantiate a Pythonic protocol specification.
 #### extract
 
 ```python
-def extract(protocol_specification: ProtocolSpecification) -> PythonicProtocolSpecification
+def extract(
+    protocol_specification: ProtocolSpecification
+) -> PythonicProtocolSpecification
 ```
 
 Converts a protocol specification into a Pythonic protocol specification.

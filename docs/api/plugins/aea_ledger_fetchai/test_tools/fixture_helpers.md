@@ -10,7 +10,9 @@ Fixture helpers
 
 ```python
 @pytest.fixture(scope="class")
-def fetchd(fetchd_configuration=FETCHD_CONFIGURATION, timeout: float = 2.0, max_attempts: int = 20)
+def fetchd(fetchd_configuration=FETCHD_CONFIGURATION,
+           timeout: float = 2.0,
+           max_attempts: int = 20)
 ```
 
 Launch the Fetch ledger image.

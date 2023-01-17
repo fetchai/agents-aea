@@ -19,7 +19,11 @@ Profiling service.
 #### `__`init`__`
 
 ```python
-def __init__(types_to_track: List[Type], period: int = 0, output_function: Callable[[str], None] = lambda x: print(x, flush=True)) -> None
+def __init__(
+    types_to_track: List[Type],
+    period: int = 0,
+    output_function: Callable[[str], None] = lambda x: print(x, flush=True)
+) -> None
 ```
 
 Init profiler.

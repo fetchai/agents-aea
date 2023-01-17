@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ from aea.helpers.async_utils import Runnable
 from aea.helpers.profiler_type_black_list import PROFILER_TYPE_BLACK_LIST
 
 
-BYTES_TO_MBYTES = 1024 ** -2
+BYTES_TO_MBYTES = 1024**-2
 
 lock = threading.Lock()
 
@@ -65,7 +65,6 @@ if platform.system() == "Windows":  # pragma: nocover
         """Get current process cpu time in seconds."""
         d = win32process.GetProcessTimes(win32process.GetCurrentProcess())  # type: ignore
         return d["UserTime"] / WIN32_PROCESS_TIMES_TICKS_PER_SECOND
-
 
 else:
     import resource

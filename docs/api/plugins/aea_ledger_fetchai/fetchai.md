@@ -29,7 +29,7 @@ Class wrapping the Entity Generation from Fetch.AI ledger.
 ## FetchAIApi Objects
 
 ```python
-class FetchAIApi(_CosmosApi,  FetchAIHelper)
+class FetchAIApi(_CosmosApi, FetchAIHelper)
 ```
 
 Class to interact with the Fetch ledger APIs.
@@ -49,7 +49,8 @@ Initialize the Fetch.ai ledger APIs.
 #### contract`_`method`_`call
 
 ```python
-def contract_method_call(contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
+def contract_method_call(contract_instance: Any, method_name: str,
+                         **method_args: Any) -> Optional[JSONLike]
 ```
 
 Call a contract's method
@@ -65,7 +66,11 @@ Call a contract's method
 #### build`_`transaction
 
 ```python
-def build_transaction(contract_instance: Any, method_name: str, method_args: Optional[Dict], tx_args: Optional[Dict], raise_on_try: bool = False) -> Optional[JSONLike]
+def build_transaction(contract_instance: Any,
+                      method_name: str,
+                      method_args: Optional[Dict],
+                      tx_args: Optional[Dict],
+                      raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Prepare a transaction
@@ -83,7 +88,10 @@ Prepare a transaction
 #### get`_`transaction`_`transfer`_`logs
 
 ```python
-def get_transaction_transfer_logs(contract_instance: Any, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
+def get_transaction_transfer_logs(
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Get all transfer events derived from a transaction.

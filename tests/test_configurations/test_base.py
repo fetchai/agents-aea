@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -351,7 +351,7 @@ class TestAgentConfig:
 class TestAgentConfigUpdate:
     """Test methods that change the agent configuration."""
 
-    def setup(self):
+    def setup(self) -> None:
         """Set up the tests."""
         self.aea_config_path = Path(
             CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE

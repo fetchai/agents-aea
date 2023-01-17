@@ -19,7 +19,8 @@ Get the protocol specification from the package README.
 #### get`_`protocol`_`specification`_`id`_`from`_`specification
 
 ```python
-def get_protocol_specification_id_from_specification(specification: str) -> str
+def get_protocol_specification_id_from_specification(
+        specification: str) -> str
 ```
 
 Get the protocol specification id from the protocol specification.

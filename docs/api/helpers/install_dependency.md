@@ -9,7 +9,10 @@ Helper to install python dependencies.
 #### install`_`dependency
 
 ```python
-def install_dependency(dependency_name: str, dependency: Dependency, logger: Logger, install_timeout: float = 300) -> None
+def install_dependency(dependency_name: str,
+                       dependency: Dependency,
+                       logger: Logger,
+                       install_timeout: float = 300) -> None
 ```
 
 Install python dependency to the current python environment.
@@ -26,7 +29,9 @@ Install python dependency to the current python environment.
 #### install`_`dependencies
 
 ```python
-def install_dependencies(dependencies: List[Dependency], logger: Logger, install_timeout: float = 300) -> None
+def install_dependencies(dependencies: List[Dependency],
+                         logger: Logger,
+                         install_timeout: float = 300) -> None
 ```
 
 Install python dependencies to the current python environment.
@@ -42,7 +47,9 @@ Install python dependencies to the current python environment.
 #### call`_`pip
 
 ```python
-def call_pip(pip_args: List[str], timeout: float = 300, retry: bool = False) -> None
+def call_pip(pip_args: List[str],
+             timeout: float = 300,
+             retry: bool = False) -> None
 ```
 
 Run pip install command.
@@ -58,7 +65,8 @@ Run pip install command.
 #### run`_`install`_`subprocess
 
 ```python
-def run_install_subprocess(install_command: List[str], install_timeout: float = 300) -> int
+def run_install_subprocess(install_command: List[str],
+                           install_timeout: float = 300) -> int
 ```
 
 Try executing install command.

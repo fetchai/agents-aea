@@ -71,7 +71,8 @@ None
 
 ```python
 @abstractmethod
-async def put(collection_name: str, object_id: str, object_body: JSON_TYPES) -> None
+async def put(collection_name: str, object_id: str,
+              object_body: JSON_TYPES) -> None
 ```
 
 Put object into collection.
@@ -99,7 +100,6 @@ Get object from the collection.
 
 **Arguments**:
 
-
 - `collection_name`: str.
 - `object_id`: str object id
 
@@ -120,7 +120,6 @@ Remove object from the collection.
 
 **Arguments**:
 
-
 - `collection_name`: str.
 - `object_id`: str object id
 
@@ -134,13 +133,13 @@ None
 
 ```python
 @abstractmethod
-async def find(collection_name: str, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
+async def find(collection_name: str, field: str,
+               equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
 ```
 
 Get objects from the collection by filtering by field value.
 
 **Arguments**:
-
 
 - `collection_name`: str.
 - `field`: field name to search: example "parent.field"

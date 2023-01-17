@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,17 +28,17 @@ from typing import Dict
 # specified in setup.py
 WHITELIST = {
     "base58": ">=1.0.3",
-    "tomte[tests]": "==0.1.5",
-    "tomte[bandit]": "==0.1.5",
-    "tomte[black]": "==0.1.5",
-    "tomte[isort]": "==0.1.5",
-    "tomte[docs]": "==0.1.5",
-    "tomte[flake8]": "==0.1.5",
-    "tomte[mypy]": "==0.1.5",
-    "tomte[pylint]": "==0.1.5",
-    "tomte[safety]": "==0.1.5",
-    "tomte[vulture]": "==0.1.5",
-    "tomte[darglint]": "==0.1.5",
+    "tomte[tests]": "==0.2.2",
+    "tomte[bandit]": "==0.2.2",
+    "tomte[black]": "==0.2.2",
+    "tomte[isort]": "==0.2.2",
+    "tomte[docs]": "==0.2.2",
+    "tomte[flake8]": "==0.2.2",
+    "tomte[mypy]": "==0.2.2",
+    "tomte[pylint]": "==0.2.2",
+    "tomte[safety]": "==0.2.2",
+    "tomte[vulture]": "==0.2.2",
+    "tomte[darglint]": "==0.2.2",
 }
 
 

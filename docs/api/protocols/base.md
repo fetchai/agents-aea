@@ -360,7 +360,7 @@ the decoded message.
 ## Serializer Objects
 
 ```python
-class Serializer(Encoder,  Decoder,  ABC)
+class Serializer(Encoder, Decoder, ABC)
 ```
 
 The implementations of this class defines a serialization layer for a protocol.
@@ -382,7 +382,8 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
-def __init__(configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any) -> None
+def __init__(configuration: ProtocolConfig, message_class: Type[Message],
+             **kwargs: Any) -> None
 ```
 
 Initialize the protocol manager.
@@ -430,7 +431,8 @@ the protocol object.
 
 ```python
 @classmethod
-def from_config(cls, configuration: ProtocolConfig, **kwargs: Any) -> "Protocol"
+def from_config(cls, configuration: ProtocolConfig,
+                **kwargs: Any) -> "Protocol"
 ```
 
 Load the protocol from configuration.

@@ -19,7 +19,10 @@ Agent Proof-of-Representation to representative.
 #### `__`init`__`
 
 ```python
-def __init__(address: str, representative_public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, signature: str) -> None
+def __init__(address: str, representative_public_key: str,
+             identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr,
+             not_before: str, not_after: str, message_format: str,
+             signature: str) -> None
 ```
 
 Initialize the AgentRecord
@@ -161,7 +164,11 @@ Get string representation.
 
 ```python
 @classmethod
-def from_cert_request(cls, cert_request: CertRequest, address: str, representative_public_key: str, data_dir: Optional[PathLike] = None) -> "AgentRecord"
+def from_cert_request(cls,
+                      cert_request: CertRequest,
+                      address: str,
+                      representative_public_key: str,
+                      data_dir: Optional[PathLike] = None) -> "AgentRecord"
 ```
 
 Get agent record from cert request.

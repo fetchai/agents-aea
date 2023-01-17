@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ import tempfile
 from abc import ABC
 from contextlib import nullcontext, redirect_stderr
 from pathlib import Path
-from typing import Any, ContextManager, Optional, Sequence, cast
+from typing import Any, ContextManager, Optional, Sequence, Union, cast
 
 import click.core
 import pytest
@@ -75,7 +75,7 @@ class CliRunner(ClickCliRunner):
         """Call a cli command with click.testing.CliRunner.invoke."""
         exc_info = None
         exception: Optional[BaseException] = None
-        exit_code = 0
+        exit_code: Union[str, int, None] = 0
 
         if self.capfd:
             if input or env or color:

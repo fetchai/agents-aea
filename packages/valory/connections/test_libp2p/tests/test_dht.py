@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -280,7 +280,7 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
     def test_prolonged_message_exchange(self, exponent: int):
         """Test prolonged message exchange"""
 
-        n_messages = 10 ** exponent
+        n_messages = 10**exponent
         for _ in range(n_messages):
             mux_pair = random.sample(self.multiplexers, 2)
             sender, to = (c.address for m in mux_pair for c in m.connections)
@@ -294,7 +294,7 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
         """Ship first check later"""
 
         shipped, delivered = [], []
-        n_messages = 10 ** exponent
+        n_messages = 10**exponent
         for _ in range(n_messages):
             mux_pair = random.sample(self.multiplexers, 2)
             sender, to = (c.address for m in mux_pair for c in m.connections)

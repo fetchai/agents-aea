@@ -151,7 +151,8 @@ Override this property in a subclass.
 #### role`_`from`_`first`_`message
 
 ```python
-def role_from_first_message(message: Message, receiver_address: Address) -> Dialogue.Role
+def role_from_first_message(message: Message,
+                            receiver_address: Address) -> Dialogue.Role
 ```
 
 Infer the role of the agent from an incoming/outgoing first message

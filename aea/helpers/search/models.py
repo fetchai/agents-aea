@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -1074,8 +1074,10 @@ class ConstraintExpr(ABC):
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 
+        :return: None
         :raises AEAEnforceError: if the object does not satisfy some requirements.  # noqa: DAR402
         """
+        return None
 
     @staticmethod
     def _encode(expression: Any) -> models_pb2.Query.ConstraintExpr:  # type: ignore
@@ -1407,15 +1409,11 @@ class Constraint(ConstraintExpr):
             value, type(next(iter(self.constraint_type.value)))
         ):
             return False
-        if (
-            type(self.constraint_type.value)
-            not in {
-                list,
-                tuple,
-                set,
-            }
-            and not isinstance(value, type(self.constraint_type.value))
-        ):
+        if type(self.constraint_type.value) not in {
+            list,
+            tuple,
+            set,
+        } and not isinstance(value, type(self.constraint_type.value)):
             return False
 
         # dispatch the check to the right implementation for the concrete constraint type.

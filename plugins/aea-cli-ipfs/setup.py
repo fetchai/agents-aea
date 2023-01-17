@@ -28,16 +28,18 @@ from setuptools import setup  # type: ignore
 
 setup(
     name="open-aea-cli-ipfs",
-    version="1.27.0.post4",
+    version="1.28.0.post1",
     author="Valory AG",
     license="Apache-2.0",
     description="CLI extension for open AEA framework wrapping IPFS functionality.",
+    long_description="CLI extension for open AEA framework wrapping IPFS functionality.",
+    long_description_content_type="text/markdown",
     packages=["aea_cli_ipfs"],
     entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
         "ipfshttpclient>=0.8.0a2",
-        "pytest>=7.0.0,<7.2.0",
+        "pytest>=7.0.0,<7.3.0",
     ],
     classifiers=[
         "Environment :: Console",

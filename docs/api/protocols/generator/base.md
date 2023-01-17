@@ -19,13 +19,14 @@ This class generates a protocol_verification package from a ProtocolTemplate obj
 #### `__`init`__`
 
 ```python
-def __init__(path_to_protocol_specification: str, output_path: str = ".", dotted_path_to_protocol_package: Optional[str] = None) -> None
+def __init__(path_to_protocol_specification: str,
+             output_path: str = ".",
+             dotted_path_to_protocol_package: Optional[str] = None) -> None
 ```
 
 Instantiate a protocol generator.
 
 **Arguments**:
-
 
 - `path_to_protocol_specification`: path to protocol specification file
 - `output_path`: the path to the location in which the protocol module is to be generated.
@@ -41,7 +42,8 @@ Instantiate a protocol generator.
 #### generate`_`protobuf`_`only`_`mode
 
 ```python
-def generate_protobuf_only_mode(language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = True) -> Optional[str]
+def generate_protobuf_only_mode(language: str = PROTOCOL_LANGUAGE_PYTHON,
+                                run_protolint: bool = True) -> Optional[str]
 ```
 
 Run the generator in "protobuf only" mode:
@@ -51,7 +53,6 @@ b) create the protocol buffer schema file.
 c) create the protocol buffer implementation file via 'protoc'.
 
 **Arguments**:
-
 
 - `language`: the target language in which to generate the package.
 - `run_protolint`: whether to run protolint or not.
@@ -92,13 +93,13 @@ optional warning message
 #### generate
 
 ```python
-def generate(protobuf_only: bool = False, language: str = PROTOCOL_LANGUAGE_PYTHON) -> Optional[str]
+def generate(protobuf_only: bool = False,
+             language: str = PROTOCOL_LANGUAGE_PYTHON) -> Optional[str]
 ```
 
 Run the generator either in "full" or "protobuf only" mode.
 
 **Arguments**:
-
 
 - `protobuf_only`: mode of running the generator.
 - `language`: the target language in which to generate the protocol package.

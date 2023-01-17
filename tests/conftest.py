@@ -44,6 +44,7 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+import pytest_asyncio
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
@@ -896,7 +897,7 @@ def check_test_threads(request):
     assert num_threads >= new_num_threads, "Non closed threads!"
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture()
 async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)
@@ -1200,7 +1201,7 @@ def method_scope(cls):
     return cls
 
 
-def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
+def get_wealth_if_needed(address: Address, fetchai_api: Optional[FetchAIApi] = None):
     """
      Get wealth from fetch.ai faucet to specific address
 

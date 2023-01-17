@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,7 +60,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Set up the test class."""
         super(TestCliTransferFetchAINetwork, cls).setup_class()
         cls.agent_name2 = "agent_" + "".join(
-            random.choices(string.ascii_lowercase, k=5)
+            random.choices(string.ascii_lowercase, k=5)  # nosec
         )
         cls.create_agents(cls.agent_name2)
 

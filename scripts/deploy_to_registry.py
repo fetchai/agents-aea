@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,8 +153,8 @@ def push_package(package_id: PackageId, runner: CliRunner) -> None:
             package_id.package_type.value, str(package_id.public_id)
         )
     )
+    cwd = os.getcwd()
     try:
-        cwd = os.getcwd()
         agent_name = "some_agent"
         result = runner.invoke(
             cli,
@@ -239,8 +239,8 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
             package_id.package_type.value, str(package_id.public_id)
         )
     )
+    cwd = os.getcwd()
     try:
-        cwd = os.getcwd()
         result = runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "fetch", "--local", str(package_id.public_id)],

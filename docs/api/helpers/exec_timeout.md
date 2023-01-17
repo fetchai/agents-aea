@@ -105,7 +105,8 @@ TimeoutResult
 #### `__`exit`__`
 
 ```python
-def __exit__(exc_type: Type[Exception], exc_val: Exception, exc_tb: TracebackType) -> None
+def __exit__(exc_type: Type[Exception], exc_val: Exception,
+             exc_tb: TracebackType) -> None
 ```
 
 Exit context manager.

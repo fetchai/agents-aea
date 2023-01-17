@@ -25,7 +25,8 @@ Check amount of time for acn connection start.
 )
 @number_of_runs_deco
 @output_format_deco
-def main(connection: str, connect_times: int, number_of_runs: int, output_format: str) -> Any
+def main(connection: str, connect_times: int, number_of_runs: int,
+         output_format: str) -> Any
 ```
 
 Check connection connect time.

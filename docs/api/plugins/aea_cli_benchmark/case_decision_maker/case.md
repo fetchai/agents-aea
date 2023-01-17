@@ -37,7 +37,8 @@ None
 #### make`_`desc`_`maker`_`wallet
 
 ```python
-def make_desc_maker_wallet(ledger_id: str, key_path: str) -> Tuple[DecisionMaker, Wallet]
+def make_desc_maker_wallet(ledger_id: str,
+                           key_path: str) -> Tuple[DecisionMaker, Wallet]
 ```
 
 Construct decision maker and wallet.
@@ -47,7 +48,8 @@ Construct decision maker and wallet.
 #### sign`_`txs
 
 ```python
-def sign_txs(decision_maker: DecisionMaker, wallet: Wallet, num_runs: int, ledger_id: str) -> float
+def sign_txs(decision_maker: DecisionMaker, wallet: Wallet, num_runs: int,
+             ledger_id: str) -> float
 ```
 
 Sign txs sprcified amount fo runs and return time taken (seconds).
@@ -57,7 +59,8 @@ Sign txs sprcified amount fo runs and return time taken (seconds).
 #### run
 
 ```python
-def run(ledger_id: str, amount_of_tx: int) -> List[Tuple[str, Union[int, float]]]
+def run(ledger_id: str,
+        amount_of_tx: int) -> List[Tuple[str, Union[int, float]]]
 ```
 
 Check memory usage.

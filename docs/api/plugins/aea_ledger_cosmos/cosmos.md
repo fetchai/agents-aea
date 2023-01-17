@@ -160,7 +160,8 @@ the contract address, if present
 
 ```python
 @staticmethod
-def is_transaction_valid(tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+def is_transaction_valid(tx: JSONLike, seller: Address, client: Address,
+                         tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -222,7 +223,10 @@ str
 
 ```python
 @classmethod
-def recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+def recover_message(cls,
+                    message: bytes,
+                    signature: str,
+                    is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.
@@ -243,7 +247,11 @@ the recovered addresses
 
 ```python
 @classmethod
-def recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+def recover_public_keys_from_message(
+        cls,
+        message: bytes,
+        signature: str,
+        is_deprecated_mode: bool = False) -> Tuple[str, ...]
 ```
 
 Get the public key used to produce the `signature` of the `message`
@@ -330,7 +338,9 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
-def __init__(private_key_path: Optional[str] = None, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
+def __init__(private_key_path: Optional[str] = None,
+             password: Optional[str] = None,
+             extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -392,7 +402,9 @@ a display_address str
 
 ```python
 @classmethod
-def load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> SigningKey
+def load_private_key_from_path(cls,
+                               file_name: str,
+                               password: Optional[str] = None) -> SigningKey
 ```
 
 Load a private key in hex format from a file.
@@ -449,7 +461,9 @@ signed transaction
 
 ```python
 @classmethod
-def generate_private_key(cls, extra_entropy: Union[str, bytes, int] = "") -> SigningKey
+def generate_private_key(cls,
+                         extra_entropy: Union[str, bytes,
+                                              int] = "") -> SigningKey
 ```
 
 Generate a key pair for cosmos network.
@@ -538,7 +552,10 @@ Get the balance of a given account.
 #### get`_`state
 
 ```python
-def get_state(callable_name: str, *args: Any, *, raise_on_try: bool = False, **kwargs: Any) -> Optional[JSONLike]
+def get_state(callable_name: str,
+              *args: Any,
+              raise_on_try: bool = False,
+              **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the ledger API.
@@ -564,7 +581,10 @@ the transaction dictionary
 #### get`_`deploy`_`transaction
 
 ```python
-def get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, raise_on_try: bool = False, **kwargs: Any, ,) -> Optional[JSONLike]
+def get_deploy_transaction(contract_interface: Dict[str, str],
+                           deployer_address: Address,
+                           raise_on_try: bool = False,
+                           **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -587,7 +607,19 @@ the transaction dictionary.
 #### get`_`handle`_`transaction
 
 ```python
-def get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None, raise_on_try: bool = False) -> Optional[JSONLike]
+def get_handle_transaction(sender_address: Address,
+                           contract_address: Address,
+                           handle_msg: Any,
+                           amount: int,
+                           tx_fee: int,
+                           denom: Optional[str] = None,
+                           gas: int = DEFAULT_GAS_AMOUNT,
+                           memo: str = "",
+                           chain_id: Optional[str] = None,
+                           account_number: Optional[int] = None,
+                           sequence: Optional[int] = None,
+                           tx_fee_denom: Optional[str] = None,
+                           raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Create a CosmWasm HandleMsg transaction.
@@ -617,7 +649,9 @@ the unsigned CosmWasm HandleMsg
 #### execute`_`contract`_`query
 
 ```python
-def execute_contract_query(contract_address: Address, query_msg: JSONLike, raise_on_try: bool = False) -> Optional[JSONLike]
+def execute_contract_query(contract_address: Address,
+                           query_msg: JSONLike,
+                           raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
@@ -637,7 +671,20 @@ the message receipt
 #### get`_`transfer`_`transaction
 
 ```python
-def get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None, raise_on_try: bool = False, **kwargs: Any, ,) -> Optional[JSONLike]
+def get_transfer_transaction(sender_address: Address,
+                             destination_address: Address,
+                             amount: int,
+                             tx_fee: int,
+                             tx_nonce: str,
+                             denom: Optional[str] = None,
+                             gas: int = DEFAULT_GAS_AMOUNT,
+                             memo: str = "",
+                             chain_id: Optional[str] = None,
+                             account_number: Optional[int] = None,
+                             sequence: Optional[int] = None,
+                             tx_fee_denom: Optional[str] = None,
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -668,13 +715,16 @@ the transfer transaction
 #### get`_`packed`_`exec`_`msg
 
 ```python
-def get_packed_exec_msg(sender_address: Address, contract_address: str, msg: JSONLike, funds: int = 0, denom: Optional[str] = None) -> ProtoAny
+def get_packed_exec_msg(sender_address: Address,
+                        contract_address: str,
+                        msg: JSONLike,
+                        funds: int = 0,
+                        denom: Optional[str] = None) -> ProtoAny
 ```
 
 Create and pack MsgExecuteContract
 
 **Arguments**:
-
 
 - `sender_address`: Address of sender
 - `contract_address`: Address of contract
@@ -691,13 +741,15 @@ Packed MsgExecuteContract
 #### get`_`packed`_`send`_`msg
 
 ```python
-def get_packed_send_msg(from_address: Address, to_address: Address, amount: int, denom: Optional[str] = None) -> ProtoAny
+def get_packed_send_msg(from_address: Address,
+                        to_address: Address,
+                        amount: int,
+                        denom: Optional[str] = None) -> ProtoAny
 ```
 
 Generate and pack MsgSend
 
 **Arguments**:
-
 
 - `from_address`: Address of sender
 - `to_address`: Address of recipient
@@ -713,13 +765,21 @@ packer ProtoAny type message
 #### get`_`multi`_`transaction
 
 ```python
-def get_multi_transaction(from_addresses: List[str], pub_keys: Optional[List[bytes]], msgs: List[ProtoAny], gas: int, tx_fee: int = 0, memo: str = "", chain_id: Optional[str] = None, denom: Optional[str] = None, tx_fee_denom: Optional[str] = None, raise_on_try: bool = False) -> JSONLike
+def get_multi_transaction(from_addresses: List[str],
+                          pub_keys: Optional[List[bytes]],
+                          msgs: List[ProtoAny],
+                          gas: int,
+                          tx_fee: int = 0,
+                          memo: str = "",
+                          chain_id: Optional[str] = None,
+                          denom: Optional[str] = None,
+                          tx_fee_denom: Optional[str] = None,
+                          raise_on_try: bool = False) -> JSONLike
 ```
 
 Generate transaction with multiple messages
 
 **Arguments**:
-
 
 - `from_addresses`: Addresses of signers
 - `pub_keys`: Public keys of signers
@@ -745,7 +805,8 @@ the transaction
 #### send`_`signed`_`transaction
 
 ```python
-def send_signed_transaction(tx_signed: JSONLike, raise_on_try: bool = False) -> Optional[str]
+def send_signed_transaction(tx_signed: JSONLike,
+                            raise_on_try: bool = False) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -764,7 +825,8 @@ tx_digest, if present
 #### get`_`transaction`_`receipt
 
 ```python
-def get_transaction_receipt(tx_digest: str, raise_on_try: bool = False) -> Optional[JSONLike]
+def get_transaction_receipt(tx_digest: str,
+                            raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -783,7 +845,8 @@ the tx receipt, if present
 #### get`_`transaction
 
 ```python
-def get_transaction(tx_digest: str, raise_on_try: bool = False) -> Optional[JSONLike]
+def get_transaction(tx_digest: str,
+                    raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -802,7 +865,8 @@ the tx, if present
 #### get`_`contract`_`instance
 
 ```python
-def get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
+def get_contract_instance(contract_interface: Dict[str, str],
+                          contract_address: Optional[str] = None) -> Any
 ```
 
 Get the instance of a contract.
@@ -835,7 +899,8 @@ Attempts to update the transaction with a gas estimate
 #### contract`_`method`_`call
 
 ```python
-def contract_method_call(contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
+def contract_method_call(contract_instance: Any, method_name: str,
+                         **method_args: Any) -> Optional[JSONLike]
 ```
 
 Call a contract's method
@@ -851,7 +916,11 @@ Call a contract's method
 #### build`_`transaction
 
 ```python
-def build_transaction(contract_instance: Any, method_name: str, method_args: Optional[Dict], tx_args: Optional[Dict], raise_on_try: bool = False) -> Optional[JSONLike]
+def build_transaction(contract_instance: Any,
+                      method_name: str,
+                      method_args: Optional[Dict],
+                      tx_args: Optional[Dict],
+                      raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Prepare a transaction
@@ -869,7 +938,10 @@ Prepare a transaction
 #### get`_`transaction`_`transfer`_`logs
 
 ```python
-def get_transaction_transfer_logs(contract_instance: Any, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
+def get_transaction_transfer_logs(
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Get all transfer events derived from a transaction.
@@ -885,7 +957,7 @@ Get all transfer events derived from a transaction.
 ## CosmosApi Objects
 
 ```python
-class CosmosApi(_CosmosApi,  CosmosHelper)
+class CosmosApi(_CosmosApi, CosmosHelper)
 ```
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
@@ -905,7 +977,8 @@ Cosmos testnet faucet API.
 #### `__`init`__`
 
 ```python
-def __init__(poll_interval: Optional[float] = None, final_wait_interval: Optional[float] = None)
+def __init__(poll_interval: Optional[float] = None,
+             final_wait_interval: Optional[float] = None)
 ```
 
 Initialize CosmosFaucetApi.

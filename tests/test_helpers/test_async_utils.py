@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import time
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
 from threading import Thread
+from typing import Optional
 
 import pytest
 
@@ -305,7 +306,9 @@ class TestRunnable:
         # for pydocstyle
         class TestRun(Runnable):
             def __init__(
-                self, loop: asyncio.AbstractEventLoop = None, threaded: bool = False
+                self,
+                loop: Optional[asyncio.AbstractEventLoop] = None,
+                threaded: bool = False,
             ) -> None:
                 Runnable.__init__(self, loop=loop, threaded=threaded)
                 self.started = False

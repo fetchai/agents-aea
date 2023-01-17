@@ -19,7 +19,7 @@ Runtime states.
 ## BaseRuntime Objects
 
 ```python
-class BaseRuntime(Runnable,  WithLogger)
+class BaseRuntime(Runnable, WithLogger)
 ```
 
 Abstract runtime class to create implementations.
@@ -29,7 +29,12 @@ Abstract runtime class to create implementations.
 #### `__`init`__`
 
 ```python
-def __init__(agent: AbstractAgent, multiplexer_options: Dict, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False, task_manager_mode: Optional[str] = None) -> None
+def __init__(agent: AbstractAgent,
+             multiplexer_options: Dict,
+             loop_mode: Optional[str] = None,
+             loop: Optional[AbstractEventLoop] = None,
+             threaded: bool = False,
+             task_manager_mode: Optional[str] = None) -> None
 ```
 
 Init runtime.
@@ -196,7 +201,12 @@ Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loo
 #### `__`init`__`
 
 ```python
-def __init__(agent: AbstractAgent, multiplexer_options: Dict, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False, task_manager_mode: Optional[str] = None) -> None
+def __init__(agent: AbstractAgent,
+             multiplexer_options: Dict,
+             loop_mode: Optional[str] = None,
+             loop: Optional[AbstractEventLoop] = None,
+             threaded: bool = False,
+             task_manager_mode: Optional[str] = None) -> None
 ```
 
 Init runtime.

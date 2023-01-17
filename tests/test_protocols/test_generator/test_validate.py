@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -798,9 +798,12 @@ class TestValidate(TestCase):
             invalid_content_type_6, performative
         )
         assert invalid_result_6 is False
-        assert invalid_msg_6 == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-            invalid_content_type_6,
-            performative,
+        assert (
+            invalid_msg_6
+            == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
+                invalid_content_type_6,
+                performative,
+            )
         )
 
         invalid_content_type_7 = "performative"
@@ -808,9 +811,12 @@ class TestValidate(TestCase):
             invalid_content_type_7, performative
         )
         assert invalid_result_7 is False
-        assert invalid_msg_7 == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-            invalid_content_type_7,
-            performative,
+        assert (
+            invalid_msg_7
+            == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
+                invalid_content_type_7,
+                performative,
+            )
         )
 
     def test_validate_content_type(self):
@@ -920,9 +926,12 @@ class TestValidate(TestCase):
             invalid_content_type_1, content_name, performative
         )
         assert invalid_result_1 is False
-        assert invalid_msg_1 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_1
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
         invalid_content_type_2 = "bool"
@@ -930,9 +939,12 @@ class TestValidate(TestCase):
             invalid_content_type_2, content_name, performative
         )
         assert invalid_result_2 is False
-        assert invalid_msg_2 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_2
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
         invalid_content_type_3 = "pt: set[pt:int]"
@@ -940,9 +952,12 @@ class TestValidate(TestCase):
             invalid_content_type_3, content_name, performative
         )
         assert invalid_result_3 is False
-        assert invalid_msg_3 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_3
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
         invalid_content_type_4 = "pt:list[string]"
@@ -950,9 +965,12 @@ class TestValidate(TestCase):
             invalid_content_type_4, content_name, performative
         )
         assert invalid_result_4 is False
-        assert invalid_msg_4 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_4
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
         invalid_content_type_5 = "pt:dict[pt:bool, pt:integer]"
@@ -960,9 +978,12 @@ class TestValidate(TestCase):
             invalid_content_type_5, content_name, performative
         )
         assert invalid_result_5 is False
-        assert invalid_msg_5 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_5
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
         invalid_content_type_6 = "pt:union{pt:boolean, pt:int]"
@@ -970,9 +991,12 @@ class TestValidate(TestCase):
             invalid_content_type_6, content_name, performative
         )
         assert invalid_result_6 is False
-        assert invalid_msg_6 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_6
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
         invalid_content_type_7 = "pt:optional[pt:str, pt:int, pt:list[pt:bool]]"
@@ -980,9 +1004,12 @@ class TestValidate(TestCase):
             invalid_content_type_7, content_name, performative
         )
         assert invalid_result_7 is False
-        assert invalid_msg_7 == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-            content_name,
-            performative,
+        assert (
+            invalid_msg_7
+            == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
+                content_name,
+                performative,
+            )
         )
 
     @mock.patch(
@@ -1054,9 +1081,12 @@ class TestValidate(TestCase):
             invalid_all_content_2,
         ) = _validate_speech_acts_section(mocked_spec)
         assert invalid_result_2 is False
-        assert invalid_msg_2 == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-            "target",
-            valid_perm,
+        assert (
+            invalid_msg_2
+            == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
+                "target",
+                valid_perm,
+            )
         )
         assert invalid_all_per_2 is None
         assert invalid_all_content_2 is None
@@ -1076,8 +1106,11 @@ class TestValidate(TestCase):
             invalid_all_content_3,
         ) = _validate_speech_acts_section(mocked_spec)
         assert invalid_result_3 is False
-        assert invalid_msg_3 == "Invalid type for content 'content_name_1' of performative '{}'. See documentation for the correct format of specification types.".format(
-            valid_perm,
+        assert (
+            invalid_msg_3
+            == "Invalid type for content 'content_name_1' of performative '{}'. See documentation for the correct format of specification types.".format(
+                valid_perm,
+            )
         )
         assert invalid_all_per_3 is None
         assert invalid_all_content_3 is None
@@ -1203,8 +1236,11 @@ class TestValidate(TestCase):
             mocked_spec, invalid_all_content_2
         )
         assert invalid_result_2 is False
-        assert invalid_msg_2 == "No protobuf code snippet is provided for the following custom types: {}".format(
-            {"ct:Frame"},
+        assert (
+            invalid_msg_2
+            == "No protobuf code snippet is provided for the following custom types: {}".format(
+                {"ct:Frame"},
+            )
         )
 
     def test_validate_field_existence(self):

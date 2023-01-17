@@ -9,7 +9,7 @@ This module contains the classes for specific behaviours.
 ## SimpleBehaviour Objects
 
 ```python
-class SimpleBehaviour(Behaviour,  ABC)
+class SimpleBehaviour(Behaviour, ABC)
 ```
 
 This class implements a simple behaviour.
@@ -64,7 +64,7 @@ Tear the behaviour down.
 ## CompositeBehaviour Objects
 
 ```python
-class CompositeBehaviour(Behaviour,  ABC)
+class CompositeBehaviour(Behaviour, ABC)
 ```
 
 This class implements a composite behaviour.
@@ -74,7 +74,7 @@ This class implements a composite behaviour.
 ## CyclicBehaviour Objects
 
 ```python
-class CyclicBehaviour(SimpleBehaviour,  ABC)
+class CyclicBehaviour(SimpleBehaviour, ABC)
 ```
 
 This behaviour is executed until the agent is stopped.
@@ -131,7 +131,7 @@ bool indicating status
 ## OneShotBehaviour Objects
 
 ```python
-class OneShotBehaviour(SimpleBehaviour,  ABC)
+class OneShotBehaviour(SimpleBehaviour, ABC)
 ```
 
 This behaviour is executed only once.
@@ -171,7 +171,7 @@ Wrap the call of the action. This method must be called only by the framework.
 ## TickerBehaviour Objects
 
 ```python
-class TickerBehaviour(SimpleBehaviour,  ABC)
+class TickerBehaviour(SimpleBehaviour, ABC)
 ```
 
 This behaviour is executed periodically with an interval.
@@ -181,7 +181,9 @@ This behaviour is executed periodically with an interval.
 #### `__`init`__`
 
 ```python
-def __init__(tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs: Any) -> None
+def __init__(tick_interval: float = 1.0,
+             start_at: Optional[datetime.datetime] = None,
+             **kwargs: Any) -> None
 ```
 
 Initialize the ticker behaviour.
@@ -254,7 +256,7 @@ True if it is time to act, false otherwise.
 ## SequenceBehaviour Objects
 
 ```python
-class SequenceBehaviour(CompositeBehaviour,  ABC)
+class SequenceBehaviour(CompositeBehaviour, ABC)
 ```
 
 This behaviour executes sub-behaviour serially.
@@ -316,7 +318,7 @@ Return True if the behaviour is terminated, False otherwise.
 ## State Objects
 
 ```python
-class State(SimpleBehaviour,  ABC)
+class State(SimpleBehaviour, ABC)
 ```
 
 A state of a FSMBehaviour.
@@ -374,7 +376,7 @@ Reset initial conditions.
 ## FSMBehaviour Objects
 
 ```python
-class FSMBehaviour(CompositeBehaviour,  ABC)
+class FSMBehaviour(CompositeBehaviour, ABC)
 ```
 
 This class implements a finite-state machine behaviour.
@@ -536,7 +538,9 @@ Return True if the behaviour is terminated, False otherwise.
 #### register`_`transition
 
 ```python
-def register_transition(source: str, destination: str, event: Optional[str] = None) -> None
+def register_transition(source: str,
+                        destination: str,
+                        event: Optional[str] = None) -> None
 ```
 
 Register a transition.
@@ -558,7 +562,9 @@ No sanity check is done.
 #### unregister`_`transition
 
 ```python
-def unregister_transition(source: str, destination: str, event: Optional[str] = None) -> None
+def unregister_transition(source: str,
+                          destination: str,
+                          event: Optional[str] = None) -> None
 ```
 
 Unregister a transition.

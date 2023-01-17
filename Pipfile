@@ -46,7 +46,7 @@ py-multicodec = ">=0.2.0"
 google-api-python-client = "<=2.60.0"
 certifi = "<=2022.6.15.1"
 mistune = "==2.0.3"
-tomte = {version = "==0.1.5", extras = ["tox", "tests"]}
+tomte = {version = "==0.2.2", extras = ["tox", "tests"]}
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy

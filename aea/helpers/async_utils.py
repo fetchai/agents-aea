@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,7 @@ from typing import (
     Awaitable,
     Callable,
     Container,
+    Coroutine,
     Generator,
     List,
     Optional,
@@ -255,7 +256,7 @@ class AnotherThreadTask:
     Provides better cancel behaviour: on cancel it will wait till cancelled completely.
     """
 
-    def __init__(self, coro: Awaitable, loop: AbstractEventLoop) -> None:
+    def __init__(self, coro: Coroutine, loop: AbstractEventLoop) -> None:
         """
         Init the task.
 
@@ -325,7 +326,7 @@ class ThreadedAsyncRunner(Thread):
         self._loop.run_forever()
         _default_logger.debug("Asyncio loop has been stopped.")
 
-    def call(self, coro: Awaitable) -> Any:
+    def call(self, coro: Coroutine) -> Any:
         """
         Run a coroutine inside the event loop.
 
@@ -364,7 +365,7 @@ class Runnable(ABC):
     """
 
     def __init__(
-        self, loop: asyncio.AbstractEventLoop = None, threaded: bool = False
+        self, loop: Optional[asyncio.AbstractEventLoop] = None, threaded: bool = False
     ) -> None:
         """
         Init runnable.
@@ -472,7 +473,10 @@ class Runnable(ABC):
         """Implement run logic respectful to CancelError on termination."""
 
     def wait_completed(
-        self, sync: bool = False, timeout: float = None, force_result: bool = False
+        self,
+        sync: bool = False,
+        timeout: Optional[float] = None,
+        force_result: bool = False,
     ) -> Awaitable:
         """
         Wait runnable execution completed.

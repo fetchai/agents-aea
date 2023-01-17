@@ -44,7 +44,8 @@ Handle the received envelope in case the protocol is not supported.
 #### send`_`decoding`_`error
 
 ```python
-def send_decoding_error(envelope: Envelope, exception: Exception, logger: Logger) -> None
+def send_decoding_error(envelope: Envelope, exception: Exception,
+                        logger: Logger) -> None
 ```
 
 Handle a decoding error.
@@ -60,7 +61,8 @@ Handle a decoding error.
 #### send`_`no`_`active`_`handler
 
 ```python
-def send_no_active_handler(envelope: Envelope, reason: str, logger: Logger) -> None
+def send_no_active_handler(envelope: Envelope, reason: str,
+                           logger: Logger) -> None
 ```
 
 Handle the received envelope in case the handler is not supported.

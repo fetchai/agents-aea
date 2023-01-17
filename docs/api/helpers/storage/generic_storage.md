@@ -19,7 +19,8 @@ Async collection.
 #### `__`init`__`
 
 ```python
-def __init__(storage_backend: AbstractStorageBackend, collection_name: str) -> None
+def __init__(storage_backend: AbstractStorageBackend,
+             collection_name: str) -> None
 ```
 
 Init collection object.
@@ -60,7 +61,6 @@ Get object from the collection.
 
 **Arguments**:
 
-
 - `object_id`: str object id
 
 **Returns**:
@@ -79,7 +79,6 @@ Remove object from the collection.
 
 **Arguments**:
 
-
 - `object_id`: str object id
 
 **Returns**:
@@ -97,7 +96,6 @@ async def find(field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
 Get objects from the collection by filtering by field value.
 
 **Arguments**:
-
 
 - `field`: field name to search: example "parent.field"
 - `equals`: value field should be equal to
@@ -135,7 +133,8 @@ Async collection.
 #### `__`init`__`
 
 ```python
-def __init__(async_collection_coro: Coroutine, loop: asyncio.AbstractEventLoop) -> None
+def __init__(async_collection_coro: Coroutine,
+             loop: asyncio.AbstractEventLoop) -> None
 ```
 
 Init collection object.
@@ -176,7 +175,6 @@ Get object from the collection.
 
 **Arguments**:
 
-
 - `object_id`: str object id
 
 **Returns**:
@@ -195,7 +193,6 @@ Remove object from the collection.
 
 **Arguments**:
 
-
 - `object_id`: str object id
 
 **Returns**:
@@ -213,7 +210,6 @@ def find(field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
 Get objects from the collection by filtering by field value.
 
 **Arguments**:
-
 
 - `field`: field name to search: example "parent.field"
 - `equals`: value field should be equal to
@@ -251,7 +247,9 @@ Generic storage.
 #### `__`init`__`
 
 ```python
-def __init__(storage_uri: str, loop: asyncio.AbstractEventLoop = None, threaded: bool = False) -> None
+def __init__(storage_uri: str,
+             loop: Optional[asyncio.AbstractEventLoop] = None,
+             threaded: bool = False) -> None
 ```
 
 Init storage.

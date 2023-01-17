@@ -38,7 +38,9 @@ Memory usage across the time.
 )
 @number_of_runs_deco
 @output_format_deco
-def main(duration: int, runtime_mode: str, runner_mode: str, start_messages: int, num_of_agents: int, number_of_runs: int, output_format: str) -> Any
+def main(duration: int, runtime_mode: str, runner_mode: str,
+         start_messages: int, num_of_agents: int, number_of_runs: int,
+         output_format: str) -> Any
 ```
 
 Check http dialogues memory usage for multiple agents set.

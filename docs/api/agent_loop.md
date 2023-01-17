@@ -29,7 +29,7 @@ Internal agent loop states.
 ## BaseAgentLoop Objects
 
 ```python
-class BaseAgentLoop(Runnable,  WithLogger,  ABC)
+class BaseAgentLoop(Runnable, WithLogger, ABC)
 ```
 
 Base abstract  agent loop class.
@@ -39,7 +39,9 @@ Base abstract  agent loop class.
 #### `__`init`__`
 
 ```python
-def __init__(agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None, threaded: bool = False) -> None
+def __init__(agent: AbstractAgent,
+             loop: Optional[AbstractEventLoop] = None,
+             threaded: bool = False) -> None
 ```
 
 Init loop.
@@ -77,13 +79,13 @@ Get current main loop state.
 #### wait`_`state
 
 ```python
-async def wait_state(state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]
+async def wait_state(
+        state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]
 ```
 
 Wait state to be set.
 
 **Arguments**:
-
 
 - `state_or_states`: state or list of states.
 
@@ -128,7 +130,8 @@ Run agent loop.
 
 ```python
 @abstractmethod
-def send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+def send_to_skill(message_or_envelope: Union[Message, Envelope],
+                  context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Send message or envelope to another skill.
@@ -167,7 +170,9 @@ Asyncio based agent loop suitable only for AEA.
 #### `__`init`__`
 
 ```python
-def __init__(agent: AbstractAgent, loop: AbstractEventLoop = None, threaded: bool = False) -> None
+def __init__(agent: AbstractAgent,
+             loop: Optional[AbstractEventLoop] = None,
+             threaded: bool = False) -> None
 ```
 
 Init agent loop.
@@ -194,7 +199,8 @@ Get skill to skill message queue.
 #### send`_`to`_`skill
 
 ```python
-def send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+def send_to_skill(message_or_envelope: Union[Message, Envelope],
+                  context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Send message or envelope to another skill.

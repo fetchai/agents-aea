@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -384,7 +384,7 @@ class TestTopologicalOrder:
             find_topological_order({0: {1, 0}, 1: {0, 1}})
 
     @pytest.mark.parametrize("chain_length", [3, 5, 10, 100])
-    def test_chain(self, chain_length):
+    def test_chain(self, chain_length: int) -> None:
         """Test the function with a chain."""
         adj_list: Dict[int, Set[int]] = {}
         for i in range(chain_length - 1):

@@ -9,7 +9,8 @@ This module validates a protocol specification.
 #### validate
 
 ```python
-def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]
+def validate(
+        protocol_specification: ProtocolSpecification) -> Tuple[bool, str]
 ```
 
 Evaluate whether a protocol specification is valid.

@@ -72,6 +72,7 @@ class JSONSerializable(ABC):
         """Compute the JSON representation."""
 
     @classmethod
+    @abstractmethod
     def from_json(cls, obj: Dict) -> "JSONSerializable":
         """Build from a JSON object."""
 

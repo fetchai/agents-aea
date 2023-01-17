@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -234,13 +234,14 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
         aea.runtime._threaded = True
         return aea
 
-    def test_dialogues_dumped_and_restored_properly(self):
+    def test_dialogues_dumped_and_restored_properly(self) -> None:
         """Test dialogues restored during restart of agent."""
         aea = self._build_aea()
         aea.runtime.start()
         try:
             wait_for_condition(lambda: aea.is_running, timeout=10)
             echo_skill = aea.resources.get_skill(PUBLIC_ID)
+            assert echo_skill is not None
             assert (
                 not echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label
             )
@@ -273,8 +274,8 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
         try:
             wait_for_condition(lambda: aea.is_running, timeout=10)
             echo_skill = aea.resources.get_skill(PUBLIC_ID)
-
-            dialogue_storage: PersistDialoguesStorage = (
+            assert echo_skill is not None
+            dialogue_storage = (
                 echo_skill.skill_context.default_dialogues._dialogues_storage
             )
             wait_for_condition(

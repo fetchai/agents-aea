@@ -71,7 +71,16 @@ Call all build entry points.
 
 ```python
 @classmethod
-def load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_remote: bool = False, is_restore: bool = False, cli_verbosity: str = "INFO", registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False, skip_aea_validation: bool = False) -> "Project"
+def load(cls,
+         working_dir: str,
+         public_id: PublicId,
+         is_local: bool = False,
+         is_remote: bool = False,
+         is_restore: bool = False,
+         cli_verbosity: str = "INFO",
+         registry_path: str = DEFAULT_REGISTRY_NAME,
+         skip_consistency_check: bool = False,
+         skip_aea_validation: bool = False) -> "Project"
 ```
 
 Load project with given public_id to working_dir.
@@ -153,7 +162,10 @@ Agent alias representation.
 #### `__`init`__`
 
 ```python
-def __init__(project: Project, agent_name: str, data_dir: str, password: Optional[str] = None)
+def __init__(project: Project,
+             agent_name: str,
+             data_dir: str,
+             password: Optional[str] = None)
 ```
 
 Init agent alias with project, config, name, agent, builder.
@@ -251,7 +263,8 @@ Issue the certificates for this agent.
 #### set`_`overrides
 
 ```python
-def set_overrides(agent_overrides: Optional[Dict] = None, component_overrides: Optional[List[Dict]] = None) -> None
+def set_overrides(agent_overrides: Optional[Dict] = None,
+                  component_overrides: Optional[List[Dict]] = None) -> None
 ```
 
 Set override for this agent alias's config.

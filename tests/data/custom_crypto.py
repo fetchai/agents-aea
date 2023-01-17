@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,9 +29,9 @@ class CustomCrypto(Crypto):
     """This is a custom crypto class for testing purposes.."""
 
     @classmethod
-    def generate_private_key(
+    def generate_private_key(  # type: ignore[empty-body]
         cls, extra_entropy: Union[str, bytes, int] = ""
-    ) -> EntityClass:
+    ) -> EntityClass:  # type: ignore[type-var]
         """Generare private key."""
         pass
 
@@ -49,22 +49,22 @@ class CustomCrypto(Crypto):
         pass
 
     @property
-    def public_key(self) -> str:
+    def public_key(self) -> str:  # type: ignore[empty-body]
         """Get public key."""
         pass
 
     @property
-    def address(self) -> str:
+    def address(self) -> str:  # type: ignore[empty-body]
         """Get address."""
         pass
 
     @property
-    def private_key(self) -> str:
+    def private_key(self) -> str:  # type: ignore[empty-body]
         """Get private key."""
         pass
 
     @classmethod
-    def get_address_from_public_key(cls, public_key: str) -> str:
+    def get_address_from_public_key(cls, public_key: str) -> str:  # type: ignore[empty-body]
         """
         Get address from public key.
 
@@ -73,7 +73,7 @@ class CustomCrypto(Crypto):
         """
         pass
 
-    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:  # type: ignore[empty-body]
         """
         Sign message.
 
@@ -92,7 +92,7 @@ class CustomCrypto(Crypto):
         """
         pass
 
-    def recover_message(
+    def recover_message(  # type: ignore[empty-body]
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
         """
@@ -104,7 +104,7 @@ class CustomCrypto(Crypto):
         """
         pass
 
-    def encrypt(self, password: str) -> str:
+    def encrypt(self, password: str) -> str:  # type: ignore[empty-body]
         """
         Encrypt the private key and return in json.
 
@@ -114,7 +114,7 @@ class CustomCrypto(Crypto):
         """
 
     @classmethod
-    def decrypt(cls, keyfile_json: str, password: str) -> str:
+    def decrypt(cls, keyfile_json: str, password: str) -> str:  # type: ignore[empty-body]
         """
         Decrypt the private key and return in raw form.
 
