@@ -91,6 +91,7 @@ def correct_spacing(string: str) -> str:
                 new_string += new_line
             else:
                 new_string += line
+            new_string += "\n"
         return new_string
     return string
 
