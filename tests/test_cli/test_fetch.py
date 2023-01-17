@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,6 @@ import pytest
 from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool
 from click import ClickException
 
-import aea
 from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
@@ -48,6 +47,7 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS,
     MY_FIRST_AEA_PUBLIC_ID,
     PACKAGES_DIR,
+    TEST_IPFS_REGISTRY_CONFIG,
 )
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -128,7 +128,7 @@ class FetchAgentLocallyTestCase(TestCase):
             fetch_agent_locally(ctx_mock, PublicIdMock())
 
 
-@mock.patch("aea.cli.fetch.fetch_agent")
+@mock.patch("aea.cli.fetch.fetch_agent_remote")
 @mock.patch("aea.cli.fetch.fetch_agent_locally")
 class FetchCommandTestCase(TestCase):
     """Test case for CLI fetch command."""
@@ -183,34 +183,88 @@ class IsVersionCorrectTestCase(TestCase):
         self.assertFalse(result)
 
 
-@pytest.mark.skip  # need remote registry
-class TestFetchFromRemoteRegistry(AEATestCaseManyFlaky):
+class TestFetchFromRemoteRegistryHTTP(AEATestCaseManyFlaky):
     """Test case for fetch agent command from Registry."""
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command(
-            "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest()), "--remote"
-        )
+
+        with mock.patch(
+            "aea.cli.utils.config.get_or_create_cli_config",
+            return_value=TEST_IPFS_REGISTRY_CONFIG,
+        ), mock.patch(
+            "aea.cli.registry.utils.get_or_create_cli_config",
+            return_value=TEST_IPFS_REGISTRY_CONFIG,
+        ), mock.patch(
+            "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_HTTP
+        ):
+            self.run_cli_command(
+                "--skip-consistency-check",
+                "fetch",
+                "fetchai/my_first_aea:0.28.4",
+                "--remote",
+            )
+        assert "my_first_aea" in os.listdir(self.t)
+
+
+class TestFetchFromRemoteRegistryIPFS(AEATestCaseManyFlaky):
+    """Test case for fetch agent command from Registry."""
+
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_fetch_agent_from_remote_registry_positive(self):
+        """Test fetch agent from Registry for positive result."""
+
+        with mock.patch(
+            "aea.cli.utils.config.get_or_create_cli_config",
+            return_value=TEST_IPFS_REGISTRY_CONFIG,
+        ), mock.patch(
+            "aea.cli.registry.utils.get_or_create_cli_config",
+            return_value=TEST_IPFS_REGISTRY_CONFIG,
+        ), mock.patch(
+            "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
+        ):
+            self.run_cli_command(
+                "fetch",
+                "open_aea/my_first_aea:0.1.0:bafybeiewms67jpwf46u4wwh6tbzedsi5jffajnywgydeo5nlvvr6pcz2zm",
+                "--remote",
+            )
         assert "my_first_aea" in os.listdir(self.t)
 
 
 class TestFetchMixedModeFallsBackCorrectly(AEATestCaseManyFlaky):
-    """Test fetch command when registry fetch fails falls back to local fetch."""
+    """Test fetch command when registry fetch fails falls back to remote fetch."""
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    @mock.patch("aea.cli.fetch.fetch_agent", side_effect=ClickException(""))
-    @mock.patch("aea.cli.fetch.fetch_agent_locally", wraps=fetch_agent_locally)
-    def test_fetch_agent_from_remote_registry_falls_back_to_local(
-        self, local_fetch, _remote_fetch
+    @mock.patch(
+        "aea.cli.fetch.fetch_agent_remote",
+    )
+    @mock.patch("aea.cli.fetch.fetch_agent_locally", side_effect=ClickException(""))
+    def test_fetch_agent_from_local_registry_falls_back_to_remote(
+        self, local_fetch, remote_fetch
     ):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command("fetch", str(MY_FIRST_AEA_PUBLIC_ID))
+        self.run_cli_command("fetch", "--mixed", str(MY_FIRST_AEA_PUBLIC_ID))
+        remote_fetch.assert_called()
+
+
+class TestFetchMixedModeLocalFirst(AEATestCaseManyFlaky):
+    """Test fetch command when registry fetch runs local only."""
+
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    @mock.patch("aea.cli.fetch.fetch_agent_remote")
+    @mock.patch("aea.cli.fetch.fetch_agent_locally")
+    def test_fetch_agent_from_local_registry_ok_remote_not_called(
+        self, local_fetch: mock.Mock, remote_fetch: mock.Mock
+    ):
+        """Test fetch agent from Registry for positive result."""
+        self.run_cli_command("fetch", "--mixed", str(MY_FIRST_AEA_PUBLIC_ID))
         local_fetch.assert_called()
-        assert "my_first_aea" in os.listdir(self.t)
+        remote_fetch.assert_not_called()
 
 
 class TestFetchLatestVersion(AEATestCaseMany):
@@ -227,11 +281,9 @@ class TestFetchLatestVersion(AEATestCaseMany):
 class TestFetchAgentMixed(BaseAEATestCase):
     """Test 'aea fetch' in mixed mode."""
 
-    @pytest.mark.skip  # need remote registry
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     @pytest.mark.integration
-    @mock.patch(
-        "aea.cli.registry.add.fetch_package", wraps=aea.cli.registry.add.fetch_package
-    )
+    @mock.patch("aea.cli.fetch.fetch_agent_remote")
     @mock.patch(
         "aea.cli.add.find_item_locally_or_distributed",
         side_effect=click.ClickException(""),
@@ -241,13 +293,12 @@ class TestFetchAgentMixed(BaseAEATestCase):
         side_effect=click.ClickException(""),
     )
     def test_fetch_mixed(
-        self, mock_fetch_package, _mock_fetch_locally, _mock_fetch_agent_locally
+        self, _mock_fetch_locally, _mock_fetch_agent_locally, mock_fetch_package
     ) -> None:
         """Test fetch in mixed mode."""
         self.run_cli_command(
-            "-v", "DEBUG", "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())
+            "-v", "DEBUG", "fetch", "--mixed", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())
         )
-        assert "my_first_aea" in os.listdir(self.t)
         mock_fetch_package.assert_called()
 
 
@@ -262,10 +313,13 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
         """Mock 'add_item' so to always fail."""
         raise click.ClickException(BaseTestFetchAgentError.ERROR_MESSAGE)
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     @pytest.mark.integration
     @mock.patch("aea.cli.fetch.add_item", side_effect=_mock_raise_click_exception)
     @mock.patch("aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_HTTP)
-    @mock.patch("aea.cli.fetch.fetch_agent", side_effect=_mock_raise_click_exception)
+    @mock.patch(
+        "aea.cli.fetch.fetch_agent_remote", side_effect=_mock_raise_click_exception
+    )
     @mock.patch(
         "aea.cli.registry.fetch.add_item", side_effect=_mock_raise_click_exception
     )
@@ -416,21 +470,21 @@ class TestFetchIPFSAlias(BaseAEATestCase):
             dep_patch.assert_called_once()
 
 
-@pytest.mark.skip  # need remote registry
 def test_fetch_mixed_no_local_registry():
     """Test that mixed becomes remote when no local registry."""
     with TemporaryDirectory() as tmp_dir:
         with cd(tmp_dir):
-            name = "my_first_aea"
             runner = CliRunner()
-            result = runner.invoke(
-                cli,
-                ["fetch", "fetchai/my_first_aea"],
-                catch_exceptions=False,
-            )
+            with mock.patch(
+                "aea.cli.fetch.fetch_agent_remote"
+            ) as fetch_agent_remote_mock:
+                result = runner.invoke(
+                    cli,
+                    ["fetch", "--mixed", "fetchai/my_first_aea"],
+                    catch_exceptions=False,
+                )
             assert result.exit_code == 0, result.stdout
-            assert os.path.exists(name)
-            assert "Trying remote registry (`--remote`)." in result.stdout
+            fetch_agent_remote_mock.assert_called_once()
 
 
 def test_fetch_local_no_local_registry():

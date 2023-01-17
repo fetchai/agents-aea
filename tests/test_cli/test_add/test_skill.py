@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,27 +20,28 @@
 
 
 """This test module contains the tests for the `aea add skill` sub-command."""
-
 import os
 import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock
 
-import click
 import pytest
 import yaml
 from jsonschema import ValidationError
 
 import aea
 from aea.cli import cli
-from aea.cli.registry.settings import REMOTE_IPFS
+from aea.cli.add import fetch_item_remote
+from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
+from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
+from aea.configurations.data_types import PackageId, PackageType
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_PUBLIC_ID
@@ -54,7 +55,13 @@ from tests.conftest import (
     CliRunner,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
+    TEST_IPFS_REGISTRY_CONFIG,
     double_escape_windows_path_separator,
+    get_package_id_with_hash,
+)
+from tests.test_cli.test_add.test_generic import (
+    BaseTestAddRemoteMode,
+    BaseTestAddSkillMixedModeFallsBack,
 )
 
 
@@ -496,7 +503,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         assert contract_dependency_name in contracts_folders
 
 
-class TestAddSkillFromRemoteRegistry(AEATestCaseEmptyFlaky):
+class TestAddSkillFromRemoteRegistryHTTP(AEATestCaseEmptyFlaky):
     """Test case for add skill from Registry command."""
 
     IS_LOCAL = False
@@ -504,7 +511,13 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmptyFlaky):
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_add_skill_from_remote_registry_positive(self):
+    @mock.patch(
+        "aea.cli.registry.utils.get_or_create_cli_config",
+        return_value=TEST_IPFS_REGISTRY_CONFIG,
+    )
+    @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+    @mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+    def test_add_skill_from_remote_registry_positive(self, *_):
         """Test add skill from Registry positive result."""
         self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=self.IS_LOCAL)
 
@@ -527,45 +540,63 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
-@pytest.mark.skip  # need remote registry
-class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
+class TestAddSkillMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
     """Test add skill in mixed mode that fails with local falls back to remote registry."""
 
-    IS_EMPTY = True
-
-    @mock.patch(
-        "aea.cli.add.find_item_locally_or_distributed",
-        side_effect=click.ClickException(""),
+    COMPONENT_ID = PublicId(
+        "fetchai",
+        "echo",
+        "0.19.0",
+        "bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
     )
-    def test_add_skill_remote_mode_negative_local_positive_remote(self, *_mocks):
-        """Test add skill mixed mode."""
-        self.run_cli_command(
-            "add", "skill", str(ECHO_PUBLIC_ID.to_latest()), cwd=self._get_cwd()
-        )
-
-        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
-        items_folders = os.listdir(items_path)
-        item_name = "echo"
-        assert item_name in items_folders
+    COMPONENT_TYPE = PackageType.SKILL
 
 
-@pytest.mark.skip  # need remote registry
-class TestAddSkillRemoteMode(AEATestCaseEmpty):
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+class TestAddSkillRemoteMode(BaseTestAddRemoteMode):
     """Test case for add skill, --remote mode."""
 
-    IS_EMPTY = True
-
-    def test_add_skill_remote_mode(self):
-        """Test add skill mixed mode."""
-        self.run_cli_command(
-            "add",
-            "--remote",
-            "skill",
-            str(ECHO_PUBLIC_ID.to_latest()),
-            cwd=self._get_cwd(),
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId(
+                "fetchai",
+                "echo",
+                "0.19.0",
+            ),
         )
+    ).public_id
+    COMPONENT_TYPE = PackageType.SKILL
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch(
+    "aea.cli.add.fetch_item",
+    wraps=fetch_item_remote,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS)
+class TestAddSkillWithLatestVersionByHash(AEATestCaseEmpty):
+    """Test case for add skill from hash."""
+
+    SKILL_ID = PublicId.from_json(
+        {
+            **DUMMY_PACKAGE_ID.json,
+            "package_hash": TestAddSkillRemoteMode.COMPONENT_ID.hash,
+        }
+    )
+    SKILL_NAME = "echo"
+
+    def test_add_skill_latest_version(self, *_):
+        """Test add skill with latest version."""
+        self.add_item("skill", str(self.SKILL_ID), local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)
-        item_name = "echo"
+        item_name = self.SKILL_NAME
         assert item_name in items_folders

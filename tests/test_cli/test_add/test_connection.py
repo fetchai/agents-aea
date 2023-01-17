@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 import yaml
@@ -33,6 +33,7 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
+from aea.configurations.data_types import PackageId, PackageType
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.connections.local.connection import (
@@ -48,7 +49,14 @@ from tests.conftest import (
     CUR_PATH,
     CliRunner,
     MAX_FLAKY_RERUNS,
+    TEST_IPFS_REGISTRY_CONFIG,
     double_escape_windows_path_separator,
+    get_package_id_with_hash,
+)
+from tests.test_cli.test_add.test_generic import (
+    BaseTestAddConnectionLocalWhenNoLocalRegistryExists,
+    BaseTestAddRemoteMode,
+    BaseTestAddSkillMixedModeFallsBack,
 )
 
 
@@ -480,7 +488,8 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddConnectionFromRemoteRegistry(AEATestCaseEmptyFlaky):
+@pytest.mark.integration
+class TestAddConnectionFromRemoteRegistryHTTP(AEATestCaseEmptyFlaky):
     """Test case for add connection from Registry command."""
 
     IS_LOCAL = False
@@ -488,7 +497,13 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmptyFlaky):
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_add_connection_from_remote_registry_positive(self):
+    @mock.patch(
+        "aea.cli.registry.utils.get_or_create_cli_config",
+        return_value=TEST_IPFS_REGISTRY_CONFIG,
+    )
+    @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS)
+    @mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+    def test_add_connection_from_remote_registry_positive(self, *_):
         """Test add connection from Registry positive result."""
         self.add_item(
             "connection",
@@ -517,120 +532,35 @@ class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
-@pytest.mark.skip  # need remote registry
-class TestAddConnectionMixedWhenNoLocalRegistryExists:
-    """Test that the command 'aea add connection' works in mixed mode when the local registry does not exists (it swaps to remote)."""
+class TestAddConnectionMixedModeFallsBack(BaseTestAddSkillMixedModeFallsBack):
+    """Test add skill in mixed mode that fails with local falls back to remote registry."""
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
-        cls.connection_name = "http_client"
-
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.CONNECTION,
+            public_id=PublicId(
+                "valory",
+                "http_client",
+                "0.23.0",
+            ),
         )
-
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        os.chdir(cls.agent_name)
-        with patch("aea.cli.registry.utils.request_api"), patch(
-            "aea.cli.add.fetch_package"
-        ), patch("aea.cli.add.load_item_config"), patch(
-            "aea.cli.add.is_fingerprint_correct"
-        ), patch(
-            "aea.cli.add.register_item"
-        ):
-
-            cls.result = cls.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
-                standalone_mode=False,
-                catch_exceptions=False,
-            )
-
-    def test_exit_code_equal_to_0(self):
-        """Test that the exit code is equal to 0."""
-        assert self.result.exit_code == 0
-
-    def test_standard_output_mentions_swap_to_remote(self):
-        """Test standard output contains information on swap to remote."""
-        assert "Trying remote registry (`--remote`)." in self.result.stdout
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    ).public_id
+    COMPONENT_TYPE = PackageType.CONNECTION
 
 
-@pytest.mark.skip  # need remote registry
-class TestAddConnectionLocalWhenNoLocalRegistryExists:
+class TestAddConnectionLocalWhenNoLocalRegistryExists(
+    BaseTestAddConnectionLocalWhenNoLocalRegistryExists
+):
     """Test that the command 'aea add connection' fails in local mode when the local registry does not exists."""
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
-        cls.connection_name = "http_client"
+    COMPONENT_ID = HTTP_CLIENT_PUBLIC_ID
+    COMPONENT_TYPE = PackageType.CONNECTION
 
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0, result.stdout
 
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0, result.stdout
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+class TestAddConnectionMode(BaseTestAddRemoteMode):
+    """Test case for add connection, --remote mode."""
 
-        os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
-            standalone_mode=False,
-        )
-
-    def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1."""
-        assert self.result.exit_code == 1, self.result.stdout
-
-    def test_standard_output_mentions_failure(self):
-        """Test standard output contains information on failure."""
-        assert (
-            "Registry path not provided and local registry `packages` not found in current (.) and parent directory."
-            in self.result.exception.message
-        )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    COMPONENT_ID = TestAddConnectionMixedModeFallsBack.COMPONENT_ID
+    COMPONENT_TYPE = PackageType.CONNECTION

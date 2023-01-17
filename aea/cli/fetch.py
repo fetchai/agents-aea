@@ -96,17 +96,36 @@ def do_fetch(
     :param alias: the agent alias.
     :param target_dir: the target directory, in case fetching locally.
     """
-
     if ctx.registry_type == REGISTRY_LOCAL:
         ctx.set_config("is_local", True)
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
     elif ctx.registry_type == REGISTRY_REMOTE:
-        if get_default_remote_registry() == REMOTE_IPFS:
-            fetch_agent_ipfs(ctx, public_id, alias, target_dir)
-        else:
-            fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
+        fetch_agent_remote(ctx, public_id, alias=alias, target_dir=target_dir)
     else:
         fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
+
+
+def fetch_agent_remote(
+    ctx: Context,
+    public_id: PublicId,
+    alias: Optional[str] = None,
+    target_dir: Optional[str] = None,
+) -> None:
+    """
+    Fetch Agent from remote registry.
+
+    :param ctx: Context
+    :param public_id: str public ID of desirable agent.
+    :param alias: an optional alias.
+    :param target_dir: the target directory to which the agent is fetched.
+    """
+
+    if get_default_remote_registry() == REMOTE_IPFS:
+        fetch_agent_ipfs(ctx, public_id, alias, target_dir)
+    else:
+        # http
+
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -276,7 +295,7 @@ def fetch_mixed(
         logger.debug(
             f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
         )
-        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
+        fetch_agent_remote(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
 class NotAnAgentPackage(Exception):

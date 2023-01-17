@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ from click import argument, option
 
 from aea.cli.registry.settings import (
     REGISTRY_LOCAL,
+    REGISTRY_MIXED,
     REGISTRY_REMOTE,
     REMOTE_HTTP,
     REMOTE_IPFS,
@@ -227,12 +228,11 @@ def registry_flag(
     mark_default: bool = True,
     default_registry: Optional[str] = None,
 ) -> Callable:
-    """Choice of one flag between: '--local/--remote'."""
+    """Choice of one flag between: '--local/--remote/--mixed'."""
 
     default_registry = default_registry or (
         get_or_create_cli_config().get("registry_config", {}).get("default")
     )
-
     default_registry = default_registry or REGISTRY_LOCAL
 
     def wrapper(f: Callable) -> Callable:
@@ -249,6 +249,13 @@ def registry_flag(
             flag_value=REGISTRY_REMOTE,
             help="To use a remote registry.",
             default=(REGISTRY_REMOTE == default_registry) and mark_default,
+        )(f)
+        f = option(
+            "--mixed",
+            "registry",
+            flag_value=REGISTRY_MIXED,
+            help="To use a local and remote registries.",
+            default=(REGISTRY_MIXED == default_registry) and mark_default,
         )(f)
         return f
 

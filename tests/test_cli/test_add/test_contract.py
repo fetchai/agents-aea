@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +25,20 @@ from unittest import TestCase, mock
 import pytest
 
 from aea.cli import cli
+from aea.cli.registry.settings import REMOTE_HTTP
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmptyFlaky
 
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    CLI_LOG_OPTION,
+    CliRunner,
+    MAX_FLAKY_RERUNS,
+    TEST_IPFS_REGISTRY_CONFIG,
+    get_package_id_with_hash,
+)
+from tests.test_cli.test_add.test_generic import BaseTestAddRemoteMode
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
@@ -58,7 +67,8 @@ class AddContractCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestAddContractFromRemoteRegistry(AEATestCaseEmptyFlaky):
+@pytest.mark.integration
+class TestAddContractFromRemoteRegistryHTTP(AEATestCaseEmptyFlaky):
     """Test case for add contract from Registry command."""
 
     IS_LOCAL = False
@@ -66,7 +76,16 @@ class TestAddContractFromRemoteRegistry(AEATestCaseEmptyFlaky):
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_add_contract_from_remote_registry_positive(self):
+    @mock.patch(
+        "aea.cli.registry.utils.get_or_create_cli_config",
+        return_value=TEST_IPFS_REGISTRY_CONFIG,
+    )
+    @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+    @mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+    @mock.patch(
+        "aea.configurations.validation.ConfigValidator.validate", return_value=True
+    )  # cause validator changed
+    def test_add_contract_from_remote_registry_positive(self, *_):
         """Test add contract from Registry positive result."""
         self.add_item(
             "contract", str(ERC1155_PUBLIC_ID.to_latest()), local=self.IS_LOCAL
@@ -95,3 +114,21 @@ class TestAddContractWithLatestVersion(AEATestCaseEmptyFlaky):
         items_folders = os.listdir(items_path)
         item_name = "erc1155"
         assert item_name in items_folders
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+class TestAddContractRemoteMode(BaseTestAddRemoteMode):
+    """Test case for add contract, --remote mode."""
+
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.CONTRACT,
+            public_id=PublicId(
+                "fetchai",
+                "erc1155",
+                "0.22.0",
+            ),
+        )
+    ).public_id
+    COMPONENT_TYPE = PackageType.CONTRACT

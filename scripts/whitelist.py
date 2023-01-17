@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -333,3 +333,4 @@ send_control_c  # unused method (aea/helpers/base.py:188)
 set_capfd_on_cli_runner  # unused method (aea/test_tools/test_cases.py:102)
 reraise_as_click_exception  # unused function (aea/cli/utils/click_utils.py:387)
 run_cli_subprocess  # unused method (aea/test_tools/click_testing.py:195)
+fetch_agent  # method is used by after cli utlity method rename vulture reports

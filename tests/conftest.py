@@ -21,6 +21,7 @@
 
 import difflib
 import inspect
+import json
 import logging
 import os
 import platform
@@ -28,6 +29,7 @@ import random
 import shutil
 import socket
 import string
+import subprocess  # nosec
 import sys
 import tempfile
 import threading
@@ -73,6 +75,13 @@ from cosmpy.crypto.keypairs import PrivateKey
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
+from aea.cli.registry.settings import (
+    AUTH_TOKEN_KEY,
+    REGISTRY_LOCAL,
+    REGISTRY_REMOTE,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
+)
 from aea.cli.utils.config import _init_cli_config
 from aea.cli.utils.constants import CLI_CONFIG_PATH, DEFAULT_CLI_CONFIG
 from aea.cli.utils.generic import load_yaml
@@ -85,6 +94,7 @@ from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAM
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER, PRIVATE_KEY_PATH_SCHEMA
+from aea.configurations.data_types import PackageId
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
@@ -242,6 +252,26 @@ FETCHD_CONFIGURATION = dict(
     genesis_account=DEFAULT_GENESIS_ACCOUNT,
     denom=DEFAULT_DENOMINATION,
 )
+
+
+TEST_IPFS_REGISTRY_CONFIG: Dict = {
+    "registry_config": {
+        "default": REGISTRY_REMOTE,
+        "settings": {
+            REGISTRY_REMOTE: {
+                "default": REMOTE_IPFS,
+                REMOTE_HTTP: {
+                    AUTH_TOKEN_KEY: "some key",  # auth token for registry
+                    "registry_api_url": "https://agents-registry.prod.fetch-ai.com/api/v1",  # registry url
+                },
+                REMOTE_IPFS: {
+                    "ipfs_node": "/dns/registry.autonolas.tech/tcp/443/https"
+                },  # IPFS url (in multiaddr format)
+            },
+            REGISTRY_LOCAL: {"default_packages_path": None},
+        },
+    }
+}
 
 
 contract_config_files = [
@@ -1227,3 +1257,40 @@ def mock_sys_modules() -> Generator:
     old_sys_modules = copy(sys.modules)
     yield
     sys.modules = old_sys_modules
+
+
+def get_latest_git_tag() -> str:
+    """Get the latest git tag"""
+    res = subprocess.run(  # nosec
+        [
+            "git",
+            "tag",
+            "--sort=-committerdate",
+        ],  # sort by commit date in descending order
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+
+    stdout = res.stdout.decode("utf-8")
+    return stdout.split("\n")[0].strip()
+
+
+def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
+    """Get a specific file version from the commit history given a tag/commit"""
+    latest_tag = latest_tag or get_latest_git_tag()
+    print(f"Checking hashes for tag {latest_tag}")
+    res = subprocess.run(  # nosec
+        ["git", "show", f"{latest_tag}:{file_path}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    return res.stdout.decode("utf-8")
+
+
+def get_package_id_with_hash(package_id: PackageId) -> PackageId:
+    """Get paccakge id with hash fromt he least release by package id."""
+    packages_json = json.loads(get_file_from_tag("packages/packages.json"))
+    package_hash = packages_json["dev"][package_id.to_uri_path]
+    return package_id.with_hash(package_hash=package_hash)

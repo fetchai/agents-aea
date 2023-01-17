@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,20 +20,28 @@
 """This test module contains the tests for the `aea local-registry-sync"""
 import os
 from tempfile import TemporaryDirectory
+from unittest import mock
 from unittest.mock import patch
-
-import pytest
 
 from aea.cli.core import cli
 from aea.cli.local_registry_sync import enlist_packages
 from aea.cli.registry.add import fetch_package
+from aea.cli.registry.settings import REMOTE_HTTP
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
 
+from tests.conftest import TEST_IPFS_REGISTRY_CONFIG
 
-@pytest.mark.skip  # need remote registry
-def test_local_registry_update():
+
+@mock.patch("aea.cli.publish.RemoteRegistry.check_item_present")
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+@mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+def test_local_registry_update_from_http(*_):
     """Test local-registry-sync cli command."""
     PACKAGES = [
         PackageId(PackageType.CONNECTION, PublicId("fetchai", "local", "0.17.0")),

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,11 +24,19 @@ import shutil
 import tempfile
 from importlib import import_module
 from pathlib import Path
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
 
-from tests.conftest import MAX_FLAKY_RERUNS, PACKAGES_DIR, ROOT_DIR
+from aea.cli.registry.settings import REMOTE_HTTP
+
+from tests.conftest import (
+    MAX_FLAKY_RERUNS,
+    PACKAGES_DIR,
+    ROOT_DIR,
+    TEST_IPFS_REGISTRY_CONFIG,
+)
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
@@ -44,8 +52,22 @@ def _import_module_mock(arg):
     return import_module(arg)
 
 
-@pytest.mark.skip  # need remote registry
+@pytest.mark.skip  # need remote registry  # many issues with fingerprints, depdendencies, p2p build
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # flaky on Windows
+@mock.patch(
+    "aea.cli.registry.utils.get_or_create_cli_config",
+    return_value=TEST_IPFS_REGISTRY_CONFIG,
+)
+@mock.patch(
+    "aea.manager.manager.MultiAgentManager._project_install_and_build",
+    return_value=REMOTE_HTTP,
+)
+@mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+@mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+@mock.patch(
+    "aea.configurations.base.ComponentConfiguration.check_fingerprint",
+    return_value=True,
+)
 class TestMultiAgentManager(BasePythonMarkdownDocs):
     """Test the ledger integration code snippets."""
 

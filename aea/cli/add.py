@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,12 @@ from typing import Union, cast
 import click
 
 from aea.cli.registry.add import fetch_package
-from aea.cli.registry.settings import REGISTRY_LOCAL, REMOTE_IPFS
+from aea.cli.registry.settings import (
+    REGISTRY_LOCAL,
+    REGISTRY_MIXED,
+    REGISTRY_REMOTE,
+    REMOTE_IPFS,
+)
 from aea.cli.utils.click_utils import component_flag, registry_flag
 from aea.cli.utils.config import get_default_remote_registry, load_item_config
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
@@ -62,7 +67,7 @@ try:
     from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
     IS_IPFS_PLUGIN_INSTALLED = True
-except ImportError:
+except ImportError:  # pragma: nocover
     IS_IPFS_PLUGIN_INSTALLED = False
 
 
@@ -117,12 +122,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     dest_path = get_package_path(ctx.cwd, item_type, item_public_id)
     ctx.clean_paths.append(dest_path)
 
-    if ctx.registry_type == REGISTRY_LOCAL:
-        package_path = find_item_locally_or_distributed(
-            ctx, item_type, item_public_id, dest_path
-        )
-    else:
-        package_path = fetch_item_remote(ctx, item_type, item_public_id, dest_path)
+    package_path = fetch_item(ctx, item_type, item_public_id, dest_path)
 
     if from_hash:
         (package_path_temp,) = list(package_path.parent.iterdir())
@@ -157,6 +157,32 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         ),
     )
     click.echo(f"Successfully added {item_type} '{item_config.public_id}'.")
+
+
+def fetch_item(
+    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
+) -> Path:
+    """
+    Unify fetch item locally, remotely or mixed.
+
+    :param ctx: the CLI context.
+    :param item_type: the item type.
+    :param item_public_id: the item public id.
+    :param dest_path: the path to the destination.
+    :return: the path to the found package.
+    """
+
+    if ctx.registry_type == REGISTRY_LOCAL:
+        package_path = find_item_locally_or_distributed(
+            ctx, item_type, item_public_id, dest_path
+        )
+    elif ctx.registry_type == REGISTRY_REMOTE:
+        package_path = fetch_item_remote(ctx, item_type, item_public_id, dest_path)
+    elif ctx.registry_type == REGISTRY_MIXED:
+        package_path = fetch_item_mixed(ctx, item_type, item_public_id, dest_path)
+    else:  # pragma: nocover
+        raise ValueError(f"Unknown registry type: {ctx.registry_type}")
+    return package_path
 
 
 def _add_item_deps(
@@ -205,7 +231,6 @@ def fetch_item_remote(
     ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
 ) -> Path:
     """Fetch item remote."""
-
     if get_default_remote_registry() == REMOTE_IPFS:
         try:
             return cast(Path, fetch_ipfs(item_type, item_public_id, dest_path))
@@ -267,7 +292,10 @@ def fetch_item_mixed(
             f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
         )
         # the following might raise exception, but we don't catch it this time
-        package_path = fetch_package(
-            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
+        package_path = fetch_item_remote(
+            item_type=item_type,
+            item_public_id=item_public_id,
+            ctx=ctx,
+            dest_path=dest_path,
         )
     return package_path

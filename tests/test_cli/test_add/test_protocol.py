@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import yaml
@@ -31,8 +32,9 @@ from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
-from aea.cli.registry.settings import REMOTE_IPFS
+from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
+from aea.configurations.data_types import PackageId, PackageType
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -44,8 +46,11 @@ from tests.conftest import (
     CUR_PATH,
     CliRunner,
     MAX_FLAKY_RERUNS,
+    TEST_IPFS_REGISTRY_CONFIG,
     double_escape_windows_path_separator,
+    get_package_id_with_hash,
 )
+from tests.test_cli.test_add.test_generic import BaseTestAddRemoteMode
 
 
 class TestAddProtocolFailsWhenProtocolAlreadyExists:
@@ -465,7 +470,8 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddProtocolFromRemoteRegistry(AEATestCaseEmptyFlaky):
+@pytest.mark.integration
+class TestAddProtocolFromRemoteRegistryHTTP(AEATestCaseEmptyFlaky):
     """Test case for add protocol from Registry command."""
 
     IS_LOCAL = False
@@ -473,7 +479,13 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmptyFlaky):
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_add_protocol_from_remote_registry_positive(self):
+    @mock.patch(
+        "aea.cli.registry.utils.get_or_create_cli_config",
+        return_value=TEST_IPFS_REGISTRY_CONFIG,
+    )
+    @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+    @mock.patch("aea.cli.add.is_fingerprint_correct", return_value=True)
+    def test_add_protocol_from_remote_registry_positive(self, *_):
         """Test add protocol from Registry positive result."""
         self.add_item(
             "protocol", str(FipaMessage.protocol_id.to_latest()), local=self.IS_LOCAL
@@ -496,3 +508,22 @@ class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
         items_folders = os.listdir(items_path)
         item_name = "fipa"
         assert item_name in items_folders
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+class TestAddProtocolRemoteMode(BaseTestAddRemoteMode):
+    """Test case for add protocol, --remote mode."""
+
+    COMPONENT_ID = get_package_id_with_hash(
+        PackageId(
+            package_type=PackageType.PROTOCOL,
+            public_id=PublicId(
+                "fetchai",
+                "fipa",
+                "1.0.0",
+            ),
+        )
+    ).public_id
+
+    COMPONENT_TYPE = PackageType.PROTOCOL
