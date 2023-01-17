@@ -19,7 +19,8 @@ This class implements the context of a skill.
 #### `__`init`__`
 
 ```python
-def __init__(agent_context: Optional[AgentContext] = None, skill: Optional["Skill"] = None) -> None
+def __init__(agent_context: Optional[AgentContext] = None,
+             skill: Optional["Skill"] = None) -> None
 ```
 
 Initialize a skill context.
@@ -387,7 +388,8 @@ Get attribute.
 #### send`_`to`_`skill
 
 ```python
-def send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+def send_to_skill(message_or_envelope: Union[Message, Envelope],
+                  context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Send message or envelope to another skill.
@@ -414,7 +416,10 @@ This class defines an abstract interface for skill component classes.
 #### `__`init`__`
 
 ```python
-def __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, **kwargs: Any, ,) -> None
+def __init__(name: str,
+             skill_context: SkillContext,
+             configuration: Optional[SkillComponentConfiguration] = None,
+             **kwargs: Any) -> None
 ```
 
 Initialize a skill component.
@@ -510,7 +515,9 @@ Implement the teardown.
 ```python
 @classmethod
 @abstractmethod
-def parse_module(cls, path: str, configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> dict
+def parse_module(cls, path: str, configs: Dict[str,
+                                               SkillComponentConfiguration],
+                 skill_context: SkillContext) -> dict
 ```
 
 Parse the component module.
@@ -520,7 +527,7 @@ Parse the component module.
 ## AbstractBehaviour Objects
 
 ```python
-class AbstractBehaviour(SkillComponent,  ABC)
+class AbstractBehaviour(SkillComponent, ABC)
 ```
 
 Abstract behaviour for periodical calls.
@@ -555,7 +562,7 @@ Get the start time of the behaviour.
 ## Behaviour Objects
 
 ```python
-class Behaviour(AbstractBehaviour,  ABC)
+class Behaviour(AbstractBehaviour, ABC)
 ```
 
 This class implements an abstract behaviour.
@@ -608,7 +615,9 @@ Wrap the call of the action. This method must be called only by the framework.
 
 ```python
 @classmethod
-def parse_module(cls, path: str, behaviour_configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> Dict[str, "Behaviour"]
+def parse_module(cls, path: str,
+                 behaviour_configs: Dict[str, SkillComponentConfiguration],
+                 skill_context: SkillContext) -> Dict[str, "Behaviour"]
 ```
 
 Parse the behaviours module.
@@ -628,7 +637,7 @@ a list of Behaviour.
 ## Handler Objects
 
 ```python
-class Handler(SkillComponent,  ABC)
+class Handler(SkillComponent, ABC)
 ```
 
 This class implements an abstract behaviour.
@@ -680,7 +689,9 @@ Wrap the call of the handler. This method must be called only by the framework.
 
 ```python
 @classmethod
-def parse_module(cls, path: str, handler_configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> Dict[str, "Handler"]
+def parse_module(cls, path: str,
+                 handler_configs: Dict[str, SkillComponentConfiguration],
+                 skill_context: SkillContext) -> Dict[str, "Handler"]
 ```
 
 Parse the handler module.
@@ -722,7 +733,7 @@ dialogue
 ## Model Objects
 
 ```python
-class Model(SkillComponent,  ABC)
+class Model(SkillComponent, ABC)
 ```
 
 This class implements an abstract model.
@@ -732,7 +743,11 @@ This class implements an abstract model.
 #### `__`init`__`
 
 ```python
-def __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, keep_terminal_state_dialogues: Optional[bool] = None, **kwargs: Any, ,) -> None
+def __init__(name: str,
+             skill_context: SkillContext,
+             configuration: Optional[SkillComponentConfiguration] = None,
+             keep_terminal_state_dialogues: Optional[bool] = None,
+             **kwargs: Any) -> None
 ```
 
 Initialize a model.
@@ -771,7 +786,9 @@ Tear the class down.
 
 ```python
 @classmethod
-def parse_module(cls, path: str, model_configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> Dict[str, "Model"]
+def parse_module(cls, path: str,
+                 model_configs: Dict[str, SkillComponentConfiguration],
+                 skill_context: SkillContext) -> Dict[str, "Model"]
 ```
 
 Parse the model module.
@@ -801,7 +818,12 @@ This class implements a skill.
 #### `__`init`__`
 
 ```python
-def __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None, **kwargs: Any, ,)
+def __init__(configuration: SkillConfig,
+             skill_context: Optional[SkillContext] = None,
+             handlers: Optional[Dict[str, Handler]] = None,
+             behaviours: Optional[Dict[str, Behaviour]] = None,
+             models: Optional[Dict[str, Model]] = None,
+             **kwargs: Any)
 ```
 
 Initialize a skill.
@@ -865,7 +887,8 @@ Get the handlers.
 
 ```python
 @classmethod
-def from_dir(cls, directory: str, agent_context: AgentContext, **kwargs: Any) -> "Skill"
+def from_dir(cls, directory: str, agent_context: AgentContext,
+             **kwargs: Any) -> "Skill"
 ```
 
 Load the skill from a directory.
@@ -915,7 +938,8 @@ Set the logger.
 
 ```python
 @classmethod
-def from_config(cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs: Any) -> "Skill"
+def from_config(cls, configuration: SkillConfig, agent_context: AgentContext,
+                **kwargs: Any) -> "Skill"
 ```
 
 Load the skill from configuration.
@@ -945,7 +969,8 @@ Class to represent a triple (component name, component configuration, component 
 #### `__`init`__`
 
 ```python
-def __init__(name: str, config: SkillComponentConfiguration, class_: Type[SkillComponent], type_: _SKILL_COMPONENT_TYPES)
+def __init__(name: str, config: SkillComponentConfiguration,
+             class_: Type[SkillComponent], type_: _SKILL_COMPONENT_TYPES)
 ```
 
 Initialize the item.
@@ -965,7 +990,8 @@ This class implements the loading policy for skill components.
 #### `__`init`__`
 
 ```python
-def __init__(configuration: SkillConfig, skill_context: SkillContext, **kwargs: Any)
+def __init__(configuration: SkillConfig, skill_context: SkillContext,
+             **kwargs: Any)
 ```
 
 Initialize the helper class.

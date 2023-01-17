@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@
 import argparse
 
 from gyms.env import BanditNArmedRandom  # noqa: I201
-from proxy.env import ProxyEnv  # noqa: I201
+from proxy.env import ProxyEnv  # type: ignore # noqa: I201
 from rl.agent import RLAgent  # noqa: I201
 
 

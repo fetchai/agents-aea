@@ -181,7 +181,11 @@ Abstract class to create multiple executors classes.
 #### `__`init`__`
 
 ```python
-def __init__(tasks: Sequence[AbstractExecutorTask], task_fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate) -> None
+def __init__(
+    tasks: Sequence[AbstractExecutorTask],
+    task_fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.
+    propagate
+) -> None
 ```
 
 Init executor.
@@ -300,7 +304,11 @@ Abstract multiple runner to create classes to launch tasks with selected mode.
 #### `__`init`__`
 
 ```python
-def __init__(mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate) -> None
+def __init__(
+    mode: str,
+    fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.
+    propagate
+) -> None
 ```
 
 Init with selected executor mode.

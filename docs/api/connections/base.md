@@ -19,7 +19,7 @@ Connection states enum.
 ## Connection Objects
 
 ```python
-class Connection(Component,  ABC)
+class Connection(Component, ABC)
 ```
 
 Abstract definition of a connection.
@@ -29,7 +29,13 @@ Abstract definition of a connection.
 #### `__`init`__`
 
 ```python
-def __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
+def __init__(configuration: ConnectionConfig,
+             data_dir: str,
+             identity: Optional[Identity] = None,
+             crypto_store: Optional[CryptoStore] = None,
+             restricted_to_protocols: Optional[Set[PublicId]] = None,
+             excluded_protocols: Optional[Set[PublicId]] = None,
+             **kwargs: Any) -> None
 ```
 
 Initialize the connection.
@@ -235,7 +241,9 @@ the received envelope, or None if an error occurred.
 
 ```python
 @classmethod
-def from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
+def from_dir(cls, directory: str, identity: Identity,
+             crypto_store: CryptoStore, data_dir: str,
+             **kwargs: Any) -> "Connection"
 ```
 
 Load the connection from a directory.
@@ -258,7 +266,9 @@ the connection object.
 
 ```python
 @classmethod
-def from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
+def from_config(cls, configuration: ConnectionConfig, identity: Identity,
+                crypto_store: CryptoStore, data_dir: str,
+                **kwargs: Any) -> "Connection"
 ```
 
 Load a connection from a configuration.
@@ -323,7 +333,13 @@ Base sync connection class to write connections with sync code.
 #### `__`init`__`
 
 ```python
-def __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
+def __init__(configuration: ConnectionConfig,
+             data_dir: str,
+             identity: Optional[Identity] = None,
+             crypto_store: Optional[CryptoStore] = None,
+             restricted_to_protocols: Optional[Set[PublicId]] = None,
+             excluded_protocols: Optional[Set[PublicId]] = None,
+             **kwargs: Any) -> None
 ```
 
 Initialize the connection.

@@ -32,6 +32,7 @@ Compute the JSON representation.
 
 ```python
 @classmethod
+@abstractmethod
 def from_json(cls, obj: Dict) -> "JSONSerializable"
 ```
 
@@ -268,7 +269,10 @@ True
 #### `__`init`__`
 
 ```python
-def __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[PackageVersionLike] = None, package_hash: Optional[IPFSHashOrStr] = None) -> None
+def __init__(author: SimpleIdOrStr,
+             name: SimpleIdOrStr,
+             version: Optional[PackageVersionLike] = None,
+             package_hash: Optional[IPFSHashOrStr] = None) -> None
 ```
 
 Initialize the public identifier.
@@ -285,7 +289,6 @@ def is_package_name_valid(cls, name: SimpleIdOrStr) -> bool
 Check is package name valid.
 
 **Arguments**:
-
 
 - `name`: str or SimpleID
 
@@ -305,7 +308,6 @@ def is_author_name_valid(cls, name: SimpleIdOrStr) -> bool
 Check is author name valid.
 
 **Arguments**:
-
 
 - `name`: str or SimpleID
 
@@ -449,13 +451,13 @@ ValueError: Input 'bad/formatted:0.1.0:Qmbadhash' is not well formatted.
 
 - `public_id_string`: the public id in string format.
 
-**Returns**:
-
-the public id object.
-
 **Raises**:
 
 - `ValueError`: if the string in input is not well formatted.
+
+**Returns**:
+
+the public id object.
 
 <a id="aea.configurations.data_types.PublicId.try_from_str"></a>
 
@@ -500,13 +502,13 @@ ValueError: Input 'bad/formatted:input' is not well formatted.
 
 - `public_id_uri_path`: the public id in uri path string format.
 
-**Returns**:
-
-the public id object.
-
 **Raises**:
 
 - `ValueError`: if the string in input is not well formatted.
+
+**Returns**:
+
+the public id object.
 
 <a id="aea.configurations.data_types.PublicId.to_uri_path"></a>
 
@@ -631,7 +633,8 @@ A package identifier.
 #### `__`init`__`
 
 ```python
-def __init__(package_type: Union[PackageType, str], public_id: PublicId) -> None
+def __init__(package_type: Union[PackageType, str],
+             public_id: PublicId) -> None
 ```
 
 Initialize the package id.
@@ -742,13 +745,13 @@ ValueError: Input 'very/bad/formatted:input' is not well formatted.
 
 - `package_id_uri_path`: the package id in uri path string format.
 
-**Returns**:
-
-the package id object.
-
 **Raises**:
 
 - `ValueError`: if the string in input is not well formatted.
+
+**Returns**:
+
+the package id object.
 
 <a id="aea.configurations.data_types.PackageId.to_uri_path"></a>
 
@@ -860,7 +863,8 @@ False
 #### `__`init`__`
 
 ```python
-def __init__(component_type: Union[ComponentType, str], public_id: PublicId) -> None
+def __init__(component_type: Union[ComponentType, str],
+             public_id: PublicId) -> None
 ```
 
 Initialize the component id.
@@ -991,7 +995,11 @@ These fields will be forwarded to the 'pip' command.
 #### `__`init`__`
 
 ```python
-def __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[str] = None, git: Optional[str] = None, ref: Optional[Union[GitRef, str]] = None) -> None
+def __init__(name: Union[PyPIPackageName, str],
+             version: Union[str, SpecifierSet] = "",
+             index: Optional[str] = None,
+             git: Optional[str] = None,
+             ref: Optional[Union[GitRef, str]] = None) -> None
 ```
 
 Initialize a PyPI dependency.

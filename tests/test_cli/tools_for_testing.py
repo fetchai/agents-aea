@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
-from typing import List
+from typing import Any, Dict, List, Set
 from unittest.mock import Mock
 
 from aea_ledger_cosmos import CosmosCrypto
@@ -29,6 +29,7 @@ from packaging.specifiers import SpecifierSet
 import aea
 from aea.configurations.base import PackageVersion
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.data_types import ComponentId
 
 from tests.conftest import AUTHOR
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
@@ -42,7 +43,7 @@ def raise_click_exception(*args, **kwargs):
 class AgentConfigMock:
     """A class to mock Agent config."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Init the AgentConfigMock object."""
         self.aea_version_specifiers: SpecifierSet = kwargs.get(
             "aea_version_specifier", SpecifierSet(f"=={aea.__version__}")
@@ -67,8 +68,8 @@ class AgentConfigMock:
             return_value=connection_private_key_paths
         )
         self.get = lambda x, default=None: getattr(self, x, default)
-        self.component_configurations = {}
-        self.package_dependencies = set()
+        self.component_configurations: Dict[ComponentId, Dict] = {}
+        self.package_dependencies: Set[ComponentId] = set()
         self.config: dict = {}
         self.default_ledger = DEFAULT_LEDGER
 
@@ -87,7 +88,7 @@ class ContextMock:
 
     cwd = "cwd"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Init the ContextMock object."""
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)

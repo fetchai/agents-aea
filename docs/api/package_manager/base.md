@@ -9,7 +9,8 @@ Base manager class.
 #### load`_`configuration
 
 ```python
-def load_configuration(package_type: PackageType, package_path: Path) -> PackageConfiguration
+def load_configuration(package_type: PackageType,
+                       package_path: Path) -> PackageConfiguration
 ```
 
 Load a configuration, knowing the type and the path to the package root.
@@ -48,7 +49,9 @@ AEA package manager
 #### `__`init`__`
 
 ```python
-def __init__(path: Path, config_loader: ConfigLoaderCallableType = load_configuration) -> None
+def __init__(
+        path: Path,
+        config_loader: ConfigLoaderCallableType = load_configuration) -> None
 ```
 
 Initialize object.
@@ -68,7 +71,9 @@ Iterate dependency tree.
 #### check`_`dependencies
 
 ```python
-def check_dependencies(configuration: PackageConfiguration) -> List[Tuple[PackageId, DepedencyMismatchErrors]]
+def check_dependencies(
+    configuration: PackageConfiguration
+) -> List[Tuple[PackageId, DepedencyMismatchErrors]]
 ```
 
 Verify hashes for package dependecies againts the available hashes.
@@ -78,7 +83,9 @@ Verify hashes for package dependecies againts the available hashes.
 #### is`_`dependencies`_`hashes`_`match
 
 ```python
-def is_dependencies_hashes_match(package_id: PackageId, configuration_obj: PackageConfiguration) -> bool
+def is_dependencies_hashes_match(
+        package_id: PackageId,
+        configuration_obj: PackageConfiguration) -> bool
 ```
 
 Check dependecies hashes match and print errors
@@ -138,7 +145,9 @@ Update fingerprints for a package.
 #### add`_`package
 
 ```python
-def add_package(package_id: PackageId, with_dependencies: bool = False, allow_update: bool = False) -> "BasePackageManager"
+def add_package(package_id: PackageId,
+                with_dependencies: bool = False,
+                allow_update: bool = False) -> "BasePackageManager"
 ```
 
 Add package.
@@ -148,7 +157,8 @@ Add package.
 #### add`_`dependencies`_`for`_`package
 
 ```python
-def add_dependencies_for_package(package_id: PackageId, allow_update: bool = False) -> None
+def add_dependencies_for_package(package_id: PackageId,
+                                 allow_update: bool = False) -> None
 ```
 
 Add dependencies for the package specified.
@@ -220,7 +230,10 @@ Return hash for the given package id.
 
 ```python
 @abstractmethod
-def sync(dev: bool = False, third_party: bool = True, update_packages: bool = False, update_hashes: bool = False) -> "BasePackageManager"
+def sync(dev: bool = False,
+         third_party: bool = True,
+         update_packages: bool = False,
+         update_hashes: bool = False) -> "BasePackageManager"
 ```
 
 Sync local packages to the remote registry.
@@ -276,7 +289,11 @@ Dump package data to file.
 ```python
 @classmethod
 @abstractmethod
-def from_dir(cls, packages_dir: Path, config_loader: ConfigLoaderCallableType = load_configuration) -> "BasePackageManager"
+def from_dir(
+    cls,
+    packages_dir: Path,
+    config_loader: ConfigLoaderCallableType = load_configuration
+) -> "BasePackageManager"
 ```
 
 Initialize from packages directory.

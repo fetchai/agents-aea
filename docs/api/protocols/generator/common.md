@@ -61,7 +61,8 @@ Get the protoc version used.
 #### load`_`protocol`_`specification
 
 ```python
-def load_protocol_specification(specification_path: str) -> ProtocolSpecification
+def load_protocol_specification(
+        specification_path: str) -> ProtocolSpecification
 ```
 
 Load a protocol specification.
@@ -107,7 +108,9 @@ Run Isort code formatting via subprocess.
 #### try`_`run`_`protoc
 
 ```python
-def try_run_protoc(path_to_generated_protocol_package: str, name: str, language: str = PROTOCOL_LANGUAGE_PYTHON) -> None
+def try_run_protoc(path_to_generated_protocol_package: str,
+                   name: str,
+                   language: str = PROTOCOL_LANGUAGE_PYTHON) -> None
 ```
 
 Run 'protoc' protocol buffer compiler via subprocess.
@@ -123,7 +126,8 @@ Run 'protoc' protocol buffer compiler via subprocess.
 #### try`_`run`_`protolint
 
 ```python
-def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> None
+def try_run_protolint(path_to_generated_protocol_package: str,
+                      name: str) -> None
 ```
 
 Run 'protolint' linter via subprocess.
@@ -138,7 +142,8 @@ Run 'protolint' linter via subprocess.
 #### check`_`protobuf`_`using`_`protoc
 
 ```python
-def check_protobuf_using_protoc(path_to_generated_protocol_package: str, name: str) -> Tuple[bool, str]
+def check_protobuf_using_protoc(path_to_generated_protocol_package: str,
+                                name: str) -> Tuple[bool, str]
 ```
 
 Check whether a protocol buffer schema file is valid.
@@ -147,7 +152,6 @@ Validation is via trying to compile the schema file. If successfully compiled it
 If valid, return True and a 'protobuf file is valid' message, otherwise return False and the error thrown by the compiler.
 
 **Arguments**:
-
 
 - `path_to_generated_protocol_package`: path to the protocol buffer schema file.
 - `name`: name of the protocol buffer schema file.
@@ -161,7 +165,9 @@ Boolean result and an accompanying message
 #### compile`_`protobuf`_`using`_`protoc
 
 ```python
-def compile_protobuf_using_protoc(path_to_generated_protocol_package: str, name: str, language: str) -> Tuple[bool, str]
+def compile_protobuf_using_protoc(path_to_generated_protocol_package: str,
+                                  name: str,
+                                  language: str) -> Tuple[bool, str]
 ```
 
 Compile a protocol buffer schema file using protoc.
@@ -170,7 +176,6 @@ If successfully compiled, return True and a success message,
 otherwise return False and the error thrown by the compiler.
 
 **Arguments**:
-
 
 - `path_to_generated_protocol_package`: path to the protocol buffer schema file.
 - `name`: name of the protocol buffer schema file.
@@ -195,7 +200,6 @@ otherwise return False and the output shown by the linter
 (minus the indentation suggestions which are automatically fixed by protolint).
 
 **Arguments**:
-
 
 - `path_to_proto_file`: path to the protocol buffer schema file.
 - `name`: name of the protocol buffer schema file.

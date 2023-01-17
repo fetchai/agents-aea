@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
 """Implementation of the 'aea fetch' subcommand."""
 import os
 import shutil
-from distutils.dir_util import copy_tree
+from distutils.dir_util import copy_tree  # pylint: disable=deprecated-module
 from pathlib import Path
 from typing import Optional, Union, cast
 

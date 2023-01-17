@@ -41,7 +41,10 @@ Get the IPFS hash.
 
 ```python
 @classmethod
-def hash_file(cls, file_path: str, wrap: bool = True, cid_v1: bool = True) -> str
+def hash_file(cls,
+              file_path: str,
+              wrap: bool = True,
+              cid_v1: bool = True) -> str
 ```
 
 Get the IPFS hash for a single file.
@@ -62,7 +65,11 @@ the ipfs hash
 
 ```python
 @classmethod
-def hash_bytes(cls, data: bytes, wrap: bool = True, cid_v1: bool = True, file_name_if_wrap: Optional[str] = None) -> str
+def hash_bytes(cls,
+               data: bytes,
+               wrap: bool = True,
+               cid_v1: bool = True,
+               file_name_if_wrap: Optional[str] = None) -> str
 ```
 
 Get the IPFS hash for a single file.
@@ -84,7 +91,10 @@ the ipfs hash
 
 ```python
 @classmethod
-def hash_directory(cls, dir_path: str, wrap: bool = True, cid_v1: bool = True) -> str
+def hash_directory(cls,
+                   dir_path: str,
+                   wrap: bool = True,
+                   cid_v1: bool = True) -> str
 ```
 
 Get the IPFS hash for a directory.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 """Classes to handle AEA configurations."""
 import pprint
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import OrderedDict
 from copy import copy, deepcopy
 from operator import attrgetter
@@ -167,6 +167,7 @@ class Configuration(JSONSerializable, ABC):
         self._key_order: List[str] = []
 
     @classmethod
+    @abstractmethod
     def from_json(cls, obj: Dict) -> "Configuration":
         """Build from a JSON object."""
 

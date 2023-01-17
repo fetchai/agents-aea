@@ -53,7 +53,11 @@ Unset the current agent context.
 
 ```python
 @classmethod
-def set_config(cls, dotted_path: str, value: Any, type_: Optional[str] = None, aev: bool = False) -> Result
+def set_config(cls,
+               dotted_path: str,
+               value: Any,
+               type_: Optional[str] = None,
+               aev: bool = False) -> Result
 ```
 
 Set a config.
@@ -61,7 +65,6 @@ Set a config.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `dotted_path`: str dotted path to config param.
 - `value`: a new value to set.
@@ -102,7 +105,7 @@ Run from agent's directory.
 
 ```python
 @classmethod
-def run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs: str) -> Result
+def run_cli_command(cls, *args: str, cwd: str = ".", **kwargs: str) -> Result
 ```
 
 Run AEA CLI command.
@@ -127,13 +130,12 @@ Result
 
 ```python
 @classmethod
-def start_subprocess(cls, *args: str, *, cwd: str = ".") -> subprocess.Popen
+def start_subprocess(cls, *args: str, cwd: str = ".") -> subprocess.Popen
 ```
 
 Run python with args as subprocess.
 
 **Arguments**:
-
 
 - `args`: CLI args
 - `cwd`: the current working directory
@@ -168,7 +170,10 @@ thread
 
 ```python
 @classmethod
-def create_agents(cls, *agents_names: str, *, is_local: bool = True, is_empty: bool = False) -> None
+def create_agents(cls,
+                  *agents_names: str,
+                  is_local: bool = True,
+                  is_empty: bool = False) -> None
 ```
 
 Create agents in current working directory.
@@ -185,7 +190,10 @@ Create agents in current working directory.
 
 ```python
 @classmethod
-def fetch_agent(cls, public_id: str, agent_name: str, is_local: bool = True) -> None
+def fetch_agent(cls,
+                public_id: str,
+                agent_name: str,
+                is_local: bool = True) -> None
 ```
 
 Create agents in current working directory.
@@ -202,13 +210,13 @@ Create agents in current working directory.
 
 ```python
 @classmethod
-def difference_to_fetched_agent(cls, public_id: str, agent_name: str) -> List[str]
+def difference_to_fetched_agent(cls, public_id: str,
+                                agent_name: str) -> List[str]
 ```
 
 Compare agent against the one fetched from public id.
 
 **Arguments**:
-
 
 - `public_id`: str public id
 - `agent_name`: str agent name.
@@ -247,7 +255,6 @@ Run from agent's directory.
 
 **Arguments**:
 
-
 - `args`: CLI args
 
 **Returns**:
@@ -260,7 +267,9 @@ subprocess object.
 
 ```python
 @classmethod
-def terminate_agents(cls, *subprocesses: subprocess.Popen, *, timeout: int = TERMINATION_TIMEOUT) -> None
+def terminate_agents(cls,
+                     *subprocesses: subprocess.Popen,
+                     timeout: int = TERMINATION_TIMEOUT) -> None
 ```
 
 Terminate agent subprocesses.
@@ -300,7 +309,10 @@ Initialize AEA locally with author name.
 
 ```python
 @classmethod
-def add_item(cls, item_type: str, public_id: str, local: bool = True) -> Result
+def add_item(cls,
+             item_type: str,
+             public_id: str,
+             local: bool = True) -> Result
 ```
 
 Add an item to the agent.
@@ -308,7 +320,6 @@ Add an item to the agent.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `item_type`: str item type.
 - `public_id`: public id of the item.
@@ -333,7 +344,6 @@ Run from agent's directory.
 
 **Arguments**:
 
-
 - `item_type`: str item type.
 - `public_id`: public id of the item.
 
@@ -347,7 +357,10 @@ Result
 
 ```python
 @classmethod
-def scaffold_item(cls, item_type: str, name: str, skip_consistency_check: bool = False) -> Result
+def scaffold_item(cls,
+                  item_type: str,
+                  name: str,
+                  skip_consistency_check: bool = False) -> Result
 ```
 
 Scaffold an item for the agent.
@@ -355,7 +368,6 @@ Scaffold an item for the agent.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `item_type`: str item type.
 - `name`: name of the item.
@@ -380,7 +392,6 @@ Run from agent's directory.
 
 **Arguments**:
 
-
 - `item_type`: str item type.
 - `public_id`: public id of the item.
 
@@ -402,7 +413,6 @@ Eject an item in the agent in quiet mode (i.e. no interaction).
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `item_type`: str item type.
 - `public_id`: public id of the item.
@@ -434,7 +444,10 @@ Result
 
 ```python
 @classmethod
-def generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None, password: Optional[str] = None) -> Result
+def generate_private_key(cls,
+                         ledger_api_id: str = DEFAULT_LEDGER,
+                         private_key_file: Optional[str] = None,
+                         password: Optional[str] = None) -> Result
 ```
 
 Generate AEA private key with CLI command.
@@ -442,7 +455,6 @@ Generate AEA private key with CLI command.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `ledger_api_id`: ledger API ID.
 - `private_key_file`: the private key file.
@@ -458,7 +470,11 @@ Result
 
 ```python
 @classmethod
-def add_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE, connection: bool = False, password: Optional[str] = None) -> Result
+def add_private_key(cls,
+                    ledger_api_id: str = DEFAULT_LEDGER,
+                    private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
+                    connection: bool = False,
+                    password: Optional[str] = None) -> Result
 ```
 
 Add private key with CLI command.
@@ -466,7 +482,6 @@ Add private key with CLI command.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `ledger_api_id`: ledger API ID.
 - `private_key_filepath`: private key filepath.
@@ -483,7 +498,9 @@ Result
 
 ```python
 @classmethod
-def remove_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False) -> Result
+def remove_private_key(cls,
+                       ledger_api_id: str = DEFAULT_LEDGER,
+                       connection: bool = False) -> Result
 ```
 
 Remove private key with CLI command.
@@ -491,7 +508,6 @@ Remove private key with CLI command.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `ledger_api_id`: ledger API ID.
 - `connection`: whether or not the private key filepath is for a connection.
@@ -506,7 +522,10 @@ Result
 
 ```python
 @classmethod
-def replace_private_key_in_file(cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE) -> None
+def replace_private_key_in_file(
+        cls,
+        private_key: str,
+        private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE) -> None
 ```
 
 Replace the private key in the provided file with the provided key.
@@ -522,7 +541,9 @@ Replace the private key in the provided file with the provided key.
 
 ```python
 @classmethod
-def generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None) -> Result
+def generate_wealth(cls,
+                    ledger_api_id: str = DEFAULT_LEDGER,
+                    password: Optional[str] = None) -> Result
 ```
 
 Generate wealth with CLI command.
@@ -530,7 +551,6 @@ Generate wealth with CLI command.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `ledger_api_id`: ledger API ID.
 - `password`: the password.
@@ -545,7 +565,9 @@ Result
 
 ```python
 @classmethod
-def get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None) -> str
+def get_wealth(cls,
+               ledger_api_id: str = DEFAULT_LEDGER,
+               password: Optional[str] = None) -> str
 ```
 
 Get wealth with CLI command.
@@ -553,7 +575,6 @@ Get wealth with CLI command.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `ledger_api_id`: ledger API ID.
 - `password`: the password to encrypt/decrypt private keys.
@@ -568,7 +589,9 @@ command line output
 
 ```python
 @classmethod
-def get_address(cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None) -> str
+def get_address(cls,
+                ledger_api_id: str = DEFAULT_LEDGER,
+                password: Optional[str] = None) -> str
 ```
 
 Get address with CLI command.
@@ -576,7 +599,6 @@ Get address with CLI command.
 Run from agent's directory.
 
 **Arguments**:
-
 
 - `ledger_api_id`: ledger API ID.
 - `password`: the password to encrypt/decrypt private keys.
@@ -644,7 +666,12 @@ Read an envelope from an agent, using the stub connection.
 
 ```python
 @classmethod
-def missing_from_output(cls, process: subprocess.Popen, strings: Sequence[str], timeout: int = DEFAULT_PROCESS_TIMEOUT, period: int = 1, is_terminating: bool = True) -> List[str]
+def missing_from_output(cls,
+                        process: subprocess.Popen,
+                        strings: Sequence[str],
+                        timeout: int = DEFAULT_PROCESS_TIMEOUT,
+                        period: int = 1,
+                        is_terminating: bool = True) -> List[str]
 ```
 
 Check if strings are present in process output.
@@ -653,7 +680,6 @@ Read process stdout in thread and terminate when all strings are present
 or timeout expired.
 
 **Arguments**:
-
 
 - `process`: agent subprocess.
 - `strings`: tuple of strings expected to appear in output.
@@ -671,7 +697,9 @@ list of missed strings.
 
 ```python
 @classmethod
-def is_running(cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT) -> bool
+def is_running(cls,
+               process: subprocess.Popen,
+               timeout: int = DEFAULT_LAUNCH_TIMEOUT) -> bool
 ```
 
 Check if the AEA is launched and running (ready to process messages).

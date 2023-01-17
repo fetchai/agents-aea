@@ -16,7 +16,6 @@ Get sha256 hash.
 
 **Arguments**:
 
-
 - `contents`: bytes contents.
 
 **Returns**:
@@ -34,7 +33,6 @@ def ripemd160(contents: bytes) -> bytes
 Get ripemd160 hash using PyCryptodome.
 
 **Arguments**:
-
 
 - `contents`: bytes contents.
 

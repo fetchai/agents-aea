@@ -17,12 +17,14 @@ Memory usage check.
     help="Ledger id",
     show_default=True,
 )
-@click.option(
-    "--amount_of_tx", default=100, help="Amount of tx to sign", show_default=True
-)
+@click.option("--amount_of_tx",
+              default=100,
+              help="Amount of tx to sign",
+              show_default=True)
 @number_of_runs_deco
 @output_format_deco
-def main(ledger_id: str, amount_of_tx: int, number_of_runs: int, output_format: str) -> Any
+def main(ledger_id: str, amount_of_tx: int, number_of_runs: int,
+         output_format: str) -> Any
 ```
 
 Check performance of decision maker on signature signing.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,7 +91,9 @@ class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
     def __init__(
-        self, loop: AbstractEventLoop = None, logger: logging.Logger = _default_logger
+        self,
+        loop: Optional[AbstractEventLoop] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a local (i.e. non-networked) implementation of an OEF Node.

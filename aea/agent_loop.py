@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,7 +187,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     def __init__(
         self,
         agent: AbstractAgent,
-        loop: AbstractEventLoop = None,
+        loop: Optional[AbstractEventLoop] = None,
         threaded: bool = False,
     ) -> None:
         """
@@ -295,9 +295,9 @@ class AsyncAgentLoop(BaseAgentLoop):
                 if self.agent.exception_handler(e, fn) is True:
                     self._state.set(AgentLoopStates.error)
                     raise
-            except Exception as e:
+            except Exception as e_:
                 self._state.set(AgentLoopStates.error)
-                self._exceptions.append(e)
+                self._exceptions.append(e_)
                 raise
 
     def _register_periodic_task(

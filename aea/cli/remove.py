@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -178,7 +178,7 @@ class ItemRemoveHelper:
         :yield: package ids: (type, public_id)
         """
         for item_type in map(str, ComponentType):
-            items = getattr(item, f"{item_type}s", set())
+            items: Set[PublicId] = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
                 if ignore_non_vendor and is_item_present(
                     self._ctx.cwd,
@@ -372,7 +372,7 @@ class RemoveItem:
     @property
     def agent_items(self) -> Set[PublicId]:
         """Return items registered with agent of the same type as item."""
-        return getattr(self.agent_config, self.item_type_plural, set)
+        return getattr(self.agent_config, self.item_type_plural, set())
 
     @property
     def is_required_by(self) -> bool:

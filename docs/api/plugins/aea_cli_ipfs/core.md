@@ -36,15 +36,20 @@ Tear down command group.
 @ipfs.command()
 @click.argument(
     "dir_path",
-    type=click.Path(
-        exists=True, dir_okay=True, file_okay=False, resolve_path=True, readable=True
-    ),
+    type=click.Path(exists=True,
+                    dir_okay=True,
+                    file_okay=False,
+                    resolve_path=True,
+                    readable=True),
     required=False,
 )
 @click.option("-p", "--publish", is_flag=True)
 @click.option("--no-pin", is_flag=True)
 @click.pass_context
-def add(click_context: click.Context, dir_path: Optional[str], publish: bool = False, no_pin: bool = False) -> None
+def add(click_context: click.Context,
+        dir_path: Optional[str],
+        publish: bool = False,
+        no_pin: bool = False) -> None
 ```
 
 Add directory to ipfs, if not directory specified the current one will be added.
@@ -85,7 +90,8 @@ Remove a directory from ipfs by it's hash.
     required=False,
 )
 @click.pass_context
-def download(click_context: click.Context, hash_: str, target_dir: Optional[str]) -> None
+def download(click_context: click.Context, hash_: str,
+             target_dir: Optional[str]) -> None
 ```
 
 Download directory by it's hash, if not target directory specified will use current one.

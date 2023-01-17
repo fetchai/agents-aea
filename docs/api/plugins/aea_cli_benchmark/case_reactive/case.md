@@ -89,7 +89,8 @@ Handle incoming message.
 #### run
 
 ```python
-def run(duration: int, runtime_mode: str, connection_mode: str) -> List[Tuple[str, Union[int, float]]]
+def run(duration: int, runtime_mode: str,
+        connection_mode: str) -> List[Tuple[str, Union[int, float]]]
 ```
 
 Test memory usage.

@@ -25,7 +25,8 @@ Run one of performance benchmark.
 @click.argument(
     "file",
     metavar="FILE",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+    type=click.Path(exists=True, file_okay=True, dir_okay=False,
+                    readable=True),
     required=False,
 )
 def run(file: Optional[str])

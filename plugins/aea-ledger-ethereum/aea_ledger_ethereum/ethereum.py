@@ -1409,7 +1409,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return Web3.isAddress(address)
 
     @classmethod
-    def contract_method_call(
+    def contract_method_call(  # pylint: disable=arguments-differ
         cls,
         contract_instance: Any,
         method_name: str,

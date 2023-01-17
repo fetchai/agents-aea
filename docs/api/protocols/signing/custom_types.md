@@ -20,7 +20,8 @@ This class represents an instance of ErrorCode.
 
 ```python
 @staticmethod
-def encode(error_code_protobuf_object: Any, error_code_object: "ErrorCode") -> None
+def encode(error_code_protobuf_object: Any,
+           error_code_object: "ErrorCode") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.

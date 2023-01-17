@@ -61,7 +61,8 @@ None
 
 ```python
 @abstractmethod
-def send_decoding_error(envelope: Envelope, exception: Exception, logger: Logger) -> None
+def send_decoding_error(envelope: Envelope, exception: Exception,
+                        logger: Logger) -> None
 ```
 
 Handle a decoding error.
@@ -82,7 +83,8 @@ None
 
 ```python
 @abstractmethod
-def send_no_active_handler(envelope: Envelope, reason: str, logger: Logger) -> None
+def send_no_active_handler(envelope: Envelope, reason: str,
+                           logger: Logger) -> None
 ```
 
 Handle the received envelope in case the handler is not supported.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -170,8 +170,8 @@ def run(
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
-    for agent in agents:
-        wait_for_condition(lambda: agent.is_running, timeout=5)
+    for agent_ in agents:
+        wait_for_condition(lambda a=agent_: a.is_running, timeout=5)
     wait_for_condition(lambda: runner.is_running, timeout=5)
     time.sleep(1)
 

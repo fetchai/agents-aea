@@ -57,11 +57,11 @@ class TestConnectionMixIn:
     async def send(self, envelope: Envelope) -> None:
         """Handle incoming envelope."""
         self.recvs.append(time.time())
-        return await super().send(envelope)  # type: ignore
+        return await super().send(envelope)  # type: ignore # pylint: disable=no-member
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional[Envelope]:
         """Generate outgoing envelope."""
-        envelope = await super().receive(*args, **kwargs)  # type: ignore
+        envelope = await super().receive(*args, **kwargs)  # type: ignore # pylint: disable=no-member
         self.sends.append(time.time())
         return envelope
 
@@ -132,7 +132,7 @@ def run(
     return [
         ("envelopes received", len(connection.recvs)),
         ("envelopes sent", len(connection.sends)),
-        ("latency(ms)", 10 ** 6 * latency),
+        ("latency(ms)", 10**6 * latency),
         ("rate(envelopes/second)", rate),
     ]
 

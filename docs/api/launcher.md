@@ -9,13 +9,13 @@ This module contains the implementation of multiple AEA configs launcher.
 #### load`_`agent
 
 ```python
-def load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> AEA
+def load_agent(agent_dir: Union[PathLike, str],
+               password: Optional[str] = None) -> AEA
 ```
 
 Load AEA from directory.
 
 **Arguments**:
-
 
 - `agent_dir`: agent configuration directory
 - `password`: the password to encrypt/decrypt the private key.
@@ -39,7 +39,8 @@ Task to run agent from agent configuration directory.
 #### `__`init`__`
 
 ```python
-def __init__(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> None
+def __init__(agent_dir: Union[PathLike, str],
+             password: Optional[str] = None) -> None
 ```
 
 Init AEA config dir task.
@@ -107,7 +108,9 @@ Version for multiprocess executor mode.
 #### `__`init`__`
 
 ```python
-def __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None, password: Optional[str] = None) -> None
+def __init__(agent_dir: Union[PathLike, str],
+             log_level: Optional[str] = None,
+             password: Optional[str] = None) -> None
 ```
 
 Init AEA config dir task.
@@ -181,7 +184,12 @@ Run multiple AEA instances.
 #### `__`init`__`
 
 ```python
-def __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None, password: Optional[str] = None) -> None
+def __init__(agent_dirs: Sequence[Union[PathLike, str]],
+             mode: str,
+             fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies
+             .propagate,
+             log_level: Optional[str] = None,
+             password: Optional[str] = None) -> None
 ```
 
 Init AEALauncher.

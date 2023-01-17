@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 """This module contains the tools for checking that all packages have been pushed to the ipfs registry."""
 
 import json
+import logging
 import subprocess  # nosec
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -31,18 +32,30 @@ import requests
 
 IPFS_ENDPOINT = "https://gateway.autonolas.tech/ipfs"
 MAX_WORKERS = 10
-REQUEST_TIMEOUT = 5  # seconds
+REQUEST_TIMEOUT = 10  # seconds
 
 
-def check_ipfs_hash_pushed(ipfs_hash: str) -> Tuple[str, bool]:
+def check_ipfs_hash_pushed(ipfs_hash: str, retries: int = 5) -> Tuple[str, bool]:
     """Check that the given ipfs hash exists in the registry"""
 
-    try:
-        url = f"{IPFS_ENDPOINT}/{ipfs_hash.strip()}"
-        res = requests.get(url, timeout=REQUEST_TIMEOUT)
-        return ipfs_hash, res.status_code == 200
-    except requests.RequestException:
-        return ipfs_hash, False
+    def check_ipfs() -> Tuple[str, bool]:
+        try:
+            url = f"{IPFS_ENDPOINT}/{ipfs_hash.strip()}"
+            res = requests.get(url, timeout=REQUEST_TIMEOUT)
+            logging.info(f"check_ipfs_hash_pushed response: {res.status_code}")
+            return ipfs_hash, res.status_code == 200
+        except requests.RequestException as e:
+            logging.error(
+                f"check_ipfs_hash_pushed failed to find {ipfs_hash} on IPFS: {e}"
+            )
+            return ipfs_hash, False
+
+    found = check_ipfs()[1]
+    while not found and retries:
+        retries -= 1
+        found = check_ipfs()[1]
+
+    return ipfs_hash, found
 
 
 def get_latest_git_tag() -> str:

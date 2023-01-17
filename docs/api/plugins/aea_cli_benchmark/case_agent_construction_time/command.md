@@ -10,9 +10,10 @@ Check amount of time and mem for agent setup.
 
 ```python
 @click.command(name="agent_construction_time")
-@click.option(
-    "--agents", default=25, help="Amount of agents to construct.", show_default=True
-)
+@click.option("--agents",
+              default=25,
+              help="Amount of agents to construct.",
+              show_default=True)
 @number_of_runs_deco
 @output_format_deco
 def main(agents: int, number_of_runs: int, output_format: str) -> Any

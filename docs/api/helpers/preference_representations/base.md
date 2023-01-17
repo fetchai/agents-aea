@@ -9,7 +9,9 @@ Preference representation helpers.
 #### logarithmic`_`utility
 
 ```python
-def logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int], quantity_shift: int = 100) -> float
+def logarithmic_utility(utility_params_by_good_id: Dict[str, float],
+                        quantities_by_good_id: Dict[str, int],
+                        quantity_shift: int = 100) -> float
 ```
 
 Compute agent's utility given her utility function params and a good bundle.
@@ -29,7 +31,8 @@ utility value
 #### linear`_`utility
 
 ```python
-def linear_utility(exchange_params_by_currency_id: Dict[str, float], balance_by_currency_id: Dict[str, int]) -> float
+def linear_utility(exchange_params_by_currency_id: Dict[str, float],
+                   balance_by_currency_id: Dict[str, int]) -> float
 ```
 
 Compute agent's utility given her utility function params and a good bundle.

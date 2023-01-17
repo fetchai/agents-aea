@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,7 @@ class Task(AbstractExecutorTask):
         """Implement stop task function here."""
         pass
 
-    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
+    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:  # type: ignore[empty-body]
         """
         Create asyncio task for task run in asyncio loop.
 

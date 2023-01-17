@@ -19,7 +19,9 @@ Holds a node address in format "host:port".
 #### `__`init`__`
 
 ```python
-def __init__(uri: Optional[str] = None, host: Optional[str] = None, port: Optional[int] = None) -> None
+def __init__(uri: Optional[str] = None,
+             host: Optional[str] = None,
+             port: Optional[int] = None) -> None
 ```
 
 Initialise Uri.

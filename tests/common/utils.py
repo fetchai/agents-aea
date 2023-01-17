@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -178,7 +178,7 @@ class AeaTool:
         to: str = "test",
         sender: str = "test",
         protocol_specification_id: PublicId = DefaultMessage.protocol_specification_id,
-        message: Message = None,
+        message: Optional[Message] = None,
     ) -> Envelope:
         """
         Create envelope, if message is not passed use .dummy_message method.

@@ -42,7 +42,10 @@ This class defines the end states of a signing dialogue.
 #### `__`init`__`
 
 ```python
-def __init__(dialogue_label: DialogueLabel, self_address: Address, role: Dialogue.Role, message_class: Type[SigningMessage] = SigningMessage) -> None
+def __init__(dialogue_label: DialogueLabel,
+             self_address: Address,
+             role: Dialogue.Role,
+             message_class: Type[SigningMessage] = SigningMessage) -> None
 ```
 
 Initialize a dialogue.
@@ -59,7 +62,7 @@ Initialize a dialogue.
 ## SigningDialogues Objects
 
 ```python
-class SigningDialogues(Dialogues,  ABC)
+class SigningDialogues(Dialogues, ABC)
 ```
 
 This class keeps track of all signing dialogues.
@@ -69,7 +72,10 @@ This class keeps track of all signing dialogues.
 #### `__`init`__`
 
 ```python
-def __init__(self_address: Address, role_from_first_message: Callable[[Message, Address], Dialogue.Role], dialogue_class: Type[SigningDialogue] = SigningDialogue) -> None
+def __init__(self_address: Address,
+             role_from_first_message: Callable[[Message, Address],
+                                               Dialogue.Role],
+             dialogue_class: Type[SigningDialogue] = SigningDialogue) -> None
 ```
 
 Initialize dialogues.

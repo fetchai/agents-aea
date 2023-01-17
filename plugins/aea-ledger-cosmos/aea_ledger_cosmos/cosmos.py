@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -138,7 +138,7 @@ class DataEncrypt:
         password: str, salt: Optional[bytes] = None
     ) -> Tuple[bytes, bytes]:
         salt = salt or get_random_bytes(16)
-        key = scrypt(password, salt, 16, N=2 ** 14, r=8, p=1)  # type: ignore
+        key = scrypt(password, salt, 16, N=2**14, r=8, p=1)  # type: ignore
         return key, salt  # type: ignore
 
     @classmethod

@@ -19,7 +19,8 @@ Generic data model.
 #### `__`init`__`
 
 ```python
-def __init__(data_model_name: str, data_model_attributes: Dict[str, Any]) -> None
+def __init__(data_model_name: str, data_model_attributes: Dict[str,
+                                                               Any]) -> None
 ```
 
 Initialise the dataModel.

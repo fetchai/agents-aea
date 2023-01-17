@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -131,6 +131,6 @@ def run(
     return [
         ("envelopes received", len(connection.recvs)),
         ("envelopes sent", len(connection.sends)),
-        ("latency(ms)", 10 ** 6 * latency),
+        ("latency(ms)", 10**6 * latency),
         ("rate(envelopes/second)", rate),
     ]

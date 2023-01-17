@@ -9,7 +9,7 @@ This module contains registries.
 ## Registry Objects
 
 ```python
-class Registry(Generic[ItemId, Item],  WithLogger,  ABC)
+class Registry(Generic[ItemId, Item], WithLogger, ABC)
 ```
 
 This class implements an abstract registry.
@@ -34,7 +34,9 @@ Initialize the registry.
 
 ```python
 @abstractmethod
-def register(item_id: ItemId, item: Item, is_dynamically_added: bool = False) -> None
+def register(item_id: ItemId,
+             item: Item,
+             is_dynamically_added: bool = False) -> None
 ```
 
 Register an item.
@@ -45,13 +47,13 @@ Register an item.
 - `item`: the item.
 - `is_dynamically_added`: whether or not the item is dynamically added.
 
-**Returns**:
-
-None
-
 **Raises**:
 
 - `ValueError`: if an item is already registered with that item id.
+
+**Returns**:
+
+None
 
 <a id="aea.registries.base.Registry.unregister"></a>
 
@@ -68,13 +70,13 @@ Unregister an item.
 
 - `item_id`: the public id of the item.
 
-**Returns**:
-
-the item
-
 **Raises**:
 
 - `ValueError`: if no item registered with that item id.
+
+**Returns**:
+
+the item
 
 <a id="aea.registries.base.Registry.fetch"></a>
 
@@ -160,7 +162,7 @@ None
 ## PublicIdRegistry Objects
 
 ```python
-class PublicIdRegistry(Generic[Item],  Registry[PublicId, Item])
+class PublicIdRegistry(Generic[Item], Registry[PublicId, Item])
 ```
 
 This class implement a registry whose keys are public ids.
@@ -183,7 +185,9 @@ Initialize the registry.
 #### register
 
 ```python
-def register(public_id: PublicId, item: Item, is_dynamically_added: bool = False) -> None
+def register(public_id: PublicId,
+             item: Item,
+             is_dynamically_added: bool = False) -> None
 ```
 
 Register an item.
@@ -285,7 +289,9 @@ Instantiate the registry.
 #### register
 
 ```python
-def register(component_id: ComponentId, component: Component, is_dynamically_added: bool = False) -> None
+def register(component_id: ComponentId,
+             component: Component,
+             is_dynamically_added: bool = False) -> None
 ```
 
 Register a component.
@@ -399,8 +405,8 @@ Teardown the registry.
 ## ComponentRegistry Objects
 
 ```python
-class ComponentRegistry(
-    Registry[Tuple[PublicId, str], SkillComponentType],  Generic[SkillComponentType])
+class ComponentRegistry(Registry[Tuple[PublicId, str], SkillComponentType],
+                        Generic[SkillComponentType])
 ```
 
 This class implements a generic registry for skill components.
@@ -424,7 +430,9 @@ Instantiate the registry.
 #### register
 
 ```python
-def register(item_id: Tuple[PublicId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
+def register(item_id: Tuple[PublicId, str],
+             item: SkillComponentType,
+             is_dynamically_added: bool = False) -> None
 ```
 
 Register a item.
@@ -564,7 +572,9 @@ Instantiate the registry.
 #### register
 
 ```python
-def register(item_id: Tuple[PublicId, str], item: Handler, is_dynamically_added: bool = False) -> None
+def register(item_id: Tuple[PublicId, str],
+             item: Handler,
+             is_dynamically_added: bool = False) -> None
 ```
 
 Register a handler.
@@ -630,7 +640,8 @@ the handlers registered for the protocol_id and skill_id
 #### fetch`_`by`_`protocol`_`and`_`skill
 
 ```python
-def fetch_by_protocol_and_skill(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
+def fetch_by_protocol_and_skill(protocol_id: PublicId,
+                                skill_id: PublicId) -> Optional[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.

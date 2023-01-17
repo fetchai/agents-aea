@@ -173,7 +173,8 @@ Get my agent address.
 #### make`_`ledger`_`msg
 
 ```python
-def make_ledger_msg(sender_address: str, counterparty_address: str) -> LedgerApiMessage
+def make_ledger_msg(sender_address: str,
+                    counterparty_address: str) -> LedgerApiMessage
 ```
 
 Make ledger api message to be signed and published over ledger netework.
@@ -223,7 +224,8 @@ Run a test case.
 #### run
 
 ```python
-def run(ledger_id: str, running_time: float) -> List[Tuple[str, Union[int, float]]]
+def run(ledger_id: str,
+        running_time: float) -> List[Tuple[str, Union[int, float]]]
 ```
 
 Check tx processing speed.

@@ -50,7 +50,8 @@ Construct an envelope.
 #### run
 
 ```python
-def run(connection: str, run_times: int = 10) -> List[Tuple[str, Union[int, float]]]
+def run(connection: str,
+        run_times: int = 10) -> List[Tuple[str, Union[int, float]]]
 ```
 
 Check construction time and memory usage.

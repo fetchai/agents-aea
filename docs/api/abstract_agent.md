@@ -123,7 +123,8 @@ None
 
 ```python
 @abstractmethod
-def get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
+def get_periodic_tasks(
+) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
 ```
 
 Get all periodic tasks for agent.
@@ -153,13 +154,13 @@ List of tuples of callables: handler and coroutine to get a message
 
 ```python
 @abstractmethod
-def exception_handler(exception: Exception, function: Callable) -> Optional[bool]
+def exception_handler(exception: Exception,
+                      function: Callable) -> Optional[bool]
 ```
 
 Handle exception raised during agent main loop execution.
 
 **Arguments**:
-
 
 - `exception`: exception raised
 - `function`: a callable exception raised in.

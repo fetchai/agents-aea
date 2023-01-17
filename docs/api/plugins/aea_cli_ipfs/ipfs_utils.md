@@ -203,7 +203,6 @@ Add bytes data to ipfs.
 
 **Arguments**:
 
-
 - `data`: bytes
 - `kwargs`: options passed to request library
 
@@ -224,7 +223,6 @@ Add directory to ipfs.
 It wraps into directory.
 
 **Arguments**:
-
 
 - `dir_path`: str, path to dir to publish
 - `pin`: bool, pin object or not
@@ -255,7 +253,6 @@ Remove dir added by it's hash.
 
 **Arguments**:
 
-
 - `hash_id`: str. hash of dir to remove
 
 **Returns**:
@@ -277,7 +274,10 @@ Remove dir added by it's hash.
 #### download
 
 ```python
-def download(hash_id: str, target_dir: Union[str, Path], fix_path: bool = True, attempts: int = 5) -> str
+def download(hash_id: str,
+             target_dir: Union[str, Path],
+             fix_path: bool = True,
+             attempts: int = 5) -> str
 ```
 
 Download dir by its hash.
@@ -304,7 +304,6 @@ def publish(hash_id: str) -> Dict
 Publish directory by it's hash id.
 
 **Arguments**:
-
 
 - `hash_id`: hash of the directory to publish.
 

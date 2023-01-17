@@ -114,7 +114,7 @@ class DummyPackageManager(BasePackageManager):
         """Return json rep"""
         return OrderedDict(self.packages)
 
-    def sync(
+    def sync(  # type: ignore[empty-body]
         self,
         dev: bool = False,
         third_party: bool = True,
@@ -123,10 +123,10 @@ class DummyPackageManager(BasePackageManager):
     ) -> "BasePackageManager":
         """Perorm sync."""
 
-    def update_package_hashes(self) -> "BasePackageManager":
+    def update_package_hashes(self) -> "BasePackageManager":  # type: ignore[empty-body]
         """Update package hashes."""
 
-    def verify(
+    def verify(  # type: ignore[empty-body]
         self,
     ) -> int:
         """Verify hashes."""

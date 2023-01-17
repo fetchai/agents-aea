@@ -259,7 +259,7 @@ def make_skill(
 
 def get_mem_usage_in_mb() -> float:
     """Get memory usage of the current process in megabytes."""
-    return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+    return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024**2
 
 
 def multi_run(

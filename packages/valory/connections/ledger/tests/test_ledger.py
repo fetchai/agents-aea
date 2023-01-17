@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -239,6 +239,7 @@ class DummyLedgerApiMessage(LedgerApiMessage):
 
     def _is_consistent(self) -> bool:
         """Dummy consistency checks."""
+        return True
 
 
 class DummyLedgerApiDialogue(Dialogue):
@@ -396,6 +397,15 @@ class DummyRequestDispatcher(RequestDispatcher):
         self, exception: Exception, api: LedgerApi, message: Message, dialogue: Dialogue
     ) -> Message:
         """Dummy `get_error_message`."""
+        return cast(
+            DummyLedgerApiMessage,
+            dialogue.reply(
+                performative=DummyLedgerApiMessage.Performative.ERROR,  # type: ignore
+                target_message=message,
+                data=f"{exception}".encode("utf-8"),
+                ledger_id=cast(DummyLedgerApiMessage, message).ledger_id,
+            ),
+        )
 
     def get_ledger_id(self, message: Message) -> str:
         """Dummy `get_ledger_id`."""

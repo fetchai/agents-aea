@@ -9,7 +9,9 @@ Ledger TX generation and processing benchmark.
 #### fund`_`accounts`_`from`_`local`_`validator
 
 ```python
-def fund_accounts_from_local_validator(addresses: List[str], amount: int, denom: str = DEFAULT_DENOMINATION)
+def fund_accounts_from_local_validator(addresses: List[str],
+                                       amount: int,
+                                       denom: str = DEFAULT_DENOMINATION)
 ```
 
 Send funds to local accounts from the local genesis validator.

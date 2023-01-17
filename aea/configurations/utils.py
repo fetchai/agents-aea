@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,8 +107,8 @@ def _(
                 component_id.component_type,
                 replacements_by_type[component_id.public_id],
             )
-            old_value = arg.component_configurations.pop(component_id)
-            arg.component_configurations[new_component_id] = old_value
+            old_value_ = arg.component_configurations.pop(component_id)
+            arg.component_configurations[new_component_id] = old_value_
 
 
 @replace_component_ids.register(ProtocolConfig)  # type: ignore
@@ -180,7 +180,9 @@ def _replace_component_id(
     :param replacements: the replacements.
     """
     for component_type in types_to_update:
-        public_id_set = getattr(config, component_type.to_plural(), set())
+        public_id_set: Set[PublicId] = getattr(
+            config, component_type.to_plural(), set()
+        )
         replacements_given_type = replacements.get(component_type, {})
         for old_public_id in list(public_id_set):
             new_public_id = replacements_given_type.get(old_public_id, old_public_id)

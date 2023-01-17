@@ -37,7 +37,8 @@ a Dependencies object.
 #### dependencies`_`to`_`json
 
 ```python
-def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict[str, str]]
+def dependencies_to_json(
+        dependencies: Dependencies) -> Dict[str, Dict[str, str]]
 ```
 
 Transform a Dependencies object into a JSON object.
@@ -49,6 +50,7 @@ Transform a Dependencies object into a JSON object.
 **Returns**:
 
 a dictionary whose keys are package names and
+values are the JSON version of a Dependency object.
 
 <a id="aea.configurations.base.ProtocolSpecificationParseError"></a>
 
@@ -65,7 +67,7 @@ Exception for parsing a protocol specification file.
 ## Configuration Objects
 
 ```python
-class Configuration(JSONSerializable,  ABC)
+class Configuration(JSONSerializable, ABC)
 ```
 
 Configuration class.
@@ -86,6 +88,7 @@ Initialize a configuration object.
 
 ```python
 @classmethod
+@abstractmethod
 def from_json(cls, obj: Dict) -> "Configuration"
 ```
 
@@ -121,7 +124,7 @@ the ordered dictionary.
 ## PackageConfiguration Objects
 
 ```python
-class PackageConfiguration(Configuration,  ABC)
+class PackageConfiguration(Configuration, ABC)
 ```
 
 This class represent a package configuration.
@@ -138,7 +141,14 @@ A package can be one of:
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None) -> None
+def __init__(name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None) -> None
 ```
 
 Initialize a package configuration.
@@ -339,7 +349,9 @@ Update configuration with other data.
 
 ```python
 @classmethod
-def validate_config_data(cls, json_data: Dict, env_vars_friendly: bool = False) -> None
+def validate_config_data(cls,
+                         json_data: Dict,
+                         env_vars_friendly: bool = False) -> None
 ```
 
 Perform config validation.
@@ -380,7 +392,8 @@ config with overrides applied
 #### check`_`overrides`_`valid
 
 ```python
-def check_overrides_valid(overrides: Dict, env_vars_friendly: bool = False) -> None
+def check_overrides_valid(overrides: Dict,
+                          env_vars_friendly: bool = False) -> None
 ```
 
 Check overrides is correct, return list of errors if present.
@@ -400,7 +413,7 @@ Get dictionary of values that can be updated for this config.
 ## ComponentConfiguration Objects
 
 ```python
-class ComponentConfiguration(PackageConfiguration,  ABC)
+class ComponentConfiguration(PackageConfiguration, ABC)
 ```
 
 Class to represent an agent component configuration.
@@ -410,7 +423,16 @@ Class to represent an agent component configuration.
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, build_directory: Optional[str] = None, dependencies: Optional[Dependencies] = None) -> None
+def __init__(name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None,
+             build_directory: Optional[str] = None,
+             dependencies: Optional[Dependencies] = None) -> None
 ```
 
 Set component configuration.
@@ -498,8 +520,8 @@ Check that the fingerprint are correct against a directory path.
 **Raises**:
 
 - `ValueError`: if
-    - the argument is not a valid package directory
-    - the fingerprints do not match.
+- the argument is not a valid package directory
+- the fingerprints do not match.
 
 <a id="aea.configurations.base.ComponentConfiguration.check_public_id_consistency"></a>
 
@@ -518,8 +540,8 @@ Check that the public ids in the init file match the config.
 **Raises**:
 
 - `ValueError`: if
-    - the argument is not a valid package directory
-    - the public ids do not match.
+- the argument is not a valid package directory
+- the public ids do not match.
 
 <a id="aea.configurations.base.ConnectionConfig"></a>
 
@@ -536,7 +558,26 @@ Handle connection configuration.
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr = "", author: SimpleIdOrStr = "", version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, build_directory: Optional[str] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, connections: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", connection_id: Optional[PublicId] = None, is_abstract: bool = False, cert_requests: Optional[List[CertRequest]] = None, **config: Any, ,) -> None
+def __init__(name: SimpleIdOrStr = "",
+             author: SimpleIdOrStr = "",
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None,
+             build_directory: Optional[str] = None,
+             class_name: str = "",
+             protocols: Optional[Set[PublicId]] = None,
+             connections: Optional[Set[PublicId]] = None,
+             restricted_to_protocols: Optional[Set[PublicId]] = None,
+             excluded_protocols: Optional[Set[PublicId]] = None,
+             dependencies: Optional[Dependencies] = None,
+             description: str = "",
+             connection_id: Optional[PublicId] = None,
+             is_abstract: bool = False,
+             cert_requests: Optional[List[CertRequest]] = None,
+             **config: Any) -> None
 ```
 
 Initialize a connection configuration object.
@@ -589,7 +630,18 @@ Handle protocol configuration.
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, build_directory: Optional[str] = None, aea_version: str = "", dependencies: Optional[Dependencies] = None, description: str = "", protocol_specification_id: Optional[str] = None) -> None
+def __init__(name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None,
+             build_directory: Optional[str] = None,
+             aea_version: str = "",
+             dependencies: Optional[Dependencies] = None,
+             description: str = "",
+             protocol_specification_id: Optional[str] = None) -> None
 ```
 
 Initialize a connection configuration object.
@@ -620,7 +672,9 @@ This class represent a skill component configuration.
 #### `__`init`__`
 
 ```python
-def __init__(class_name: str, file_path: Optional[str] = None, **args: Any) -> None
+def __init__(class_name: str,
+             file_path: Optional[str] = None,
+             **args: Any) -> None
 ```
 
 Initialize a skill component configuration.
@@ -668,7 +722,22 @@ Class to represent a skill configuration file.
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, build_directory: Optional[str] = None, connections: Optional[Set[PublicId]] = None, protocols: Optional[Set[PublicId]] = None, contracts: Optional[Set[PublicId]] = None, skills: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", is_abstract: bool = False) -> None
+def __init__(name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None,
+             build_directory: Optional[str] = None,
+             connections: Optional[Set[PublicId]] = None,
+             protocols: Optional[Set[PublicId]] = None,
+             contracts: Optional[Set[PublicId]] = None,
+             skills: Optional[Set[PublicId]] = None,
+             dependencies: Optional[Dependencies] = None,
+             description: str = "",
+             is_abstract: bool = False) -> None
 ```
 
 Initialize a skill configuration.
@@ -731,7 +800,36 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
-def __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, required_ledgers: Optional[List[str]] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, task_manager_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None, dependencies: Optional[Dependencies] = None) -> None
+def __init__(agent_name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None,
+             description: str = "",
+             logging_config: Optional[Dict] = None,
+             period: Optional[float] = None,
+             execution_timeout: Optional[float] = None,
+             max_reactions: Optional[int] = None,
+             error_handler: Optional[Dict] = None,
+             decision_maker_handler: Optional[Dict] = None,
+             skill_exception_policy: Optional[str] = None,
+             connection_exception_policy: Optional[str] = None,
+             default_ledger: Optional[str] = None,
+             required_ledgers: Optional[List[str]] = None,
+             currency_denominations: Optional[Dict[str, str]] = None,
+             default_connection: Optional[str] = None,
+             default_routing: Optional[Dict[str, str]] = None,
+             loop_mode: Optional[str] = None,
+             runtime_mode: Optional[str] = None,
+             task_manager_mode: Optional[str] = None,
+             storage_uri: Optional[str] = None,
+             data_dir: Optional[str] = None,
+             component_configurations: Optional[Dict[ComponentId,
+                                                     Dict]] = None,
+             dependencies: Optional[Dependencies] = None) -> None
 ```
 
 Instantiate the agent configuration object.
@@ -828,7 +926,9 @@ Get list of the all components for this agent config.
 #### update
 
 ```python
-def update(data: Dict, env_vars_friendly: bool = False, dict_overrides: Optional[Dict] = None) -> None
+def update(data: Dict,
+           env_vars_friendly: bool = False,
+           dict_overrides: Optional[Dict] = None) -> None
 ```
 
 Update configuration with other data.
@@ -899,7 +999,13 @@ Handle protocol specification.
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", description: str = "", protocol_specification_id: Optional[str] = None) -> None
+def __init__(name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             description: str = "",
+             protocol_specification_id: Optional[str] = None) -> None
 ```
 
 Initialize a protocol specification configuration object.
@@ -974,7 +1080,20 @@ Handle contract configuration.
 #### `__`init`__`
 
 ```python
-def __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, build_directory: Optional[str] = None, dependencies: Optional[Dependencies] = None, description: str = "", contract_interface_paths: Optional[Dict[str, str]] = None, class_name: str = "", contracts: Optional[Set[PublicId]] = None) -> None
+def __init__(name: SimpleIdOrStr,
+             author: SimpleIdOrStr,
+             version: str = "",
+             license_: str = "",
+             aea_version: str = "",
+             fingerprint: Optional[Dict[str, str]] = None,
+             fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+             build_entrypoint: Optional[str] = None,
+             build_directory: Optional[str] = None,
+             dependencies: Optional[Dependencies] = None,
+             description: str = "",
+             contract_interface_paths: Optional[Dict[str, str]] = None,
+             class_name: str = "",
+             contracts: Optional[Set[PublicId]] = None) -> None
 ```
 
 Initialize a protocol configuration object.
@@ -1016,7 +1135,8 @@ Special Exception for version error.
 #### `__`init`__`
 
 ```python
-def __init__(package_id: PublicId, aea_version_specifiers: SpecifierSet) -> None
+def __init__(package_id: PublicId,
+             aea_version_specifiers: SpecifierSet) -> None
 ```
 
 Init exception.
