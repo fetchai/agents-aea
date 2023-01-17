@@ -4,8 +4,7 @@ A lightweight TCP connection to a libp2p DHT node.
 
 It allows for using the DHT without having to deploy a node by delegating its communication traffic to an already running DHT node with delegate service enabled.
 
-
-## Usage 
+## Usage
 
 First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p_client:0.20.5`.
 

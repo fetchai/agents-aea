@@ -58,4 +58,4 @@ keep_terminal_state_dialogues: true
 
 ## Links
 
-* <a href="http://www.fipa.org" target="_blank">FIPA Foundation</a>
+- <a href="http://www.fipa.org" target="_blank">FIPA Foundation</a>

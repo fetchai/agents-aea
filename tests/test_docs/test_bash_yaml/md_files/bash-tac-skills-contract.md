@@ -4,6 +4,7 @@ cd tac_controller_contract
 aea install
 aea build
 ```
+
 ``` bash
 aea create tac_controller_contract
 cd tac_controller_contract
@@ -31,6 +32,7 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/tac_participant_contract:0.22.4 --alias tac_participant_one
 cd tac_participant_one
@@ -42,10 +44,12 @@ cd tac_participant_two
 aea install
 aea build
 ```
+
 ``` bash
 aea create tac_participant_one
 aea create tac_participant_two
 ```
+
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -79,6 +83,7 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -112,27 +117,34 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
+
 ``` bash
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time "$(date -d "5 minutes" +'%d %m %Y %H:%M')"
 ```
+
 ``` bash
 aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -143,6 +155,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -153,29 +166,36 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9002"
 }'
 ```
+
 ``` bash
 aea get-address fetchai
 ```
+
 ``` bash
 aea get-wealth fetchai
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea launch tac_participant_one tac_participant_two
 ```
+
 ``` bash
 aea delete tac_controller_contract
 aea delete tac_participant_one
 aea delete tac_participant_two
 ```
+
 ``` bash
 aea fetch fetchai/tac_controller_contract:0.32.4
 cd tac_controller_contract
 aea install
 aea build
 ```
+
 ``` bash
 aea create tac_controller_contract
 cd tac_controller_contract
@@ -203,6 +223,7 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/tac_participant_contract:0.22.4 --alias tac_participant_one
 cd tac_participant_one
@@ -214,10 +235,12 @@ cd tac_participant_two
 aea install
 aea build
 ```
+
 ``` bash
 aea create tac_participant_one
 aea create tac_participant_two
 ```
+
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -251,6 +274,7 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -284,33 +308,41 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 aea install
 aea build
 ```
+
 ```bash
 aea config set agent.default_ledger ethereum
 json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
+
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
+
 ``` bash
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time "$(date -d "5 minutes" +'%d %m %Y %H:%M')"
 ```
+
 ```bash
 aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -321,6 +353,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -331,18 +364,23 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9002"
 }'
 ```
+
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat tac_controller_contract/ethereum_private_key.txt),1000000000000000000000" --account="$(cat tac_participant_one/ethereum_private_key.txt),1000000000000000000000" --account="$(cat tac_participant_two/ethereum_private_key.txt),1000000000000000000000"
 ```
+
 ``` bash
 aea get-wealth ethereum
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea launch tac_participant_one tac_participant_two
 ```
+
 ``` bash
 aea delete tac_controller_contract
 aea delete tac_participant_one

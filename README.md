@@ -14,10 +14,10 @@ Create Autonomous Economic Agents (AEAs)
     <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/aea">
   </a>
   <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/l/aea">
   </a>
   <a href="https://pypi.org/project/aea/">
-    <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/dm/aea">
   </a>
   <br />
   <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
@@ -32,6 +32,7 @@ Create Autonomous Economic Agents (AEAs)
 </p>
 
 The AEA framework allows you to create **Autonomous Economic Agents**:
+
 - An AEA is an <b>Agent</b>, representing an individual, family, organisation or object (a.k.a. its "owner") in the digital world. It looks after its owner's interests and has their preferences in mind when acting on their behalf.
 - AEAs are <b>Autonomous</b>; acting with no, or minimal, interference from their owners.
 - AEAs have a narrow and specific focus: creating <b>Economic</b> value for their owners.
@@ -56,7 +57,7 @@ The full documentation, including how to get started, can be found [here][docs].
 
 ## Contributing
 
-All contributions are very welcome! Remember, contribution is not only PRs and code, but any help with docs or helping other developers solve their issues are very appreciated! 
+All contributions are very welcome! Remember, contribution is not only PRs and code, but any help with docs or helping other developers solve their issues are very appreciated!
 
 Read below to learn how you can take part in the AEA project.
 
@@ -90,7 +91,6 @@ If you want to cite this software in a publication, please use the `Cite this re
 [contributing]: https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md
 [developing]: https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md
 [coc]: https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md
-[security]: https://github.com/fetchai/agents-aea/blob/main/SECURITY.md
 [discussion]: https://github.com/fetchai/agents-aea/discussions
 [issues]: https://github.com/fetchai/agents-aea/issues
 [github]: https://github.com/fetchai/agents-aea

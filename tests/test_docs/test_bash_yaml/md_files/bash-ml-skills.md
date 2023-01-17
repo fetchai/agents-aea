@@ -7,12 +7,14 @@
   "public_uri": "127.0.0.1:9001"
 }
 ```
+
 ``` bash
 aea fetch fetchai/ml_data_provider:0.32.4
 cd ml_data_provider
 aea install
 aea build
-``` 
+```
+
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
@@ -33,12 +35,14 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/ml_model_trainer:0.33.4
 cd ml_model_trainer
 aea install
 aea build
 ```
+
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
@@ -59,35 +63,44 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
+
 ``` bash
 aea generate-wealth fetchai
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -98,14 +111,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 cd ..
 aea delete ml_data_provider
 aea delete ml_model_trainer
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

@@ -1,57 +1,71 @@
 ``` bash
 sudo nano 99-hidraw-permissions.rules
 ```
+
 ``` bash
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
+
 ``` bash
 aea fetch fetchai/generic_seller:0.29.4
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.28.5
 cd ..
 ```
+
 ``` bash
 aea fetch fetchai/generic_buyer:0.30.4
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.27.5
 cd ..
 ```
+
 ``` bash
 aea init --reset --author fetchai
 ```
+
 ``` bash
 aea create my_generic_seller
 cd my_generic_seller
 aea install
 ```
+
 ``` bash
 aea scaffold skill generic_seller
 ```
+
 ``` bash
 aea fingerprint skill fetchai/generic_seller:0.1.0
 ```
+
 ``` bash
 aea create my_generic_buyer
 cd my_generic_buyer
 aea install
 ```
+
 ``` bash
 aea scaffold skill generic_buyer
 ```
+
 ``` bash
 aea fingerprint skill fetchai/generic_buyer:0.1.0
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
@@ -59,9 +73,11 @@ aea config set --type dict agent.default_routing \
   "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
 }'
 ```
+
 ``` bash
 aea generate-wealth fetchai --sync
 ```
+
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.27.4
 aea add connection fetchai/soef:0.27.5
@@ -72,7 +88,8 @@ aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 aea run
 ```
-``` bash 
+
+``` bash
 aea add connection fetchai/p2p_libp2p:0.27.4
 aea add connection fetchai/soef:0.27.5
 aea add connection fetchai/ledger:0.21.4
@@ -82,6 +99,7 @@ aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -92,14 +110,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
-``` bash 
+
+``` bash
 cd ..
 aea delete my_generic_seller
 aea delete my_generic_buyer
 ```
+
 ``` yaml
 name: generic_seller
 author: fetchai
@@ -172,6 +193,7 @@ models:
 is_abstract: false
 dependencies: {}
 ```
+
 ``` yaml
 name: generic_buyer
 author: fetchai
@@ -258,6 +280,7 @@ models:
 is_abstract: false
 dependencies: {}
 ```
+
 ``` yaml
 config:
   delegate_uri: 127.0.0.1:11001

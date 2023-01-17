@@ -7,7 +7,7 @@ description: The thermometer client skill implements the skill to purchase tempe
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmT1Nm7vfaUs3oxt5awfQLkezXkqkkabYaKc2q5bDgdq1K
+  README.md: QmdjHRzrhq636HNZYKaR8YCFKromFJqkKL3vMKHFpnmwSq
   __init__.py: QmYAqGMnn4SKHVNhxA1Z3goWVFvF5B4Z9DS1R6WvoewtE5
   behaviours.py: QmSr6fB3N7dhVo1cLY1TGd2q8usjGwNmTCNjBBbtgtVf9j
   dialogues.py: QmXgXcs25v9ob9a9XwT49wvK788vbUdZyYxUgG3ndHjrix

@@ -1,12 +1,12 @@
-<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define the structure of agent-to-agent and component-to-component interactions, which in the AEA world, are in the form of communication. To learn more about interactions and interaction protocols, see <a href="../interaction-protocol">here</a>. 
+# Protocols
+
+<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define the structure of agent-to-agent and component-to-component interactions, which in the AEA world, are in the form of communication. To learn more about interactions and interaction protocols, see <a href="../interaction-protocol">here</a>.
 
 Protocols in the AEA world provide definitions for:
 
-* `messages` defining the structure and syntax of messages;
-
-* `serialization` defining how a message is encoded/decoded for transport; and optionally
-
-* `dialogues` defining the structure of dialogues formed from exchanging series of messages.
+- `messages` defining the structure and syntax of messages;
+- `serialization` defining how a message is encoded/decoded for transport; and optionally
+- `dialogues` defining the structure of dialogues formed from exchanging series of messages.
 
 <img src="../assets/protocol.jpg" alt="Protocol simplified" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
@@ -16,62 +16,54 @@ Additional protocols - i.e. a new type of interaction - can be added as packages
 
 We highly recommend you to **not** attempt writing your protocol manually as they tend to have involved logic; always use existing packages or the protocol generator!
 
-## Components of a protocol
+## Components of a Protocol
 
 A protocol package contains the following files:
 
-* `__init__.py`
-* `message.py`, which defines message representation
-* `serialization.py`, which defines the encoding and decoding logic
-* two protobuf related files
+- `__init__.py`
+- `message.py`, which defines message representation
+- `serialization.py`, which defines the encoding and decoding logic
+- two protobuf related files
 
 It optionally also contains
 
-* `dialogues.py`, which defines the structure of dialogues formed from the exchange of a series of messages
-* `custom_types.py`, which defines custom types 
+- `dialogues.py`, which defines the structure of dialogues formed from the exchange of a series of messages
+- `custom_types.py`, which defines custom types
 
 All protocols are for point to point interactions between two agents or agent-like services.
-
-<!-- ## Interaction Protocols
-
-Protocols are not to be conflated with Interaction Protocols. The latter consist of three components in the AEA:
-
-- Protocols: which deal with the syntax and potentially semantics of the message exchange
-- Handlers: which handle incoming messages
-- Behaviours: which execute pro-active patterns of one-shot, cyclic or even finite-state-machine-like type. -->
 
 ## Metadata
 
 Each `Message` in an interaction protocol has a set of default fields:
 
-* `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. The default value is `("", "")`.
-* `message_id: int`, the identifier of the message in a dialogue. The default value is `1`.
-* `target: int`, the id of the message this message is replying to. The default value is `0`.
-* `performative: Enum`, the purpose/intention of the message. 
-* `sender: Address`, the address of the sender of this message.
-* `to: Address`, the address of the receiver of this message.
+- `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. The default value is `("", "")`.
+- `message_id: int`, the identifier of the message in a dialogue. The default value is `1`.
+- `target: int`, the id of the message this message is replying to. The default value is `0`.
+- `performative: Enum`, the purpose/intention of the message.
+- `sender: Address`, the address of the sender of this message.
+- `to: Address`, the address of the receiver of this message.
 
 The default values for `message_id` and `target` assume the message is the first message in a dialogue. Therefore, the `message_id` is set to `1` indicating the first message in the dialogue and `target` is `0` since the first message is the only message that does not reply to any other.
 
-By default, the values of `dialogue_reference`, `message_id`, `target` are set. However, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep track of messages and their replies. For instance, on receiving of a message with `message_id=1` and `target=0`, the responding agent could respond with another with `message_id=2` and `target=1` replying to the first message. In particular, `target` holds the id of the message being replied to. This can be the preceding message, or an older one. 
+By default, the values of `dialogue_reference`, `message_id`, `target` are set. However, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep track of messages and their replies. For instance, on receiving of a message with `message_id=1` and `target=0`, the responding agent could respond with another with `message_id=2` and `target=1` replying to the first message. In particular, `target` holds the id of the message being replied to. This can be the preceding message, or an older one.
 
 ## Contents
 
-Each message may optionally have any number of contents of varying types. 
+Each message may optionally have any number of contents of varying types.
 
-## Dialogue rules
+## Dialogue Rules
 
 Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single, respectively, all dialogues associated with a protocol.
 
 The framework provides a number of helpful classes which implement most of the logic to maintain dialogues, namely the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> base classes.
 
-## Custom protocol
+## Custom Protocol
 
 The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech-acts as well as optionally the dialogue structure (e.g. roles of agents participating in a dialogue, the states a dialogue may end in, and the reply structure of the speech-acts in a dialogue).
 
 We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
-## `fetchai/default:1.1.6` protocol
+## `fetchai/default:1.1.6` Protocol
 
 The `fetchai/default:1.1.6` protocol is meant to be implemented by every AEA. It serves AEA to AEA interaction and includes three message performatives:
 
@@ -90,7 +82,8 @@ class Performative(Enum):
         return self.value
 ```
 
-* The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
+- The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
+
 ``` python
 from packages.fetchai.protocols.default.message import DefaultMessage
 
@@ -100,7 +93,8 @@ msg = DefaultMessage(
 )
 ```
 
-* The `DefaultMessage` of performative `DefaultMessage.Performative.ERROR` is used to notify other AEAs of errors in an interaction, including errors with other protocols, by including an `error_code` in the payload:
+- The `DefaultMessage` of performative `DefaultMessage.Performative.ERROR` is used to notify other AEAs of errors in an interaction, including errors with other protocols, by including an `error_code` in the payload:
+
 ``` python
 class ErrorCode(Enum):
     """This class represents an instance of ErrorCode."""
@@ -111,7 +105,9 @@ class ErrorCode(Enum):
     UNSUPPORTED_SKILL = 3
     INVALID_DIALOGUE = 4
 ```
+
 An example is:
+
 ``` python
 msg = DefaultMessage(
     performative=DefaultMessage.Performative.ERROR,
@@ -121,7 +117,8 @@ msg = DefaultMessage(
 )
 ```
 
-* The `DefaultMessage` of performative `DefaultMessage.Performative.END` is used to terminate a default protocol dialogue. An example is:
+- The `DefaultMessage` of performative `DefaultMessage.Performative.END` is used to terminate a default protocol dialogue. An example is:
+
 ``` python
 from packages.fetchai.protocols.default.message import DefaultMessage
 
@@ -132,7 +129,7 @@ msg = DefaultMessage(
 
 Each AEA's `fetchai/error:0.18.5` skill utilises the `fetchai/default:1.0.0` protocol for error handling.
 
-## `fetchai/oef_search:1.1.6` protocol
+## `fetchai/oef_search:1.1.6` Protocol
 
 The `fetchai/oef_search:1.1.6` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
 
@@ -156,11 +153,14 @@ class Performative(Enum):
 
 We show some example messages below:
 
-* To register a service, we require a reference to the dialogue in string form (used to keep different dialogues apart), for instance
+- To register a service, we require a reference to the dialogue in string form (used to keep different dialogues apart), for instance
+
 ``` python
 my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
+
 and a description of the service we would like to register, for instance
+
 ``` python
 from aea.helpers.search.models import Description
 
@@ -170,7 +170,9 @@ my_service_description = Description(
     data_model=my_data_model,
 )
 ```
+
 where we use, for instance
+
 ``` python
 from aea.helpers.search.generic import GenericDataModel
 
@@ -189,7 +191,9 @@ data_model = {
 }
 my_data_model = GenericDataModel(data_model_name, data_model)
 ```
+
 We can then create the message to register this service:
+
 ``` python
 msg = OefSearchMessage(
     performative=OefSearchMessage.Performative.REGISTER_SERVICE,
@@ -198,11 +202,14 @@ msg = OefSearchMessage(
 )
 ```
 
-* To unregister a service, we require a reference to the dialogue in string form, for instance
+- To unregister a service, we require a reference to the dialogue in string form, for instance
+
 ``` python
 my_dialogue_reference = "a_unique_unregister_service_dialogue_reference"
 ```
+
 the description of the service we would like to unregister, say `my_service_description` from above and construct the message:
+
 ``` python
 msg = OefSearchMessage(
     performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
@@ -211,7 +218,8 @@ msg = OefSearchMessage(
 )
 ```
 
-* To search a service, we similarly require a reference to the dialogue in string form, and then the query we would like the search node to evaluate, for instance
+- To search a service, we similarly require a reference to the dialogue in string form, and then the query we would like the search node to evaluate, for instance
+
 ``` python
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 
@@ -233,7 +241,9 @@ query = Query(
     model=None,
 )
 ```
+
 We can then create the message to search these services:
+
 ``` python
 oef_msg = OefSearchMessage(
     performative=OefSearchMessage.Performative.SEARCH_SERVICES,
@@ -242,9 +252,10 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The <a href="../simple-oef">SOEF search node</a> will respond with a message `msg` of type `OefSearchMessage` with performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:1.0.0`.
+- The <a href="../simple-oef">SOEF search node</a> will respond with a message `msg` of type `OefSearchMessage` with performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:1.0.0`.
 
-* If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
+- If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
+
 ``` python
 class OefErrorOperation(Enum):
 
@@ -257,7 +268,7 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:1.1.6` protocol
+## `fetchai/fipa:1.1.6` Protocol
 
 This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="https://en.wikipedia.org/wiki/Foundation_for_Intelligent_Physical_Agents" target="_blank">FIPA</a> Agent Communication Language.
 
@@ -299,12 +310,12 @@ The `fetchai/fipa:1.1.6` protocol also defines a `FipaDialogue` class which spec
 
 For examples of the usage of the `fetchai/fipa:1.1.6` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
 
-
-### Fipa dialogue
+### Fipa Dialogue
 
 Below, we give an example of a dialogue between two agents. In practice; both dialogues would be maintained in the respective agent.
 
 We first create concrete implementations of `FipaDialogue` and `FipaDialogues` for the buyer and seller:
+
 ``` python
 from aea.common import Address
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
@@ -432,6 +443,7 @@ class SellerDialogues(FipaDialogues):
 ```
 
 Next, we can imitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
+
 ``` python
 buyer_address = "buyer_address_stub"
 seller_address = "seller_address_stub"
@@ -440,6 +452,7 @@ seller_dialogues = SellerDialogues(seller_address)
 ```
 
 First, the buyer creates a message destined for the seller and updates the dialogues:
+
 ``` python
 cfp_msg = FipaMessage(
     message_id=1,
@@ -453,29 +466,35 @@ cfp_msg.counterparty = seller_addr
 # Extends the outgoing list of messages.
 buyer_dialogue = buyer_dialogues.update(cfp_msg)
 ```
+
 If the message has been correctly constructed, the `buyer_dialogue` will be returned, otherwise it will be `None`.
 
 In a skill, the message could now be sent:
+
 ``` python
 # In a skill we would do:
 # self.context.outbox.put_message(message=cfp_msg)
 ```
 
 However, here we simply continue with the seller:
+
 ``` python
 # change the incoming message field & counterparty
 cfp_msg.is_incoming = True
 cfp_msg.counterparty = buyer_address
 ```
+
 In the skill, the above two lines will be done by the framework; you can simply receive the message in the handler.
 
 We update the seller's dialogues model next to generate a new dialogue:
+
 ``` python
 # Creates a new dialogue for the seller side based on the income message.
 seller_dialogue = seller_dialogues.update(cfp_msg)
 ```
 
 Next, the seller can generate a proposal:
+
 ``` python
 # Generate a proposal message to send to the buyer.
 proposal = Description({"foo1": 1, "bar1": 2})
@@ -495,6 +514,7 @@ seller_dialogue.update(proposal_msg)
 ```
 
 In a skill, the message could now be sent:
+
 ``` python
 # In a skill we would do:
 # self.context.outbox.put_message(message=proposal_msg)
@@ -507,6 +527,3 @@ To retrieve a dialogue for a given message, we can do the following:
 ``` python
 retrieved_dialogue = seller_dialogues.get_dialogue(cfp_msg)
 ```
-
-
-<br />

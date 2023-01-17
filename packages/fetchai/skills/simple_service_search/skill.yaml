@@ -6,7 +6,7 @@ description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmdwNVXwPsrA2sYiGae2koQjETVTfxLe6VXyfS3ya5KnyG
+  README.md: Qme6VKFeMeJe4BjUEeqL1tTVisW4QUEFDu3PCgcHyUJWG8
   __init__.py: QmT5AtvVKPwihV3oLuCD5L97UdFPdgUijX26rdCdTHu7ez
   behaviours.py: QmQVn5ASsL6fPgyvLJbKt9DHKaPRtQbtvNbj4L9Wk1zKr8
   dialogues.py: QmazwDnVLDM3UsfDHPcamVWaipNVnNDAsRqTZe8vB6cXTn

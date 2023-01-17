@@ -7,7 +7,7 @@ description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmcZmB65nV5YAodzDTvj2Fp5VYD9gfLQcuRp65Z1VQS5xM
+  README.md: QmTjWriXYziJZPT7S9tuG19Af7h5V6qCWW8nqXjW8P2eLN
   __init__.py: QmatteE6QhCeWxHKpFxLH9ZB1kjVDA3jVNwkiBjW7r6Xzx
   dialogues.py: QmUcjazcTHwvVMQk2vPjsJQjscbm5mE1mKBHYVUrNJbTsR
   http.proto: Qmag9uQYVPQwsdZfH1GEaBX5xgikoYuphQpXnWP2xob6Ys

@@ -7,7 +7,7 @@ description: The registration_aw1 skill is a skill for registration in Agent Wor
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: Qmc9dfzqAXJWCJxYNqLd1yz8U7p4DQNbGGMmXMP73wUvJR
+  README.md: QmUMdQxB7uC3SuP92vfiCRr4fHUeWMcfJNmJ74BoCk8eHT
   __init__.py: QmegXC4RzwC3pZw8SzsW41Yk2sHGHMor6FK9Frz7eGdyUd
   behaviours.py: QmS5mMwaq2pQSaphNPA4QRxXRBBUpVerLvpYfg532Hb9wk
   dialogues.py: QmbdecnniJWxH7dnNUB14JKU16BwSKx37USyqcJahEQpVw

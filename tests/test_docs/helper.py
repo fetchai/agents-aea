@@ -18,10 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains helper function to extract code from the .md files."""
+import re
 import traceback
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 import mistune
 import pytest
@@ -51,13 +52,91 @@ def type_filter(type_: Optional[str], b: Dict) -> bool:
     return b["info"].strip() == type_ if b["info"] is not None else False
 
 
+def extract_dicts(dictionary: Dict, collection_dict: List[Dict]) -> List[Dict]:
+    """Extract code blocks from .md files."""
+    if all(not isinstance(v, list) for v in dictionary.values()):
+        collection_dict.append(dictionary)
+    else:
+        for dict_el in dictionary.values():
+            if isinstance(dict_el, list):
+                for list_el in dict_el:
+                    if isinstance(list_el, dict):
+                        extract_dicts(list_el, collection_dict)
+    return collection_dict
+
+
+def flatten_blocks(blocks: List[Dict]) -> List[Dict]:
+    """Convert a list of dicts with nested dicts, into a list containing all dicts."""
+    new_blocks: List[Dict] = []
+    if isinstance(blocks, list):
+        for el in blocks:
+            if isinstance(el, dict):
+                extract_dicts(el, new_blocks)
+    return new_blocks
+
+
+def correct_spacing(string: str) -> str:
+    """Convert a list of dicts with nested dicts, into a list containing all dicts."""
+    new_string = ""
+    string_no_back_quote = string[:-3]
+    last_new_line = string.rfind("\n")
+    last_none_space = len(string_no_back_quote.strip(" ")) - 1
+
+    if last_new_line != -1 and last_new_line == last_none_space:
+        number_of_trailing_spaces = (len(string_no_back_quote) - 1) - last_none_space
+        for line in string.splitlines():
+            number_of_leading_spaces = len(line) - len(line.lstrip(" "))
+            if number_of_leading_spaces >= number_of_trailing_spaces:
+                new_line = line[number_of_trailing_spaces:]
+                new_string += new_line
+            else:
+                new_string += line
+            new_string += "\n"
+        return new_string
+    return string
+
+
+def extract_inner_code_blocks(block: Dict, code_blocks: List[Dict]) -> None:
+    """Replace code_block with any sub code_blocks it may have"""
+    text = cast(str, block["text"])
+    indexes = [m.start() for m in re.finditer("```", text)]
+    if indexes:
+        if len(indexes) % 2 != 0:
+            raise SyntaxError(f"un-matching ``` found in the block: {text}")
+        while indexes:
+            starting_index = indexes.pop(0)
+            ending_index = indexes.pop(0) + 3
+            sub_string = text[starting_index:ending_index]
+            new_substring = correct_spacing(sub_string)
+            new_dict = {
+                "type": block["type"],
+                "text": new_substring,
+                "info": block["info"],
+            }
+            code_blocks.insert(code_blocks.index(block), new_dict)
+        code_blocks.remove(block)
+
+
 def extract_code_blocks(filepath, filter_=None):
     """Extract code blocks from .md files."""
     content = Path(filepath).read_text(encoding="utf-8")
     markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
     blocks = markdown_parser(content)
+    flat_blocks = flatten_blocks(blocks)
     actual_type_filter = partial(type_filter, filter_)
-    code_blocks = list(filter(block_code_filter, blocks))
+    code_blocks = list(filter(block_code_filter, flat_blocks))
+
+    for code_block in code_blocks:
+        extract_inner_code_blocks(code_block, code_blocks)
+
+    for block in code_blocks:
+        if block["text"].startswith("``` "):
+            type_ = block["text"][4 : block["text"].find("\n")]
+            block["text"] = block["text"].strip()[block["text"].find("\n") + 1 :]
+            if block["text"].endswith("```"):
+                block["text"] = block["text"].strip()[:-3]
+            block["info"] = f"{type_}"
+
     bash_code_blocks = filter(actual_type_filter, code_blocks)
     return list(b["text"] for b in bash_code_blocks)
 
@@ -116,6 +195,7 @@ class BaseTestMarkdownDocs:
 
     DOC_PATH: Path
     blocks: List[Dict]
+    flat_blocks: List[Dict]
     python_blocks: List[Dict]
 
     @classmethod
@@ -125,8 +205,9 @@ class BaseTestMarkdownDocs:
         cls.doc_path = cls.DOC_PATH
         cls.doc_content = cls.doc_path.read_text()
         cls.blocks = markdown_parser(cls.doc_content)
-        cls.code_blocks = list(filter(block_code_filter, cls.blocks))
-        cls.python_blocks = list(filter(cls._python_selector, cls.blocks))
+        cls.flat_blocks = flatten_blocks(cls.blocks)
+        cls.code_blocks = list(filter(block_code_filter, cls.flat_blocks))
+        cls.python_blocks = list(filter(cls._python_selector, cls.flat_blocks))
 
     @classmethod
     def _python_selector(cls, block: Dict) -> bool:

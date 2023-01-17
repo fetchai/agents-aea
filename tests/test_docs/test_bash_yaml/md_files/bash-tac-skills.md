@@ -7,6 +7,7 @@
   "public_uri": "127.0.0.1:9001"
 }
 ```
+
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11002",
@@ -16,12 +17,14 @@
   "public_uri": "127.0.0.1:9002"
 }
 ```
+
 ``` bash
 aea fetch fetchai/tac_controller:0.30.4
 cd tac_controller
 aea install
 aea build
 ```
+
 ``` bash
 aea create tac_controller
 cd tac_controller
@@ -42,6 +45,7 @@ aea config set --type dict agent.default_routing \
 aea install
 aea build
 ```
+
 ``` bash
 aea fetch fetchai/tac_participant:0.32.4 --alias tac_participant_one
 cd tac_participant_one
@@ -52,10 +56,12 @@ aea fetch fetchai/tac_participant:0.32.4 --alias tac_participant_two
 cd tac_participant_two
 aea build
 ```
+
 ``` bash
 aea create tac_participant_one
 aea create tac_participant_two
 ```
+
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -82,6 +88,7 @@ aea config set --type dict agent.decision_maker_handler \
 aea install
 aea build
 ```
+
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.27.4
@@ -108,27 +115,34 @@ aea config set --type dict agent.decision_maker_handler \
 aea install
 aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
+
 ``` bash
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -139,6 +153,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -149,17 +164,21 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9002"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea launch tac_participant_one tac_participant_two
 ```
+
 ``` bash
 aea delete tac_controller
 aea delete tac_participant_one
 aea delete tac_participant_two
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4
@@ -171,6 +190,7 @@ config:
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9001
 ```
+
 ``` yaml
 ---
 public_id: fetchai/p2p_libp2p:0.27.4

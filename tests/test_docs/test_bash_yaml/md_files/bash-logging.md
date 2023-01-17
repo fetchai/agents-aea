@@ -2,6 +2,7 @@
 aea create my_aea
 cd my_aea
 ```
+
 ``` yaml
 agent_name: my_aea
 author: fetchai
@@ -27,6 +28,7 @@ logging_config:
   version: 1
 private_key_paths: {}
 ```
+
 ``` yaml
 logging_config:
   version: 1
@@ -52,6 +54,7 @@ logging_config:
       level: DEBUG
       propagate: False
 ```
+
 ``` yaml
 logging_config:
   version: 1

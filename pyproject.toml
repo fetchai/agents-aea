@@ -98,13 +98,13 @@ pexpect = "^4.8.0"
 sqlalchemy = ">=1.4.41"            # used in one test
 mistune = "^2.0.4"
 requests = "^2.28.0"
-web3 = ">=5.31.0,<6.0.0"
+web3 = "==5.31.1"
 
 [tool.poetry.group.docs]
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-mkdocs-material = "^8.5.7"
+mkdocs-material = "^9.0.3"
 mkdocs-mermaid-plugin = { git = "https://github.com/pugong/mkdocs-mermaid-plugin.git" }
 pydoc-markdown = "^4.6.3"
 pydocstyle = "^6.1.1"

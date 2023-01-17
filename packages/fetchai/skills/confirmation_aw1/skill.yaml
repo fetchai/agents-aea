@@ -7,7 +7,7 @@ description: The confirmation_aw1 skill is a skill to confirm registration for A
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmWEG3A5xRL3yf65UHfrKhUwazR5bjpxSiuuBGMYX7t7Co
+  README.md: QmaGTwfKyYVAJEfqHjGVViTYer2f3JJj22ftQH19NuA3eQ
   __init__.py: Qmc4MHyZV31ZKUxc4QsRtpVhr6WGWCpCrVyNsxj7Xs9CrF
   behaviours.py: QmZVaGLyZZZJu5HBR1rNukpfnvpvEFxn8tA2JKL8JgFWUB
   dialogues.py: QmQnYQyRtmFYhHxCirxg5vchWSogwnKVEgozKBwL19svGe

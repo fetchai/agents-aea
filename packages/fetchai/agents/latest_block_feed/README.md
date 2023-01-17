@@ -1,6 +1,6 @@
 # Random Beacon Feed AEA
 
-An agent that fetches the latest block from the Fetch ledger. 
+An agent that fetches the latest block from the Fetch ledger.
 
 ## Description
 

@@ -18,6 +18,7 @@ dependencies: {}
 protocols:
 - fetchai/default:1.1.6
 ```
-```
+
+``` bash
 aea scaffold error-handler
 ```

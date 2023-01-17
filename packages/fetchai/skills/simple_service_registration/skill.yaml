@@ -6,7 +6,7 @@ description: The simple service registration skills is a skill to register a ser
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
+  README.md: QmcAU3oi7tWS86UmAePbubQLinLutQsSQ1eGce5LperZty
   __init__.py: QmXRcGYBPxfZXFBxDvYjLKm7WCP6biG8sHG6P3g43Aaf5a
   behaviours.py: QmWuomUzWYZXeshgbnnzzeC9xE3tNwJReGwCBtbqhMXcaY
   dialogues.py: QmbgKy2b6WiWSFXxdwDaawAsoBY2VsBAdhRgUL6WTaGhEt

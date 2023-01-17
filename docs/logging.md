@@ -1,9 +1,10 @@
+# Logging
+
 The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target="_blank">Python logging library</a>.
 
 In this tutorial, we configure logging for an AEA.
 
-First of all, create your AEA.
-
+First, create your AEA.
 
 ``` bash
 aea create my_aea
@@ -75,8 +76,7 @@ logging_config:
 
 This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.
 
-
-## Streaming to browser
+## Streaming to Browser
 
 It is possible to configure the AEA to stream logs to a browser.
 
@@ -167,5 +167,3 @@ if __name__ == "__main__":
 Save the script in a file called `server.py`, install flask with `pip install flask` and run the server with `python server.py`.
 
 Third, run your AEA and visit `localhost:5000` in your browser.
-
-<br />

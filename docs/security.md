@@ -1,3 +1,4 @@
+# Security
 
 The AEA framework takes every care to follow best practice around security.
 

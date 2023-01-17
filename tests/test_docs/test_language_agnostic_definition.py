@@ -47,7 +47,7 @@ class TestLanguageAgnosticDocs(BaseTestMarkdownDocs):
     def setup_class(cls):
         """Set up the test."""
         super().setup_class()
-        cls.code_blocks = list(filter(cls._proto_snippet_selector, cls.blocks))
+        cls.code_blocks = list(filter(cls._proto_snippet_selector, cls.flat_blocks))
         cls.actual_mail_base_file_content = MAIL_BASE_PROTO.read_text()
         cls.actual_default_message_file_content = DEFAULT_MESSAGE_PROTO.read_text()
 

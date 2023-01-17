@@ -6,7 +6,7 @@ description: Fetch oracle client contract
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmUBEziYn29b61higYFNsSxtnKcSNq7CRFpsQ68WjmTCcN
+  README.md: Qmasz3mr6zrBNWULfiMeeMC9py561evkcwsCbkjEZnwto5
   __init__.py: QmYWrZY2q18XGiS8EDki97v3Gi9KHLi1YhC7e7cpbkEXU2
   build/FetchOracleTestClient.json: QmbqwQiYs8Tb2DKB1BDiigqmXxVt1BmfM5RVXHwkvysdqf
   build/oracle_client.wasm: QmXE7H9JqjJFNEzjUiMv5Sv6NyaMqB4eYDwSVym66L52xU
