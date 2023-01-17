@@ -80,12 +80,12 @@ def correct_spacing(string: str) -> str:
     new_string = ""
     string_no_back_quote = string[:-3]
     last_new_line = string.rfind("\n")
-    last_none_space = len(string_no_back_quote.strip(' ')) - 1
+    last_none_space = len(string_no_back_quote.strip(" ")) - 1
 
     if last_new_line != -1 and last_new_line == last_none_space:
         number_of_trailing_spaces = (len(string_no_back_quote) - 1) - last_none_space
         for line in string.splitlines():
-            number_of_leading_spaces = len(line) - len(line.lstrip(' '))
+            number_of_leading_spaces = len(line) - len(line.lstrip(" "))
             if number_of_leading_spaces >= number_of_trailing_spaces:
                 new_line = line[number_of_trailing_spaces:]
                 new_string += new_line
@@ -130,7 +130,7 @@ def extract_code_blocks(filepath, filter_=None):
 
     for block in code_blocks:
         if block["text"].startswith("``` "):
-            type_ = block["text"][4:block["text"].find("\n")]
+            type_ = block["text"][4 : block["text"].find("\n")]
             block["text"] = block["text"].strip()[block["text"].find("\n") + 1 :]
             if block["text"].endswith("```"):
                 block["text"] = block["text"].strip()[:-3]
