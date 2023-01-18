@@ -8,10 +8,10 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmdkqMTGvvmv1ZG1sSj7M7xheSTviLrWiV8h3XePV1dxy2
+  README.md: Qmf8Gh38S4rtZVh2yPUTdHrAEpovt1ULg4bccaFNZfYxCt
   __init__.py: Qmcwvb5isp1zoF57phgDHEPTNLuPa5zCkEC4JSsDUUHE78
   check_dependencies.py: QmXCg3mGhHzGxxbaTtHKY1HfumubPKryiaBeBMbJEZLQTE
-  connection.py: QmeiAj5jycYvzUXXdeU94Lx78KBZqozAkWwEiDJWSXoBK3
+  connection.py: QmZxZagVYj9NVzAYtM9UyMPsiXjz6uPuF8Ywb2WnJnTDiZ
   consts.py: QmXi6edKonz6SuAnRnMURRRU62GNZa9TRhqiDxmnwLB4Sp
   libp2p_node/.dockerignore: QmVwyNjya468nRTxSjFP73dSzQdSffp74osz5dGEAHHweA
   libp2p_node/Dockerfile: QmeZ6KJf4cpgL7DY6qdWetVfTPPijUvHxoCUbYgSS3SsWM

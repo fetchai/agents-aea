@@ -7,10 +7,10 @@ description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZD23pF9nKMYpiRfxBfDXkuiqHD2ZhV4sBASGG7ypDEt5
+  README.md: QmbFH2ySjB5FnvLhKCm68jJPVeasHbGBSTUyEZP4P17mKi
   __init__.py: Qmboa7WunXM34apxH2fu4z1996CrfxcCaV2HxhvXsjnkxK
   dialogues.py: QmUugwuLbuHr8zkGRkd7Dimwc7LzbCHYvdNHC6cn3TS7XP
-  message.py: QmYVGUWX1jefcs5qyzjGma2NgZreou1Jebwxxra8Nvit21
+  message.py: QmPKeMCSAcxDeEXUMzAjRvVvWJ5AUMYoDyGPGjUEoHkKff
   serialization.py: QmRxkqWUB7EVGp1SnsMXeDssCcsiirvPPJAaeN5TREPBBm
   state_update.proto: QmdLQpu2jpJUuUFhF34hBeh64Gfv5V1JxLTKCTgY93qduR
   state_update_pb2.py: QmXmaUALXJ4zV2CuADrGsFpNmy8RhWLSYpm7dXXogfgrw3

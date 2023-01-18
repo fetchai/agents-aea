@@ -7,11 +7,11 @@ description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmbRA7t2WYhLHmFki79Ko8iUtsDgCxARdtUwEnSy2dMbnR
+  README.md: QmWWjq6ppoaiGG46yUQWbgrN78fF3iKcuk5Zn6L7pkVdtA
   __init__.py: QmQwA8M3CvBeWabUAWUC6Mmt5bUgqQK8TAHt62JpZzsSt1
   custom_types.py: QmbYjhUzvTMv6kU9UbuGLyVGfyurZPgX8PBGZGj58jDHv3
   dialogues.py: QmQ9LyN1FamvMZ1o7Pt9H69bZZVY1Yxgm7HhyeN4fSXEUa
-  message.py: QmQ6Nf1hVnJFzkeYmFcGWVMNkqPygpsr3q2stfXpMy3CG2
+  message.py: QmeugK5PynXtgXgRbvjVyQCBXWwVdvnQvNgWLYScqLhFn1
   serialization.py: QmPeHDs5eXVApHLj6Xecc6jqBC8LDrmUJcKRgVYDNQ9W2q
   signing.proto: QmbHQYswu1d5JTq8QD3WY9Trw7CwCFbv4c1wmgwiZC5756
   signing_pb2.py: QmaYoSC2uxSATBzNY9utPp7J78drWgyYocr4cPjEhyLf7y

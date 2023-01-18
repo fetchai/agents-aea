@@ -7,9 +7,9 @@ description: The HTTP server connection that wraps http server implementing a RE
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmcZWakNoHKmTiKz8cUnQFDLofyPZHGsizWBKsUksgi62a
+  README.md: QmQKVp9nw9xvQa36AbBQzwrwvvLeuSEE1poy1GNw5egBXG
   __init__.py: QmPQbWNzuoYoaWQ35b4XUzGUZqwm2YYNg9XpngS4xqCdiZ
-  connection.py: QmW7RSdTFkSHPuD8ruVRzfcCdHereTVnD21e297EXbiEAE
+  connection.py: QmaQj91PXE5X9BZBBtei7JAKRWuxjHo8X8oewX5rFKU7VR
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

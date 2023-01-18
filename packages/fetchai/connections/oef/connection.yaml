@@ -7,9 +7,9 @@ description: The oef connection provides a wrapper around the OEF SDK for connec
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZGv1JVuU9SYbZnLabhePrVVCrtQY62bUR1BXsqoNq36f
+  README.md: QmWXtFDtByTYoLy5UKYbYQ9hfDUnDhLJzSy1svoAnHyKUp
   __init__.py: QmPyDUmHgQdAtuq46GSQ75kpkeH3jg5LQoZm2xQi9j9PMk
-  connection.py: QmYgKDjLXoVoYkmhtAJYFtxC3DzmPVPMUF4EGqeDf6Kx2X
+  connection.py: QmTKTZvUxTfL9qZ9on9h6WmiempZBbPsQ6yMiCvwt2jm3v
   object_translator.py: QmTcyE7yVMzx72zr7JJoZDftL42aP5s3jQQBgMCGqgY6PW
 fingerprint_ignore_patterns: []
 connections: []

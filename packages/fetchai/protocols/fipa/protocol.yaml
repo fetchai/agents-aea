@@ -7,13 +7,13 @@ description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmeWg8xspRuFyJ1m9oGkA6rxWECWmSYMQGex4br14LpKiw
+  README.md: Qmb3nuPdF326cWYMVYJjqxdpGMkdR4ENFdCXbMEv9t7Doj
   __init__.py: QmcKvopHYdkJwfnAYmgtPbUZZvcnP3bffhKjFWMXJFwno9
   custom_types.py: QmNibpgi18PbM4drwbYxw18GwMkBAToh21EhKimnF3j7Sg
   dialogues.py: QmS2o9G3AyW7n7R6Ec9n3KSSntMx5MrGARD3Ya67FDAa2s
   fipa.proto: QmS7aXZ2JoG3oyMHWiPYoP9RJ7iChsoTC9KQLsj6vi3ejR
   fipa_pb2.py: QmT6CxDiwyz3ucsNxZSxtNZXE9NThshV68zvXEYtiWjEUP
-  message.py: QmbwbYUxR9w5Ub9HoZaECCmXPq2412fWZxYbXtAL91NtKb
+  message.py: QmZKYP3yu7KRRxJsip9FKbuuW91FUwnDuVsFTaxqeuccuT
   serialization.py: QmUHydPjLVt5B4JAoN3XccNieB3EFiUoMzvs2N9UQmZXJZ
 fingerprint_ignore_patterns: []
 dependencies:
