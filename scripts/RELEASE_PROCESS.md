@@ -3,7 +3,7 @@
 
 1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit). Make sure you have a clean develop virtual environment.
 
-2. Determine the next AEA version. Create a new release branch named "feature/release-{new-version}". Switch to this branch. Run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
+2. Determine the next AEA version (we use [semantic versioning v 2.0.0][semver]). Create a new release branch named "feature/release-{new-version}". Switch to this branch. Run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
 
 3. Bump plugin versions if necessary by running `python scripts/update_plugin_versions.py --update "PLUGIN_NAME,NEW_VERSION"`. Commit if satisfied.
 
@@ -37,3 +37,5 @@
 17. Note, the AEA develop docker image is automatically created as part of the CI process in the develop to main PR.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
+
+[semver]: https://semver.org/spec/v2.0.0.html
