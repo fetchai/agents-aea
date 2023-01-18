@@ -1,6 +1,6 @@
 name: p2p_stub
 author: fetchai
-version: 0.18.2
+version: 0.18.3
 type: connection
 description: The stub p2p connection implements a local p2p connection allowing agents
   to communicate with each other through files created in the namespace directory.
@@ -12,7 +12,7 @@ fingerprint:
   connection.py: QmULoaRPg62eJeAjnUsV2temHRbqCwfV3BhFHAuseJYVfZ
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.2
+- fetchai/stub:0.21.3
 protocols: []
 class_name: P2PStubConnection
 config:

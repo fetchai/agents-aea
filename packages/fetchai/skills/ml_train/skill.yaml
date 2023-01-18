@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.29.5
+version: 0.29.6
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -16,16 +16,16 @@ fingerprint:
   tasks.py: QmPLZyT4pX2Kq2HGkBdS5Jwyz6CFgsk4B4SSBUxJu1kP3C
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.4
+- fetchai/ledger:0.21.5
 contracts: []
 protocols:
-- fetchai/default:1.1.6
-- fetchai/ledger_api:1.1.6
-- fetchai/ml_trade:1.1.6
-- fetchai/oef_search:1.1.6
-- fetchai/signing:1.1.6
+- fetchai/default:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/ml_trade:1.1.7
+- fetchai/oef_search:1.1.7
+- fetchai/signing:1.1.7
 skills:
-- fetchai/generic_buyer:0.27.5
+- fetchai/generic_buyer:0.27.6
 behaviours:
   search:
     args:

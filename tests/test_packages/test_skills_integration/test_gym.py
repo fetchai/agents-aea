@@ -34,15 +34,15 @@ class TestGymSkill(AEATestCaseEmpty):
         """Run the gym skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("skill", "fetchai/gym:0.21.5")
+        self.add_item("skill", "fetchai/gym:0.21.6")
         self.run_install()
 
         # change default connection
         setting_path = "agent.default_connection"
-        self.set_config(setting_path, "fetchai/gym:0.20.5")
+        self.set_config(setting_path, "fetchai/gym:0.20.6")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/gym_aea:0.26.4", self.agent_name
+            "fetchai/gym_aea:0.26.5", self.agent_name
         )
         assert (
             diff == []

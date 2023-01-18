@@ -1,6 +1,6 @@
 name: tac
 author: fetchai
-version: 1.1.6
+version: 1.1.7
 protocol_specification_id: fetchai/tac:1.0.0
 type: protocol
 description: The tac protocol implements the messages an AEA needs to participate

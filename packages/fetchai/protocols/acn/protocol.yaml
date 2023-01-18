@@ -1,6 +1,6 @@
 name: acn
 author: fetchai
-version: 1.1.6
+version: 1.1.7
 protocol_specification_id: aea/acn:1.0.0
 type: protocol
 description: The protocol used for envelope delivery on the ACN.

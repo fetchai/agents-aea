@@ -1,6 +1,6 @@
 name: tcp
 author: fetchai
-version: 0.17.2
+version: 0.17.3
 type: connection
 description: The tcp connection implements a tcp server and client.
 license: Apache-2.0

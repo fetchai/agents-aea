@@ -50,7 +50,7 @@ For the AEA to use a package, the `public_id` for the package must be listed in 
 
 ``` yaml
 connections:
-- fetchai/stub:0.21.2
+- fetchai/stub:0.21.3
 ```
 
 The above shows a part of the `aea-config.yaml`. If you see the connections, you will see that we follow a pattern of `author/name_package:version` to identify each package, also referred to as `public_id`. Here the `author` is the author of the package.

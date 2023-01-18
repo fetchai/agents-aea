@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/weather_client:0.26.5")
+PUBLIC_ID = PublicId.from_str("fetchai/weather_client:0.26.6")

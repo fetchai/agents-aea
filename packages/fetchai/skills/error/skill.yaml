@@ -1,6 +1,6 @@
 name: error
 author: fetchai
-version: 0.18.5
+version: 0.18.6
 type: skill
 description: The error skill implements basic error handling required by all AEAs.
 license: Apache-2.0
@@ -13,7 +13,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.6
+- fetchai/default:1.1.7
 skills: []
 behaviours: {}
 handlers:

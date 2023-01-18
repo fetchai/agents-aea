@@ -1,6 +1,6 @@
 name: hello_world
 author: fetchai
-version: 0.1.4
+version: 0.1.5
 type: skill
 description: This skill prints `Hello World!` on the screen. The message can be configured
   to be any different string.

@@ -79,7 +79,7 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.28.4
+aea fetch fetchai/my_first_aea:0.28.5
 cd my_first_aea
 ```
 
@@ -89,11 +89,11 @@ cd my_first_aea
 ```
 
 ``` bash
-aea add connection fetchai/stub:0.21.2
+aea add connection fetchai/stub:0.21.3
 ```
 
 ``` bash
-aea add skill fetchai/echo:0.20.5
+aea add skill fetchai/echo:0.20.6
 ```
 
 ``` bash

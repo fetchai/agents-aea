@@ -1,6 +1,6 @@
 name: p2p_libp2p_mailbox
 author: fetchai
-version: 0.2.5
+version: 0.2.6
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
@@ -14,7 +14,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/acn:1.1.6
+- fetchai/acn:1.1.7
 class_name: P2PLibp2pMailboxConnection
 config:
   connect_retries: 3

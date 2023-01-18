@@ -1,6 +1,6 @@
 name: simple_aggregation
 author: fetchai
-version: 0.3.5
+version: 0.3.6
 type: skill
 description: The skill for aggregating observations between AEAs
 license: Apache-2.0
@@ -15,9 +15,9 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/aggregation:0.2.6
-- fetchai/default:1.1.6
-- fetchai/oef_search:1.1.6
+- fetchai/aggregation:0.2.7
+- fetchai/default:1.1.7
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   aggregation:

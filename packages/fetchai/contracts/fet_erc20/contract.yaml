@@ -1,6 +1,6 @@
 name: fet_erc20
 author: fetchai
-version: 0.9.1
+version: 0.9.2
 type: contract
 description: The fet_erc20 contract contains a mock Fetch ERC20 contract
 license: Apache-2.0

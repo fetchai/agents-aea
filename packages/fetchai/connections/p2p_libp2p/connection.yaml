@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.27.4
+version: 0.27.5
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -59,7 +59,7 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/acn:1.1.6
+- fetchai/acn:1.1.7
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

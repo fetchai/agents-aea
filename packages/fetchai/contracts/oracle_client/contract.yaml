@@ -1,6 +1,6 @@
 name: oracle_client
 author: fetchai
-version: 0.11.2
+version: 0.11.3
 type: contract
 description: Fetch oracle client contract
 license: Apache-2.0

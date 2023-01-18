@@ -1,6 +1,6 @@
 name: http
 author: fetchai
-version: 1.1.6
+version: 1.1.7
 protocol_specification_id: fetchai/http:1.0.0
 type: protocol
 description: A protocol for HTTP requests and responses.

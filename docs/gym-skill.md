@@ -33,7 +33,7 @@ pip install numpy gym
 First, fetch the gym AEA:
 
 ``` bash
-aea fetch fetchai/gym_aea:0.26.4 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.26.5 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -52,13 +52,13 @@ aea install
     ### Add the gym skill
 
     ``` bash
-    aea add skill fetchai/gym:0.21.5
+    aea add skill fetchai/gym:0.21.6
     ```
     
     ### Set gym connection as default
 
     ``` bash
-    aea config set agent.default_connection fetchai/gym:0.20.5
+    aea config set agent.default_connection fetchai/gym:0.20.6
     ```
 
     ### Install the skill dependencies

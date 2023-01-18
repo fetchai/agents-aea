@@ -178,7 +178,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.28.4
+aea fetch fetchai/my_first_aea:0.28.5
 cd my_first_aea
 ```
 
@@ -199,7 +199,7 @@ To learn more about the folder structure of an AEA project read on <a href="../p
     Second, add the stub connection to the project.
 
     ``` bash
-    aea add connection fetchai/stub:0.21.2
+    aea add connection fetchai/stub:0.21.3
     ```
 
     **Add the echo skill**
@@ -207,10 +207,10 @@ To learn more about the folder structure of an AEA project read on <a href="../p
     Third, add the echo skill to the project.
 
     ``` bash
-    aea add skill fetchai/echo:0.20.5
+    aea add skill fetchai/echo:0.20.6
     ```
 
-    This copies the <code>fetchai/echo:0.20.5</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.20.5</code> consists of the name of the author of the skill, followed by the skill name and its version.
+    This copies the <code>fetchai/echo:0.20.6</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.20.6</code> consists of the name of the author of the skill, followed by the skill name and its version.
 
 ### Echo Skill
 

@@ -4,11 +4,11 @@ cd my_aea
 ```
 
 ``` bash
-aea add connection fetchai/http_server:0.23.5
+aea add connection fetchai/http_server:0.23.6
 ```
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.23.5
+aea config set agent.default_connection fetchai/http_server:0.23.6
 ```
 
 ``` bash
@@ -29,7 +29,7 @@ aea scaffold skill http_echo
 ```
 
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.21.5
+aea fingerprint skill fetchai/http_echo:0.21.6
 ```
 
 ``` bash

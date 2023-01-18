@@ -1,6 +1,6 @@
 name: staking_erc20
 author: fetchai
-version: 0.10.2
+version: 0.10.3
 type: contract
 description: The staking_erc20 contract contains the main staking contract of Fetch.ai
   for Ethereum mainnet.

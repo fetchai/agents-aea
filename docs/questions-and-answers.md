@@ -32,7 +32,7 @@
     You can find more details on the application areas of the AEA framework <a href="../app-areas/">here</a>.
 
 ??? question "When a new AEA is created, is the `vendor` folder populated with some default packages?"
-    All AEA projects by default hold the `fetchai/default:1.1.6`, `fetchai/state_update:1.1.6` and `fetchai/signing:1.1.6` protocols. These (as all other packages installed from the registry) are placed in the `vendor` folder.
+    All AEA projects by default hold the `fetchai/default:1.1.7`, `fetchai/state_update:1.1.7` and `fetchai/signing:1.1.7` protocols. These (as all other packages installed from the registry) are placed in the `vendor` folder.
 
     You can find more details about the file structure <a href="../package-imports/">here</a>.
 

@@ -8,23 +8,23 @@ aea fingerprint skill fetchai/my_search:0.1.0
 ```
 
 ``` bash
-aea add protocol fetchai/oef_search:1.1.6
+aea add protocol fetchai/oef_search:1.1.7
 ```
 
 ``` bash
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/soef:0.27.6
+aea add connection fetchai/p2p_libp2p:0.27.5
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+  "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
 }'
 ```
 
 ``` bash
-aea fetch fetchai/simple_service_registration:0.32.4 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.32.5 && cd simple_service_registration && aea install && aea build
 ```
 
 ``` bash
@@ -87,7 +87,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.6
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   my_search_behaviour:
@@ -135,7 +135,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.6
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   service:

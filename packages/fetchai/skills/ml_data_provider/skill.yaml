@@ -1,6 +1,6 @@
 name: ml_data_provider
 author: fetchai
-version: 0.27.5
+version: 0.27.6
 type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
@@ -17,12 +17,12 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.6
-- fetchai/ledger_api:1.1.6
-- fetchai/ml_trade:1.1.6
-- fetchai/oef_search:1.1.6
+- fetchai/default:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/ml_trade:1.1.7
+- fetchai/oef_search:1.1.7
 skills:
-- fetchai/generic_seller:0.28.5
+- fetchai/generic_seller:0.28.6
 behaviours:
   service_registration:
     args:
