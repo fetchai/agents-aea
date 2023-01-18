@@ -263,7 +263,7 @@ class PythonPackageVersionBumper:
         Update version for file.
 
         If __version__.py is available, parse it and check for __version__ variable.
-        Otherwise, try to parse setup.py.
+        Otherwise, try to parse pyproject.py.
         Otherwise, raise error.
 
         :param new_version: the new version
@@ -457,7 +457,7 @@ def process_plugins(new_versions: Dict[str, Version]) -> bool:
             continue
         new_version = new_versions[plugin_dir_name]
         logging.info(
-            f"Processing {plugin_dir_name}: upgrading at version {new_version}"
+            f"Processing {plugin_dir_name}: upgrading to version {new_version}"
         )
         plugin_bumper = make_plugin_bumper(plugin_dir, new_version)
         plugin_bumper.run()
