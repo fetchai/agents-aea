@@ -81,10 +81,6 @@ We use [GitHub Issues][issues] for tracking requests and bugs, and [GitHub Discu
 
 The AEA project is licensed under [Apache License 2.0][license].
 
-## Cite
-
-If you want to cite this software in a publication, please use the `Cite this repository` option on the [main GiHub page][github].
-
 [poetry]: https://python-poetry.org
 [pipenv]: https://pypi.org/project/pipenv/
 [docs]: https://docs.fetch.ai
@@ -93,6 +89,5 @@ If you want to cite this software in a publication, please use the `Cite this re
 [coc]: https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md
 [discussion]: https://github.com/fetchai/agents-aea/discussions
 [issues]: https://github.com/fetchai/agents-aea/issues
-[github]: https://github.com/fetchai/agents-aea
 [license]: https://github.com/fetchai/agents-aea/blob/main/LICENSE
 [docs-install]: https://docs.fetch.ai/aea/installation/
