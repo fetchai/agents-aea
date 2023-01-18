@@ -73,7 +73,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.2.4
+v1.2.5
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
