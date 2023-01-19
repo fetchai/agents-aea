@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of multiple AEA configs launcher."""
+import asyncio
 import logging
 import multiprocessing
 from asyncio.events import AbstractEventLoop
@@ -25,7 +26,7 @@ from concurrent.futures.process import BrokenProcessPool
 from multiprocessing.synchronize import Event
 from os import PathLike
 from threading import Thread
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, Union, cast
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -91,7 +92,7 @@ def _run_agent(
     :param log_level: debug level applied for AEA in subprocess
     :param password: the password to encrypt/decrypt the private key.
     """
-    import asyncio  # pylint: disable=import-outside-toplevel
+    import asyncio  # pylint: disable=import-outside-toplevel,reimported,redefined-outer-name
     import select  # pylint: disable=import-outside-toplevel
     import selectors  # pylint: disable=import-outside-toplevel
 
@@ -173,7 +174,10 @@ class AEADirTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.start_and_wait_completed())  # type: ignore
+        coro_or_future = self._agent.runtime.start_and_wait_completed()
+        if asyncio.iscoroutine(coro_or_future):
+            return loop.create_task(coro_or_future)
+        return cast(asyncio.Future, coro_or_future)
 
 
 class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):

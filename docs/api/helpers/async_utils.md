@@ -378,9 +378,10 @@ Implement run logic respectful to CancelError on termination.
 #### wait`_`completed
 
 ```python
-def wait_completed(sync: bool = False,
-                   timeout: Optional[float] = None,
-                   force_result: bool = False) -> Awaitable
+def wait_completed(
+        sync: bool = False,
+        timeout: Optional[float] = None,
+        force_result: bool = False) -> Union[Coroutine, asyncio.Future]
 ```
 
 Wait runnable execution completed.
@@ -410,7 +411,8 @@ Stop runnable.
 #### start`_`and`_`wait`_`completed
 
 ```python
-def start_and_wait_completed(*args: Any, **kwargs: Any) -> Awaitable
+def start_and_wait_completed(*args: Any,
+                             **kwargs: Any) -> Union[Coroutine, Future]
 ```
 
 Alias for start and wait methods.

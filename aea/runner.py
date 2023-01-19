@@ -18,9 +18,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of AEA multiple instances runner."""
+import asyncio
 import logging
+from asyncio import iscoroutine
 from asyncio.events import AbstractEventLoop
-from typing import Dict, Sequence, Type
+from typing import Dict, Sequence, Type, cast
 
 from aea.aea import AEA
 from aea.helpers.multiple_executor import (
@@ -79,7 +81,10 @@ class AEAInstanceTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.start_and_wait_completed())  # type: ignore
+        coro_or_future = self._agent.runtime.start_and_wait_completed()
+        if iscoroutine(coro_or_future):
+            return loop.create_task(coro_or_future)
+        return cast(asyncio.Future, coro_or_future)
 
 
 class AEARunner(AbstractMultipleRunner):
