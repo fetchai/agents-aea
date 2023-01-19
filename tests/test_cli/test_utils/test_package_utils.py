@@ -23,11 +23,12 @@ import re
 from pathlib import Path
 from typing import cast
 from unittest import mock
+from unittest.mock import patch
 
 import click
 import pytest
 
-from aea import get_current_aea_version
+from aea import Version
 from aea.cli.utils.context import Context
 from aea.cli.utils.package_utils import (
     is_item_with_hash_present,
@@ -155,16 +156,23 @@ class TestListAvailablePackages(BaseAEATestCase):
 
 def test_update_aea_version_range() -> None:
     """Test `update_aea_version_range`"""
-
     package_config = AgentConfig("name", "author", aea_version="0.1.0")
-    assert not package_config.aea_version_specifiers.contains(
-        str(get_current_aea_version())
-    )
-
-    update_aea_version_range(package_configuration=package_config)
-    assert package_config.aea_version_specifiers.contains(
-        str(get_current_aea_version())
-    )
+    versions = [
+        "1.0.0",
+        "2.0.0",
+        "2.2.2",
+        "1.30.0post0",
+        "0.0.1",
+        "1000.0.10000",
+        "1.1.0alpha0",
+    ]
+    for version_str in versions:
+        version = Version(version_str)
+        with patch(
+            "aea.cli.utils.package_utils.get_current_aea_version", return_value=version
+        ):
+            update_aea_version_range(package_configuration=package_config)
+            assert version in package_config.aea_version_specifiers
 
 
 class TestItemPresentWithHash(BaseAEATestCase):
