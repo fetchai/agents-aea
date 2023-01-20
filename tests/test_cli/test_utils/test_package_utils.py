@@ -162,9 +162,13 @@ def test_update_aea_version_range() -> None:
         "2.0.0",
         "2.2.2",
         "1.30.0post0",
+        "1.30.0.post1",
+        "1.30.0dev1",
+        "1.30.0.dev1",
         "0.0.1",
         "1000.0.10000",
         "1.1.0alpha0",
+        "1.1.0.alpha1",
     ]
     for version_str in versions:
         version = Version(version_str)
