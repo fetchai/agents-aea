@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -194,9 +194,8 @@ def push_item_local(
     )
 
 
-def push_item_ipfs(component_path: Path, public_id: PublicId) -> None:
+def push_item_ipfs(component_path: Path, public_id: PublicId, tries: int = 1) -> None:
     """Push items to the ipfs registry."""
-
     if not IS_IPFS_PLUGIN_INSTALLED:
         raise click.ClickException(
             "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
@@ -208,8 +207,15 @@ def push_item_ipfs(component_path: Path, public_id: PublicId) -> None:
         )
 
     ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
-    _, package_hash, _ = ipfs_tool.add(str(component_path))
-    package_hash = to_v1(package_hash)
+    for try_ in range(1, tries + 1):
+        try:
+            _, package_hash, _ = ipfs_tool.add(str(component_path))
+            package_hash = to_v1(package_hash)
+            break
+        except Exception as e:  # pylint: disable=broad-except
+            if try_ == tries:
+                raise
+            click.echo(f"Error occured: {repr(e)}. Trying one more time")
 
     click.echo("Pushed component with:")
     click.echo(f"\tPublicId: {public_id}")
