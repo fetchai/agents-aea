@@ -1,13 +1,13 @@
 name: simple_service_registration
 author: fetchai
-version: 0.23.5
+version: 0.23.6
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmcAU3oi7tWS86UmAePbubQLinLutQsSQ1eGce5LperZty
-  __init__.py: QmXRcGYBPxfZXFBxDvYjLKm7WCP6biG8sHG6P3g43Aaf5a
+  __init__.py: QmTBYeERGsytUjBYUFCBCA55yuXaQSetGT235Zz8fbV16L
   behaviours.py: QmWuomUzWYZXeshgbnnzzeC9xE3tNwJReGwCBtbqhMXcaY
   dialogues.py: QmbgKy2b6WiWSFXxdwDaawAsoBY2VsBAdhRgUL6WTaGhEt
   handlers.py: QmehzwbrYqX2VAoAzVC7754rdJFjYoNCs58R5oBu5ChnDq
@@ -16,7 +16,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.6
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   service:

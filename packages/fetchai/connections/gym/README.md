@@ -6,4 +6,4 @@ The connection wraps a gym and allows the AEA to interact with the gym interface
 
 ## Usage
 
-First, add the connection to your AEA project (`aea add connection fetchai/gym:0.20.5`). Then, update the `config` in `connection.yaml` by providing a dotted path to the gym module in the `env` field.
+First, add the connection to your AEA project (`aea add connection fetchai/gym:0.20.6`). Then, update the `config` in `connection.yaml` by providing a dotted path to the gym module in the `env` field.

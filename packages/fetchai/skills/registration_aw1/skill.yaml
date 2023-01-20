@@ -1,6 +1,6 @@
 name: registration_aw1
 author: fetchai
-version: 0.13.5
+version: 0.13.6
 type: skill
 description: The registration_aw1 skill is a skill for registration in Agent World
   1.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUMdQxB7uC3SuP92vfiCRr4fHUeWMcfJNmJ74BoCk8eHT
-  __init__.py: QmegXC4RzwC3pZw8SzsW41Yk2sHGHMor6FK9Frz7eGdyUd
+  __init__.py: QmYQgGit93v872iD5etZ5k5F2tNo1b5W6Sjtv7nyNwjDh3
   behaviours.py: QmS5mMwaq2pQSaphNPA4QRxXRBBUpVerLvpYfg532Hb9wk
   dialogues.py: QmbdecnniJWxH7dnNUB14JKU16BwSKx37USyqcJahEQpVw
   handlers.py: QmUi9Ry9xd7R8RPFbeW3wePBT26s5q4Mvojs2zuR4xFXfW
@@ -17,10 +17,10 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/register:1.1.6
-- fetchai/signing:1.1.6
+- fetchai/register:1.1.7
+- fetchai/signing:1.1.7
 skills:
-- fetchai/simple_service_search:0.11.5
+- fetchai/simple_service_search:0.11.6
 behaviours:
   registration:
     args:

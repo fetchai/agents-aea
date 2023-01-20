@@ -109,7 +109,7 @@ Follow this instruction to run TAC against the fetch.ai Dorado testnet.
 In the root directory, fetch the controller AEA:
 
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.32.4
+aea fetch fetchai/tac_controller_contract:0.32.5
 cd tac_controller_contract
 aea install
 aea build
@@ -121,24 +121,24 @@ aea build
     ``` bash
     aea create tac_controller_contract
     cd tac_controller_contract
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_control_contract:0.27.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_control_contract:0.27.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
       "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger fetchai
     aea config set vendor.fetchai.connections.soef.config.chain_identifier fetchai_v2_misc
     aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/contract_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
     '[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -151,12 +151,12 @@ aea build
 In separate terminals, in the root directory, fetch at least two participants:
 
 ``` bash
-aea fetch fetchai/tac_participant_contract:0.22.4 --alias tac_participant_one
+aea fetch fetchai/tac_participant_contract:0.22.5 --alias tac_participant_one
 cd tac_participant_one
 aea install
 aea build
 cd ..
-aea fetch fetchai/tac_participant_contract:0.22.4 --alias tac_participant_two
+aea fetch fetchai/tac_participant_contract:0.22.5 --alias tac_participant_two
 cd tac_participant_two
 aea install
 aea build
@@ -174,26 +174,26 @@ aea build
 
     ``` bash
     cd tac_participant_one
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_participation:0.25.5
-    aea add skill fetchai/tac_negotiation:0.29.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_participation:0.25.6
+    aea add skill fetchai/tac_negotiation:0.29.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
       "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger fetchai
     aea config set vendor.fetchai.connections.soef.config.chain_identifier fetchai_v2_misc
     aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
     aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/contract_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type dict agent.decision_maker_handler \
     '{
@@ -210,26 +210,26 @@ aea build
 
     ``` bash
     cd tac_participant_two
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_participation:0.25.5
-    aea add skill fetchai/tac_negotiation:0.29.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_participation:0.25.6
+    aea add skill fetchai/tac_negotiation:0.29.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
       "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger fetchai
     aea config set vendor.fetchai.connections.soef.config.chain_identifier fetchai_v2_misc
     aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
     aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/contract_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type dict agent.decision_maker_handler \
     '{
@@ -288,7 +288,7 @@ Update the connection parameters of the TAC participants to allow them to connec
 First, retrieve controller's local ACN address by running the following in the controller agent's project terminal:
 
 ``` bash
-aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri
+aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.5 -u public_uri
 ```
 
 Then, in participant one, run this command (replace `SOME_ADDRESS` with the value you retrieved above):
@@ -372,7 +372,7 @@ Follow this instruction to run TAC against a local Ganache Ethereum test-net.
 In the root directory, fetch the controller AEA:
 
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.32.4
+aea fetch fetchai/tac_controller_contract:0.32.5
 cd tac_controller_contract
 aea install
 aea build
@@ -384,24 +384,24 @@ aea build
     ``` bash
     aea create tac_controller_contract
     cd tac_controller_contract
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_control_contract:0.27.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_control_contract:0.27.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
       "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger ethereum
     aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
     aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/contract_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
     '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -414,12 +414,12 @@ aea build
 In separate terminals, in the root directory, fetch at least two participants:
 
 ``` bash
-aea fetch fetchai/tac_participant_contract:0.22.4 --alias tac_participant_one
+aea fetch fetchai/tac_participant_contract:0.22.5 --alias tac_participant_one
 cd tac_participant_one
 aea install
 aea build
 cd ..
-aea fetch fetchai/tac_participant_contract:0.22.4 --alias tac_participant_two
+aea fetch fetchai/tac_participant_contract:0.22.5 --alias tac_participant_two
 cd tac_participant_two
 aea install
 aea build
@@ -437,26 +437,26 @@ aea build
 
     ``` bash
     cd tac_participant_one
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_participation:0.25.5
-    aea add skill fetchai/tac_negotiation:0.29.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_participation:0.25.6
+    aea add skill fetchai/tac_negotiation:0.29.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
       "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger ethereum
     aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
     aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
     aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/contract_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type dict agent.decision_maker_handler \
     '{
@@ -473,26 +473,26 @@ aea build
 
     ``` bash
     cd tac_participant_two
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_participation:0.25.5
-    aea add skill fetchai/tac_negotiation:0.29.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_participation:0.25.6
+    aea add skill fetchai/tac_negotiation:0.29.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
       "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger ethereum
     aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
     aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
     aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/contract_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/contract_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type dict agent.decision_maker_handler \
     '{
@@ -562,7 +562,7 @@ Update the connection parameters of the TAC participants to allow them to connec
 First, retrieve controller's local ACN address by running the following in the controller agent's project terminal:
 
 ``` bash
-aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri
+aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.5 -u public_uri
 ```
 
 Then, in participant one, run this command (replace `SOME_ADDRESS` with the value you retrieved above):

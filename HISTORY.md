@@ -1,6 +1,19 @@
 # Release History
 
-## 1.2.4(2022-11-30)
+## 1.2.5 (2023-01-18)
+
+Docs:
+
+- Sweeping foundational updates across all documentation
+
+Misc:
+
+- Update some dependencies
+- Update copyright headers across all files (including year 2023)
+- Remove `docker-images` submodule
+- Various bug fixes
+
+## 1.2.4 (2022-11-30)
 
 Agents:
 
@@ -18,7 +31,7 @@ Misc:
 - Speed up CI/CD
 - Various bug fixes
 
-## 1.2.3(2022-11-03)
+## 1.2.3 (2022-11-03)
 
 AEA:
 

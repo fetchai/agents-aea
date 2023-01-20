@@ -1,22 +1,22 @@
 agent_name: latest_block_feed
 author: fetchai
-version: 0.11.4
+version: 0.11.5
 license: Apache-2.0
 description: An agent that retrieves the latest block data from the Fetch ledger.
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.4
+- fetchai/ledger:0.21.5
 contracts: []
 protocols:
-- fetchai/default:1.1.6
-- fetchai/ledger_api:1.1.6
-- fetchai/signing:1.1.6
-- fetchai/state_update:1.1.6
+- fetchai/default:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/signing:1.1.7
+- fetchai/state_update:1.1.7
 skills:
-- fetchai/fetch_block:0.12.5
-default_connection: fetchai/ledger:0.21.4
+- fetchai/fetch_block:0.12.6
+default_connection: fetchai/ledger:0.21.5
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -30,7 +30,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/ledger:0.21.4
+public_id: fetchai/ledger:0.21.5
 type: connection
 config:
   ledger_apis:

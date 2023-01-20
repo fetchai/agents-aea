@@ -10,7 +10,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:1.1.6
+- fetchai/default:1.1.7
 skills: []
 behaviours: {}
 handlers: {}

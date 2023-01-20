@@ -146,7 +146,7 @@ Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, m
 
 You can access more details on <a href="https://docs.fetch.ai/ledger_v2/networks/" target="_blank">docs section</a>.
 
-The configurations can be specified for the `fetchai/ledger:0.21.4` connection.
+The configurations can be specified for the `fetchai/ledger:0.21.5` connection.
 
 ## CosmWasm Supporting Chains
 

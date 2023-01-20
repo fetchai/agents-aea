@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the aggregation protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.4`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.5`.
 """
 
 from packages.fetchai.protocols.aggregation.message import AggregationMessage

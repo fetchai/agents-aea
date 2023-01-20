@@ -158,7 +158,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 In the root directory, fetch the controller AEA:
 
 ``` bash
-aea fetch fetchai/tac_controller:0.30.4
+aea fetch fetchai/tac_controller:0.30.5
 cd tac_controller
 aea install
 aea build
@@ -171,19 +171,19 @@ aea build
     ``` bash
     aea create tac_controller
     cd tac_controller
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_control:0.25.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_control:0.25.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger fetchai
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea install
     aea build
@@ -194,12 +194,12 @@ aea build
 In a separate terminal, in the root directory, fetch at least two participants:
 
 ``` bash
-aea fetch fetchai/tac_participant:0.32.4 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.32.5 --alias tac_participant_one
 cd tac_participant_one
 aea install
 aea build
 cd ..
-aea fetch fetchai/tac_participant:0.32.4 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.32.5 --alias tac_participant_two
 cd tac_participant_two
 aea build
 ```
@@ -217,21 +217,21 @@ aea build
 
     ``` bash
     cd tac_participant_one
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_participation:0.25.5
-    aea add skill fetchai/tac_negotiation:0.29.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_participation:0.25.6
+    aea add skill fetchai/tac_negotiation:0.29.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger fetchai
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type dict agent.decision_maker_handler \
     '{
@@ -246,21 +246,21 @@ aea build
 
     ``` bash
     cd tac_participant_two
-    aea add connection fetchai/p2p_libp2p:0.27.4
-    aea add connection fetchai/soef:0.27.5
-    aea add connection fetchai/ledger:0.21.4
-    aea add skill fetchai/tac_participation:0.25.5
-    aea add skill fetchai/tac_negotiation:0.29.5
+    aea add connection fetchai/p2p_libp2p:0.27.5
+    aea add connection fetchai/soef:0.27.6
+    aea add connection fetchai/ledger:0.21.5
+    aea add skill fetchai/tac_participation:0.25.6
+    aea add skill fetchai/tac_negotiation:0.29.6
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
     }'
-    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+    aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
     aea config set agent.default_ledger fetchai
     aea config set --type dict agent.default_routing \
     '{
-      "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-      "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+      "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+      "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
     }'
     aea config set --type dict agent.decision_maker_handler \
     '{
@@ -316,7 +316,7 @@ Briefly run the controller AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.4 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.5 -u public_uri` to retrieve the address.)
 
 Then, in the participant one, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 

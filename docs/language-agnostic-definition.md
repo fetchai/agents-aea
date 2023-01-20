@@ -69,7 +69,7 @@ An AEA, in technical terms, must satisfy the following requirements:
 
 - It MUST implement protocols according to their specification (see <a href="../protocol-generator/#full-mode-vs-protobuf-only-mode">here</a> for details).
 
-- It SHOULD implement the `fetchai/default:1.1.6` protocol which satisfies the following protobuf schema:
+- It SHOULD implement the `fetchai/default:1.1.7` protocol which satisfies the following protobuf schema:
 
     ``` proto
     syntax = "proto3";
@@ -117,7 +117,7 @@ An AEA, in technical terms, must satisfy the following requirements:
 - The protocol id MUST match the following regular expression: `^([a-zA-Z_][a-zA-Z0-9_]{0,127})/([a-zA-Z_][a-zA-Z0-9_]{0,127})(:((any|latest|((0|[1-9]\d*))\.((0|[1-9]\d*))\.((0|[1-9]\d*))(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)))?$`
 - It is recommended that it processes `Envelopes` asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation, and the AEA can be designed to process envelopes either synchronously and asynchronously. However, asynchronous message handling enables the agent to be more responsive and scalable in maintaining many concurrent dialogues with its peers.
 - It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
-- It SHOULD implement handling of errors using the `fetchai/default:1.1.6` protocol. The protobuf schema is given above.
+- It SHOULD implement handling of errors using the `fetchai/default:1.1.7` protocol. The protobuf schema is given above.
 - It MUST implement the following principles when handling messages:
     - It MUST ALWAYS handle incoming envelopes/messages and NEVER raise an exception when decoding and validating the message. This ensures another AEA cannot cause the agent to fail by sending a malicious envelope/message.
     - It MUST NEVER handle outgoing messages and ALWAYS raise an exception when validating the message. An exception implies that the handler is resolving a bug in the implementation.

@@ -23,11 +23,18 @@ from tests.conftest import ROOT_DIR
 
 
 T_PROTOCOL_NAME = "t_protocol"
+T_PROTOCOL_NO_CT_NAME = "t_protocol_no_ct"
 PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
     ROOT_DIR, "tests", "data", "sample_specification.yaml"
 )
+PATH_TO_T_PROTOCOL_NO_CT_SPECIFICATION = os.path.join(
+    ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"
+)
 PATH_TO_T_PROTOCOL = os.path.join(
-    ROOT_DIR, "tests", "data", "reference_protocols", T_PROTOCOL_NAME
+    ROOT_DIR, "tests", "data", "generator", T_PROTOCOL_NAME
+)
+PATH_TO_T_PROTOCOL_NO_CT = os.path.join(
+    ROOT_DIR, "tests", "data", "generator", T_PROTOCOL_NO_CT_NAME
 )
 
 

@@ -63,9 +63,9 @@ The developer can generate custom protocols with the <a href="../protocol-genera
 
 We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
-## `fetchai/default:1.1.6` Protocol
+## `fetchai/default:1.1.7` Protocol
 
-The `fetchai/default:1.1.6` protocol is meant to be implemented by every AEA. It serves AEA to AEA interaction and includes three message performatives:
+The `fetchai/default:1.1.7` protocol is meant to be implemented by every AEA. It serves AEA to AEA interaction and includes three message performatives:
 
 ``` python
 from enum import Enum
@@ -127,13 +127,13 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.18.5` skill utilises the `fetchai/default:1.0.0` protocol for error handling.
+Each AEA's `fetchai/error:0.18.6` skill utilises the `fetchai/default:1.0.0` protocol for error handling.
 
-## `fetchai/oef_search:1.1.6` Protocol
+## `fetchai/oef_search:1.1.7` Protocol
 
-The `fetchai/oef_search:1.1.6` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:1.1.7` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
 
-The `fetchai/oef_search:1.1.6` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:1.1.7` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ``` python
 class Performative(Enum):
@@ -268,11 +268,11 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:1.1.6` Protocol
+## `fetchai/fipa:1.1.7` Protocol
 
 This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="https://en.wikipedia.org/wiki/Foundation_for_Intelligent_Physical_Agents" target="_blank">FIPA</a> Agent Communication Language.
 
-The `fetchai/fipa:1.1.6` protocol definition includes a `FipaMessage` with the following performatives:
+The `fetchai/fipa:1.1.7` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -306,9 +306,9 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:1.1.6` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:1.1.7` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:1.1.6` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:1.1.7` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
 
 ### Fipa Dialogue
 

@@ -7,7 +7,7 @@ pip install aea-ledger-fetchai
 ```
 
 ``` bash
-aea fetch fetchai/weather_station:0.32.4
+aea fetch fetchai/weather_station:0.32.5
 cd weather_station
 aea install
 aea build

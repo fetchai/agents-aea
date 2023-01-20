@@ -30,7 +30,7 @@ class TestHelloWorldSkill(AEATestCaseEmpty):
         """Run the hello_world skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("skill", "fetchai/hello_world:0.1.4")
+        self.add_item("skill", "fetchai/hello_world:0.1.5")
 
         process = self.run_agent()
         is_running = self.is_running(process)

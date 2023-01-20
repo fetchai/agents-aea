@@ -39,12 +39,15 @@ from aea.protocols.generator.base import (
 )
 from aea.protocols.generator.common import _to_camel_case
 
-from tests.conftest import ROOT_DIR, match_files
+from tests.conftest import match_files
 from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_aea.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL,
+    PATH_TO_T_PROTOCOL_NO_CT,
+    PATH_TO_T_PROTOCOL_NO_CT_SPECIFICATION,
     PATH_TO_T_PROTOCOL_SPECIFICATION,
     T_PROTOCOL_NAME,
+    T_PROTOCOL_NO_CT_NAME,
 )
 
 
@@ -180,20 +183,13 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
               custom_types.py files makes their IPFS hashes different.
         """
 
-        protocol_name = "t_protocol_no_ct"
-        path_to_protocol_specification_with_no_custom_types = os.path.join(
-            ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"
-        )
         path_to_generated_protocol = self.t
         dotted_path_to_package_for_imports = "tests.data.generator."
-        path_to_protocol = os.path.join(
-            ROOT_DIR, "tests", "data", "reference_protocols", protocol_name
-        )
 
         # Generate the protocol
         try:
             protocol_generator = ProtocolGenerator(
-                path_to_protocol_specification=path_to_protocol_specification_with_no_custom_types,
+                path_to_protocol_specification=PATH_TO_T_PROTOCOL_NO_CT_SPECIFICATION,
                 output_path=path_to_generated_protocol,
                 dotted_path_to_protocol_package=dotted_path_to_package_for_imports,
             )
@@ -205,9 +201,9 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
             )
 
         # compare __init__.py
-        init_file_generated = Path(self.t, protocol_name, "__init__.py")
+        init_file_generated = Path(self.t, T_PROTOCOL_NO_CT_NAME, "__init__.py")
         init_file_original = Path(
-            path_to_protocol,
+            PATH_TO_T_PROTOCOL_NO_CT,
             "__init__.py",
         )
         is_matched, diff = match_files(init_file_generated, init_file_original)
@@ -216,18 +212,20 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         ), f"Difference Found between __init__.py files:\n{diff}"
 
         # compare message.py
-        message_file_generated = Path(self.t, protocol_name, "message.py")
+        message_file_generated = Path(self.t, T_PROTOCOL_NO_CT_NAME, "message.py")
         message_file_original = Path(
-            path_to_protocol,
+            PATH_TO_T_PROTOCOL_NO_CT,
             "message.py",
         )
         is_matched, diff = match_files(message_file_generated, message_file_original)
         assert is_matched, f"Difference Found between message.py files:\n{diff}"
 
         # compare serialization.py
-        serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
+        serialization_file_generated = Path(
+            self.t, T_PROTOCOL_NO_CT_NAME, "serialization.py"
+        )
         serialization_file_original = Path(
-            path_to_protocol,
+            PATH_TO_T_PROTOCOL_NO_CT,
             "serialization.py",
         )
         is_matched, diff = match_files(
@@ -236,9 +234,9 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         assert is_matched, f"Difference Found between serialization.py files:\n{diff}"
 
         # compare dialogues.py
-        dialogue_file_generated = Path(self.t, protocol_name, "dialogues.py")
+        dialogue_file_generated = Path(self.t, T_PROTOCOL_NO_CT_NAME, "dialogues.py")
         dialogue_file_original = Path(
-            path_to_protocol,
+            PATH_TO_T_PROTOCOL_NO_CT,
             "dialogues.py",
         )
         is_matched, diff = match_files(dialogue_file_generated, dialogue_file_original)
@@ -246,11 +244,11 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
 
         # compare .proto
         proto_file_generated = Path(
-            self.t, protocol_name, "{}.proto".format(protocol_name)
+            self.t, T_PROTOCOL_NO_CT_NAME, "{}.proto".format(T_PROTOCOL_NO_CT_NAME)
         )
         proto_file_original = Path(
-            path_to_protocol,
-            "{}.proto".format(protocol_name),
+            PATH_TO_T_PROTOCOL_NO_CT,
+            "{}.proto".format(T_PROTOCOL_NO_CT_NAME),
         )
         is_matched, diff = match_files(proto_file_generated, proto_file_original)
         assert is_matched, f"Difference Found between .proto files:\n{diff}"

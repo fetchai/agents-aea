@@ -1,6 +1,6 @@
 name: simple_data_request
 author: fetchai
-version: 0.14.5
+version: 0.14.6
 type: skill
 description: This skill is used to request data from a HTTP endpoint and then saving
   it in the AEA's shared state for use by other skills.
@@ -8,16 +8,16 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmemL4YrZjQSMjhF2uymRmntNHSoyvAQ66R9TtnEwmDxiv
-  __init__.py: QmUF9T3TLcR2enCvJVptLzsnjcLB5Ws41ByeXfZbmz8uLU
+  __init__.py: QmW6iSrqrczrFvKxaTgkyQXneR4ckMimYZheFu8EHsB66N
   behaviours.py: QmcAsxDGEjf2zofag5X3PxmaPBwrjqf9zoSZVdLwCUFRaC
   dialogues.py: QmVYsxmS1okvCqTQFs6PwNRWvzP1YeguD1FxLopQWe1a9h
   handlers.py: QmZ52t9KWAzLLrUv5ZZvfFT4CgB4YvN9HceDcWuQBvRqxT
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.5
+- fetchai/http_client:0.24.6
 contracts: []
 protocols:
-- fetchai/http:1.1.6
+- fetchai/http:1.1.7
 skills: []
 behaviours:
   http_request:

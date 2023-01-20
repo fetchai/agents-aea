@@ -5,8 +5,8 @@ pip install aea-ledger-fetchai
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/p2p_libp2p:0.27.5
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
 aea install
 aea build
 ```
@@ -20,14 +20,14 @@ aea issue-certificates
 ```
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.27.4
+aea run --connections fetchai/p2p_libp2p:0.27.5
 ```
 
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+aea add connection fetchai/p2p_libp2p:0.27.5
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
 aea install
 aea build
 ```
@@ -52,7 +52,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 ```
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.27.4
+aea run --connections fetchai/p2p_libp2p:0.27.5
 ```
 
 ``` bash
@@ -99,7 +99,7 @@ docker run -v <node_private_key.txt>:/acn/key.txt -it acn_node_standalone --key-
 
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.27.4
+public_id: fetchai/p2p_libp2p:0.27.5
 type: connection
 config:
   delegate_uri: null

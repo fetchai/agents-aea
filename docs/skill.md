@@ -268,7 +268,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:1.1.6
+- fetchai/default:1.1.7
 ```
 
 ## Error Skill

@@ -12,7 +12,7 @@ Then B constructs the transaction using both his public key and A's, signs the t
 ---
 name: cosm_trade
 author: fetchai
-version: 0.2.6
+version: 0.2.7
 description: A protocol for preparing an atomic swap bilateral transaction for cosmos-based ledgers, including fetchai's.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
