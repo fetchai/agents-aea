@@ -10,19 +10,97 @@ copyright: Copyright &copy; 2018 - 2023 Fetch.ai # Copyright notice in footer
 strict: true
 
 nav:
-  - Introduction: 'index.md'
-  - Version: 'version.md'
-  - Upgrading: 'upgrading.md'
-  - Concepts:
-    - Language Agnostic Definition: 'language-agnostic-definition.md'
-    - Agent-oriented development: 'agent-oriented-development.md'
+  - AEA Overview:
+    - 'index.md'
+    - Autonomous Economic Agents: 'aeas.md'
     - Vision: 'vision.md'
     - Application areas: 'app-areas.md'
-    - Relation to OEF and Ledger: 'oef-ledger.md'
-    - Identity: 'identity.md'
-    - Trust minimisation: 'trust.md'
+    - Agent ecosystem: 'oef-ledger.md'
+  - Installation and setup:
+    - 'install.md'
+    - Development setup: 'development-setup.md'
+    - Version: 'version.md'
+    - Installation: 'cli-how-to.md'
+    - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
+  - Getting started:
+    - Core components: 'core-components.md'
+    - Ways to build an AEA: 'step-one.md'
+    - Build an AEA with the CLI: 'build-aea-step-by-step.md'
+  - Architecture deep dives:
+    - Language Agnostic Definition: 'language-agnostic-definition.md'
+    - Architectural diagram: 'diagram.md'
+    - Core components - Part 1: 'core-components-1.md'
+    - Core components - Part 2: 'core-components-2.md'
+    - Comparisons:
+      - AEA and web frameworks: 'aea-vs-mvc.md'
+      - 12-Factor app and AEAs: '12-factor.md'
+      - Design principles: 'design-principles.md'
+  - Developing Agents:
+    - Modes of running an AEA: 'modes.md'
+    - Multi agent manager: 'multi-agent-manager.md'
+    - Logging: 'logging.md'
+    - Deployment: 'deployment.md'
+    - Debugging: 'debug.md'
+    - Profiling: 'runtime-cost.md'
+    - Performance benchmark: 'performance-benchmark.md'
+    - Security Considerations: 'security.md'
+  - Developing Packages:
+    - File structure: 'package-imports.md'
+    - Scaffolding packages: 'scaffolding.md'
+    - Configurations: 'config.md'
+    - Skills:
+      - Skills: 'skill.md'
+      - AEA quick start: 'quickstart.md'
+      - Build your first skill - search & discovery: 'skill-guide.md'
+      - Trade between two AEAs: 'generic-skills-step-by-step.md'
+      - Testing Skills: 'skill-testing.md'
+    - Protocols:
+      - Protocols: 'protocol.md'
+      - Message routing: 'message-routing.md'
+      - Generating protocols: 'protocol-generator.md'
+    - Connections:
+      - Connections: 'connection.md'
+    - Contracts:
+      - Contracts: 'contract.md'
+      - Contract deploy and interact: 'erc1155-skills.md'
+    - Decision Maker:
+      - Decision Maker: 'decision-maker.md'
+    - Ledger & Crypto APIs:
+      - Ledger & Crypto APIs: 'ledger-integration.md'
+  - Ecosystem:
+    - Agent Communication:
+      - Agent Communication Network: 'acn.md'
+      - ACN Internals: 'acn-internals.md'
+      - Proof of Representation: 'por.md'
+      - P2P Connection: 'p2p-connection.md'
+    - Search & Discovery:
+      - Simple OEF: 'simple-oef.md'
+      - Defining Data Models: 'defining-data-models.md'
+      - The Query Language: 'query-language.md'
+      - SOEF Connection: 'simple-oef-usage.md'
+    - Integrations:
+      - Front-end integration: 'connect-a-frontend.md'
+      - ORM integration: 'orm-integration.md'
+      - Generic Storage: 'generic-storage.md'
+      - Prometheus monitoring: 'prometheus.md'
+      - Generating wealth: 'wealth.md'
+  - Guides:
+    - Agent-oriented development: 'agent-oriented-development.md'
+    - Interaction protocols: 'interaction-protocol.md'
+    - Concepts:
+      - Identity: 'identity.md'
+      - Trust minimisation: 'trust.md'
+  - Development - Advanced:
+    - Build an AEA programmatically: 'build-aea-programmatically.md'
+    - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
+    - AEAs vs agents: 'agent-vs-aea.md'
+    - Use multiplexer stand-alone: 'multiplexer-standalone.md'
+    - Create stand-alone transaction: 'standalone-transaction.md'
+    - Create decision-maker transaction: 'decision-maker-transaction.md'
   - Demos:
     - Demos: 'demos.md'
+    - Generic skills: 'generic-skills.md'
+    - HTTP Connection: 'http-connection-and-skill.md'
     - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
     - Car park skills: 'car-park-skills.md'
     - Gym example: 'gym-example.md'
@@ -34,68 +112,8 @@ nav:
     - TAC skills ledger-based: 'tac-skills-contract.md'
     - Thermometer skills: 'thermometer-skills.md'
     - Weather skills: 'weather-skills.md'
-  - Development - Beginner:
-    - AEA quick start: 'quickstart.md'
-    - Core components - Part 1: 'core-components-1.md'
-    - AEA and web frameworks: 'aea-vs-mvc.md'
-    - Build your first skill - search & discovery: 'skill-guide.md'
-    - Core components - Part 2: 'core-components-2.md'
-    - How AEAs talk to each other - interaction protocols: 'interaction-protocol.md'
-    - Trade between two AEAs: 'generic-skills-step-by-step.md'
-    - Development setup: 'development-setup.md'
-  - Development - Advanced:
-    - Topic guides:
-      - Ways to build an AEA: 'step-one.md'
-      - Build an AEA with the CLI: 'build-aea-step-by-step.md'
-      - Scaffolding packages: 'scaffolding.md'
-      - Generating protocols: 'protocol-generator.md'
-      - Logging: 'logging.md'
-      - Use multiplexer stand-alone: 'multiplexer-standalone.md'
-      - Create stand-alone transaction: 'standalone-transaction.md'
-      - Create decision-maker transaction: 'decision-maker-transaction.md'
-      - Testing Skills: 'skill-testing.md'
-      - Deployment: 'deployment.md'
-      - 12-Factor app and AEAs: '12-factor.md'
-      - Prometheus monitoring: 'prometheus.md'
-      - Known limitations: 'known-limits.md'
-      - Build an AEA programmatically: 'build-aea-programmatically.md'
-      - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
-      - AEAs vs agents: 'agent-vs-aea.md'
-      - Modes of running an AEA: 'modes.md'
-      - Generic Storage: 'generic-storage.md'
-      - Multi agent manager: 'multi-agent-manager.md'
-      - Debugging: 'debug.md'
-      - Profiling: 'runtime-cost.md'
-      - Proof of Representation: 'por.md'
-      - Security: 'security.md'
-    - Architecture & component deep-dives:
-      - Design principles: 'design-principles.md'
-      - Architectural diagram: 'diagram.md'
-      - Connections: 'connection.md'
-      - Protocols: 'protocol.md'
-      - Skills: 'skill.md'
-      - Contracts: 'contract.md'
-      - Decision Maker: 'decision-maker.md'
-      - Ledger & Crypto APIs: 'ledger-integration.md'
-      - Message routing: 'message-routing.md'
-      - Configurations: 'config.md'
-      - Limitations of v1: 'limits.md'
-    - Agent Communication:
-      - Agent Communication Network: 'acn.md'
-      - ACN Internals: 'acn-internals.md'
-    - Search & Discovery:
-      - Simple OEF: 'simple-oef.md'
-      - Defining Data Models: 'defining-data-models.md'
-      - The Query Language: 'query-language.md'
-      - SOEF Connection: 'simple-oef-usage.md'
-    - Developer Interfaces:
-      - CLI:
-        - Installation: 'cli-how-to.md'
-        - Commands: 'cli-commands.md'
-        - File structure: 'package-imports.md'
-        - Generating wealth: 'wealth.md'
-    - Benchmarks:
-      - Performance benchmark: 'performance-benchmark.md'
+  - Reference:
+    - Command Line Interface: 'cli-commands.md'
     - API:
       - AbstractAgent: 'api/abstract_agent.md'
       - AEA: 'api/aea.md'
@@ -109,144 +127,139 @@ nav:
       - Runner: 'api/runner.md'
       - Runtime: 'api/runtime.md'
       - Components:
-        - Base: 'api/components/base.md'
-        - Loader: 'api/components/loader.md'
-        - Utils: 'api/components/utils.md'
+          - Base: 'api/components/base.md'
+          - Loader: 'api/components/loader.md'
+          - Utils: 'api/components/utils.md'
       - Configurations:
-        - Base: 'api/configurations/base.md'
-        - Constants: 'api/configurations/constants.md'
-        - Data Types: 'api/configurations/data_types.md'
-        - Loader: 'api/configurations/loader.md'
-        - Manager: 'api/configurations/manager.md'
-        - Pypi: 'api/configurations/pypi.md'
-        - Utils: 'api/configurations/utils.md'
-        - Validation: 'api/configurations/validation.md'
+          - Base: 'api/configurations/base.md'
+          - Constants: 'api/configurations/constants.md'
+          - Data Types: 'api/configurations/data_types.md'
+          - Loader: 'api/configurations/loader.md'
+          - Manager: 'api/configurations/manager.md'
+          - Pypi: 'api/configurations/pypi.md'
+          - Utils: 'api/configurations/utils.md'
+          - Validation: 'api/configurations/validation.md'
       - Connections:
-        - Base: 'api/connections/base.md'
+          - Base: 'api/connections/base.md'
       - Context: 'api/context/base.md'
       - Contracts:
-        - Base: 'api/contracts/base.md'
+          - Base: 'api/contracts/base.md'
       - Crypto:
-        - Base: 'api/crypto/base.md'
-        - Helpers: 'api/crypto/helpers.md'
-        - LedgerApis: 'api/crypto/ledger_apis.md'
-        - Plugin: 'api/crypto/plugin.md'
-        - Wallet: 'api/crypto/wallet.md'
-        - Registries:
-          - Base: 'api/crypto/registries/base.md'
+          - Base: 'api/crypto/base.md'
+          - Helpers: 'api/crypto/helpers.md'
+          - LedgerApis: 'api/crypto/ledger_apis.md'
+          - Plugin: 'api/crypto/plugin.md'
+          - Wallet: 'api/crypto/wallet.md'
+          - Registries:
+              - Base: 'api/crypto/registries/base.md'
       - Decision Maker:
-        - Base: 'api/decision_maker/base.md'
-        - Default: 'api/decision_maker/default.md'
-        - GOP: 'api/decision_maker/gop.md'
+          - Base: 'api/decision_maker/base.md'
+          - Default: 'api/decision_maker/default.md'
+          - GOP: 'api/decision_maker/gop.md'
       - Error Handler:
-        - Base: 'api/error_handler/base.md'
-        - Default: 'api/error_handler/default.md'
+          - Base: 'api/error_handler/base.md'
+          - Default: 'api/error_handler/default.md'
       - Helpers:
-        - ACN:
-          - Agent Record: 'api/helpers/acn/agent_record.md'
-          - URI: 'api/helpers/acn/uri.md'
-        - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
-        - Async Utils: 'api/helpers/async_utils.md'
-        - Base: 'api/helpers/base.md'
-        - Constants: 'api/helpers/constants.md'
-        - Env Vars: 'api/helpers/env_vars.md'
-        - Exception Policy: 'api/helpers/exception_policy.md'
-        - Exec Timeout: 'api/helpers/exec_timeout.md'
-        - File IO: 'api/helpers/file_io.md'
-        - File Lock: 'api/helpers/file_lock.md'
-        - HttpRequests: 'api/helpers/http_requests.md'
-        - Install Dependency: 'api/helpers/install_dependency.md'
-        - IO: 'api/helpers/io.md'
-        - IPFS:
-          - Base: 'api/helpers/ipfs/base.md'
-          - Utils: 'api/helpers/ipfs/utils.md'
-        - Logging: 'api/helpers/logging.md'
-        - MultiAddress:
-          - Base: 'api/helpers/multiaddr/base.md'
-        - MultipleExecutor: 'api/helpers/multiple_executor.md'
-        - Pipe: 'api/helpers/pipe.md'
-        - Preferences:
-          - Base: 'api/helpers/preference_representations/base.md'
-        - Profiling: 'api/helpers/profiling.md'
-        - Search:
-          - Generic: 'api/helpers/search/generic.md'
-          - Models: 'api/helpers/search/models.md'
-        - Serializers: 'api/helpers/serializers.md'
-        - Storage:
-          - GenericStorage: 'api/helpers/storage/generic_storage.md'
-          - Backends:
-            - Base: 'api/helpers/storage/backends/base.md'
-            - Sqlite: 'api/helpers/storage/backends/sqlite.md'
-        - Sym Link: 'api/helpers/sym_link.md'
-        - Transaction:
-          - Base: 'api/helpers/transaction/base.md'
-        - Win32: 'api/helpers/win32.md'
-        - YamlUtils: 'api/helpers/yaml_utils.md'
+          - ACN:
+              - Agent Record: 'api/helpers/acn/agent_record.md'
+              - URI: 'api/helpers/acn/uri.md'
+          - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
+          - Async Utils: 'api/helpers/async_utils.md'
+          - Base: 'api/helpers/base.md'
+          - Constants: 'api/helpers/constants.md'
+          - Env Vars: 'api/helpers/env_vars.md'
+          - Exception Policy: 'api/helpers/exception_policy.md'
+          - Exec Timeout: 'api/helpers/exec_timeout.md'
+          - File IO: 'api/helpers/file_io.md'
+          - File Lock: 'api/helpers/file_lock.md'
+          - HttpRequests: 'api/helpers/http_requests.md'
+          - Install Dependency: 'api/helpers/install_dependency.md'
+          - IO: 'api/helpers/io.md'
+          - IPFS:
+              - Base: 'api/helpers/ipfs/base.md'
+              - Utils: 'api/helpers/ipfs/utils.md'
+          - Logging: 'api/helpers/logging.md'
+          - MultiAddress:
+              - Base: 'api/helpers/multiaddr/base.md'
+          - MultipleExecutor: 'api/helpers/multiple_executor.md'
+          - Pipe: 'api/helpers/pipe.md'
+          - Preferences:
+              - Base: 'api/helpers/preference_representations/base.md'
+          - Profiling: 'api/helpers/profiling.md'
+          - Search:
+              - Generic: 'api/helpers/search/generic.md'
+              - Models: 'api/helpers/search/models.md'
+          - Serializers: 'api/helpers/serializers.md'
+          - Storage:
+              - GenericStorage: 'api/helpers/storage/generic_storage.md'
+              - Backends:
+                  - Base: 'api/helpers/storage/backends/base.md'
+                  - Sqlite: 'api/helpers/storage/backends/sqlite.md'
+          - Sym Link: 'api/helpers/sym_link.md'
+          - Transaction:
+              - Base: 'api/helpers/transaction/base.md'
+          - Win32: 'api/helpers/win32.md'
+          - YamlUtils: 'api/helpers/yaml_utils.md'
       - Identity: 'api/identity/base.md'
       - Mail: 'api/mail/base.md'
       - Manager:
-        - Manager: 'api/manager/manager.md'
-        - Project: 'api/manager/project.md'
-        - Utils: 'api/manager/utils.md'
+          - Manager: 'api/manager/manager.md'
+          - Project: 'api/manager/project.md'
+          - Utils: 'api/manager/utils.md'
       - Protocols:
-        - Base: 'api/protocols/base.md'
-        - Dialogue:
-          - Base: 'api/protocols/dialogue/base.md'
-        - Generator:
-          - Base: 'api/protocols/generator/base.md'
-          - Common: 'api/protocols/generator/common.md'
-          - Extract Specification: 'api/protocols/generator/extract_specification.md'
-          - Validate: 'api/protocols/generator/validate.md'
-        - Default Protocol:
-          - Custom Types: 'api/protocols/default/custom_types.md'
-          - Dialogues: 'api/protocols/default/dialogues.md'
-          - Message: 'api/protocols/default/message.md'
-          - Serialization: 'api/protocols/default/serialization.md'
-        - Signing Protocol:
-          - Custom Types: 'api/protocols/signing/custom_types.md'
-          - Dialogues: 'api/protocols/signing/dialogues.md'
-          - Message: 'api/protocols/signing/message.md'
-          - Serialization: 'api/protocols/signing/serialization.md'
-        - State Update Protocol:
-          - Dialogues: 'api/protocols/state_update/dialogues.md'
-          - Message: 'api/protocols/state_update/message.md'
-          - Serialization: 'api/protocols/state_update/serialization.md'
+          - Base: 'api/protocols/base.md'
+          - Dialogue:
+              - Base: 'api/protocols/dialogue/base.md'
+          - Generator:
+              - Base: 'api/protocols/generator/base.md'
+              - Common: 'api/protocols/generator/common.md'
+              - Extract Specification: 'api/protocols/generator/extract_specification.md'
+              - Validate: 'api/protocols/generator/validate.md'
+          - Default Protocol:
+              - Custom Types: 'api/protocols/default/custom_types.md'
+              - Dialogues: 'api/protocols/default/dialogues.md'
+              - Message: 'api/protocols/default/message.md'
+              - Serialization: 'api/protocols/default/serialization.md'
+          - Signing Protocol:
+              - Custom Types: 'api/protocols/signing/custom_types.md'
+              - Dialogues: 'api/protocols/signing/dialogues.md'
+              - Message: 'api/protocols/signing/message.md'
+              - Serialization: 'api/protocols/signing/serialization.md'
+          - State Update Protocol:
+              - Dialogues: 'api/protocols/state_update/dialogues.md'
+              - Message: 'api/protocols/state_update/message.md'
+              - Serialization: 'api/protocols/state_update/serialization.md'
       - Registries:
-        - Base: 'api/registries/base.md'
-        - Filter: 'api/registries/filter.md'
-        - Resources: 'api/registries/resources.md'
+          - Base: 'api/registries/base.md'
+          - Filter: 'api/registries/filter.md'
+          - Resources: 'api/registries/resources.md'
       - Skills:
-        - Base: 'api/skills/base.md'
-        - Behaviors: 'api/skills/behaviours.md'
-        - Task: 'api/skills/tasks.md'
+          - Base: 'api/skills/base.md'
+          - Behaviors: 'api/skills/behaviours.md'
+          - Task: 'api/skills/tasks.md'
       - Test Tools:
-        - Constants: 'api/test_tools/constants.md'
-        - Exceptions: 'api/test_tools/exceptions.md'
-        - Generic: 'api/test_tools/generic.md'
-        - Test Cases: 'api/test_tools/test_cases.md'
-        - Test Contract: 'api/test_tools/test_contract.md'
-        - Test Skill: 'api/test_tools/test_skill.md'
+          - Constants: 'api/test_tools/constants.md'
+          - Exceptions: 'api/test_tools/exceptions.md'
+          - Generic: 'api/test_tools/generic.md'
+          - Test Cases: 'api/test_tools/test_cases.md'
+          - Test Contract: 'api/test_tools/test_contract.md'
+          - Test Skill: 'api/test_tools/test_skill.md'
       - Plugins:
-        - CLI:
-          - IPFS:
-            - API: 'api/plugins/aea_cli_ipfs/core.md'
-            - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
-        - Ledger:
-          - Cosmos:
-            - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'
-          - Ethereum:
-            - API: 'api/plugins/aea_ledger_ethereum/ethereum.md'
-          - Fetchai:
-            - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
-            - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
-  - Development - Use Case:
-    - Generic skills: 'generic-skills.md'
-    - Front-end integration: 'connect-a-frontend.md'
-    - HTTP Connection: 'http-connection-and-skill.md'
-    - ORM integration: 'orm-integration.md'
-    - Contract deploy and interact: 'erc1155-skills.md'
-    - P2P Connection: 'p2p-connection.md'
-    - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
+          - CLI:
+              - IPFS:
+                  - API: 'api/plugins/aea_cli_ipfs/core.md'
+                  - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
+          - Ledger:
+              - Cosmos:
+                  - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'
+              - Ethereum:
+                  - API: 'api/plugins/aea_ledger_ethereum/ethereum.md'
+              - Fetchai:
+                  - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
+                  - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
+  - Upgrading: 'upgrading.md'
+  - Limitations of v1: 'limits.md'
+  - Known limitations: 'known-limits.md'
   - Glossary: 'glossary.md'
   - Q&A: 'questions-and-answers.md'
   - Archives:
@@ -273,6 +286,11 @@ theme:
   features:
     - navigation.instant # Fast page loading
     - navigation.tracking # URL automatically updated with the currently active anchor
+#    - navigation.tabs
+#    - navigation.tabs.sticky
+#    - navigation.sections
+#    - navigation.expand
+    - navigation.indexes
     - navigation.top # Back-to-top button
     - search.suggest # Completion for the searched word (can be accepted with ->).
     - search.highlight # Highlight all occurrences after following a search result link

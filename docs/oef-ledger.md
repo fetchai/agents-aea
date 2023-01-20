@@ -1,25 +1,10 @@
-# Relation to OEF and Ledger
+# AEA Ecosystem
 
-The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) allow AEAs to create value through their interaction with other AEAs. The following diagram illustrates the relation of AEAs to the OEF and DLTs.
+AEAs are situated within a larger ecosystem comprised of various other systems and technology layers.
 
 <img src="../assets/oef-ledger.jpg" alt="The AEA, OEF, and Ledger systems" class="center">
 
-## Open Economic Framework (OEF)
-
-The _Open Economic Framework_ (OEF) consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralized virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
-
-!!! note
-    The OEF is under development. Expect frequent changes. What follows is a description of the current implementation.
-
-At present, the OEF's capabilities are fulfilled by three components:
-
-- a permissionless, public peer to peer (agent to agent) communication network, called the <a href="../acn">Agent Communication Network</a>;
-- a set of <a href="../interaction-protocol">agent interaction protocols</a>; and
-- a centralized <a href="../simple-oef">search and discovery system</a>.
-
-The latter will be decentralized over time.
-
-### Agent Communication Network (ACN)
+## Agent Communication Network (ACN)
 
 ACN is a <a href="../acn">peer-to-peer communication network for agents</a>. It allows AEAs to send and receive envelopes between each other.
 
@@ -27,9 +12,9 @@ The implementation builds on the open-source <a href="https://libp2p.io/" target
 
 Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a> for an example).
 
-### Search and Discovery
+## Search and Discovery
 
-A <a href="../simple-oef">simple OEF (sOEF) node</a> allows agents to discover each other. In particular, agents can register themselves and the services they offer, and can search for agents who offer specific services.
+An <a href="../simple-oef">sOEF node</a> allows agents to discover each other. In particular, agents can register themselves and the services they offer, and can search for agents who offer specific services.
 
 For two agents to be able to find each other, at least one must register itself on the sOEF and the other must query the sOEF node for it. Detailed documentation is provided <a href="../simple-oef">here</a>.
 

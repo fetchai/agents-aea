@@ -17,16 +17,6 @@ The AEA framework provides the tools for creating Autonomous Economic Agents (AE
 
 AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
 
-### What is not an AEA
-
-- Any <a href="https://en.wikipedia.org/wiki/Software_agent" target="_blank">agent</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
-- APIs or sensors which do not have agency.
-- <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactivity and are purely reactive to external requests (=contract calls and transactions).
-- <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
-
-!!! note
-    In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.
-
 ## What is the AEA Framework?
 
 The AEA framework is a development suite, currently implemented in Python, which equips you with an efficient and accessible set of tools for building and running AEAs. The framework is modular, extensible, and composable. It attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
