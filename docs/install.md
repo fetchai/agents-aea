@@ -1,16 +1,21 @@
 # Installation and setup
 
-If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective, you can use the AEA framework.
+## AEA Framework
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+### System Requirements
 
-This example will take you through a simple AEA to familiarise you with the basics of the framework.
+!!! Info "System requirements"
+    The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
+    
+    You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.8</a> or higher on your system.
 
-## System Requirements
+Depending on what you want to do, you might need extra tools on your system:
 
-The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
+- The project uses Google Protocol Buffers compiler for message serialization. The compiler's version must match the protobuf library installed with the project (see pyproject.toml).
+- The fetchai/p2p_libp2p package is partially developed in Go. To make changes, install Golang.
+- To update fingerprint hashes of packages, you will need the IPFS daemon.
 
-You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.7</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 GCC installation is required:
 
