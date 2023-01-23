@@ -194,7 +194,7 @@ def push_item_local(
     )
 
 
-def push_item_ipfs(component_path: Path, public_id: PublicId, tries: int = 1) -> None:
+def push_item_ipfs(component_path: Path, public_id: PublicId, retries: int = 1) -> None:
     """Push items to the ipfs registry."""
     if not IS_IPFS_PLUGIN_INSTALLED:
         raise click.ClickException(
@@ -207,13 +207,13 @@ def push_item_ipfs(component_path: Path, public_id: PublicId, tries: int = 1) ->
         )
 
     ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
-    for try_ in range(1, tries + 1):
+    for try_ in range(1, retries + 1):
         try:
             _, package_hash, _ = ipfs_tool.add(str(component_path))
             package_hash = to_v1(package_hash)
             break
         except Exception as e:  # pylint: disable=broad-except
-            if try_ == tries:
+            if try_ == retries:
                 raise
             click.echo(f"Error occured: {repr(e)}. Trying one more time")
 

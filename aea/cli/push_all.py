@@ -41,16 +41,16 @@ from aea.package_manager.v1 import PackageManagerV1
     "--packages-dir", type=click.Path(file_okay=False, dir_okay=True, exists=True)
 )
 @click.option(
-    "--tries",
+    "--retries",
     type=int,
     default=1,
     help="Tries on package push to the network.",
 )
 @registry_flag()
-def push_all(packages_dir: Optional[Path], tries: int, registry: str) -> None:
+def push_all(packages_dir: Optional[Path], retries: int, registry: str) -> None:
     """Push all available packages to a registry."""
     try:
-        push_all_packages(registry, packages_dir, tries=tries)
+        push_all_packages(registry, packages_dir, retries=retries)
     except ValueError as e:
         raise click.ClickException(str(e)) from e
 
@@ -59,7 +59,7 @@ def push_all_packages(
     registry: str,
     packages_dir: Optional[Path] = None,
     package_type_config_class: Optional[Dict] = None,
-    tries: int = 1,
+    retries: int = 1,
 ) -> None:
     """Push all packages."""
 
@@ -101,5 +101,5 @@ def push_all_packages(
             package_path=package_path,
             package_type_config_class=package_type_config_class,
         )
-        push_item_ipfs(package_path, item_config.public_id, tries=tries)
+        push_item_ipfs(package_path, item_config.public_id, retries=retries)
         click.echo("")

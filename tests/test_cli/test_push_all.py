@@ -103,8 +103,8 @@ class TestPushAll(BaseAEATestCase):
             ):
                 self.run_cli_command("push-all", "--remote")
 
-    def test_tries_applied(self) -> None:
-        """Test tries flag works for pushing packages."""
+    def test_retries_applied(self) -> None:
+        """Test retries flag works for pushing packages."""
         with mock.patch(
             "aea.cli.push_all.get_package_manager",
             return_value=PackageManagerV1(
@@ -125,5 +125,5 @@ class TestPushAll(BaseAEATestCase):
             with mock.patch(
                 "aea.cli.push.IPFSTool.add", side_effect=Exception("expected")
             ) as push_item_ipfs_mock, pytest.raises(Exception, match="expected"):
-                self.run_cli_command("push-all", "--remote", "--tries=3")
+                self.run_cli_command("push-all", "--remote", "--retries=3")
             assert push_item_ipfs_mock.call_count == 3
