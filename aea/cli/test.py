@@ -24,12 +24,13 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, cast
+from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, Union, cast
 
 import click
 import pytest
 from coverage.cmdline import main as coverage
 
+from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import (
     PublicIdParameter,
     determine_package_type_for_directory,
@@ -37,8 +38,8 @@ from aea.cli.utils.click_utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_package_path
-from aea.components.base import load_aea_package, perform_load_aea_package
-from aea.configurations.base import ComponentConfiguration
+from aea.components.base import load_aea_package
+from aea.configurations.base import AgentConfig, ComponentConfiguration
 from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
     CONNECTION,
@@ -118,7 +119,6 @@ def test_aea_project(
     """Run tests of an AEA project."""
     click.echo("Executing tests of the AEA project...")
     ctx = cast(Context, click_context.obj)
-    # in case of an AEA project, the 'packages' directory is the AEA project path itself
     test_package_by_path(
         aea_project_dirpath,
         args,
@@ -411,7 +411,7 @@ def load_package(
     packages_dir: Optional[Path] = None,
     skip_consistency_check: bool = False,
 ) -> None:
-    """Load packages into cache."""
+    """Load packages into memory."""
     enforce(
         (aea_project_path is None) != (packages_dir is None),
         "one of either aea_project_path or packages_dir must be specified",
@@ -423,33 +423,35 @@ def load_package(
         if aea_project_path
         else find_component_directory_from_component_id_in_registry
     )
-
+    if root_packages is None:
+        raise ValueError("Packages dir not set!")
     # check the path points to a valid AEA package
     package_type = determine_package_type_for_directory(package_dir)
-
     if package_type != PackageType.AGENT:
-        if root_packages is None:
-            raise ValueError("Packages dir not set!")
         component_type = ComponentType(package_type.value)
         configuration = load_component_configuration(
             component_type, package_dir, skip_consistency_check=skip_consistency_check
         )
         configuration.directory = package_dir
         load_aea_packages_recursively(configuration, package_path_finder, root_packages)
-    else:
-        perform_load_aea_package(
-            dir_=package_dir,
-            author=package_dir.parent.parent.name,
-            package_type_plural=PackageType(package_type).to_plural(),
-            package_name=package_dir.name,
+
+        test_package_dir = package_dir / AEA_TEST_DIRNAME
+        enforce(
+            test_package_dir.exists(),
+            f"tests directory in {package_dir} not found",
+            click.ClickException,
         )
 
-    test_package_dir = package_dir / AEA_TEST_DIRNAME
-    enforce(
-        test_package_dir.exists(),
-        f"tests directory in {package_dir} not found",
-        click.ClickException,
-    )
+    else:
+        if not (aea_project_path and aea_project_path.exists()):
+            raise click.ClickException(
+                "aea_project_path not spcified or does not exists"
+            )
+
+        agent_config = AEABuilder.try_to_load_agent_configuration_file(
+            cast(Path, aea_project_path)
+        )
+        load_aea_packages_recursively(agent_config, package_path_finder, root_packages)
 
 
 def test_package_by_path(
@@ -463,7 +465,7 @@ def test_package_by_path(
     skip_consistency_check: bool = False,
 ) -> None:
     """
-    Fingerprint package placed in package_dir.
+    Test package placed in package_dir.
 
     :param package_dir: directory of the package
     :param pytest_arguments: arguments to forward to Pytest
@@ -550,7 +552,7 @@ def test_package_collection(
 
 
 def load_aea_packages_recursively(
-    config: ComponentConfiguration,
+    config: Union[ComponentConfiguration, AgentConfig],
     package_path_finder: Callable[[Path, ComponentId], Path],
     root_packages: Path,
     already_loaded: Optional[Set[ComponentId]] = None,
@@ -577,8 +579,10 @@ def load_aea_packages_recursively(
         load_aea_packages_recursively(
             dependency_configuration, package_path_finder, root_packages, already_loaded
         )
-    load_aea_package(config)
-    already_loaded.add(config.component_id)
+    if not isinstance(config, AgentConfig):
+        # works for component, not for agent
+        load_aea_package(config)
+        already_loaded.add(config.component_id)
 
 
 def find_component_directory_from_component_id_in_registry(
@@ -603,7 +607,6 @@ def get_pytest_args(
     coverage_context: Optional[CoverageContext] = None,
 ) -> List:
     """Get pytest args for coverage checks."""
-
     args = [
         str(package_dir / AEA_TEST_DIRNAME),
     ]
