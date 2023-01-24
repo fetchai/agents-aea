@@ -140,7 +140,7 @@ matplotlib = ">=3.3.0,<3.4"
 psutil = "^5.9.3"
 memory-profiler = ">=0.57.0"
 # scripts
-gitpython = "==3.1.14"
+gitpython = "==3.1.30"
 ipfshttpclient = "==0.8.0a2"
 
 
