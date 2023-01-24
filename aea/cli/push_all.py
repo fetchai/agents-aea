@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -40,11 +40,17 @@ from aea.package_manager.v1 import PackageManagerV1
 @click.option(
     "--packages-dir", type=click.Path(file_okay=False, dir_okay=True, exists=True)
 )
+@click.option(
+    "--retries",
+    type=int,
+    default=1,
+    help="Tries on package push to the network.",
+)
 @registry_flag()
-def push_all(packages_dir: Optional[Path], registry: str) -> None:
+def push_all(packages_dir: Optional[Path], retries: int, registry: str) -> None:
     """Push all available packages to a registry."""
     try:
-        push_all_packages(registry, packages_dir)
+        push_all_packages(registry, packages_dir, retries=retries)
     except ValueError as e:
         raise click.ClickException(str(e)) from e
 
@@ -53,6 +59,7 @@ def push_all_packages(
     registry: str,
     packages_dir: Optional[Path] = None,
     package_type_config_class: Optional[Dict] = None,
+    retries: int = 1,
 ) -> None:
     """Push all packages."""
 
@@ -94,5 +101,5 @@ def push_all_packages(
             package_path=package_path,
             package_type_config_class=package_type_config_class,
         )
-        push_item_ipfs(package_path, item_config.public_id)
+        push_item_ipfs(package_path, item_config.public_id, retries=retries)
         click.echo("")
