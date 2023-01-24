@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.stub.connection import StubConnection, write_envelope
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.18.2")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.18.3")
 
 
 class P2PStubConnection(StubConnection):

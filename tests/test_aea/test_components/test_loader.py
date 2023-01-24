@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -229,7 +229,7 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
             )
             handlers_file.write_text(file_data)
             with cd("./vendor/fetchai"):
-                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.20.5")
+                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.20.6")
 
             proc = PexpectWrapper.aea_cli(["run"], cwd=self._get_cwd())
             proc.expect_all(

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,14 +51,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/local:0.21.5
+- fetchai/local:0.21.6
 contracts: []
 protocols:
-- fetchai/default:1.1.6
+- fetchai/default:1.1.7
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.18.5
-default_connection: fetchai/local:0.21.5
+- fetchai/error:0.18.6
+default_connection: fetchai/local:0.21.6
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: ${DISABLE_LOGS:bool}

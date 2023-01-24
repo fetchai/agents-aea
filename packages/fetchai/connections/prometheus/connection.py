@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ from packages.fetchai.protocols.prometheus.dialogues import (
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.9.5")
+PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.9.6")
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 9090

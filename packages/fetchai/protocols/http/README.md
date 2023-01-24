@@ -10,7 +10,7 @@ This is a protocol for interacting with a client/server via HTTP requests and re
 ---
 name: http
 author: fetchai
-version: 1.1.6
+version: 1.1.7
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -43,4 +43,4 @@ keep_terminal_state_dialogues: false
 
 ## Links
 
-* <a href="https://www.w3.org/Protocols/rfc2616/rfc2616.html" target="_blank">HTTP Specification</a>
+- <a href="https://www.w3.org/Protocols/rfc2616/rfc2616.html" target="_blank">HTTP Specification</a>

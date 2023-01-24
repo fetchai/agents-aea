@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.aggregation.v0_2_6;
+package aea.fetchai.aggregation.v0_2_7;
 
 message AggregationMessage{
 

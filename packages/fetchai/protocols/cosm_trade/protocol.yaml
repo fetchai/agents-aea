@@ -1,6 +1,6 @@
 name: cosm_trade
 author: fetchai
-version: 0.2.6
+version: 0.2.7
 protocol_specification_id: fetchai/cosm_trade:1.0.0
 type: protocol
 description: A protocol for preparing an atomic swap bilateral transaction for cosmos-based
@@ -8,14 +8,14 @@ description: A protocol for preparing an atomic swap bilateral transaction for c
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmaGRhL44vq5fJnfunNMD9RoxHFHQggUy6Xv2LAmVHL6RJ
-  __init__.py: QmSkX3VUfjpja5B48M839dGMRVQHfz4egTb5CqWuskPzNt
+  README.md: QmU2AsQPL4v5qPsPxh17pbNQCFV5qgqbXbsUe5kMJPCyum
+  __init__.py: QmcBn4zeHdnsdkMKwbiWaKpPKELmzKSrv4aFPPSp3EgUqb
   cosm_trade.proto: QmWJZbNWJD8Qz1A1ju89wWoxFjMhC7RHn1pkeVPW3s3CPT
   cosm_trade_pb2.py: Qma3GnRA8g9t6RADbYyagW747CcDmuNUEqahpjHvsroTTx
-  custom_types.py: QmS4h6s3ZnbzrDrud9ZPfaUesN3CczZHC4LPqFX8VGFPcj
-  dialogues.py: QmNWYxmPJJEuqyc8NS5zxXMB3w2avNxZwBVdvX1Fms6oDD
-  message.py: QmUK8s2RBTjQhs2BKbTjC4RKFQUkNjcp3t4dD4eUpGR6LT
-  serialization.py: QmeF2MbgLAsJ4TnXmsLF6eTfepvzmiQjyS3veYUhmph7bJ
+  custom_types.py: QmZPHKmNPKwPGQu6cswi7MsfWGUHm8YG1XWowtnxVBstXS
+  dialogues.py: QmThJHxUPEeiaVqNJz3QgNvJXAVxwxppM5VHK8TSEuPdxk
+  message.py: QmdbUwDBj5v6DkcvjtHgHz6HPHjZndDTEQH12RwL4eQCR6
+  serialization.py: QmT2faXciRfykDBg3kXUvma2wjNgjHZ37nDfxiGD6mMtrB
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

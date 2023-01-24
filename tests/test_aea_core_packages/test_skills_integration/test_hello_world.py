@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ class TestHelloWorldSkill(AEATestCaseEmpty):
         """Run the hello_world skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("skill", "fetchai/hello_world:0.1.4")
+        self.add_item("skill", "fetchai/hello_world:0.1.5")
 
         process = self.run_agent()
         is_running = self.is_running(process)

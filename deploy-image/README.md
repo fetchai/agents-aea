@@ -23,13 +23,13 @@ Second, review the `entrypoint.sh` script to make sure you supply the agent with
 Importantly, do not add any private keys during the build step!
 
 Third, create a local `.env` file with the relevant environment variables:
-```
+
+``` bash
 AGENT_PRIV_KEY=hex_key_here
 CONNECTION_PRIV_KEY=hex_key_here
 ```
 
 Finally, if required, modify the `Dockerfile` to expose any ports needed by the AEA. (The default example does not require this.)
-
 
 ### Build the image
 
@@ -47,5 +47,4 @@ To stop, use `docker ps` to find the container id and then `docker stop CONTAINE
 
 ## Advanced usage and comments
 
-- The above approach implies that key files remain in the container. To avoid this, a static volume can be mounted with the key files in it (https://docs.docker.com/get-started/06_bind_mounts/).
-
+- The above approach implies that key files remain in the container. To avoid this, a static volume can be mounted with the key files in it (<https://docs.docker.com/get-started/06_bind_mounts/>).

@@ -1,3 +1,4 @@
+# Modes of Running an AEA
 
 We can run an AEA in multiple modes thanks to the configurable design of the framework.
 

@@ -18,7 +18,7 @@ _Put an `x` in the boxes that apply._
 - [ ] I have added an item in `HISTORY.md` for this release.
 - [ ] I bumped the version number in the `aea/__version__.py` file.
 - [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest`  
-      (check the READMEs of [`aea-develop`](https://github.com/fetchai/agents-aea/blob/master/develop-image/README.md#publish) 
+      (check the READMEs of [`aea-develop`](https://github.com/fetchai/agents-aea/blob/master/develop-image/README.md#publish)
       and [`aea-user`](https://github.com/fetchai/agents-aea/blob/master/develop-image/user-image/README.md#publish))
 - [ ] I have pushed the latest packages to the registry.
 - [ ] I have uploaded the latest `aea` to PyPI.

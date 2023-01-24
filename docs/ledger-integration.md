@@ -1,6 +1,8 @@
+# Ledger & Crypto APIs
+
 In this section, we show you how to integrate the AEA with the Fetch.ai and third-party ledgers.
 
-## Ledger support
+## Ledger Support
 
 For a ledger to be considered _supported_ in the framework, three abstract base classes need to be implemented:
 
@@ -10,10 +12,10 @@ For a ledger to be considered _supported_ in the framework, three abstract base 
 
 These three classes have their own registries, which allow the developer to import the relevant object where needed.
 
-## Ledger plug-in architecture
+## Ledger Plug-in Architecture
 
-The AEA framework provides a plug-in mechanism to support ledger functionalities in 
-an easily extendible way. At import time, the framework will load
+The AEA framework provides a plug-in mechanism to support ledger functionalities in
+an easily extendable way. At import time, the framework will load
 all the crypto plug-ins available in the current Python environment.
 
 A _crypto plug-in_ is a Python package which declares some specific
@@ -27,7 +29,7 @@ In particular, there are three types of entry points the framework looks up:
 
 This is an example of `setup.py` script for a ledger plug-in `aea-ledger-myledger`:
 
-```python
+``` python
 # sample ./setup.py file
 from setuptools import setup
 
@@ -55,7 +57,7 @@ and the importable package name is `aea_ledger_myledger`.
 You can search for AEA ledger plug-ins on PyPI:
 <a href="https://pypi.org/search/?q=aea-ledger" target="_blank">https://pypi.org/search/?q=aea-ledger</a>
 
-## Maintained plug-ins
+## Maintained Plug-ins
 
 At the moment, the framework natively supports the following three ledgers:
 
@@ -64,7 +66,6 @@ At the moment, the framework natively supports the following three ledgers:
 - Cosmos: <a href="https://pypi.org/project/aea-ledger-cosmos/" target="_blank">PyPI package: `aea-ledger-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos" target="_blank">source code</a>.
 
 However, support for additional ledgers can be added to the framework at runtime.
-
 
 ## Examples
 
@@ -128,27 +129,25 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
-## Stargate World - Fetch.ai testnet for agents
+## Stargate World - Fetch.ai Testnet for Agents
 
 Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
-
-| Parameter      | Value                                                                      |
-| -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | dorado-1                                                            |
-| Denomination   | atestfet                                                                   |
-| Decimals       | 18                                                                         |
-| Version        | v0.8.x                                                                     |
-| RPC Endpoint   | https://rpc-dorado.fetch.ai:443                                     |
-| REST Endpoint  | https://rest-dorado.fetch.ai:443                                    |
+| Parameter      | Value                                                                                         |
+|----------------|-----------------------------------------------------------------------------------------------|
+| Chain ID       | dorado-1                                                                                      |
+| Denomination   | atestfet                                                                                      |
+| Decimals       | 18                                                                                            |
+| Version        | v0.8.x                                                                                        |
+| RPC Endpoint   | <https://rpc-dorado.fetch.ai:443>                                                             |
+| REST Endpoint  | <https://rest-dorado.fetch.ai:443>                                                            |
 | Block Explorer | <a href="https://explore-dorado.fetch.ai" target="_blank">https://explore-dorado.fetch.ai</a> |
-| Token Faucet   | Use block explorer                                                         |
+| Token Faucet   | Use block explorer                                                                            |
 
 You can access more details on <a href="https://docs.fetch.ai/ledger_v2/networks/" target="_blank">docs section</a>.
 
-The configurations can be specified for the `fetchai/ledger:0.21.4` connection.
+The configurations can be specified for the `fetchai/ledger:0.21.5` connection.
 
-## CosmWasm supporting chains
+## CosmWasm Supporting Chains
 
 The Fetch.ai networks use <a href="https://docs.cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
-

@@ -4,6 +4,7 @@ AUTHOR_REGEX: "[a-zA-Z_][a-zA-Z0-9_]*"
 PUBLIC_ID_REGEX: "^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
 LEDGER_ID_REGEX: "^[^\\d\\W]\\w*\\Z"
 ```
+
 ``` yaml
 agent_name: my_agent                            # Name of the AEA project (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the project's author (must satisfy AUTHOR_REGEX)
@@ -14,13 +15,13 @@ aea_version: '>=1.0.0, <2.0.0'               # AEA framework version(s) compatib
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.21.2
+- fetchai/stub:0.21.3
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:1.1.6
+- fetchai/default:1.1.7
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.18.5
-default_connection: fetchai/p2p_libp2p:0.27.4   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.18.6
+default_connection: fetchai/p2p_libp2p:0.27.5   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 required_ledgers: [fetchai]                            # the list of identifiers of ledgers that the AEA project requires key pairs for (each item must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
@@ -33,6 +34,7 @@ logging_config:                                 # The logging configurations the
   version: 1
 dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins). They will be installed when `aea install` is run.
 ```
+
 ``` yaml
 period: 0.05                                    # The period to call agent's act
 execution_timeout: 0                            # The execution time limit on each call to `react` and `act` (0 disables the feature)
@@ -47,11 +49,13 @@ decision_maker_handler: None                    # The decision maker handler to 
 storage_uri: None                               # The URI to the storage.
 data_dir: None                                  # The path to the directory for local files. Defaults to current working directory.
 ```
+
 ``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
 type: connection                                # for connections, this must be "connection".
 config: ...                                     # a dictionary to overwrite the `config` field (see below)
 ```
+
 ``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
 type: skill                                     # for skills, this must be "skill".
@@ -68,6 +72,7 @@ models:                                         # override configurations for mo
     args:                                       # arguments for a specific model (see below)
       foo: bar
 ```
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
@@ -90,6 +95,7 @@ restricted_to_protocols: []                     # The list of protocol public id
 dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 is_abstract: false                              # An optional boolean that if `true` makes the connection
 ```
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
@@ -108,6 +114,7 @@ config:                                         # A dictionary containing the kw
   foo: bar
 dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
@@ -123,6 +130,7 @@ fingerprint:                                    # Fingerprint of package compone
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)

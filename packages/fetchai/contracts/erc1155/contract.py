@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ from aea.crypto.base import LedgerApi
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.23.2")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.23.3")
 DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT = 2818111
 DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT = 1500000
 DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT = 300000

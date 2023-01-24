@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_VERSION
+from aea.configurations.constants import DEFAULT_README_FILE, DEFAULT_VERSION
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
@@ -354,7 +354,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.30.4",
+            "fetchai/generic_buyer:0.30.5",
             "--alias",
             cls.agent_name,
         )
@@ -436,7 +436,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.30.4", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.30.5", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -935,7 +935,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.21.2\n"
+        assert result.stdout == "fetchai/stub:0.21.3\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
@@ -1038,7 +1038,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
     IS_EMPTY = True
 
     GENERIC_SELLER = ComponentId(
-        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.28.5")
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.28.6")
     )
     unmocked = get_latest_version_available_in_registry
 
@@ -1189,7 +1189,10 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        ignore = [
+            DEFAULT_AEA_CONFIG_FILE,
+            DEFAULT_README_FILE,
+        ] + filecmp.DEFAULT_IGNORES
         dircmp = filecmp.dircmp(
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
@@ -1215,7 +1218,10 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        ignore = [
+            DEFAULT_AEA_CONFIG_FILE,
+            DEFAULT_README_FILE,
+        ] + filecmp.DEFAULT_IGNORES
         dircmp = filecmp.dircmp(
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
@@ -1232,7 +1238,7 @@ class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     The test works as follows:
     """
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.32.4")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.32.5")
     EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:latest")
 
     def test_upgrade(self):
