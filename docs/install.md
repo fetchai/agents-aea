@@ -1,71 +1,37 @@
 # Installation and setup
 
-## AEA Framework
-
-### System Requirements
+## System Requirements
 
 !!! Info "System requirements"
     The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
     
-    You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.8</a> or higher on your system.
-
-Depending on what you want to do, you might need extra tools on your system:
-
-- The project uses Google Protocol Buffers compiler for message serialization. The compiler's version must match the protobuf library installed with the project (see pyproject.toml).
-- The fetchai/p2p_libp2p package is partially developed in Go. To make changes, install Golang.
-- To update fingerprint hashes of packages, you will need the IPFS daemon.
-
-You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.7</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+    You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.8, 3.9 or 3.10</a> on your system.
 
 GCC installation is required:
 
 - Ubuntu: `apt-get install gcc`
+- MacOS X (with home brew): `brew install gcc`
 - Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
  installed): `choco install mingw`
-- MacOS X (with home brew): `brew install gcc`
 
 ### Option 1: Manual System Preparation
 
-Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
+Install a compatible Python version on your system.
 
 ??? note "Manual approach:"
 
     The following hints can help:
     
-    - To install Go, follow the official guide, depending on your platform <a href="https://go.dev/doc/install" target="_blank">here</a>
-    - Python is already included by default on many Linux distributions (e.g. Ubuntu), as well as MacOS. To check you have the right version, open a terminal and run:
+    - Ubuntu/Debian systems only: install Python headers, depending on the Python version you have installed on your machine. E.g. for Python 3.8: 
 
         ``` bash
-        python3 --version
-        ```
-
-    - To install Python on Windows machines, you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
-    - Ubuntu/Debian systems only: install Python headers, depending on the Python version you have installed on your machine. E.g. for Python 3.7: 
-
-        ``` bash
-        sudo apt-get install python3.7-dev
+        sudo apt-get install python3.8-dev
         ```
 
     - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
-### Option 2: Using an 'Automated Install' Script
+### Option 2: Using Docker
 
-We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the <a href="../quickstart#installation">installation step</a> that comes later on this page.
-
-??? note "The 'Automated install' script approach:"
-    On macOS or Ubuntu run the following commands to download and install:
-
-    ``` bash
-    curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
-    chmod +x install.sh
-    ./install.sh
-    ```
-
-    On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
-
-### Option 3: Using Docker
-
-​
 We also provide a Docker image with all the needed dependencies.
 
 ??? note "Docker approach:"
@@ -94,45 +60,62 @@ We also provide a Docker image with all the needed dependencies.
 
 ## Preliminaries
 
-Ensure, you are in a clean working directory:
+Create a new working directory. Let's call it `my_aea_projects`. This is where you will create your agent projects.
 
-- either you create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
+Inside `my_aea_projects`, add an empty directory called `packages`. This is a local registry for your agents' components.
 
-- or you clone the template repo as described in `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
+You should now have the following directory structure:
 
-At this point, when typing `ls` you should see a single folder called `packages` in your working environment. This will act as your local registry for AEA components.
-
-Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
-
-Check that you have <a href="https://github.com/pypa/pipenv" target="_blank">`pipenv`</a>.
-
-``` bash
-which pipenv
+```bash
+my_aea_projects
+└── packages
 ```
 
-If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target="_blank">here</a>.
+Instead of the above, you can clone the template repo as described in `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
 
-Once installed, create a new environment and open it (here we use Python 3.7 but the AEA framework supports any Python >= 3.6).
+### Virtual Environment
 
-``` bash
-touch Pipfile && pipenv --python 3.7 && pipenv shell
-```
+Unless you are using the docker image, we highly recommend using a virtual environment so that your setup is isolated from the rest of your system. This prevents clashes and ensures consistency across dependencies.
+
+You can use any common virtual environment manager for Python, such as [`pipenv`](https://pypi.org/project/pipenv/) and [`poetry`](https://python-poetry.org/docs/#installation). If you do not have either, install one.
+
+Once installed, create a new virtual environment in the `my_aea_projects` directory and enter it:
+
+=== "pipenv"
+    (you can use Python version `3.8`, `3.9`, or `3.10` in the command):
+    ``` bash
+    pipenv --python 3.9 && pipenv shell
+    ```
+=== "poetry"
+    ``` bash
+    poetry init -n && poetry shell
+    ```
 
 ## Installation
 
-The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the 'install script' above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
+!!! info
+    Skip this step if you used the 'install script' above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.
 
-``` bash
-pip install aea[all]
-```
+Install the AEA framework:
 
-If you are using `zsh` rather than `bash` type
+=== "bash/windows"
+    ``` bash
+    pip install aea[all]
+    ```
+=== "zsh"
+    ``` zsh
+    pip install 'aea[all]'
+    ```
 
-``` zsh
-pip install 'aea[all]'
-```
+If installation fail, it might be a dependency issue. Make sure you have followed all the relevant steps under `System Requirements`.
 
-If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
+## Other tools you might need
+
+Depending on what you want to do, you might need extra tools on your system:
+
+- To use the Agent Communication Network (ACN) for peer-to-peer communication between agents (e.g. using the `fetchai/p2p_libp2p` connection) you will need to [install Golang 1.14.2 or higher](https://go.dev/doc/install).
+- The framework uses [Google Protocol Buffers](https://protobuf.dev) for message serialization. If you want to develop protocols, install the protobuf compiler on your system. The version you install must match the protobuf library installed with the project (see pyproject.toml).
+- To update fingerprint hashes of packages, you will need the IPFS daemon.
 
 ## Setup Author Name
 
