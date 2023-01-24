@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of the ledger API request dispatcher."""
+import asyncio
 import logging
-import time
 from typing import Any, cast
 
 from aea.connections.base import ConnectionStates
@@ -280,7 +280,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             if transaction_receipt is not None:
                 is_settled = api.is_transaction_settled(transaction_receipt)
             attempts += 1
-            time.sleep(retry_timeout * attempts)
+            await asyncio.sleep(retry_timeout * attempts)
         self.logger.debug(
             f"Transaction receipt: {transaction_receipt}, settled: {is_settled}"
         )
@@ -305,7 +305,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 transaction = None
 
             attempts += 1
-            time.sleep(retry_timeout * attempts)
+            await asyncio.sleep(retry_timeout * attempts)
         self.logger.debug(f"Transaction: {transaction}")
 
         if not is_settled:
