@@ -48,7 +48,7 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_VERSION
+from aea.configurations.constants import DEFAULT_README_FILE, DEFAULT_VERSION
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
@@ -1189,7 +1189,10 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        ignore = [
+            DEFAULT_AEA_CONFIG_FILE,
+            DEFAULT_README_FILE,
+        ] + filecmp.DEFAULT_IGNORES
         dircmp = filecmp.dircmp(
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
@@ -1215,7 +1218,10 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        ignore = [
+            DEFAULT_AEA_CONFIG_FILE,
+            DEFAULT_README_FILE,
+        ] + filecmp.DEFAULT_IGNORES
         dircmp = filecmp.dircmp(
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
