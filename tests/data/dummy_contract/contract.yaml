@@ -6,10 +6,10 @@ description: A test contract
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmU1AKVDZPZurHxYStRw5tpoyxKxAohQ4yu57mNSTWYzPE
+  __init__.py: QmURXWttkpyyuCk7YfhmvWyRx9xNXzZUmrXaZDJeucajzn
   build/some.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
   build/some.wasm: Qmc9gthbdwRSywinTHKjRVQdFzrKTxUuLDx2ryNfQp1xqf
-  contract.py: QmPUPN58uwMtQEigj4e6SNFGQNNRpzCuQcXYFF4XyHLD8r
+  contract.py: QmUw1VRch2sJGAzS5nb8JMFN2xYL5ovsm3SpnZMw9nV8zg
 fingerprint_ignore_patterns: []
 build_entrypoint: path/to/script.py
 class_name: DummyContract

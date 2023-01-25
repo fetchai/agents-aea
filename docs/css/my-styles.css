@@ -1,37 +1,75 @@
-pre {
-    background-color: #f8f8f7;
+/* overriding colours */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #4051b5;
+  --md-typeset-color: #525252;
+  --md-a-color:#1d6ff5;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #fff;
+  --md-typeset-color: #d0d6fc;
+  --md-a-color:#5997fd;
 }
 
-code {
-    background-color: #0083fb;
+/*overriding the header*/
+.md-header-nav__button.md-logo img {
+	width: auto!important;
 }
 
-/* this doesn't work now
-.md-nav__link {
-  text-transform: uppercase;
-  color: #0083fb;
-}
-*/
-
-/* Katharine's css additions */
-.md-header,
-.md-tabs,
-.md-footer-meta,
-.md-footer-nav,
-.md-footer-nav__inner {
-    background-color: #172b6e;
+.md-nav__button .md-logo{
+	width: auto!important;
 }
 
-.md-nav__title {
-    color: #172b6e;
+.md-header__button.md-logo img {
+  width: auto !important;
 }
 
-.md-icon {
-    ./assets/images/favicon.ico;
+
+@media screen and (max-width: 76.1875em) {
+  .md-nav--primary .md-nav__title[for="__drawer"] {
+    background-color: #202943 !important;
+  }
+
+	.md-nav--primary .md-nav__title[for=__drawer] img{
+		width: 180px;
+	    height: auto;
+	}
 }
 
-/* Needed so that Mermaid UML diagrams don't end up being massively tall */
-svg{
-    height: auto;
+.md-header{
+	background-color:#202943!important;
+	padding: 10px;
+	height: auto;
+}
 
+/* Overriding font header, link, paragraph styling  */
+.md-typeset h3,
+.md-typeset h1,
+.md-typeset h2 {
+  margin-bottom: 0.4em;
+  color: var(--md-primary-fg-color);
+  font-weight: 400;
+}
+
+.md-typeset a {
+  color: var(--md-a-color);
+}
+
+.black-link{
+	color: black!important;
+}
+
+.md-nav__item .md-nav__link--active {
+  padding: 4px 8px;
+  position: relative;
+  left: -8px;
+  background: #E9EBFC;
+  border-radius: 16px;
+  width: fit-content;
+  color: rgb(64, 81, 181)
+}
+
+@media screen and (max-width: 76.1875em) {
+  .md-nav__item .md-nav__link--active {
+    left: 0;
+  }
 }

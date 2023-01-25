@@ -1,12 +1,13 @@
+# Gym Skill
+
 The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.dev/" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
-### Discussion
+## Discussion
 
 The gym skills demonstrate how to wrap a Reinforcement Learning agent in a skill.
 The example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
 
-
-## Preparation instructions
+## Preparation Instructions
 
 ### Dependencies
 
@@ -25,69 +26,72 @@ Install the `gym` and `numpy` library.
 pip install numpy gym
 ```
 
-## Demo instructions
-
+## Demo Instructions
 
 ### Create the AEA
 
 First, fetch the gym AEA:
+
 ``` bash
-aea fetch fetchai/gym_aea:0.26.4 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.26.5 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
+??? note "Alternatively, create from scratch:"
 
-### Create the AEA
-In the root directory, create the gym AEA and enter the project.
-``` bash
-aea create my_gym_aea
-cd my_gym_aea
-```
+    ### Create the AEA
 
-### Add the gym skill
-``` bash
-aea add skill fetchai/gym:0.21.5
-```
+    In the root directory, create the gym AEA and enter the project.
 
-### Set gym connection as default
-``` bash
-aea config set agent.default_connection fetchai/gym:0.20.5
-```
+    ``` bash
+    aea create my_gym_aea
+    cd my_gym_aea
+    ```
 
-### Install the skill dependencies
+    ### Add the gym skill
 
-To install the `gym` package, a dependency of the gym skill, from PyPI run
-``` bash
-aea install
-```
+    ``` bash
+    aea add skill fetchai/gym:0.21.6
+    ```
+    
+    ### Set gym connection as default
 
-</p>
-</details>
+    ``` bash
+    aea config set agent.default_connection fetchai/gym:0.20.6
+    ```
 
-### Set up the training environment
+    ### Install the skill dependencies
+    
+    To install the `gym` package, a dependency of the gym skill, from PyPI run
 
-#### Copy the gym environment to the AEA directory
+    ``` bash
+    aea install
+    ```
+
+### Set up the Training Environment
+
+#### Copy the Gym Environment to the AEA Directory
+
 ``` bash
 mkdir gyms
 cp -a ../examples/gym_ex/gyms/. gyms/
 ```
 
-#### Update the connection configuration
+#### Update the Connection Configuration
+
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 
-#### Create and add a private key
+#### Create and Add a Private Key
 
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai
 ```
 
-### Run the AEA with the gym connection
+### Run the AEA with the Gym Connection
 
 ``` bash
 aea run
@@ -95,9 +99,7 @@ aea run
 
 You will see the gym training logs.
 
-
 <img src="../assets/gym-training.png" alt="AEA gym training logs" class="center">
-
 
 ### Delete the AEA
 
@@ -109,9 +111,10 @@ aea delete my_gym_aea
 ```
 
 ## Communication
+
 This diagram shows the communication between the AEA and the gym environment
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant AEA
         participant Environment
@@ -127,7 +130,7 @@ This diagram shows the communication between the AEA and the gym environment
 
         deactivate AEA
         deactivate Environment
-</div>
+```
 
 ## Skill Architecture
 
@@ -142,5 +145,3 @@ In this particular skill, which chiefly serves for demonstration purposes, we im
 <img src="../assets/gym-skill.jpg" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 The illustration shows how the RL agent only interacts with the proxy environment by sending it `action (A)` and receiving `observation (O)`, `reward (R)`, `done (D)` and  `info (I)`.
-
-<br/>

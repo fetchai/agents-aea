@@ -1,14 +1,19 @@
+# SOEF Connection
+
 You can use the <a href="../simple-oef">SOEF</a> in the agent framework by using the SOEF connection as a package in your agent project.
 
-## Add the SOEF package
-Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.27.5` connection package. 
+## Add the SOEF Package
 
-## Register your agent and its services
+Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.27.6` connection package.
 
-### Register agent location
+## Register your Agent and its Services
+
+### Register Agent Location
+
 To register your agent's location, you have to send a message in the `fetchai/oef_search:1.0.0` protocol to the SOEF connection.
 
 First, define a data model for location data:
+
 ``` python
 from aea.helpers.search.models import Attribute, DataModel, Location
 
@@ -18,9 +23,11 @@ AGENT_LOCATION_MODEL = DataModel(
     "A data model to describe location of an agent.",
 )
 ```
+
 It is important to use this exact data model, as the SOEF connection can only process specific data models.
 
 Second, create a location object:
+
 ``` python
 from aea.helpers.search.models import Location
 
@@ -28,6 +35,7 @@ agent_location = Location(52.2057092, 2.1183431)
 ```
 
 Third, construct a service description instance with location and data model:
+
 ``` python
 from aea.helpers.search.models import Description
 
@@ -38,6 +46,7 @@ service_description = Description(
 ```
 
 Finally, construct a message and send it:
+
 ``` python
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
@@ -51,9 +60,10 @@ In case everything is registered OK, you will not receive any message back.
 
 If something goes wrong you will receive an error message with performative `OefSearchMessage.Performative.OEF_ERROR`.
 
-### Register personality pieces
+### Register Personality Pieces
 
 To register personality pieces, you have to use a specific data model:
+
 ``` python
 from aea.helpers.search.models import Attribute, DataModel, Location
 
@@ -68,6 +78,7 @@ AGENT_PERSONALITY_MODEL = DataModel(
 ```
 
 An example follows:
+
 ``` python
 service_instance = {"piece": "genus", "value": "service"}
 service_description = Description(
@@ -75,9 +86,10 @@ service_description = Description(
 )
 ```
 
-### Register services
+### Register Services
 
 To set some service key and value you have to use a specific data model:
+
 ``` python
 SET_SERVICE_KEY_MODEL = DataModel(
     "set_service_key",
@@ -90,6 +102,7 @@ SET_SERVICE_KEY_MODEL = DataModel(
 ```
 
 An example follows:
+
 ``` python
 service_instance = {"key": "test", "value": "test"}
 service_description = Description(
@@ -97,9 +110,10 @@ service_description = Description(
 )
 ```
 
-### Remove service key
+### Remove Service Key
 
 To remove service key have to use a specific data model:
+
 ``` python
 REMOVE_SERVICE_KEY_MODEL = DataModel(
     "remove_service_key",
@@ -109,6 +123,7 @@ REMOVE_SERVICE_KEY_MODEL = DataModel(
 ```
 
 An example follows:
+
 ``` python
 service_instance = {"key": "test"}
 service_description = Description(
@@ -116,16 +131,15 @@ service_description = Description(
 )
 ```
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Currently, the soef does not allow for multiple registrations to be combined into a single command.
-</div>
+!!! note
+    Currently, the soef does not allow for multiple registrations to be combined into a single command.
 
-## Perform a search
+## Perform a Search
 
 To perform a search for services registered you have to define a search query consisting of constraints. The location constraints is required, personality pieces or services keys constraints are optional.
 
 An example follows:
+
 ``` python
 from aea.helpers.search.models import (
     Constraint,
@@ -159,11 +173,12 @@ message = OefSearchMessage(
 )
 ```
 
-In case of error you will received a message with `OefSearchMessage.Performative.OEF_ERROR`. In case of successful search you will receive a message with performative `OefSearchMessage.Performative.SEARCH_RESULT` and the list of matched agents addresses.
+In case of error, you will receive a message with `OefSearchMessage.Performative.OEF_ERROR`. In case of successful search you will receive a message with performative `OefSearchMessage.Performative.SEARCH_RESULT` and the list of matched agents addresses.
 
-## Generic command
+## Generic Command
 
 To send a generic command request to the SOEF use the following (here on the example of setting a declared name):
+
 ``` python
 import urllib
 

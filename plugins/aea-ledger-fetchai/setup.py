@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ plugin_dir = os.path.abspath(os.path.join(here, ".."))
 
 setup(
     name="aea-ledger-fetchai",
-    version="1.2.4",
+    version="1.2.5",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",

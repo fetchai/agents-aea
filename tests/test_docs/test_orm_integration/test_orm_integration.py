@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -127,8 +127,8 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-            "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5",
+            "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+            "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6",
         }
 
         # generate random location
@@ -139,15 +139,15 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.4")
-        self.add_item("connection", "fetchai/soef:0.27.5")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.4")
-        self.add_item("connection", "fetchai/ledger:0.21.4")
-        self.add_item("skill", "fetchai/thermometer:0.27.5")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.5")
+        self.add_item("connection", "fetchai/soef:0.27.6")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.5")
+        self.add_item("connection", "fetchai/ledger:0.21.5")
+        self.add_item("skill", "fetchai/thermometer:0.27.6")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.27.5")
+        self.eject_item("skill", "fetchai/thermometer:0.27.6")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.nested_set_config(
             "skills.thermometer.models.strategy.args",
@@ -194,11 +194,11 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.4")
-        self.add_item("connection", "fetchai/soef:0.27.5")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.4")
-        self.add_item("connection", "fetchai/ledger:0.21.4")
-        self.add_item("skill", "fetchai/thermometer_client:0.26.5")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.5")
+        self.add_item("connection", "fetchai/soef:0.27.6")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.5")
+        self.add_item("connection", "fetchai/ledger:0.21.5")
+        self.add_item("skill", "fetchai/thermometer_client:0.26.6")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)

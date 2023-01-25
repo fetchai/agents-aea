@@ -1,22 +1,22 @@
 name: simple_service_registration
 author: fetchai
-version: 0.23.5
+version: 0.23.6
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
-  __init__.py: QmYmua5kBdXWDA3NnmxHZ5oSAhGFMoq13ZjbqyCusoBCXM
-  behaviours.py: QmeHRYpWwbXVt5TikSGDaZHv34ouu3uCGBv2Xw2K17mBsc
-  dialogues.py: QmW3VCm1q3xUvr11APWvRQo4z64rs2eUp9svg8zWSqk2Zi
-  handlers.py: QmX3bdLbmZtMwzU3u7NAc8q3NuwERV9xohLrCNZyvey2VL
-  strategy.py: QmXcRCe5herdhFEqPyF7rbzLY7UeFGnkjrDsEnyUC12dwv
+  README.md: QmcAU3oi7tWS86UmAePbubQLinLutQsSQ1eGce5LperZty
+  __init__.py: QmTBYeERGsytUjBYUFCBCA55yuXaQSetGT235Zz8fbV16L
+  behaviours.py: QmWuomUzWYZXeshgbnnzzeC9xE3tNwJReGwCBtbqhMXcaY
+  dialogues.py: QmbgKy2b6WiWSFXxdwDaawAsoBY2VsBAdhRgUL6WTaGhEt
+  handlers.py: QmehzwbrYqX2VAoAzVC7754rdJFjYoNCs58R5oBu5ChnDq
+  strategy.py: QmcwQhz4RsqN35BiApeTDoyuggqXXooezW6HvsTx9ugXGj
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.6
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   service:

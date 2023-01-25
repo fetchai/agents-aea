@@ -1,87 +1,105 @@
 ``` bash
 sudo nano 99-hidraw-permissions.rules
 ```
+
 ``` bash
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
+
 ``` bash
-aea fetch fetchai/generic_seller:0.29.4
+aea fetch fetchai/generic_seller:0.29.5
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.28.5
+aea eject skill fetchai/generic_seller:0.28.6
 cd ..
 ```
+
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.4
+aea fetch fetchai/generic_buyer:0.30.5
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.27.5
+aea eject skill fetchai/generic_buyer:0.27.6
 cd ..
 ```
+
 ``` bash
 aea init --reset --author fetchai
 ```
+
 ``` bash
 aea create my_generic_seller
 cd my_generic_seller
 aea install
 ```
+
 ``` bash
 aea scaffold skill generic_seller
 ```
+
 ``` bash
 aea fingerprint skill fetchai/generic_seller:0.1.0
 ```
+
 ``` bash
 aea create my_generic_buyer
 cd my_generic_buyer
 aea install
 ```
+
 ``` bash
 aea scaffold skill generic_buyer
 ```
+
 ``` bash
 aea fingerprint skill fetchai/generic_buyer:0.1.0
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.6": "fetchai/ledger:0.21.4",
-  "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5"
+  "fetchai/ledger_api:1.1.7": "fetchai/ledger:0.21.5",
+  "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
 }'
 ```
+
 ``` bash
 aea generate-wealth fetchai --sync
 ```
+
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add protocol fetchai/fipa:1.1.6
+aea add connection fetchai/p2p_libp2p:0.27.5
+aea add connection fetchai/soef:0.27.6
+aea add connection fetchai/ledger:0.21.5
+aea add protocol fetchai/fipa:1.1.7
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
 aea run
 ```
-``` bash 
-aea add connection fetchai/p2p_libp2p:0.27.4
-aea add connection fetchai/soef:0.27.5
-aea add connection fetchai/ledger:0.21.4
-aea add protocol fetchai/fipa:1.1.6
-aea add protocol fetchai/signing:1.1.6
+
+``` bash
+aea add connection fetchai/p2p_libp2p:0.27.5
+aea add connection fetchai/soef:0.27.6
+aea add connection fetchai/ledger:0.21.5
+aea add protocol fetchai/fipa:1.1.7
+aea add protocol fetchai/signing:1.1.7
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.4
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -92,14 +110,17 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
-``` bash 
+
+``` bash
 cd ..
 aea delete my_generic_seller
 aea delete my_generic_buyer
 ```
+
 ``` yaml
 name: generic_seller
 author: fetchai
@@ -118,13 +139,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.4
+- fetchai/ledger:0.21.5
 contracts: []
 protocols:
-- fetchai/default:1.1.6
-- fetchai/fipa:1.1.6
-- fetchai/ledger_api:1.1.6
-- fetchai/oef_search:1.1.6
+- fetchai/default:1.1.7
+- fetchai/fipa:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   service_registration:
@@ -172,6 +193,7 @@ models:
 is_abstract: false
 dependencies: {}
 ```
+
 ``` yaml
 name: generic_buyer
 author: fetchai
@@ -189,14 +211,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.4
+- fetchai/ledger:0.21.5
 contracts: []
 protocols:
-- fetchai/default:1.1.6
-- fetchai/fipa:1.1.6
-- fetchai/ledger_api:1.1.6
-- fetchai/oef_search:1.1.6
-- fetchai/signing:1.1.6
+- fetchai/default:1.1.7
+- fetchai/fipa:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/oef_search:1.1.7
+- fetchai/signing:1.1.7
 skills: []
 behaviours:
   search:
@@ -258,6 +280,7 @@ models:
 is_abstract: false
 dependencies: {}
 ```
+
 ``` yaml
 config:
   delegate_uri: 127.0.0.1:11001

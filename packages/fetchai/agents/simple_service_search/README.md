@@ -8,4 +8,4 @@ This agent is used in the "Guide on Writing a Skill" section of the documentatio
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/skill-guide/" target="_blank">Guide on Building a Skill</a>
+- <a href="https://docs.fetch.ai/aea/skill-guide/" target="_blank">Guide on Building a Skill</a>

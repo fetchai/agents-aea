@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class TestLanguageAgnosticDocs(BaseTestMarkdownDocs):
     def setup_class(cls):
         """Set up the test."""
         super().setup_class()
-        cls.code_blocks = list(filter(cls._proto_snippet_selector, cls.blocks))
+        cls.code_blocks = list(filter(cls._proto_snippet_selector, cls.flat_blocks))
         cls.actual_mail_base_file_content = MAIL_BASE_PROTO.read_text()
         cls.actual_default_message_file_content = DEFAULT_MESSAGE_PROTO.read_text()
 

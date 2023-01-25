@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.27.4
+version: 0.27.5
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -8,15 +8,15 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmdkqMTGvvmv1ZG1sSj7M7xheSTviLrWiV8h3XePV1dxy2
-  __init__.py: QmcibHXQV8uZnMRJe7jNGEFeUKns1ZF2QR9c6mxKMbV4oa
-  check_dependencies.py: QmXpT25ZDNrjJ7VPspLGipn9WP9j313cvhP439pzr5Gc3J
-  connection.py: QmXfAipE1a6XzUo7Gkm2PkF8vV3Qm6AkGJqgjo1D8EZVWq
-  consts.py: QmNbua6EsorAf3FS4fCmCHBZ9TRZ6ENkZoHTyA9TEJZqpy
+  README.md: Qmf8Gh38S4rtZVh2yPUTdHrAEpovt1ULg4bccaFNZfYxCt
+  __init__.py: Qmcwvb5isp1zoF57phgDHEPTNLuPa5zCkEC4JSsDUUHE78
+  check_dependencies.py: QmXCg3mGhHzGxxbaTtHKY1HfumubPKryiaBeBMbJEZLQTE
+  connection.py: QmZxZagVYj9NVzAYtM9UyMPsiXjz6uPuF8Ywb2WnJnTDiZ
+  consts.py: QmXi6edKonz6SuAnRnMURRRU62GNZa9TRhqiDxmnwLB4Sp
   libp2p_node/.dockerignore: QmVwyNjya468nRTxSjFP73dSzQdSffp74osz5dGEAHHweA
   libp2p_node/Dockerfile: QmeZ6KJf4cpgL7DY6qdWetVfTPPijUvHxoCUbYgSS3SsWM
   libp2p_node/Makefile: Qmezxsp96mW85mJhjGAarLmwWJG9JvGJowcY5h56oPB9bt
-  libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
+  libp2p_node/README.md: QmR1Lk6utZWxN1rEBmTodenwfyjTucv5akx9GGcFzxmPjb
   libp2p_node/acn/utils.go: Qmb39aDGu7N5a8JPdHeRsjSzJ9fyKp2jT3EkULocvGGYKV
   libp2p_node/aea/api.go: QmW7mHHShumfDHg9Ds1nxHZJN4EAHGLrr15jLX7kKYkcV9
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
@@ -59,7 +59,7 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/acn:1.1.6
+- fetchai/acn:1.1.7
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

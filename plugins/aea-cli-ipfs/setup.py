@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ from setuptools import setup  # type: ignore
 
 setup(
     name="aea-cli-ipfs",
-    version="1.0.3",
+    version="1.0.4",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="CLI extension for AEA framework wrapping IPFS functionality.",

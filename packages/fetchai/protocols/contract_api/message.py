@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ DEFAULT_BODY_SIZE = 4
 class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/contract_api:1.1.6")
+    protocol_id = PublicId.from_str("fetchai/contract_api:1.1.7")
     protocol_specification_id = PublicId.from_str("fetchai/contract_api:1.0.0")
 
     Kwargs = CustomKwargs

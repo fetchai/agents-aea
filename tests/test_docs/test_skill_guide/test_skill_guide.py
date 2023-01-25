@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.32.4",
+            "fetchai/simple_service_registration:0.32.5",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -99,7 +99,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         self.set_config(setting_path, FetchAICrypto.identifier)
 
         default_routing = {
-            "fetchai/oef_search:1.1.6": "fetchai/soef:0.27.5",
+            "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6",
         }
 
         # replace location
@@ -112,9 +112,9 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.4")
-        self.add_item("connection", "fetchai/soef:0.27.5")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.4")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.5")
+        self.add_item("connection", "fetchai/soef:0.27.6")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.5")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 

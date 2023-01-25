@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ LIBP2P_NODE_CLARGS = []  # type: List[str]
 
 PIPE_CONN_TIMEOUT = 10.0
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.27.4")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.27.5")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 

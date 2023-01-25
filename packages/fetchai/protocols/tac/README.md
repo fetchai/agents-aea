@@ -10,7 +10,7 @@ This is a protocol for participating in a Trading Agent Competition (TAC).
 ---
 name: tac
 author: fetchai
-version: 1.1.6
+version: 1.1.7
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
@@ -86,4 +86,4 @@ keep_terminal_state_dialogues: true
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/tac-skills/" target="_blank">TAC skill in the AEA framework</a>
+- <a href="https://docs.fetch.ai/aea/tac-skills/" target="_blank">TAC skill in the AEA framework</a>

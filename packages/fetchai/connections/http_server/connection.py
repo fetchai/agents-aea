@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.23.5")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.23.6")
 
 
 class HttpDialogues(BaseHttpDialogues):

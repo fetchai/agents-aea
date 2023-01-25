@@ -1,23 +1,23 @@
 name: simple_aggregation
 author: fetchai
-version: 0.3.5
+version: 0.3.6
 type: skill
 description: The skill for aggregating observations between AEAs
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmSFsC6K217XxwuH5fXGQYU29J44VvW9Qim5yNPAbXLegV
-  __init__.py: QmNdVdjxMXfyHDAwZeqkLaW5nawkC2DyYvoj28nVFusP4e
-  behaviours.py: QmRVGGihhrds2ASPUK1bsPQVLQR1ZcsAEjnWAqNqhMCQRg
-  dialogues.py: QmPBSUmeve76gRwrDuYCdJrLMgwgrrCKYbo6Btepd9SZbm
-  handlers.py: QmVKtuaGE37ZTAx75mshgwofrcfYBizYBtUjeU9hyJhRjf
-  strategy.py: QmZesrdzHqJL7ovStUc1uFpYKkt87hA9aoiRq4AJF7bp4J
+  README.md: QmcHh82NQkgDx4w2cNN6sGzWquSXEYp4BgPrbSBo5tTf2w
+  __init__.py: QmacrtqzSrgzHTp2bqiVLPjDMydiVKNN6AtJG8sEzRVu1o
+  behaviours.py: QmXsdJUEC9MPAGQvUgUYuZV8du9Dtejexbe941sqgYaSzh
+  dialogues.py: QmeGB6miynaHtBG9LU96tiwCp8AKZwJ8y9oGqVeRNkWpvW
+  handlers.py: QmNYga7nHVfyrqsnHCPYXKSVkY9gvsxHCQufHR4Ls2AVyD
+  strategy.py: QmTepCGXskTbVh9AqigU5JN4my9Qbj4prvtsPVrreYnt6p
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/aggregation:0.2.6
-- fetchai/default:1.1.6
-- fetchai/oef_search:1.1.6
+- fetchai/aggregation:0.2.7
+- fetchai/default:1.1.7
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   aggregation:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ class TestTaskTestSkill(AEATestCaseEmpty):
     def setup_class(cls) -> None:
         """Init the test case."""
         super(TestTaskTestSkill, cls).setup_class()
-        cls.add_item("skill", "fetchai/task_test_skill:0.1.1", local=True)
+        cls.add_item("skill", "fetchai/task_test_skill:0.1.2", local=True)
         cls.generate_private_key()
         cls.add_private_key()
         cls.set_config("agent.task_manager_mode", "multiprocess", "str")

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.22.5")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.22.6")
 
 OefSearchDialogue = BaseOefSearchDialogue
 
