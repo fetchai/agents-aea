@@ -11,6 +11,7 @@ message Envelope{
     string uri = 5;
 }
 ```
+
 ``` proto
 import "google/protobuf/struct.proto";
 
@@ -29,6 +30,7 @@ message Message {
     }
 }
 ```
+
 ``` proto
 syntax = "proto3";
 

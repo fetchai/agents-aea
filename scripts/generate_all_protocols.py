@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -187,7 +187,7 @@ def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
         "-m",
         "isort",
         "--settings-path",
-        "setup.cfg",
+        "pyproject.toml",
         "--verbose",
         str(directory.absolute()),
         **kwargs,

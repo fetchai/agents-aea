@@ -1,18 +1,20 @@
+# HTTP Connection
+
 ## Description
 
-The HTTP client and HTTP server connections enable an AEA to communicate with external servers, respectively clients, via HTTP. 
+The HTTP client and HTTP server connections enable an AEA to communicate with external servers, respectively clients, via HTTP.
 
 The HTTP client connection receives request envelops from an agent's skill, translates each into an HTTP request and sends it to a server external to the agent. If it receives an HTTP response from the server within a timeout window, it translates it into a response envelope, and sends this back to the relevant skill inside the agent.
 
-The HTTP server connection allows you to run a server inside the connection itself which accepts requests from clients external to the agent. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the skill specified in the connections configuration. If it receives a valid response envelope from the skill within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
+The HTTP server connection allows you to run a server inside the connection itself which accepts requests from clients external to the agent. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the skill specified in the `connections` configuration. If it receives a valid response envelope from the skill within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
 
 ## HTTP Client
 
-The `fetchai/simple_data_request:0.14.4` skill demonstrates a simple use case of the HTTP Client connection.
+The `fetchai/simple_data_request:0.14.6` skill demonstrates a simple use case of the HTTP Client connection.
 
 The `HttpRequestBehaviour` in `behaviours.py` periodically sends HTTP envelops to the HTTP client connection. Its `act()` method, periodically called, simply calls `_generate_http_request` which contains the logic for enqueueing an HTTP request envelop.
 
-The `HttpHandler` in `handler.py` is a basic handler for dealing with HTTP response envelops received from the HTTP client connection. In the `handle()` method, the responses are dealt with by the private `_handle_response` method which essentially logs the response and adds the body of the response into the skill's shared state. 
+The `HttpHandler` in `handler.py` is a basic handler for dealing with HTTP response envelops received from the HTTP client connection. In the `handle()` method, the responses are dealt with by the private `_handle_response` method which essentially logs the response and adds the body of the response into the skill's shared state.
 
 ## HTTP Server
 
@@ -26,13 +28,13 @@ cd my_aea
 Add the http server connection package:
 
 ``` bash
-aea add connection fetchai/http_server:0.23.4
+aea add connection fetchai/http_server:0.23.6
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.23.4
+aea config set agent.default_connection fetchai/http_server:0.23.6
 ```
 
 Modify the `api_spec_path`:
@@ -64,15 +66,11 @@ aea scaffold skill http_echo
 
 You can implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
 
-
 First, delete the `my_model.py` and `behaviour.py` files (in `my_aea/skills/http_echo/`). The server will be purely reactive, so you only need the `handlers.py` file, and the `dialogues.py` to record the state of the dialogues. Update `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
 
 Next implement a basic handler which prints the received envelopes and responds.
 
-
-Then, replace the content of `handlers.py` with the following code snippet,
-after having replaced the placeholder `YOUR_USERNAME` with 
-the author username (i.e. the output of `aea config get agent.author`):
+Then, replace the content of `handlers.py` with the following code snippet, after having replaced the placeholder `YOUR_USERNAME` with the author username (i.e. the output of `aea config get agent.author`):
 
 ``` python
 import json
@@ -217,6 +215,7 @@ class HttpHandler(Handler):
 ```
 
 Moreover, add a `dialogues.py` file with the following code:
+
 ``` python
 from typing import Any
 
@@ -314,12 +313,11 @@ models:
     class_name: HttpDialogues
 ```
 
-
 Run the fingerprinter (note, you will have to replace the author name with your author handle):
-``` bash
-aea fingerprint skill fetchai/http_echo:0.21.4
-```
 
+``` bash
+aea fingerprint skill fetchai/http_echo:0.21.6
+```
 
 Moreover, we need to tell to the `http_server` connection to what skill
 the HTTP requests should be forwarded.
@@ -331,11 +329,13 @@ aea config set vendor.fetchai.connections.http_server.config.target_skill_id "$(
 ```
 
 You can now run the AEA:
+
 ``` bash
 aea run
 ```
 
 In a separate terminal, you can create a client and communicate with the server:
+
 ``` python
 import requests
 

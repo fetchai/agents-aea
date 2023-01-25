@@ -1,15 +1,17 @@
+# Skills
+
 <a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
 <img src="../assets/skill-components.jpg" alt="Skill components of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
-* <a href="../api/skills/base#handler-objects">`Handler`</a>: each skill has zero, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
-* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: zero, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
-* <a href="../api/skills/base#model-objects">`Model`</a>: zero, one or more `Models` that inherit from the `Model` class. `Models` encapsulate custom objects which are made accessible to any part of a skill via the `SkillContext`.
-* <a href="../api/skills/tasks#task-objects">`Task`</a>: zero, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
+- <a href="../api/skills/base#handler-objects">`Handler`</a>: each skill has zero, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
+- <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: zero, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
+- <a href="../api/skills/base#model-objects">`Model`</a>: zero, one or more `Models` that inherit from the `Model` class. `Models` encapsulate custom objects which are made accessible to any part of a skill via the `SkillContext`.
+- <a href="../api/skills/tasks#task-objects">`Task`</a>: zero, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
 
-A skill can read (parts of) the state of the the AEA (as summarised in the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>), and suggest actions to the AEA according to its specific logic. As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. In technical terms this means skills are horizontally arranged.
+A skill can read (parts of) the state of the AEA (as summarised in the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>), and propose actions to the AEA according to its specific logic. As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. In technical terms this means skills are horizontally arranged.
 
 For instance, an AEA who is trading goods, could subscribe to more than one skill, where each skill corresponds to a different trading strategy.  The skills could then read the preference and ownership state of the AEA, and independently suggest profitable transactions.
 
@@ -17,7 +19,7 @@ The framework places no limits on the complexity of skills. They can implement s
 
 The framework provides one default skill, called `error`. Additional skills can be added as packages.
 
-## Independence of skills
+## Independence of Skills
 
 Skills are `horizontally layered`, that is they run independently of each other. They also cannot access each other's state.
 
@@ -33,15 +35,15 @@ For example, in the `ErrorHandler(Handler)` class, the code often grabs a refere
 
 ``` python
 self.context.outbox.put_message(message=reply)
-``` 
+```
 
 Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
 
 Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.
 
-## What to code
+## What to Code
 
-Each of the skill classes has three methods that must be implemented. All of them include a `setup()` and `teardown()` method which the developer must implement. 
+Each of the skill classes has three methods that must be implemented. All of them include a `setup()` and `teardown()` method which the developer must implement.
 
 Then there is a specific method that the framework requires for each class.
 
@@ -51,7 +53,7 @@ There can be none, one or more `Handler` class per skill.
 
 `Handler` classes can receive `Message` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol they require.
 
-* `handle(self, message: Message)`: is where the skill receives a `Message` of the specified protocol and decides what to do with it.
+- `handle(self, message: Message)`: is where the skill receives a `Message` of the specified protocol and decides what to do with it.
 
 A handler can be registered in one way:
 
@@ -71,7 +73,7 @@ Conceptually, a `Behaviour`  class contains the business logic specific to initi
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
-* `act(self)`: is how the framework calls the `Behaviour` code.
+- `act(self)`: is how the framework calls the `Behaviour` code.
 
 A behaviour can be registered in two ways:
 
@@ -82,13 +84,12 @@ The framework supports different types of behaviours:
 
 - <a href="../api/skills/behaviours#oneshotbehaviour-objects">`OneShotBehaviour`</a>: this behaviour is executed only once.
 - <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a>: the `act()` method is called every `tick_interval`. E.g. if the `TickerBehaviour` subclass is instantiated
- 
+
 There is another category of behaviours, called <a href="../api/skills/behaviours#compositebehaviour-objects">`CompositeBehaviour`</a>:
 
-- <a href="../api/skills/behaviours#sequencebehaviour-objects">`SequenceBehaviour`</a>: a sequence of `Behaviour` classes, executed 
+- <a href="../api/skills/behaviours#sequencebehaviour-objects">`SequenceBehaviour`</a>: a sequence of `Behaviour` classes, executed
   one after the other.
 - <a href="../api/skills/behaviours#fsmbehaviour-objects">`FSMBehaviour`</a>: a state machine of `State` behaviours. A state is in charge of scheduling the next state.
-
 
 If your behaviour fits one of the above, we suggest subclassing your
 behaviour class with that behaviour class. Otherwise, you
@@ -123,6 +124,7 @@ self.context.new_behaviours.put(HelloWorldBehaviour(name="hello_world", skill_co
 ```
 
 Or, equivalently to the previous two code blocks:
+
 ``` python
 def hello():
     print("Hello, World!")
@@ -131,9 +133,9 @@ self.context.new_behaviours.put(OneShotBehaviour(act=hello, name="hello_world", 
 ```
 
 The callable passed to the `act` parameter is equivalent to the implementation
-of the `act` method described above. 
+of the `act` method described above.
 
-The framework is then in charge of registering the behaviour and scheduling it 
+The framework is then in charge of registering the behaviour and scheduling it
 for execution.
 
 ### `tasks.py`
@@ -142,22 +144,23 @@ Conceptually, a `Task` is where the developer codes any internal tasks the AEA r
 
 There can be one or more `Task` classes per skill. The developer subclasses abstract class `Task` to create a new `Task`.
 
-* `execute(self)`: is how the framework calls a `Task`. 
+- `execute(self)`: is how the framework calls a `Task`.
 
 The `Task` class implements the <a href="https://en.wikipedia.org/wiki/Function_object" target="_blank">functor pattern</a>.
-An instance of the `Task` class can be invoked as if it 
+An instance of the `Task` class can be invoked as if it
 were an ordinary function. Once completed, it will store the
 result in the property `result`. Raises error if the task has not been executed yet,
 or an error occurred during computation.
 
 We suggest using the `task_manager`, accessible through the skill context,
-to manage long-running tasks. The task manager uses `multiprocessing` to 
-schedule tasks, so be aware that the changes on the task object will 
+to manage long-running tasks. The task manager uses `multiprocessing` to
+schedule tasks, so be aware that the changes on the task object will
 not be updated.
 
 Here's an example:
 
 In `tasks.py`:
+
 ``` python
 
 from aea.skills.tasks import Task
@@ -193,6 +196,7 @@ class LongTask(Task):
 ```
 
 In `behaviours.py`:
+
 ``` python
 
 from aea.skills.behaviours import TickerBehaviour
@@ -228,17 +232,19 @@ class MyBehaviour(TickerBehaviour):
 The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end, the developer can subclass an abstract <a href="../api/skills/base#model-objects">`Model`</a>. These models are made available on the context level upon initialization of the AEA.
 
 Say, the developer has a class called `SomeModel`
+
 ``` python
 class SomeModel(Model):
     ...
 ```
 
 Then, an instance of this class is available on the context level like so:
+
 ``` python
 some_model = self.context.some_model
-``` 
+```
 
-### Skill configuration
+### Skill Configuration
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
@@ -262,25 +268,23 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:1.1.4
+- fetchai/default:1.1.7
 ```
 
-
-## Error skill
+## Error Skill
 
 All AEAs have a default `error` skill that contains error handling code for a number of scenarios:
 
-* Received envelopes with unsupported protocols 
-* Received envelopes with unsupported skills (i.e. protocols for which no handler is registered)
-* Envelopes with decoding errors
-* Invalid messages with respect to the registered protocol
+- Received envelopes with unsupported protocols
+- Received envelopes with unsupported skills (i.e. protocols for which no handler is registered)
+- Envelopes with decoding errors
+- Invalid messages with respect to the registered protocol
 
 The error skill relies on the `fetchai/default:1.0.0` protocol which provides error codes for the above.
 
+## Custom Error Handler
 
-## Custom Error handler
-
-The framework implements a default <a href="../api/error_handler/default#errorhandler-objects">`ErrorHandler`</a>. 
+The framework implements a default <a href="../api/error_handler/default#errorhandler-objects">`ErrorHandler`</a>.
 You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `ErrorHandler`:
 
 ``` bash
@@ -288,7 +292,4 @@ aea scaffold error-handler
 ```
 
 Now you will see a file called `error_handler.py` in the AEA project root.
-You can then implement your own custom logic to process messages. 
-
-
-<br />
+You can then implement your own custom logic to process messages.

@@ -2,51 +2,63 @@
 aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
+
 ``` bash
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
+
 ``` bash
-aea add protocol fetchai/oef_search:1.1.4
+aea add protocol fetchai/oef_search:1.1.7
 ```
+
 ``` bash
-aea add connection fetchai/soef:0.27.4
-aea add connection fetchai/p2p_libp2p:0.27.3
+aea add connection fetchai/soef:0.27.6
+aea add connection fetchai/p2p_libp2p:0.27.5
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.5
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/oef_search:1.1.7": "fetchai/soef:0.27.6"
 }'
 ```
+
 ``` bash
-aea fetch fetchai/simple_service_registration:0.32.3 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.32.5 && cd simple_service_registration && aea install && aea build
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea run
 ```
+
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
+
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
+
 ``` bash
 aea issue-certificates
 ```
+
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -57,9 +69,11 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
+
 ``` bash
 aea run
 ```
+
 ``` yaml
 name: my_search
 author: fetchai
@@ -73,7 +87,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.4
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   my_search_behaviour:
@@ -101,6 +115,7 @@ dependencies:
     version: <2.0.0,>=1.0.0
 is_abstract: false
 ```
+
 ``` yaml
 name: simple_service_registration
 author: fetchai
@@ -120,7 +135,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.4
+- fetchai/oef_search:1.1.7
 skills: []
 behaviours:
   service:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the http protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.3`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.5`.
 """
 
 from packages.fetchai.protocols.http.message import HttpMessage

@@ -1,90 +1,125 @@
-# Contributing
+# Contribution Guidelines
 
-Contributions to the framework, its plugins, related tools and packages are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
+Contributions to the framework, plugins, packages and related tools are welcome. As a contributor, here are the guidelines we would like you to follow:
 
-There are various ways to contribute:
+- [Code of Conduct](#coc)
+- [Question or Problem?](#question)
+- [Issues and Bugs](#issue)
+- [Feature Requests](#feature)
+- [Submission Guidelines](#submit)
+- [Coding Rules](#rules)
+- [Commit Message Guidelines](#commit)
 
-- If you need support, want to report a bug or ask for features, you can check the [Issues page](https://github.com/fetchai/agents-aea/issues) and raise an issue, if applicable.
+## <a name="coc"></a> Code of Conduct
 
-- If you would like to contribute a bug fix of feature then [submit a Pull request](https://github.com/fetchai/agents-aea/pulls).
+Please read and follow our [Code of Conduct][coc].
 
-For other kinds of feedback, you can contact one of the
-[authors](https://github.com/fetchai/agents-aea/blob/main/AUTHORS.md) by email.
+## <a name="question"></a> Question or Problem?
 
-Before reading on, please have a look at the [code of conduct](https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md).
+Please use [GitHub Discussions][ghdiscussion] for support related questions and general discussions. Do NOT open issues as they are for bug reports and feature requests. This is because:
 
-## A few simple rules
+- Questions and answers stay available for public viewing so your question/answer might help someone else.
+- GitHub Discussions voting system ensures the best answers are prominently visible.
 
-- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `main`!
+## <a name="issue"></a> Found a Bug?
 
-- Before working on a feature, reach out to one of the core developers or discuss the feature in an issue. The framework caters a diverse audience and new features require upfront coordination.
+If you find a bug in the source code [submit a bug report issue](#submit-issue).
+Even better, you can [submit a Pull Request](#submit-pr) with a fix.
 
-- Include unit tests for 100% coverage when you contribute new features, as they help to a) prove that your code works correctly, and b) guard against future breaking changes to lower the maintenance cost.
+## <a name="feature"></a> Missing a Feature?
 
-- Bug fixes also generally require unit tests, because the presence of bugs usually indicates insufficient test coverage.
+You can *request* a new feature by [submitting a feature request issue](#submit-issue).
+If you would like to *implement* a new feature:
 
-- Keep API compatibility in mind when you change code in the `aea`. The `aea` has passed version 1.0 and hence cannot make non-backward-compatible API changes without a major release. Reviewers of your pull request will comment on any API compatibility issues.
+- For a **Major Feature**, first [open an issue](#submit-issue) and outline your proposal so that it can be discussed.
+- **Small Features** can be crafted and directly [submitted as a Pull Request](#submit-pr).
 
-- When you contribute a new feature to `aea`, the maintenance burden is transferred to the core team. This means that the benefit of the contribution must be compared against the cost of maintaining the feature.
+## <a name="submit"></a> Submission Guidelines
 
-- Where possible, add new functionality via plugins. Currently, CLI and ledger plugins are supported. Furthermore, the `aea` native packages also allow for extensibility.
+### <a name="submit-issue"></a> Submitting an Issue
 
+Before you submit an issue, please search the [issue tracker][issues]. An issue for your problem might already exist and the discussion might inform you of workarounds readily available.
+
+For bug reports, it is important that we can reproduce and confirm it. For this, we need you to provide a minimal reproduction instruction (this is part of the bug report issue template).
+
+You can file new issues by selecting from our [new issue templates][new-issue] and filling out the issue template.
+
+### <a name="submit-pr"></a> Submitting a Pull Request (PR)
+
+Before you submit your Pull Request (PR) consider the following guidelines:
+
+1. All Pull Requests should be based off of and opened against the `develop` branch. Do **not** open a Pull Request against `main`!
+
+2. Search [Existing PRs][prs] for an open or closed PR that relates to your submission.
+   You don't want to duplicate existing efforts.
+
+3. Be sure that an issue exists describing the problem you're fixing, or the design for the feature you'd like to add.
+
+4. [Fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) the [repository][github].
+
+5. In your forked repository, make your changes in a new git branch created from the `develop` branch.
+
+6. Make your changes, **including test cases** and updating documentation where appropriate.
+
+7. Follow our [coding rules](#rules).
+
+8. Run all tests and checks locally, as described in the [development guide][developing], and ensure they pass. This saves CI hours and ensures you only commit clean code.
+
+9. Commit your changes using a descriptive commit message that follows our [commit message conventions](#commit).
+
+10. Push your branch to GitHub.
+
+11. In GitHub, send a pull request to `fetchai:develop`.
+
+> Where possible, try to take advantage of the modularity of the framework and add new functionality via a new module. Currently, ledger plugins are supported and packages (skills, connections, protocols, contracts) allow for extensibility.
+
+#### Reviewing a Pull Request
+
+The AEA team reserves the right not to accept pull requests from community members who haven't been good citizens of the community. Such behavior includes not following our [code of conduct][coc] and applies within or outside the managed channels.
+
+When you contribute a new feature, the maintenance burden is transferred to the core team. This means that the benefit of the contribution must be compared against the cost of maintaining the feature.
+
+#### Addressing review feedback
+
+If we ask for changes via code reviews then:
+
+1. Make the required updates to the code.
+
+2. Re-run the tests and checks to ensure they are still passing.
+
+3. Create a new commit and push to your GitHub repository (this will update your Pull Request).
+
+#### After your pull request is merged
+
+After your pull request is merged, you can safely delete your branch and pull the changes from the (upstream) repository.
+
+## <a name="rules"></a> Coding Rules
+
+To ensure consistency throughout the source code, keep these rules in mind as you are working:
+
+- All code must pass our code quality checks (linters, formatters, etc). See the [development guide][developing] section for more detail.
+- All features or bug fixes **must be tested** via unit-tests and if applicable integration-tests. These help to, a. prove that your code works correctly, and b. guard against future breaking changes and lower the maintenance cost.
+- All public features **must be documented**.
 - All files must include a license header.
 
-- Before committing and opening a PR, run all tests locally. This saves CI hours and ensures you only commit clean code.
+## <a name="commit"></a> Commit Message Convention
 
-## Contributing code
+Please follow the [Conventional Commits v1.0.0][convcommit]. The commit types must be one of the following:
 
-If you have improvements, send us your pull requests!
+- **build**: Changes that affect the build system or external dependencies
+- **ci**: Changes to our CI configuration files and scripts
+- **docs**: Documentation only changes
+- **feat**: A new feature
+- **fix**: A bug fix
+- **nfunc**: Code that improves some non-functional characteristic, such as performance, security, ...
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **test**: Adding missing tests or correcting existing tests
 
-A team member will be assigned to review your pull requests. All tests are run as part of CI as well as various other checks (linters, static type checkers, security checkers, etc). If there are any problems, feedback is provided via GitHub. Once the pull requests is approved and passes continuous integration checks, you or a team member can merge it.
-
-If you want to contribute, start working through the codebase, navigate to the Github "issues" tab and start looking through interesting issues. If you are not sure of where to start, then start by trying one of the smaller/easier issues here i.e. issues with the "good first issue" label and then take a look at the issues with the "contributions welcome" label. These are issues that we believe are particularly well suited for outside contributions, often because we probably won't get to them right now. If you decide to start on an issue, leave a comment so that other people know that you're working on it. If you want to help out, but not alone, use the issue comment thread to coordinate.
-
-## Development setup
-
-First, setup your environment by either using the `develop-image` or by following these steps:
-
-- The simplest way to get setup for development on the framework is to install Python `>=3.6` and `pipenv`, then run the following:
-
-      make new_env
-      pipenv shell
-
-- The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
-
-## Further commands needed during development
-
-We have various commands which are helpful during development.
-
-- For linting and static analysis use:
-
-      make lint
-      make static
-      make pylint
-      make security
-
-- For checking packages integrity:
-
-      make package_checks
-
-- To run tests: `make test`.
-
-- For testing `aea.{SUBMODULE}` with `tests/test_{TESTMODULE}` use:
-
-      make dir={SUBMODULE} tdir={TESTMODULE} test-sub
-
-  e.g.
-
-      make dir=cli tdir=cli test-sub
-
-- When making changes to one of the `packages`, then use `python scripts/generate_ipfs_hashes.py` to generate the latest hashes.
-
-### Go Development
-
-- The `fetchai/p2p_libp2p` package is partially developed in Go.
-
-- To install Go visit the [Golang site](https://golang.org/doc/install).
-
-- We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
-
-- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
+[coc]: https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md
+[developing]: https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md
+[ghdiscussion]: https://github.com/fetchai/agents-aea/discussions
+[issues]: https://github.com/fetchai/agents-aea/issues
+[new-issue]: https://github.com/fetchai/agents-aea/issues/new/choose
+[prs]: https://github.com/fetchai/agents-aea/pulls
+[convcommit]: https://www.conventionalcommits.org/en/v1.0.0/
+[github]: https://github.com/fetchai/agents-aea

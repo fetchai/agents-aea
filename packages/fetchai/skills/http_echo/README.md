@@ -8,8 +8,8 @@ This skill is part of the Fetch.ai "HTTP Connection and Skill" guide. Upon recei
 
 ## Handlers
 
-* `http_handler`: handles `http` messages for echoing back an HTTP request as an HTTP response.
+- `http_handler`: handles `http` messages for echoing back an HTTP request as an HTTP response.
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/http-connection-and-skill/" target="_blank">HTTP Connection and Skill</a>
+- <a href="https://docs.fetch.ai/aea/http-connection-and-skill/" target="_blank">HTTP Connection and Skill</a>

@@ -10,7 +10,7 @@ This is a protocol for interacting with a gym connection.
 ---
 name: gym
 author: fetchai
-version: 1.1.4
+version: 1.1.7
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -51,4 +51,4 @@ keep_terminal_state_dialogues: false
 
 ## Links
 
-* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>
+- <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>

@@ -1,28 +1,28 @@
 name: ml_data_provider
 author: fetchai
-version: 0.27.4
+version: 0.27.6
 type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmYBr97UhQA8GoWFN6yNKdWix1AKJYx4zY246HYAFGpYRP
-  __init__.py: QmQB6Axj2m2rcy7hnh8T4rYERPJw7EhuYR71uyhfZLyAMH
-  behaviours.py: QmU6DnhfLsYNGoJMrW9jeQ9CknpJG5cp2WjCFwPQfuJkiV
-  dialogues.py: QmTWTeidShLf6Pg5pxrYTxAFMYWQ5rRdgLrXLcXMJS8vYn
-  handlers.py: QmYoipDR88wvdgvNxK4xaEpiugpWAtgcKr6dsp1kxtDm4N
-  strategy.py: QmVNtB9CfMbVKd1GRymNCr9iQtpayfrjzMg8jQZaZgTVoG
+  README.md: QmcPsTwjWbUTMamK8aH94yRgYrKrmCwzffmMUueLya5wAg
+  __init__.py: Qma4KbWbeEcrX2gSghAwGU2fjpvS1xyEWZPTaiifxYgSEM
+  behaviours.py: QmZvLViapWxG1H41wn4e6Mzt8nmV6yyuk2sSsLJKZTQy2c
+  dialogues.py: QmaVve3Ldt3TN1QSA1x58tBruPDRZ5bnVYHencsVHvfsoh
+  handlers.py: QmYkHwQSjJh7CsMDRscidGzn4DMcWTJrFYMhV9yVaGNFZF
+  strategy.py: QmW8SBVyZyfpQG4b25xvjtEQVuKNPbqryYLdMVzkjtYFxc
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/ml_trade:1.1.4
-- fetchai/oef_search:1.1.4
+- fetchai/default:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/ml_trade:1.1.7
+- fetchai/oef_search:1.1.7
 skills:
-- fetchai/generic_seller:0.28.4
+- fetchai/generic_seller:0.28.6
 behaviours:
   service_registration:
     args:

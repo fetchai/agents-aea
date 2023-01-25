@@ -8,15 +8,15 @@ This skill registers some data selling service on the sOEF. It can be requested 
 
 ## Behaviours
 
-* `service_registration`: registers data selling service on the sOEF 
+- `service_registration`: registers data selling service on the sOEF
 
 ## Handlers
 
-* `fipa`: handles `fipa` messages for negotiation
-* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
-* `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
+- `fipa`: handles `fipa` messages for negotiation
+- `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+- `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/generic-skills/" target="_blank">Generic Skills</a>
-* <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank">Generic Skill Step by Step Guide</a>
+- <a href="https://docs.fetch.ai/aea/generic-skills/" target="_blank">Generic Skills</a>
+- <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank">Generic Skill Step by Step Guide</a>

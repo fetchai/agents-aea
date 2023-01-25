@@ -7,6 +7,7 @@ IPFS command to publish and download directories.
 Make sure you have `aea` installed.
 
 Then, install the plug-in:
+
 ``` bash
 pip install aea-cli-ipfs
 ```

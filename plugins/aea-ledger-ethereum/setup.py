@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ from setuptools import find_packages, setup
 
 setup(
     name="aea-ledger-ethereum",
-    version="1.1.1",
+    version="1.1.2",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
     packages=find_packages(include=["aea_ledger_ethereum*"]),
     install_requires=[
         "aea>=1.0.0, <2.0.0",
-        "web3>=5.31.0,<6.0.0",
+        "web3==5.31.1",
         "ipfshttpclient==0.8.0a2",
     ],
     tests_require=["pytest"],

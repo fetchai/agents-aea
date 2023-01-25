@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = PublicId.from_str("fetchai/ml_trade:1.1.4")
+    protocol_id = PublicId.from_str("fetchai/ml_trade:1.1.7")
     protocol_specification_id = PublicId.from_str("fetchai/ml_trade:1.0.0")
 
     Description = CustomDescription

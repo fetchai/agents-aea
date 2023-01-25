@@ -1,35 +1,35 @@
 agent_name: coin_price_oracle_client
 author: fetchai
-version: 0.12.4
+version: 0.12.6
 license: Apache-2.0
 description: An AEA providing a coin price oracle client service.
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.4
-- fetchai/ledger:0.21.3
+- fetchai/http_client:0.24.6
+- fetchai/ledger:0.21.5
 contracts:
-- fetchai/fet_erc20:0.9.1
-- fetchai/oracle_client:0.11.2
+- fetchai/fet_erc20:0.9.2
+- fetchai/oracle_client:0.11.3
 protocols:
-- fetchai/contract_api:1.1.4
-- fetchai/default:1.1.4
-- fetchai/http:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/state_update:1.1.4
+- fetchai/contract_api:1.1.7
+- fetchai/default:1.1.7
+- fetchai/http:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/signing:1.1.7
+- fetchai/state_update:1.1.7
 skills:
-- fetchai/simple_oracle_client:0.13.3
-default_connection: fetchai/ledger:0.21.3
+- fetchai/simple_oracle_client:0.13.5
+default_connection: fetchai/ledger:0.21.5
 default_ledger: fetchai
 required_ledgers:
 - fetchai
 - ethereum
 default_routing:
-  fetchai/contract_api:1.1.4: fetchai/ledger:0.21.3
-  fetchai/http:1.1.4: fetchai/http_client:0.24.4
-  fetchai/ledger_api:1.1.4: fetchai/ledger:0.21.3
+  fetchai/contract_api:1.1.7: fetchai/ledger:0.21.5
+  fetchai/http:1.1.7: fetchai/http_client:0.24.6
+  fetchai/ledger_api:1.1.7: fetchai/ledger:0.21.5
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -41,7 +41,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/simple_oracle_client:0.13.3
+public_id: fetchai/simple_oracle_client:0.13.5
 type: skill
 models:
   strategy:

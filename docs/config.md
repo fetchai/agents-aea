@@ -1,8 +1,11 @@
+# Configurations
+
 This document describes the configuration files of the different packages.
 
-## AEA configuration YAML
+## AEA Configuration YAML
 
 The following provides a list of the relevant regex used:
+
 ``` yaml
 PACKAGE_REGEX: "[a-zA-Z_][a-zA-Z0-9_]*"
 AUTHOR_REGEX: "[a-zA-Z_][a-zA-Z0-9_]*"
@@ -11,6 +14,7 @@ LEDGER_ID_REGEX: "^[^\\d\\W]\\w*\\Z"
 ```
 
 The `aea-config.yaml` defines the AEA project. The compulsory components are listed below:
+
 ``` yaml
 agent_name: my_agent                            # Name of the AEA project (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the project's author (must satisfy AUTHOR_REGEX)
@@ -21,13 +25,13 @@ aea_version: '>=1.0.0, <2.0.0'               # AEA framework version(s) compatib
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.21.2
+- fetchai/stub:0.21.3
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:1.1.4
+- fetchai/default:1.1.7
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.18.4
-default_connection: fetchai/p2p_libp2p:0.27.3   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.18.6
+default_connection: fetchai/p2p_libp2p:0.27.5   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 required_ledgers: [fetchai]                            # the list of identifiers of ledgers that the AEA project requires key pairs for (each item must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
@@ -42,6 +46,7 @@ dependencies: {}                                # The python dependencies the AE
 ```
 
 The `aea-config.yaml` can be extended with a number of optional fields:
+
 ``` yaml
 period: 0.05                                    # The period to call agent's act
 execution_timeout: 0                            # The execution time limit on each call to `react` and `act` (0 disables the feature)
@@ -60,6 +65,7 @@ data_dir: None                                  # The path to the directory for 
 The `aea-config.yaml` can further be extended with component configuration overrides.
 
 For custom connection configurations:
+
 ``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
 type: connection                                # for connections, this must be "connection".
@@ -67,6 +73,7 @@ config: ...                                     # a dictionary to overwrite the 
 ```
 
 For custom skill configurations:
+
 ``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
 type: skill                                     # for skills, this must be "skill".
@@ -84,10 +91,10 @@ models:                                         # override configurations for mo
       foo: bar
 ```
 
-
-## Connection configuration YAML
+## Connection Configuration YAML
 
 The `connection.yaml`, which is present in each connection package, has the following required fields:
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
@@ -111,9 +118,10 @@ dependencies: {}                                # The python dependencies the pa
 is_abstract: false                              # An optional boolean that if `true` makes the connection
 ```
 
-## Contract configuration YAML
+## Contract Configuration YAML
 
 The `contract.yaml`, which is present in each contract package, has the following required fields:
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
@@ -133,9 +141,10 @@ config:                                         # A dictionary containing the kw
 dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
 
-## Protocol configuration YAML
+## Protocol Configuration YAML
 
 The `protocol.yaml`, which is present in each protocol package, has the following required fields:
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
@@ -152,9 +161,10 @@ fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerp
 dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
 
-## Skill configuration YAML
+## Skill Configuration YAML
 
 The `skill.yaml`, which is present in each protocol package, has the following required fields:
+
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)

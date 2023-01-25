@@ -10,7 +10,7 @@ This is a protocol for communication between a skill and a decision maker.
 ---
 name: signing
 author: fetchai
-version: 1.1.4
+version: 1.1.7
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

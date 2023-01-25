@@ -1,16 +1,20 @@
 ``` bash
 aea generate protocol <path-to-protocol-specification>
 ```
+
 ``` bash
 aea generate protocol --l <language> <path-to-protocol-specification>
 ```
+
 ``` bash
 aea create my_aea
 cd my_aea
 ```
+
 ``` bash
 aea generate protocol ../examples/protocol_specification_ex/sample.yaml
 ```
+
 ``` yaml
 ---
 name: two_party_negotiation

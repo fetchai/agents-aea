@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ class TestSlowQueue:
                 with open(self.conn.node.log_file) as f:
                     return "while sending slow envelope:" in f.read()
 
-            wait_for_condition(_check, timeout=30, period=1)
+            wait_for_condition(_check, timeout=30, period=0.1)
         finally:
             await self.conn.disconnect()
 

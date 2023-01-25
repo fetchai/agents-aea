@@ -1,31 +1,31 @@
+# Performance Benchmark
+
 Test AEA framework performance.
 
 ## What is it?
 
 The benchmark module is a set of tools to measure execution time, CPU load and memory usage of the AEA Python code. It produces text reports and draws charts to present the results.
 
-## How does it work?
+## How does it Work?
 
 The framework:
 
-* spawns a dedicated process for each test run to execute the function to test.
-* measures CPU and RAM usage periodically.
-* waits for function exits or terminates them by timeout.
-* repeats test execution multiple times to get more accurate results.
+- spawns a dedicated process for each test run to execute the function to test.
+- measures CPU and RAM usage periodically.
+- waits for function exits or terminates them by timeout.
+- repeats test execution multiple times to get more accurate results.
 
-
-
-## How to use
+## How to Use
 
 Steps to run a test:
 
-* Write a function you would like to test with all arguments you would like to parametrise, add some doc strings.
-* Split the function into two parts: prepare part and performance part. The prepare part will not be included in the measurement.
-* Add `BenchmarkControl` support, to notify framework to start measurement.
-* Import `TestCli` class,  `TestCli().run(function_to_be_tested)`
-* Call it from console to get text results.
+- Write a function you would like to test with all arguments you would like to parametrise, add some doc strings.
+- Split the function into two parts: 'prepare' and 'performance' part. The 'prepare' part will not be included in the measurement.
+- Add `BenchmarkControl` support, to notify framework to start measurement.
+- Import `TestCli` class,  `TestCli().run(function_to_be_tested)`
+- Call it from console to get text results.
 
-### Simple example
+### Simple Example
 
 `cpuburn` - simple test of CPU load depends on idle sleep time. Shows how much CPU consumed during the execution.
 
@@ -59,8 +59,8 @@ if __name__ == "__main__":
     TestCli(cpu_burn).run()
 ```
 
-
 Run it with `python ./benchmark/cases/cpu_burn.py --help` to get help about usage.
+
 ``` bash
 Usage: cpu_burn.py [OPTIONS] [ARGS]...
 
@@ -83,8 +83,8 @@ Options:
   --help                        Show this message and exit.
 ```
 
-
 Run it with `python ./benchmark/cases/cpu_burn.py` to start with default parameters.
+
 ``` bash
 Test execution timeout: 10.0
 Test execution measure period: 0.1
@@ -116,11 +116,11 @@ mem mean (kb): 53.98828125 ± 0
 
 Here you can see test report for default arguments set.
 
-
 Run with multiple arguments set, multiple repeats and draw a chart on resources
 `python ./benchmark/cases/cpu_burn.py -N 5 -P 1 3,0.00001 3,0.001 3,0.01`
 
 Report is:
+
 ``` bash
 Test execution timeout: 10.0
 Test execution measure period: 0.1
@@ -179,27 +179,24 @@ Chart is drawn for argument 1: sleep:
 The most interesting part is CPU usage, as you can see  CPU usage decreases with increasing value of idle sleep.
 Memory usage and execution time can slightly differ per case execution.
 
+## Requirements for Tested Function
 
-## Requirements for tested function
+- The first function's argument has to be `benchmark: BenchmarkControl` which is passed by default by the framework.
+- All arguments except the fist one have to set default values.
+- Function doc string is required, it used for help information.
+- `benchmark.start()` has to be called once in the function body to start measurement. The timeout is counted from this point!
+- All the "prepare part" in the function that should not be measured has to be placed before `benchmark.start()`
+- Code to be measured has to go after `benchmark.start()`
+- Try to avoid infinitive loops and assume the test should exit after a while.
 
-* The first function's argument has to be `benchmark: BenchmarkControl` which is passed by default by the framework.
-* All arguments except the fist one have to set default values.
-* Function doc string is required, it used for help information.
-* `benchmark.start()` has to be called once in the function body to start measurement. The timeout is counted from this point!
-* All the "prepare part" in the function that should not be measured has to be placed before `benchmark.start()`
-* Code to be measured has to go after `benchmark.start()`
-* Try to avoid infinitive loops and assume the test should exit after a while.
+## Execution Options
 
-
-## Execution options
-
-* To pass an arguments set just provide it as a comma separated string like `10,0.1`
-* To pass several argument sets just separate them by white space `10,0.1 20,0.2`
-* `--timeout FLOAT` is test execution timeout in seconds. If the test takes more time, it will be terminated.
-* `--period FLOAT` is measurement interval in seconds, how often to make CPU and RAM usage measurements.
-* `-N, --num-executions INTEGER` - how many time to run the same argument set to make result more accurate.
-* `-P, --plot INTEGER` -  Draw a chart using, using values of argument specified as values for axis X. argument positions started with 0, argument benchmark does not counted. for example `-P 0` will use `run_time` values, `-P 1` will use `sleep` values.
-
+- To pass an arguments set just provide it as a comma separated string like `10,0.1`
+- To pass several argument sets just separate them by white space `10,0.1 20,0.2`
+- `--timeout FLOAT` is test execution timeout in seconds. If the test takes more time, it will be terminated.
+- `--period FLOAT` is measurement interval in seconds, how often to make CPU and RAM usage measurements.
+- `-N, --num-executions INTEGER` - how many times to run the same argument set to make result more accurate.
+- `-P, --plot INTEGER` -  Draw a chart, using values in the argument on the X axis, argument positions started with 0, argument benchmark not counted. For example `-P 0` will use `run_time` values, `-P 1` will use `sleep` values, and so on.
 
 ## Limitations
 
@@ -207,9 +204,7 @@ Currently, the benchmark framework does not measure resources consumed by subpro
 
 Asynchronous functions or coroutines are not supported directly. So you have to set up an event loop inside test function and start loop manually.
 
-
-
-## Testing AEA: handlers example
+## Testing AEA: Handlers Example
 
 Test react speed on specific messages amount.
 
@@ -247,8 +242,8 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
     aea_test_wrapper.stop_loop()
 ```
 
-
 Create AEA wrapper with specified handler:
+
 ``` python
 skill_definition = {
     "handlers": {"dummy_handler": DummyHandler}
@@ -259,8 +254,8 @@ aea_test_wrapper = AEATestWrapper(
 )
 ```
 
-
 Populate inbox with dummy messages:
+
 ``` python
 for _ in range(inbox_amount):
     aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())
@@ -271,6 +266,7 @@ Set timeout `0`, for maximum messages processing speed: `aea_test_wrapper.set_lo
 Start benchmark: `benchmark.start()`
 
 Start/stop AEA:
+
 ``` python
 aea_test_wrapper.start()
 ...
@@ -278,6 +274,7 @@ aea_test_wrapper.stop()
 ```
 
 Wait till messages present in inbox:
+
 ``` python
 while not aea_test_wrapper.is_inbox_empty():
     time.sleep(0.1)

@@ -19,6 +19,7 @@ Options:
   -P, --plot INTEGER            X axis parameter idx
   --help                        Show this message and exit.
 ```
+
 ``` bash
 Test execution timeout: 10.0
 Test execution measure period: 0.1
@@ -47,6 +48,7 @@ mem min (kb): 53.98828125 ± 0
 mem max (kb): 53.98828125 ± 0
 mem mean (kb): 53.98828125 ± 0
 ```
+
 ``` bash
 Test execution timeout: 10.0
 Test execution measure period: 0.1

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.20.4")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.20.6")
 
 
 class GymDialogues(BaseGymDialogues):

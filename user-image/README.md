@@ -14,6 +14,6 @@ First,
 
     ./user-image/scripts/docker-publish-img.sh
 
-And then, in `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-user:latest` and comment the alternative line, then run the publish command again: 
+And then, in `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-user:latest` and comment the alternative line, then run the publish command again:
 
     ./user-image/scripts/docker-publish-img.sh

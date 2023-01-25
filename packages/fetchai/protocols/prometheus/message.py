@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class PrometheusMessage(Message):
     """A protocol for adding and updating metrics to a prometheus server."""
 
-    protocol_id = PublicId.from_str("fetchai/prometheus:1.1.4")
+    protocol_id = PublicId.from_str("fetchai/prometheus:1.1.7")
     protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.0.0")
 
     class Performative(Message.Performative):

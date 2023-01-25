@@ -7,7 +7,7 @@ This document outlines security procedures and general policies for the `aea` pr
 The following table shows which versions of `aea` are currently being supported with security updates.
 
 | Version   | Supported          |
-| --------- | ------------------ |
+|-----------|--------------------|
 | `1.2.x`   | :white_check_mark: |
 | `< 1.2.0` | :x:                |
 
