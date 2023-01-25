@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ def fetch_agent(
 
         # initialize fetched agent with empty folders for custom packages
         custom_items_folder = os.path.join(ctx.cwd, item_type_plural)
-        os.makedirs(custom_items_folder)
+        os.makedirs(custom_items_folder, exist_ok=True)
 
         config = getattr(ctx.agent_config, item_type_plural)
         for item_public_id in config:

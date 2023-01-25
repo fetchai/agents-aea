@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2022 Fetch.AI Limited
+#   Copyright 2018-2023 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -89,7 +89,8 @@ PROTOLINT_CONFIGURATION = """lint:
       - ENUM_FIELD_NAMES_ZERO_VALUE_END_WITH
       - PACKAGE_NAME_LOWER_CASE
       - REPEATED_FIELD_NAMES_PLURALIZED
-      - FIELD_NAMES_LOWER_SNAKE_CASE"""
+      - FIELD_NAMES_LOWER_SNAKE_CASE
+      - ENUM_FIELD_NAMES_PREFIX"""
 
 PROTOLINT_INDENTATION_ERROR_STR = "incorrect indentation style"
 PROTOLINT_ERROR_WHITELIST = [PROTOLINT_INDENTATION_ERROR_STR]

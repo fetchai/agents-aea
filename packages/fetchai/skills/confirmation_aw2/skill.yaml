@@ -1,31 +1,31 @@
 name: confirmation_aw2
 author: fetchai
-version: 0.13.4
+version: 0.13.6
 type: skill
 description: This skill purchases information from other agents as specified in its
   configuration. It is the confirmation buyer for Agent World 2.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQtVnRU5nNhxkaVKX6Go5G4X5dVcocLGM5uynZ1wzHCKK
-  __init__.py: QmWTS3qVqofJpTLD7fnTNEvFj2pXmKGmWpW9L3fWnTJ7mj
-  behaviours.py: QmNxVQanY9hn7Cp9tfTvJhF7ghLpUBDd8XUVjhfQ5xCsnj
-  dialogues.py: QmXsn6zXQoqTMQaq86CAEyMJcyN9TQtKH7a5531t3y4x8J
-  handlers.py: QmZWWcnX8LfACWBhYe3UAVKoXuFbbqXAM5aw2ZY9NpZiFL
-  registration_db.py: QmNkLosYVGuxkaybMCuAbMXtaEBXZHRdsVFSvreUiSWjCG
-  strategy.py: QmUfyuL7qLAWBEaPdzUoREVpYBES4JJEbT6cJ2tpwz5uPS
+  README.md: QmSQgVJrmh5XBGLKVmzEzUVmeEr6BmZmeWebqixq6EBftd
+  __init__.py: QmT9TnpHa8E3EGvPupDbjTJm3quhLTgUGAYjPXKGVnbsYs
+  behaviours.py: QmSr6fB3N7dhVo1cLY1TGd2q8usjGwNmTCNjBBbtgtVf9j
+  dialogues.py: QmXgXcs25v9ob9a9XwT49wvK788vbUdZyYxUgG3ndHjrix
+  handlers.py: QmNvKz36cN7H53yUpdW7GDAFbk5YThSVnFd691GLi3N4uN
+  registration_db.py: QmW4h9dsk7V5JmAwyJArYsAdUeKNKWL2q4cPK6FXpZV21C
+  strategy.py: QmYAdTnztBNQXDp3CqMx1PEVhtz3zFdcLuQz8muZysDfyj
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.3
+- fetchai/ledger:0.21.5
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/fipa:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
+- fetchai/default:1.1.7
+- fetchai/fipa:1.1.7
+- fetchai/ledger_api:1.1.7
+- fetchai/oef_search:1.1.7
+- fetchai/signing:1.1.7
 skills:
-- fetchai/generic_buyer:0.27.4
+- fetchai/generic_buyer:0.27.6
 behaviours:
   search:
     args:

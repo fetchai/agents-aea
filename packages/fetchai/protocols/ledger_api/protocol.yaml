@@ -1,20 +1,20 @@
 name: ledger_api
 author: fetchai
-version: 1.1.4
+version: 1.1.7
 protocol_specification_id: fetchai/ledger_api:1.0.0
 type: protocol
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmeTENiMYauATeUpT8B8rHm8NXCy2Afot18iXrTL2qomEE
-  __init__.py: QmcQ533u3VYmdbTdqfLe8WoBGLtnnMJLyb2cCrAoEpPMbx
-  custom_types.py: QmWHcqh5AcpTLAsiRPaNDLBoNRgnQ6ykQCTZB5hf6womQT
-  dialogues.py: QmUkhFxEAJ4YKPXddit7rWZ13r78MM3suZJ1uAAgTbuLwH
+  README.md: QmPh9s795kuU8tCggTPTuAcHC95dkf6CNPUwRCZvZnQ7ty
+  __init__.py: QmUTxKefDQ2Pek9zDDFkSBG79vJnbPftX7mLvoEWg8Qw2w
+  custom_types.py: QmVHe1LBaErJseoa5QbhpvbEpFZXx4vaaBveREGNmwZs91
+  dialogues.py: QmZ7iDRuQs32KxGEutUrHqTeVHa8UTTje2tvVa8ELu3kDy
   ledger_api.proto: QmR92cmoxSxKANTvCmm9skftvgzYobNwcWCUanNkduJjyh
   ledger_api_pb2.py: QmNt9mSa71PcXDHFDwEWb3ay4RAE11KURX8hzZmFj8voEo
-  message.py: QmS2y42TwM6evnxwbSGeRjqFDpY8czaFV3WeWhka3vmj2i
-  serialization.py: QmcsSo3pzXF1j214TAq1hM2cypTg4yQLJSwWVBDyj5WK1g
+  message.py: QmbeVWQTAkLybFVLyemoMtotXaU7DyjByXz2JW5pxXob1M
+  serialization.py: QmbYMuLC59Emc8hwW8ELcFRaT8xiXakdL2p5vCyBE8PnCg
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

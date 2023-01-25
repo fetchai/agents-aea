@@ -10,7 +10,7 @@ jobs:
      BASE_TAG: fetchai/aea-develop
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up tag
       run: echo export TAG=${BASE_TAG}:$(python3 -c "from setup import about; print(about[\"__version__\"])") > env.sh
     - name: docker login

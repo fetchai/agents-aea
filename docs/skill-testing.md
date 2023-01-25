@@ -1,10 +1,12 @@
-In this guide we describe some of the tools the framework offers for testing skills.
+# Testing Skills
 
-## The `BaseSkillTestCase` class
+In this guide, we describe some of the tools the framework offers for testing skills.
 
-The framework offers a <a href="../api/test_tools/test_skill#baseskilltestcase-objects">`BaseSkillTestCase`</a> class which you can subclass and write your test cases with. 
+## The `BaseSkillTestCase` Class
 
-Let us assume you want to test the `my_behaviour` behaviour of a `CustomSkill` skill you have developed. 
+The framework offers a <a href="../api/test_tools/test_skill#baseskilltestcase-objects">`BaseSkillTestCase`</a> class which you can subclass and write your test cases with.
+
+Let us assume you want to test the `my_behaviour` behaviour of a `CustomSkill` skill you have developed.
 
 You can create a `TestMyBehaviour` class which inherits `BaseSkillTestCase` as below:
 
@@ -52,7 +54,7 @@ In the above, we make the `my_behaviour` behaviour object accessible for every t
 
 ### Skill and Skill Context
 
-The skill object itself is exposed via a property. So you can access the skill object by `self.skill` and by extension all of its attributes. This crucially includes the complete `skill_context`. This means that for example, all of the components of the skill (e.g. behaviours, handlers, models) can be accessed via the skill context. 
+The skill object itself is exposed via a property. So you can access the skill object by `self.skill` and by extension all of its attributes. This crucially includes the complete `skill_context`. This means that for example, every component of the skill (e.g. behaviours, handlers, models) can be accessed via the skill context.
 
 In the above code snippet, `my_behavior` is accessed and exposed as a class attribute. Note accessing the skill context is slightly different in the above because it is a class method. If this was a test method, you could access the behaviour via `self.skill.skill_context.behaviours.my_behaviour`.
 
@@ -85,19 +87,19 @@ agent_context = AgentContext(
 
 Some of the useful objects you can access in your test class for the loaded skill are below:
 
-* `self.skill.skill_context.agent_address`: this is the agent identity the skill uses and is set to `"test_agent_address"`.
-* `self.skill.skill_context.search_service_address`: this is the address of the search service and is set to `"dummy_search_service_address"`.
-* `self.skill.skill_context.skill_id`: this is the id of the skill.
-* `self.skill.skill_context.decision_maker_address`: this is the address of the decision maker and is set to `"dummy_decision_maker_address"`.
+- `self.skill.skill_context.agent_address`: this is the agent identity the skill uses and is set to `"test_agent_address"`.
+- `self.skill.skill_context.search_service_address`: this is the address of the search service and is set to `"dummy_search_service_address"`.
+- `self.skill.skill_context.skill_id`: this is the id of the skill.
+- `self.skill.skill_context.decision_maker_address`: this is the address of the decision maker and is set to `"dummy_decision_maker_address"`.
 
 ### Some Useful `BaseSkillTestCase` Methods
 
 There are a number of methods that `BaseSkillTestCase` offers to make testing skills easier. Some of these are mentioned below. For the rest, consult the API for `BaseSkillTestCase`:
 
-* `self.get_quantity_in_outbox()`: gives you the number of messages which are in the outbox. After running a part of the skill which is expected to send messages, you can use this method to assert the correct number of messages are indeed sent.
-* `self.get_message_from_outbox()`: gives you the last message in the outbox. Together with the above, you can use this method to grab the last message sent by the skill code you tested and check this is indeed the expected message.
-* `self.message_has_attributes(actual_message: Message, message_type: Type[Message], **kwargs,)`: you can use this method in tandem with the above method to check that a message has the attributes you expect it to have. You have to supply it with the actual message (e.g. using `self.get_message_from_outbox()`), specify its expected type (e.g. `FipaMessage`), and any other attribute you expect the message to have (e.g. `message_id` is 1) may be provided via keyword arguments.
-* `self.build_incoming_message`: this is an especially useful method to test handlers. Since handlers handle incoming messages, you can create an incoming message using this method to feed it to the handler and test its execution.
+- `self.get_quantity_in_outbox()`: gives you the number of messages which are in the outbox. After running a part of the skill which is expected to send messages, you can use this method to assert the correct number of messages are indeed sent.
+- `self.get_message_from_outbox()`: gives you the last message in the outbox. Together with the above, you can use this method to grab the last message sent by the skill code you tested and check this is indeed the expected message.
+- `self.message_has_attributes(actual_message: Message, message_type: Type[Message], **kwargs,)`: you can use this method in tandem with the above method to check that a message has the attributes you expect it to have. You have to supply it with the actual message (e.g. using `self.get_message_from_outbox()`), specify its expected type (e.g. `FipaMessage`), and any other attribute you expect the message to have (e.g. `message_id` is 1) may be provided via keyword arguments.
+- `self.build_incoming_message`: this is an especially useful method to test handlers. Since handlers handle incoming messages, you can create an incoming message using this method to feed it to the handler and test its execution.
 
 #### Checking Logger Output
 
@@ -115,8 +117,8 @@ mock_logger.assert_any_call(logging.INFO, "some_logger_message")
 
 In the above, we mock the logger before running `my_behaviour`'s `act()` method and check that  the string `"some_logger_message"` is indeed passed to the logger.
 
-## Next steps
+## Next Steps
 
 You can consult the `fetchai/generic_buyer` and `fetchai/generic_seller` skills and their associated tests <a href="https://github.com/fetchai/agents-aea/tree/main/tests/test_packages/test_skills" target="_blank">here</a> to study how `BaseSkillTestCase` can help you in testing your skills.
 
-You can also refer to the API to study the different methods `BaseSkillTestCase` makes available to make testing your skills easier. 
+You can also refer to the API to study the different methods `BaseSkillTestCase` makes available to make testing your skills easier.

@@ -1,15 +1,19 @@
+# Benchmarks
 
-# Running a benchmark locally:
+## Running a benchmark locally
 
 First, set permissions:
+
 ``` bash
 chmod +x /benchmark/checks/run_benchmark.sh
 ```
 
 Then, run:
+
 ``` bash
 ./benchmark/checks/run_benchmark.sh
 ```
+
 or to save to file:
 
 ``` bash
@@ -18,10 +22,10 @@ or to save to file:
 
 The benchmark will use the locally installed AEA version!
 
-
-# Deploying a benchmark run and serving results:
+## Deploying a benchmark run and serving results
 
 First remove any old configuration maps and create a new one:
+
 ``` bash
 kubectl delete configmap run-benchmark
 kubectl create configmap run-benchmark --from-file=run_from_branch.sh
@@ -51,11 +55,14 @@ List pods:
 kubectl get pod -o wide
 ```
 
-To access NGINX (wait for status: ` `):
+To access NGINX (wait for status: ``):
+
 ``` bash
 kubectl port-forward NODE_NAME 8000:80
 ```
+
 then
+
 ``` bash
 curl localhost:8000 | tee results.txt
 ```

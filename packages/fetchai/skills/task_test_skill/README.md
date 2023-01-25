@@ -6,6 +6,4 @@ Simple task skill to test
 
 ## Handlers
 
-
-
 ## Links

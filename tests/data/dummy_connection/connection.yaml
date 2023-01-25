@@ -6,8 +6,8 @@ description: dummy_connection connection description.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmYqrEF1XrRvBKRc85AtJxoXVpeAGwr6fzKiTrRv1cUy7R
-  connection.py: QmbqvFHy48N5qJNJRt5ivSXsPc8iBAGL7auqUBVSSFZBma
+  __init__.py: QmVLvYQsVuMRPvU3w9UzZzEGjGa5iP5SWwDwTKCuRMzRrQ
+  connection.py: QmergefLxWSmAPqn4DZiKEa8xS4u6F8Wp46QqsCv6UMnKq
 fingerprint_ignore_patterns: []
 build_entrypoint: path/to/script.py
 connections: []
@@ -16,7 +16,7 @@ class_name: DummyConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/default:1.1.4
+- fetchai/default:1.1.7
 dependencies:
   dep1:
     version: ==1.0.0
