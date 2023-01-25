@@ -443,10 +443,8 @@ def load_package(
         )
 
     else:
-        if not (aea_project_path and aea_project_path.exists()):
-            raise click.ClickException(
-                "aea_project_path not spcified or does not exists"
-            )
+        # already know it's an agent
+        aea_project_path = aea_project_path or package_dir
 
         agent_config = AEABuilder.try_to_load_agent_configuration_file(
             cast(Path, aea_project_path)
