@@ -10,7 +10,8 @@ copyright: Copyright &copy; 2018 - 2023 Fetch.ai # Copyright notice in footer
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+      - Who is the AEA Framework for?: 'introduction/who_is_the_aea_framework_for.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
