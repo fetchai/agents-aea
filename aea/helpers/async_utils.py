@@ -477,7 +477,7 @@ class Runnable(ABC):
         sync: bool = False,
         timeout: Optional[float] = None,
         force_result: bool = False,
-    ) -> Awaitable:
+    ) -> Union[Coroutine, asyncio.Future]:
         """
         Wait runnable execution completed.
 
@@ -591,7 +591,9 @@ class Runnable(ABC):
         self._was_cancelled = True
         self._task.cancel()
 
-    def start_and_wait_completed(self, *args: Any, **kwargs: Any) -> Awaitable:
+    def start_and_wait_completed(
+        self, *args: Any, **kwargs: Any
+    ) -> Union[Coroutine, Future]:
         """Alias for start and wait methods."""
         self.start()
         return self.wait_completed(*args, **kwargs)

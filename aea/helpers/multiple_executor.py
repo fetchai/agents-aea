@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ from typing import (
 _default_logger = logging.getLogger(__name__)
 
 
-TaskAwaitable = Union[Task, Future]
+TaskAwaitable = Union[Task, Future, asyncio.Future]
 
 
 class ExecutorExceptionPolicies(Enum):
