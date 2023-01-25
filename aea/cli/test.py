@@ -38,8 +38,12 @@ from aea.cli.utils.click_utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_package_path
-from aea.components.base import load_aea_package
-from aea.configurations.base import AgentConfig, ComponentConfiguration
+from aea.components.base import load_aea_package, perform_load_aea_package
+from aea.configurations.base import (
+    AgentConfig,
+    ComponentConfiguration,
+    PackageConfiguration,
+)
 from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
     CONNECTION,
@@ -53,7 +57,10 @@ from aea.configurations.data_types import (
     PackageType,
     PublicId,
 )
-from aea.configurations.loader import load_component_configuration
+from aea.configurations.loader import (
+    load_component_configuration,
+    load_package_configuration,
+)
 from aea.configurations.manager import find_component_directory_from_component_id
 from aea.exceptions import enforce
 from aea.package_manager.v1 import PackageManagerV1
@@ -443,13 +450,42 @@ def load_package(
         )
 
     else:
-        # already know it's an agent
-        aea_project_path = aea_project_path or package_dir
+        if aea_project_path:
+            # for agent's workdir
+            agent_config = AEABuilder.try_to_load_agent_configuration_file(
+                cast(Path, aea_project_path)
+            )
+            load_aea_packages_recursively(
+                agent_config, package_path_finder, root_packages
+            )
+        else:
+            # for agents package in packages
+            package_configuration = load_package_configuration(
+                package_type=package_type,
+                directory=package_dir,
+                skip_aea_validation=skip_consistency_check,
+            )
+            package_configuration.directory = package_dir
 
-        agent_config = AEABuilder.try_to_load_agent_configuration_file(
-            cast(Path, aea_project_path)
-        )
-        load_aea_packages_recursively(agent_config, package_path_finder, root_packages)
+            # loads dependencies packages
+            load_aea_packages_recursively(
+                package_configuration, package_path_finder, root_packages
+            )
+
+            # requires to populate sys.modules with packages/author/agents
+            perform_load_aea_package(
+                package_dir,
+                package_configuration.author,
+                package_type.to_plural(),
+                package_configuration.name,
+            )
+
+            test_package_dir = package_dir / AEA_TEST_DIRNAME
+            enforce(
+                test_package_dir.exists(),
+                f"tests directory in {package_dir} not found",
+                click.ClickException,
+            )
 
 
 def test_package_by_path(
@@ -492,6 +528,7 @@ def test_package_by_path(
                 coverage_context=coverage_context,
             ),
             *pytest_arguments,
+            "-vvvvvvvvvvvvvvv",
         ]
         exit_code = pytest.main(runtime_args)
         if cov:
@@ -550,7 +587,7 @@ def test_package_collection(
 
 
 def load_aea_packages_recursively(
-    config: Union[ComponentConfiguration, AgentConfig],
+    config: Union[ComponentConfiguration, AgentConfig, PackageConfiguration],
     package_path_finder: Callable[[Path, ComponentId], Path],
     root_packages: Path,
     already_loaded: Optional[Set[ComponentId]] = None,
@@ -577,8 +614,8 @@ def load_aea_packages_recursively(
         load_aea_packages_recursively(
             dependency_configuration, package_path_finder, root_packages, already_loaded
         )
-    if not isinstance(config, AgentConfig):
-        # works for component, not for agent
+    if isinstance(config, ComponentConfiguration):
+        # works for component, not for agent config or package config used for agent
         load_aea_package(config)
         already_loaded.add(config.component_id)
 
