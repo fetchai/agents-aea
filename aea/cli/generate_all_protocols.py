@@ -175,7 +175,9 @@ def _fix_generated_protocol(package_path: Path) -> None:
     if tests_module.is_dir():
         log(f"Restore original `tests` directory in {package_path}")
         shutil.copytree(
-            tests_module, Path(PROTOCOLS, package_path.name, AEA_TEST_DIRNAME)
+            tests_module,
+            Path(PROTOCOLS, package_path.name, AEA_TEST_DIRNAME),
+            dirs_exist_ok=True,
         )
 
 
