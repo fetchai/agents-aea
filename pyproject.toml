@@ -11,6 +11,9 @@ authors = ["Fetch.AI Limited"]
 readme = "README.md"
 license = "Apache-2.0"
 homepage = "https://github.com/fetchai/agents-aea"
+repository = "https://github.com/fetchai/agents-aea"
+documentation = "https://docs.fetch.ai/aea/"
+keywords = ["agent", "aea", "autonomous", "economic", "autonomous economic agent"]
 classifiers = [
     "Environment :: Console",
     "Development Status :: 4 - Beta",
