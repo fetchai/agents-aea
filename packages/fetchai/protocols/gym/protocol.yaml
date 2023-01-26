@@ -16,7 +16,9 @@ fingerprint:
   message.py: bafybeifc7eyahc562zesgs5bwiaqwi2ibrfoieeffqxu2isq2h4oeudbxu
   serialization.py: bafybeidjrnjgs5yhzxoc5wfpxmfnnd764rbtugecn4uirmjs6mvtmbva7y
   tests/__init__.py: bafybeidoxwwkwljoz2xsmv7pif3tksdyhl7tgf4s4aao5ypjg4o4hefk7e
+  tests/test_dialogues.py: bafybeibi3rm45tjp5uhxygmfc4smewxy5p3qkuwf3cnu22bgsd2qemy3tu
   tests/test_gym.py: bafybeih7jqhs3exvqfbo5et55pdksp6q44q2tq6edjx7mnesm44mgzmnrq
+  tests/test_messages.py: bafybeiawt7tqejbrlqtn5uvueqdj6qygvx2abpord4ylvjygzlkflnbasi
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
