@@ -449,3 +449,39 @@ class TestPackageTestPackages(BaseAEATestCommand):
             get_packages_list_mock.assert_called_once_with(
                 packages_dir=mock.ANY, packages_filter="all"
             )
+
+
+class TestPackageTestPackagesFails(BaseAEATestCommand):
+    """Test that the command 'aea test pacakages' fails with errors printed."""
+
+    def test_packages_all_dev(self) -> None:
+        """Check test packages --all fails."""
+
+        with mock.patch("aea.cli.test.pytest.main", return_value=1), mock.patch(
+            "aea.cli.test.click.echo"
+        ) as echo_mock:
+            result = self.run_test_command(
+                "packages",
+                "--all",
+            )
+            assert result.exit_code == 1
+            assert r"call('Failed tests')" in str(echo_mock.call_args_list)
+            assert r"call('1       \topen_aea/protocols/signing')" in str(
+                echo_mock.call_args_list
+            )
+
+    def test_packages_no_tests_collected(self) -> None:
+        """Check test packages --all fails."""
+
+        with mock.patch(
+            "aea.cli.test.pytest.main", return_value=NO_TESTS_COLLECTED_PYTEST_EXIT_CODE
+        ), mock.patch("aea.cli.test.click.echo") as echo_mock:
+            result = self.run_test_command(
+                "packages",
+                "--all",
+            )
+            assert result.exit_code == 0
+            assert (
+                r"call('Could not collect tests for for signing of type protocols'),"
+                in str(echo_mock.call_args_list)
+            )
