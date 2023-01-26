@@ -243,6 +243,25 @@ class TestAgentTestSingleTest(BaseAEATestCommand):
         assert result.exit_code == OK_PYTEST_EXIT_CODE
 
 
+class TestAgentTestByPathSingleTest(BaseAEATestCommand):
+    """Test that the command 'aea test by-path' works as expected (with a non-empty test suite)."""
+
+    def test_run(self, mock_sys_modules) -> None:
+        """Assert that the exit code is equal to 0 (tests are run successfully)."""
+        # write dummy test module in test/ folder
+        self.get_test_aea_dirpath().mkdir(exist_ok=False)
+        test_module_filepath = self.get_test_aea_dirpath() / "test_module.py"
+        self.write_dummy_test_module(test_module_filepath)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "test", "by-path", self._get_cwd()],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+
+        assert result.exit_code == OK_PYTEST_EXIT_CODE
+
+
 @_parametrize_class
 class TestPackageTestByTypeEmptyTestSuite(BaseAEATestCommand):
     """Test that the command 'aea test item_type public_id' works as expected (with an empty test suite)."""
