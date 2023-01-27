@@ -468,7 +468,9 @@ class TestPackageTestPackagesFails(BaseAEATestCommand):
             assert r"call('Failed tests')" in str(echo_mock.call_args_list)
             assert r"call('1       \topen_aea/protocols/signing')" in str(
                 echo_mock.call_args_list
-            )
+            ).replace(r"\\\\", "/").replace(
+                r"\\", "/"
+            )  # fix for windows
 
     def test_packages_no_tests_collected(self) -> None:
         """Check test packages --all fails."""
