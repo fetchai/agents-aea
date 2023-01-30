@@ -479,7 +479,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if system_name == "Windows":  # pragma: no cover
             # ctrl-c event will be handled with stdin in Windows
             consume(map(lambda p: p.stdin.close(), active_agents()))
-            signals = [signal.CTRL_C_EVENT, signal.CTRL_BREAK_EVENT, signal.SIGTERM]  # type: ignore
+            signals = [signal.CTRL_BREAK_EVENT, signal.CTRL_C_EVENT, signal.SIGTERM]  # type: ignore
         elif system_name in {"Linux", "Darwin"}:  # pragma: no cover
             signals = [signal.SIGINT, signal.SIGTERM, signal.SIGKILL]  # type: ignore
         else:
