@@ -31,24 +31,23 @@ from packages.fetchai.protocols.gym.message import GymMessage
 class TestMessageGym(BaseProtocolMessagesTestCase):
     """Test for the 'gym' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = GymMessage
 
-    def build_messages(self) -> List[GymMessage]:
+    def build_messages(self) -> List[GymMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             GymMessage(
                 performative=GymMessage.Performative.ACT,
-                action=AnyObject(),  # check it please!
+                action=AnyObject("some_info"),
                 step_id=12,
             ),
             GymMessage(
                 performative=GymMessage.Performative.PERCEPT,
                 step_id=12,
-                observation=AnyObject(),  # check it please!
-                reward=1.4,
+                observation=AnyObject("some_info1"),
+                reward=1.0,
                 done=True,
-                info=AnyObject(),  # check it please!
+                info=AnyObject("some_info"),
             ),
             GymMessage(
                 performative=GymMessage.Performative.STATUS,
@@ -62,7 +61,7 @@ class TestMessageGym(BaseProtocolMessagesTestCase):
             ),
         ]
 
-    def build_inconsistent(self) -> List[GymMessage]:
+    def build_inconsistent(self) -> List[GymMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             GymMessage(
@@ -73,10 +72,10 @@ class TestMessageGym(BaseProtocolMessagesTestCase):
             GymMessage(
                 performative=GymMessage.Performative.PERCEPT,
                 # skip content: step_id
-                observation=AnyObject(),  # check it please!
+                observation=AnyObject("some_info"),
                 reward=1.4,
                 done=True,
-                info=AnyObject(),  # check it please!
+                info=AnyObject("some_info"),
             ),
             GymMessage(
                 performative=GymMessage.Performative.STATUS,

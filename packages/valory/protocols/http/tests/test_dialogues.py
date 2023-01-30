@@ -29,7 +29,6 @@ from packages.valory.protocols.http.message import HttpMessage
 class TestDialoguesHttp(BaseProtocolDialoguesTestCase):
     """Test for the 'http' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = HttpMessage
 
     DIALOGUE_CLASS = HttpDialogue

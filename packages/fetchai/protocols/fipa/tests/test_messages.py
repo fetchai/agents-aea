@@ -22,6 +22,7 @@
 # pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,redefined-builtin
 from typing import List
 
+from aea.helpers.search.models import Constraint, ConstraintType
 from aea.test_tools.test_protocol import BaseProtocolMessagesTestCase
 
 from packages.fetchai.protocols.fipa.custom_types import Description, Query
@@ -31,19 +32,18 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 class TestMessageFipa(BaseProtocolMessagesTestCase):
     """Test for the 'fipa' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = FipaMessage
 
-    def build_messages(self) -> List[FipaMessage]:
+    def build_messages(self) -> List[FipaMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             FipaMessage(
                 performative=FipaMessage.Performative.CFP,
-                query=Query(),  # check it please!
+                query=Query([Constraint("something", ConstraintType(">", 1))]),
             ),
             FipaMessage(
                 performative=FipaMessage.Performative.PROPOSE,
-                proposal=Description(),  # check it please!
+                proposal=Description({"foo1": 1, "bar1": 2}),
             ),
             FipaMessage(
                 performative=FipaMessage.Performative.ACCEPT_W_INFORM,
@@ -71,7 +71,7 @@ class TestMessageFipa(BaseProtocolMessagesTestCase):
             ),
         ]
 
-    def build_inconsistent(self) -> List[FipaMessage]:
+    def build_inconsistent(self) -> List[FipaMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             FipaMessage(

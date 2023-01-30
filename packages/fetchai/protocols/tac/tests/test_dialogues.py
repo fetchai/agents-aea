@@ -29,7 +29,6 @@ from packages.fetchai.protocols.tac.message import TacMessage
 class TestDialoguesTac(BaseProtocolDialoguesTestCase):
     """Test for the 'tac' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = TacMessage
 
     DIALOGUE_CLASS = TacDialogue

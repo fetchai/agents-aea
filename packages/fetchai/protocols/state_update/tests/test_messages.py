@@ -30,16 +30,15 @@ from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 class TestMessageStateUpdate(BaseProtocolMessagesTestCase):
     """Test for the 'state_update' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = StateUpdateMessage
 
-    def build_messages(self) -> List[StateUpdateMessage]:
+    def build_messages(self) -> List[StateUpdateMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             StateUpdateMessage(
                 performative=StateUpdateMessage.Performative.INITIALIZE,
-                exchange_params_by_currency_id={"some str": 1.4},
-                utility_params_by_good_id={"some str": 1.4},
+                exchange_params_by_currency_id={"some str": 1.0},
+                utility_params_by_good_id={"some str": 1.0},
                 amount_by_currency_id={"some str": 12},
                 quantities_by_good_id={"some str": 12},
             ),
@@ -53,7 +52,7 @@ class TestMessageStateUpdate(BaseProtocolMessagesTestCase):
             ),
         ]
 
-    def build_inconsistent(self) -> List[StateUpdateMessage]:
+    def build_inconsistent(self) -> List[StateUpdateMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             StateUpdateMessage(

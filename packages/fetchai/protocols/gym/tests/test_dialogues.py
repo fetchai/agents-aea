@@ -29,7 +29,6 @@ from packages.fetchai.protocols.gym.message import GymMessage
 class TestDialoguesGym(BaseProtocolDialoguesTestCase):
     """Test for the 'gym' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = GymMessage
 
     DIALOGUE_CLASS = GymDialogue

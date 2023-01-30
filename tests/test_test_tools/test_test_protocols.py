@@ -57,7 +57,7 @@ class TestMessages(BaseProtocolMessagesTestCase):
 
     MESSAGE_CLASS = TProtocolMessage
 
-    def build_messages(self) -> List[Message]:
+    def build_messages(self) -> List[Message]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             TProtocolMessage(
@@ -66,7 +66,7 @@ class TestMessages(BaseProtocolMessagesTestCase):
             )
         ]
 
-    def build_inconsistent(self) -> List[Message]:
+    def build_inconsistent(self) -> List[Message]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             TProtocolMessage(

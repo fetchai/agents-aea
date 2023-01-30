@@ -30,7 +30,6 @@ from packages.valory.protocols.acn.message import AcnMessage
 class TestDialoguesAcn(BaseProtocolDialoguesTestCase):
     """Test for the 'acn' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = AcnMessage
 
     DIALOGUE_CLASS = AcnDialogue
@@ -43,5 +42,12 @@ class TestDialoguesAcn(BaseProtocolDialoguesTestCase):
         """Make a dict with message contruction content for dialogues.create."""
         return dict(
             performative=AcnMessage.Performative.REGISTER,
-            record=AgentRecord(),  # check it please!
+            record=AgentRecord(
+                address="address",
+                public_key="pbk",
+                peer_public_key="peerpbk",
+                signature="sign",
+                service_id="acn",
+                ledger_id="fetchai",
+            ),
         )

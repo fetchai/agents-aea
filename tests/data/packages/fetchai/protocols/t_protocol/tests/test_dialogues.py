@@ -33,7 +33,6 @@ from tests.data.packages.fetchai.protocols.t_protocol.message import TProtocolMe
 class TestDialoguesTProtocol(BaseProtocolDialoguesTestCase):
     """Test for the 't_protocol' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = TProtocolMessage
 
     DIALOGUE_CLASS = TProtocolDialogue
@@ -46,5 +45,14 @@ class TestDialoguesTProtocol(BaseProtocolDialoguesTestCase):
         """Make a dict with message contruction content for dialogues.create."""
         return dict(
             performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
-            content_ct=DataModel(),  # check it please!
+            content_ct=DataModel(
+                int_field=12,
+                bool_field=True,
+                bytes_field=b"",
+                dict_field={},
+                float_field=1.0,
+                set_field=set(),
+                str_field="str",
+                list_field=["str"],
+            ),
         )

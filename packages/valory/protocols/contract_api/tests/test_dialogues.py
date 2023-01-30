@@ -33,7 +33,6 @@ from packages.valory.protocols.contract_api.message import ContractApiMessage
 class TestDialoguesContractApi(BaseProtocolDialoguesTestCase):
     """Test for the 'contract_api' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = ContractApiMessage
 
     DIALOGUE_CLASS = ContractApiDialogue
@@ -49,5 +48,5 @@ class TestDialoguesContractApi(BaseProtocolDialoguesTestCase):
             ledger_id="some str",
             contract_id="some str",
             callable="some str",
-            kwargs=Kwargs(),  # check it please!
+            kwargs=Kwargs({"key_1": 1, "key_2": 2}),
         )

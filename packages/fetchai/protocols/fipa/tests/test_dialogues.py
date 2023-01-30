@@ -20,6 +20,7 @@
 """Test dialogues module for fipa protocol."""
 
 # pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,redefined-builtin
+from aea.helpers.search.models import Constraint, ConstraintType
 from aea.test_tools.test_protocol import BaseProtocolDialoguesTestCase
 
 from packages.fetchai.protocols.fipa.custom_types import Query
@@ -30,7 +31,6 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 class TestDialoguesFipa(BaseProtocolDialoguesTestCase):
     """Test for the 'fipa' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = FipaMessage
 
     DIALOGUE_CLASS = FipaDialogue
@@ -43,5 +43,5 @@ class TestDialoguesFipa(BaseProtocolDialoguesTestCase):
         """Make a dict with message contruction content for dialogues.create."""
         return dict(
             performative=FipaMessage.Performative.CFP,
-            query=Query(),  # check it please!
+            query=Query([Constraint("something", ConstraintType(">", 1))]),
         )

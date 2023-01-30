@@ -36,10 +36,9 @@ from packages.valory.protocols.contract_api.message import ContractApiMessage
 class TestMessageContractApi(BaseProtocolMessagesTestCase):
     """Test for the 'contract_api' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = ContractApiMessage
 
-    def build_messages(self) -> List[ContractApiMessage]:
+    def build_messages(self) -> List[ContractApiMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             ContractApiMessage(
@@ -47,7 +46,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 ledger_id="some str",
                 contract_id="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -55,7 +54,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 contract_id="some str",
                 contract_address="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
@@ -63,7 +62,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 contract_id="some str",
                 contract_address="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.GET_STATE,
@@ -71,29 +70,29 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 contract_id="some str",
                 contract_address="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.STATE,
-                state=State(),  # check it please!
+                state=State("some_ledger_id", {"key": "some_body"}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-                raw_transaction=RawTransaction(),  # check it please!
+                raw_transaction=RawTransaction("some_ledger_id", {"body": "some_body"}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.RAW_MESSAGE,
-                raw_message=RawMessage(),  # check it please!
+                raw_message=RawMessage("some_ledger_id", b"some_body"),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.ERROR,
-                code=[12],
-                message=["some str"],
+                code=12,
+                message="some str",
                 data=b"some_bytes",
             ),
         ]
 
-    def build_inconsistent(self) -> List[ContractApiMessage]:
+    def build_inconsistent(self) -> List[ContractApiMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             ContractApiMessage(
@@ -101,7 +100,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 # skip content: ledger_id
                 contract_id="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -109,7 +108,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 contract_id="some str",
                 contract_address="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
@@ -117,7 +116,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 contract_id="some str",
                 contract_address="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.GET_STATE,
@@ -125,7 +124,7 @@ class TestMessageContractApi(BaseProtocolMessagesTestCase):
                 contract_id="some str",
                 contract_address="some str",
                 callable="some str",
-                kwargs=Kwargs(),  # check it please!
+                kwargs=Kwargs({"key_1": 1, "key_2": 2}),
             ),
             ContractApiMessage(
                 performative=ContractApiMessage.Performative.STATE,

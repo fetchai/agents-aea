@@ -30,10 +30,9 @@ from packages.valory.protocols.http.message import HttpMessage
 class TestMessageHttp(BaseProtocolMessagesTestCase):
     """Test for the 'http' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = HttpMessage
 
-    def build_messages(self) -> List[HttpMessage]:
+    def build_messages(self) -> List[HttpMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             HttpMessage(
@@ -54,7 +53,7 @@ class TestMessageHttp(BaseProtocolMessagesTestCase):
             ),
         ]
 
-    def build_inconsistent(self) -> List[HttpMessage]:
+    def build_inconsistent(self) -> List[HttpMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             HttpMessage(

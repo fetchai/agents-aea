@@ -32,7 +32,6 @@ from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 class TestDialoguesLedgerApi(BaseProtocolDialoguesTestCase):
     """Test for the 'ledger_api' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = LedgerApiMessage
 
     DIALOGUE_CLASS = LedgerApiDialogue

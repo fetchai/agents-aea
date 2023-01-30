@@ -33,7 +33,6 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 class TestDialoguesOefSearch(BaseProtocolDialoguesTestCase):
     """Test for the 'oef_search' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = OefSearchMessage
 
     DIALOGUE_CLASS = OefSearchDialogue
@@ -46,5 +45,5 @@ class TestDialoguesOefSearch(BaseProtocolDialoguesTestCase):
         """Make a dict with message contruction content for dialogues.create."""
         return dict(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=Description(),  # check it please!
+            service_description=Description({"foo1": 1, "bar1": 2}),  # check it please!
         )

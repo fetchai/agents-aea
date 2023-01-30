@@ -31,10 +31,9 @@ from packages.fetchai.protocols.tac.message import TacMessage
 class TestMessageTac(BaseProtocolMessagesTestCase):
     """Test for the 'tac' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = TacMessage
 
-    def build_messages(self) -> List[TacMessage]:
+    def build_messages(self) -> List[TacMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             TacMessage(
@@ -63,15 +62,15 @@ class TestMessageTac(BaseProtocolMessagesTestCase):
             TacMessage(
                 performative=TacMessage.Performative.GAME_DATA,
                 amount_by_currency_id={"some str": 12},
-                exchange_params_by_currency_id={"some str": 1.4},
+                exchange_params_by_currency_id={"some str": 1.0},
                 quantities_by_good_id={"some str": 12},
-                utility_params_by_good_id={"some str": 1.4},
+                utility_params_by_good_id={"some str": 1.0},
                 fee_by_currency_id={"some str": 12},
                 agent_addr_to_name={"some str": "some str"},
                 currency_id_to_name={"some str": "some str"},
                 good_id_to_name={"some str": "some str"},
                 version_id="some str",
-                info=[{"some str": "some str"}],
+                info={"some str": "some str"},
             ),
             TacMessage(
                 performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
@@ -81,12 +80,12 @@ class TestMessageTac(BaseProtocolMessagesTestCase):
             ),
             TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
-                error_code=ErrorCode(),  # check it please!
-                info=[{"some str": "some str"}],
+                error_code=ErrorCode.TRANSACTION_NOT_MATCHING,
+                info={"some str": "some str"},
             ),
         ]
 
-    def build_inconsistent(self) -> List[TacMessage]:
+    def build_inconsistent(self) -> List[TacMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             TacMessage(
@@ -117,7 +116,7 @@ class TestMessageTac(BaseProtocolMessagesTestCase):
                 currency_id_to_name={"some str": "some str"},
                 good_id_to_name={"some str": "some str"},
                 version_id="some str",
-                info=[{"some str": "some str"}],
+                info={"some str": "some str"},
             ),
             TacMessage(
                 performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
@@ -128,6 +127,6 @@ class TestMessageTac(BaseProtocolMessagesTestCase):
             TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
                 # skip content: error_code
-                info=[{"some str": "some str"}],
+                info={"some str": "some str"},
             ),
         ]

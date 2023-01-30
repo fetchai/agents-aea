@@ -22,12 +22,12 @@
 # pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,redefined-builtin
 from typing import List
 
+from aea.helpers.search.models import Constraint, ConstraintType
 from aea.test_tools.test_protocol import BaseProtocolMessagesTestCase
 
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo,
     Description,
-    OefErrorOperation,
     Query,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -36,40 +36,55 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 class TestMessageOefSearch(BaseProtocolMessagesTestCase):
     """Test for the 'oef_search' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = OefSearchMessage
 
-    def build_messages(self) -> List[OefSearchMessage]:
+    def build_messages(self) -> List[OefSearchMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                service_description=Description(),  # check it please!
+                service_description=Description(
+                    {"foo1": 1, "bar1": 2}
+                ),  # check it please!
             ),
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                service_description=Description(),  # check it please!
+                service_description=Description(
+                    {"foo1": 1, "bar1": 2}
+                ),  # check it please!
             ),
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=Query(),  # check it please!
+                query=Query(
+                    [Constraint("something", ConstraintType(">", 1))]
+                ),  # check it please!
             ),
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                agents=Tuple[str, ...](),
-                agents_info=AgentsInfo(),  # check it please!
+                agents=("some str",),
+                agents_info=AgentsInfo(
+                    {
+                        "key_1": {"key_1": b"value_1", "key_2": b"value_2"},
+                        "key_2": {"key_3": b"value_3", "key_4": b"value_4"},
+                    }
+                ),
             ),
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.SUCCESS,
-                agents_info=AgentsInfo(),  # check it please!
+                agents_info=AgentsInfo(
+                    {
+                        "key_1": {"key_1": b"value_1", "key_2": b"value_2"},
+                        "key_2": {"key_3": b"value_3", "key_4": b"value_4"},
+                    }
+                ),
             ),
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.OEF_ERROR,
-                oef_error_operation=OefErrorOperation(),  # check it please!
+                oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,  # check it please!
             ),
         ]
 
-    def build_inconsistent(self) -> List[OefSearchMessage]:
+    def build_inconsistent(self) -> List[OefSearchMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             OefSearchMessage(
@@ -87,7 +102,12 @@ class TestMessageOefSearch(BaseProtocolMessagesTestCase):
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
                 # skip content: agents
-                agents_info=AgentsInfo(),  # check it please!
+                agents_info=AgentsInfo(
+                    {
+                        "key_1": {"key_1": b"value_1", "key_2": b"value_2"},
+                        "key_2": {"key_3": b"value_3", "key_4": b"value_4"},
+                    }
+                ),  # check it please!
             ),
             OefSearchMessage(
                 performative=OefSearchMessage.Performative.SUCCESS,

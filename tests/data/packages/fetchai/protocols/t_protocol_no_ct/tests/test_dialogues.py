@@ -34,7 +34,6 @@ from tests.data.packages.fetchai.protocols.t_protocol_no_ct.message import (
 class TestDialoguesTProtocolNoCt(BaseProtocolDialoguesTestCase):
     """Test for the 't_protocol_no_ct' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = TProtocolNoCtMessage
 
     DIALOGUE_CLASS = TProtocolNoCtDialogue
@@ -49,7 +48,7 @@ class TestDialoguesTProtocolNoCt(BaseProtocolDialoguesTestCase):
             performative=TProtocolNoCtMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some_bytes",
             content_int=12,
-            content_float=1.4,
+            content_float=1.0,
             content_bool=True,
             content_str="some str",
         )

@@ -31,10 +31,9 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 class TestMessageDefault(BaseProtocolMessagesTestCase):
     """Test for the 'default' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = DefaultMessage
 
-    def build_messages(self) -> List[DefaultMessage]:
+    def build_messages(self) -> List[DefaultMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             DefaultMessage(
@@ -43,7 +42,7 @@ class TestMessageDefault(BaseProtocolMessagesTestCase):
             ),
             DefaultMessage(
                 performative=DefaultMessage.Performative.ERROR,
-                error_code=ErrorCode(),  # check it please!
+                error_code=ErrorCode.DECODING_ERROR,  # check it please!
                 error_msg="some str",
                 error_data={"some str": b"some_bytes"},
             ),
@@ -52,7 +51,7 @@ class TestMessageDefault(BaseProtocolMessagesTestCase):
             ),
         ]
 
-    def build_inconsistent(self) -> List[DefaultMessage]:
+    def build_inconsistent(self) -> List[DefaultMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             DefaultMessage(

@@ -32,7 +32,6 @@ from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 class TestDialoguesStateUpdate(BaseProtocolDialoguesTestCase):
     """Test for the 'state_update' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = StateUpdateMessage
 
     DIALOGUE_CLASS = StateUpdateDialogue

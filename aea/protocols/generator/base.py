@@ -25,7 +25,7 @@ import shutil
 # pylint: skip-file
 from datetime import date
 from pathlib import Path
-from typing import Any, Optional, Tuple
+from typing import Optional, Tuple
 
 # pylint: skip-file
 from aea.configurations.base import ProtocolSpecificationParseError
@@ -2148,7 +2148,7 @@ class ProtocolGenerator:
                 full_mode_output = incomplete_generation_warning_msg
         return full_mode_output
 
-    def _generate_tests(self):
+    def _generate_tests(self) -> None:
         tests_dir = str(Path(self.path_to_generated_protocol_package) / "tests")
         os.makedirs(tests_dir, exist_ok=True)
 
@@ -2166,7 +2166,7 @@ class ProtocolGenerator:
             self._test_dialogues_file_str(),
         )
 
-    def _test_messages_file_str(self):
+    def _test_messages_file_str(self) -> str:
         """
         Produce the content of the test_messages.py.
 
@@ -2223,13 +2223,16 @@ class ProtocolGenerator:
         )
 
         msg_class = f"{self.protocol_specification_in_camel_case}Message"
-        cls_str += self.indent + "__test__ = True\n"
+        cls_str += self.indent + "\n"
         cls_str += self.indent + f"MESSAGE_CLASS = {msg_class}\n\n"
-        cls_str += self.indent + f"def build_messages(self) -> List[{msg_class}]:\n"
+        cls_str += (
+            self.indent
+            + f"def build_messages(self) -> List[{msg_class}]: # type: ignore[override]\n"
+        )
         self._change_indent(1)
         cls_str += self.indent + '"""Build the messages to be used for testing."""\n'
 
-        cls_str += self.indent + f"return [\n"
+        cls_str += self.indent + "return [\n"
 
         for performative, content in self.spec.speech_acts.items():
             cls_str += (
@@ -2253,18 +2256,21 @@ class ProtocolGenerator:
 
             cls_str += self.indent + "),\n"
 
-        cls_str += self.indent + f"]\n"
+        cls_str += self.indent + "]\n"
 
         self._change_indent(-1)
 
-        cls_str += self.indent + f"def build_inconsistent(self) -> List[{msg_class}]:\n"
+        cls_str += (
+            self.indent
+            + f"def build_inconsistent(self) -> List[{msg_class}]: # type: ignore[override]\n"
+        )
 
         self._change_indent(1)
         cls_str += (
             self.indent + '"""Build inconsistent messages to be used for testing."""\n'
         )
 
-        cls_str += self.indent + f"return [\n"
+        cls_str += self.indent + "return [\n"
 
         for performative, content in self.spec.speech_acts.items():
             if len(content) == 0:
@@ -2297,11 +2303,11 @@ class ProtocolGenerator:
 
             cls_str += self.indent + "),\n"
 
-        cls_str += self.indent + f"]\n"
+        cls_str += self.indent + "]\n"
 
         return cls_str
 
-    def _test_dialogues_file_str(self):
+    def _test_dialogues_file_str(self) -> str:
         """
         Produce the content of the test_dialogues.py.
 
@@ -2379,7 +2385,7 @@ class ProtocolGenerator:
             )
         )
 
-        cls_str += self.indent + "__test__ = True\n"
+        cls_str += self.indent + "\n"
         cls_str += self.indent + f"MESSAGE_CLASS = {msg_class}\n\n"
         cls_str += (
             self.indent
@@ -2421,13 +2427,20 @@ class ProtocolGenerator:
         cls_str += self.indent + ")\n"
         return cls_str
 
-    def _make_type_value(self, content_type) -> str:
+    def _make_type_value(self, content_type: str) -> str:
+        """
+        Make a value of type definition.
+
+        :param content_type: str type definition
+
+        :returns: str value
+        """
         type_map = {
             "bytes": 'b"some_bytes"',
             "str": '"some str"',
             "bool": "True",
             "int": "12",
-            "float": "1.4",
+            "float": "1.0",
         }
         if content_type in type_map:
             return type_map[content_type]
@@ -2435,6 +2448,15 @@ class ProtocolGenerator:
         if content_type.startswith("List"):
             inner_type = content_type[5:-1]
             return f"[{self._make_type_value(inner_type)}]"
+        elif content_type.startswith("FrozenSet"):
+            inner_type = content_type[10:-1]
+            return f"frozenset([{self._make_type_value(inner_type)}])"
+        elif content_type.startswith("Union"):
+            inner_type = content_type[6:-1].split(",")[0].strip()
+            return f"{self._make_type_value(inner_type)}"
+        elif content_type.startswith("Tuple"):
+            inner_type = content_type[6:-1].split(",")[0].strip()
+            return f"({self._make_type_value(inner_type)},)"
         elif content_type.startswith("Dict"):
             inner_type1, inner_type2 = [
                 i.strip() for i in content_type[5:-1].split(",")
@@ -2442,7 +2464,7 @@ class ProtocolGenerator:
             return f"{{ {self._make_type_value(inner_type1)} :  {self._make_type_value(inner_type2)}}}"
         elif content_type.startswith("Optional"):
             inner_type = content_type[9:-1]
-            return f"[{self._make_type_value(inner_type)}]"
+            return f"{self._make_type_value(inner_type)}"
 
         return f"{content_type}()"
 

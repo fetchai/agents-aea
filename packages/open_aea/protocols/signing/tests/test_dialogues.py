@@ -33,7 +33,6 @@ from packages.open_aea.protocols.signing.message import SigningMessage
 class TestDialoguesSigning(BaseProtocolDialoguesTestCase):
     """Test for the 'signing' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = SigningMessage
 
     DIALOGUE_CLASS = SigningDialogue
@@ -46,6 +45,14 @@ class TestDialoguesSigning(BaseProtocolDialoguesTestCase):
         """Make a dict with message contruction content for dialogues.create."""
         return dict(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            terms=Terms(),  # check it please!
-            raw_transaction=RawTransaction(),  # check it please!
+            terms=Terms(
+                ledger_id="ledger_id",
+                sender_address="address1",
+                counterparty_address="address2",
+                amount_by_currency_id={"FET": -2},
+                quantities_by_good_id={"good_id": 10},
+                is_sender_payable_tx_fee=True,
+                nonce="transaction nonce",
+            ),
+            raw_transaction=RawTransaction("ledger_id", {"tx": "transaction"}),
         )

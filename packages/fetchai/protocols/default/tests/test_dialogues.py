@@ -32,7 +32,6 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 class TestDialoguesDefault(BaseProtocolDialoguesTestCase):
     """Test for the 'default' protocol dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS = DefaultMessage
 
     DIALOGUE_CLASS = DefaultDialogue

@@ -31,15 +31,21 @@ from packages.valory.protocols.acn.message import AcnMessage
 class TestMessageAcn(BaseProtocolMessagesTestCase):
     """Test for the 'acn' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = AcnMessage
 
-    def build_messages(self) -> List[AcnMessage]:
+    def build_messages(self) -> List[AcnMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             AcnMessage(
                 performative=AcnMessage.Performative.REGISTER,
-                record=AgentRecord(),  # check it please!
+                record=AgentRecord(
+                    address="address",
+                    public_key="pbk",
+                    peer_public_key="peerpbk",
+                    signature="sign",
+                    service_id="acn",
+                    ledger_id="fetchai",
+                ),
             ),
             AcnMessage(
                 performative=AcnMessage.Performative.LOOKUP_REQUEST,
@@ -47,20 +53,37 @@ class TestMessageAcn(BaseProtocolMessagesTestCase):
             ),
             AcnMessage(
                 performative=AcnMessage.Performative.LOOKUP_RESPONSE,
-                record=AgentRecord(),  # check it please!
+                record=AgentRecord(
+                    address="address",
+                    public_key="pbk",
+                    peer_public_key="peerpbk",
+                    signature="sign",
+                    service_id="acn",
+                    ledger_id="fetchai",
+                ),
             ),
             AcnMessage(
                 performative=AcnMessage.Performative.AEA_ENVELOPE,
                 envelope=b"some_bytes",
-                record=AgentRecord(),  # check it please!
+                record=AgentRecord(
+                    address="address",
+                    public_key="pbk",
+                    peer_public_key="peerpbk",
+                    signature="sign",
+                    service_id="acn",
+                    ledger_id="fetchai",
+                ),
             ),
             AcnMessage(
                 performative=AcnMessage.Performative.STATUS,
-                body=StatusBody(),  # check it please!
+                body=StatusBody(
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_UNSUPPORTED_VERSION,
+                    msgs=["pbk"],
+                ),
             ),
         ]
 
-    def build_inconsistent(self) -> List[AcnMessage]:
+    def build_inconsistent(self) -> List[AcnMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             AcnMessage(
@@ -78,7 +101,14 @@ class TestMessageAcn(BaseProtocolMessagesTestCase):
             AcnMessage(
                 performative=AcnMessage.Performative.AEA_ENVELOPE,
                 # skip content: envelope
-                record=AgentRecord(),  # check it please!
+                record=AgentRecord(
+                    address="address",
+                    public_key="pbk",
+                    peer_public_key="peerpbk",
+                    signature="sign",
+                    service_id="acn",
+                    ledger_id="fetchai",
+                ),
             ),
             AcnMessage(
                 performative=AcnMessage.Performative.STATUS,

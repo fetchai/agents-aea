@@ -36,13 +36,25 @@ from packages.valory.protocols.ledger_api.custom_types import (
 from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
+LEDGER_ID = "ethereum"
+
+
 class TestMessageLedgerApi(BaseProtocolMessagesTestCase):
     """Test for the 'ledger_api' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = LedgerApiMessage
 
-    def build_messages(self) -> List[LedgerApiMessage]:
+    ledger_id = LEDGER_ID
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address="sender_address",
+        counterparty_address="counterparty_address",
+        amount_by_currency_id={},
+        quantities_by_good_id={},
+        nonce="nonce_stub",
+    )
+
+    def build_messages(self) -> List[LedgerApiMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             LedgerApiMessage(
@@ -52,17 +64,19 @@ class TestMessageLedgerApi(BaseProtocolMessagesTestCase):
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=Terms(),  # check it please!
+                terms=self.terms,
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-                signed_transaction=SignedTransaction(),  # check it please!
+                signed_transaction=SignedTransaction(
+                    "some_ledger_id", {"body": "some_body"}
+                ),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                transaction_digest=TransactionDigest(),  # check it please!
-                retry_timeout=[12],
-                retry_attempts=[12],
+                transaction_digest=TransactionDigest("some_ledger_id", "some_body"),
+                retry_timeout=12,
+                retry_attempts=12,
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.BALANCE,
@@ -71,37 +85,41 @@ class TestMessageLedgerApi(BaseProtocolMessagesTestCase):
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
-                raw_transaction=RawTransaction(),  # check it please!
+                raw_transaction=RawTransaction("some_ledger_id", {"body": "some_body"}),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
-                transaction_digest=TransactionDigest(),  # check it please!
+                transaction_digest=TransactionDigest("some_ledger_id", "some_body"),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                transaction_receipt=TransactionReceipt(),  # check it please!
+                transaction_receipt=TransactionReceipt(
+                    "some_ledger_id",
+                    {"key": "some_receipt"},
+                    {"key": "some_transaction"},
+                ),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.GET_STATE,
                 ledger_id="some str",
                 callable="some str",
-                args=Tuple[str, ...](),
-                kwargs=Kwargs(),  # check it please!
+                args=("some str",),
+                kwargs=Kwargs({}),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.STATE,
                 ledger_id="some str",
-                state=State(),  # check it please!
+                state=State(ledger_id=LEDGER_ID, body={}),  # check it please!
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.ERROR,
                 code=12,
-                message=["some str"],
-                data=[b"some_bytes"],
+                message="some str",
+                data=b"some_bytes",
             ),
         ]
 
-    def build_inconsistent(self) -> List[LedgerApiMessage]:
+    def build_inconsistent(self) -> List[LedgerApiMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             LedgerApiMessage(
@@ -120,8 +138,8 @@ class TestMessageLedgerApi(BaseProtocolMessagesTestCase):
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
                 # skip content: transaction_digest
-                retry_timeout=[12],
-                retry_attempts=[12],
+                retry_timeout=12,
+                retry_attempts=12,
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.BALANCE,
@@ -144,18 +162,18 @@ class TestMessageLedgerApi(BaseProtocolMessagesTestCase):
                 performative=LedgerApiMessage.Performative.GET_STATE,
                 # skip content: ledger_id
                 callable="some str",
-                args=Tuple[str, ...](),
-                kwargs=Kwargs(),  # check it please!
+                args=("some str",),
+                kwargs=Kwargs({}),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.STATE,
                 # skip content: ledger_id
-                state=State(),  # check it please!
+                state=State(ledger_id=LEDGER_ID, body={}),
             ),
             LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.ERROR,
                 # skip content: code
-                message=["some str"],
-                data=[b"some_bytes"],
+                message="some str",
+                data=b"some_bytes",
             ),
         ]

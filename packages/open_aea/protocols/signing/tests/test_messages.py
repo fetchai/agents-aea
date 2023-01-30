@@ -22,6 +22,8 @@
 # pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,redefined-builtin
 from typing import List
 
+from aea_ledger_cosmos import CosmosCrypto
+
 from aea.test_tools.test_protocol import BaseProtocolMessagesTestCase
 
 from packages.open_aea.protocols.signing.custom_types import (
@@ -38,48 +40,59 @@ from packages.open_aea.protocols.signing.message import SigningMessage
 class TestMessageSigning(BaseProtocolMessagesTestCase):
     """Test for the 'signing' protocol message."""
 
-    __test__ = True
     MESSAGE_CLASS = SigningMessage
+    ledger_id = CosmosCrypto.identifier
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address="address1",
+        counterparty_address="address2",
+        amount_by_currency_id={"FET": -2},
+        quantities_by_good_id={"good_id": 10},
+        is_sender_payable_tx_fee=True,
+        nonce="transaction nonce",
+    )
 
-    def build_messages(self) -> List[SigningMessage]:
+    def build_messages(self) -> List[SigningMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             SigningMessage(
                 performative=SigningMessage.Performative.SIGN_TRANSACTION,
-                terms=Terms(),  # check it please!
-                raw_transaction=RawTransaction(),  # check it please!
+                terms=self.terms,
+                raw_transaction=RawTransaction(self.ledger_id, {"tx": "transaction"}),
             ),
             SigningMessage(
                 performative=SigningMessage.Performative.SIGN_MESSAGE,
-                terms=Terms(),  # check it please!
-                raw_message=RawMessage(),  # check it please!
+                terms=self.terms,
+                raw_message=RawMessage(self.ledger_id, b"message"),
             ),
             SigningMessage(
                 performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-                signed_transaction=SignedTransaction(),  # check it please!
+                signed_transaction=SignedTransaction(
+                    self.ledger_id, {"sig": "signature"}
+                ),
             ),
             SigningMessage(
                 performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                signed_message=SignedMessage(),  # check it please!
+                signed_message=SignedMessage(self.ledger_id, "message"),
             ),
             SigningMessage(
                 performative=SigningMessage.Performative.ERROR,
-                error_code=ErrorCode(),  # check it please!
+                error_code=ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
             ),
         ]
 
-    def build_inconsistent(self) -> List[SigningMessage]:
+    def build_inconsistent(self) -> List[SigningMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             SigningMessage(
                 performative=SigningMessage.Performative.SIGN_TRANSACTION,
                 # skip content: terms
-                raw_transaction=RawTransaction(),  # check it please!
+                raw_transaction=RawTransaction(self.ledger_id, {"tx": "transaction"}),
             ),
             SigningMessage(
                 performative=SigningMessage.Performative.SIGN_MESSAGE,
                 # skip content: terms
-                raw_message=RawMessage(),  # check it please!
+                raw_message=RawMessage(self.ledger_id, b"message"),
             ),
             SigningMessage(
                 performative=SigningMessage.Performative.SIGNED_TRANSACTION,
