@@ -13,14 +13,13 @@ nav:
   - AEA Overview:
     - 'index.md'
     - Autonomous Economic Agents: 'aeas.md'
-    - Vision: 'vision.md'
-    - Application areas: 'app-areas.md'
-    - Agent ecosystem: 'oef-ledger.md'
+    - Application areas: 'application.md'
+    - Agent ecosystem: 'ecosystem.md'
   - Installation and setup:
-    - 'install.md'
+    - Installation: 'install.md'
+    - Setting up: 'setup.md'
     - Development setup: 'development-setup.md'
-    - Version: 'version.md'
-    - Installation: 'cli-how-to.md'
+    - Upgrading: 'upgrading.md'
     - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
   - Getting started:
     - Core components: 'core-components.md'
@@ -257,7 +256,6 @@ nav:
               - Fetchai:
                   - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
                   - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
-  - Upgrading: 'upgrading.md'
   - Limitations of v1: 'limits.md'
   - Known limitations: 'known-limits.md'
   - Glossary: 'glossary.md'
@@ -292,6 +290,7 @@ theme:
 #    - navigation.expand
     - navigation.indexes
     - navigation.top # Back-to-top button
+    - navigation.footer # Add links to the previous and next page of the current page
     - search.suggest # Completion for the searched word (can be accepted with ->).
     - search.highlight # Highlight all occurrences after following a search result link
     - search.share # Show share button for copying deep link to the current search query and result
@@ -302,6 +301,7 @@ theme:
 
 extra_css:
     - css/my-styles.css
+    - css/admonitions.css
 
 markdown_extensions:
   - admonition # Required by admonitions
@@ -323,6 +323,7 @@ markdown_extensions:
   - tables # # Required by tables
   - toc:
         permalink: true
+  - def_list
 
 plugins:
   - search # Enables search

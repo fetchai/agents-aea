@@ -1,4 +1,4 @@
-# AEA Ecosystem
+# Agent Ecosystem
 
 AEAs are situated within a larger ecosystem comprised of various other systems and technology layers.
 
@@ -6,7 +6,7 @@ AEAs are situated within a larger ecosystem comprised of various other systems a
 
 ## Agent Communication Network (ACN)
 
-ACN is a <a href="../acn">peer-to-peer communication network for agents</a>. It allows AEAs to send and receive envelopes between each other.
+ACN is a <a href="../acn">peer-to-peer communication network</a> for agents. It allows AEAs to send and receive envelopes between each other.
 
 The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
 
@@ -22,15 +22,15 @@ For two agents to be able to find each other, at least one must register itself 
 
 Ledgers enable AEAs to store transactions, for example involving the transfer of funds to each other, or the execution of smart contracts. They optionally ensure the truth and integrity of agent to agent interactions.
 
-Whilst a ledger can, in principle, be used to store structured data (for instance, training data in a machine learning model) in most use cases the resulting costs and privacy implications do not make this an efficient use of the ledger. Instead, usually only references to structured data - often in the form of hashes - are stored on a ledger, and the actual data is stored off-chain.
+Although a ledger can, in principle, be used to store structured data (e.g. training data in a machine learning model), in most cases the resulting costs and privacy implications do not make this sustainable. Instead, usually only references to structured data - often in the form of hashes - are stored on a ledger, and the actual data is stored off-chain.
 
 The Python implementation of the AEA Framework currently integrates with three ledgers:
 
-- <a href="https://docs.fetch.ai/ledger/" target="_blank">Fetch.ai ledger</a>
+- <a href="https://docs.fetch.ai/ledger_v2/" target="_blank">Fetch.ai ledger</a>
 - <a href="https://ethereum.org/en/developers/learning-tools/" target="_blank">Ethereum ledger</a>
 - <a href="https://v1.cosmos.network/sdk" target="_blank">Cosmos ledger</a>
 
-However, the framework makes it straightforward for any developer to add support for other ledgers.
+Furthermore, the framework makes it straightforward for any developer to create a ledger plugin, adding support for another ledger.
 
 ### AEAs as Second Layer Technology
 
