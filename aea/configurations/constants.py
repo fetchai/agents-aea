@@ -29,7 +29,7 @@ _ETHEREUM_IDENTIFIER = "ethereum"
 _COSMOS_IDENTIFIER = "cosmos"
 SIGNING_PROTOCOL = "open_aea/signing:latest"
 SIGNING_PROTOCOL_WITH_HASH = (
-    "open_aea/signing:1.0.0:bafybeidlbuhssnfifl2xn2kngompqkmhgtu4xaxgwfphqqqukrcbf2q544"
+    "open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4"
 )
 DEFAULT_LEDGER = _ETHEREUM_IDENTIFIER
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"

@@ -2152,14 +2152,18 @@ class ProtocolGenerator:
         tests_dir = str(Path(self.path_to_generated_protocol_package) / "tests")
         os.makedirs(tests_dir, exist_ok=True)
 
-        TESTS_MESSAGES_DOT_PY_FILE_NAME = "test_messages.py"
+        TESTS_MESSAGES_DOT_PY_FILE_NAME = (
+            f"test_{self.protocol_specification.name}_messages.py"
+        )
         _create_protocol_file(
             tests_dir,
             TESTS_MESSAGES_DOT_PY_FILE_NAME,
             self._test_messages_file_str(),
         )
 
-        TESTS_DIALOGUES_DOT_PY_FILE_NAME = "test_dialogues.py"
+        TESTS_DIALOGUES_DOT_PY_FILE_NAME = (
+            f"test_{self.protocol_specification.name}_dialogues.py"
+        )
         _create_protocol_file(
             tests_dir,
             TESTS_DIALOGUES_DOT_PY_FILE_NAME,

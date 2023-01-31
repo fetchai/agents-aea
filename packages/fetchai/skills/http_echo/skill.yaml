@@ -18,8 +18,8 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeihlinyex5t3hzhkwl4wjxymkmx7vkg7k2vfkfr4sgylrmuxztccyy
-- valory/http:1.0.0:bafybeievb6lewfroy7ykojmbmn63qc2hrpdmzgkh7ejpbkybmrqvz4dsxq
+- fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4
+- valory/http:1.0.0:bafybeifyoio7nlh5zzyn5yz7krkou56l22to3cwg7gw5v5o3vxwklibhty
 skills: []
 behaviours: {}
 handlers:

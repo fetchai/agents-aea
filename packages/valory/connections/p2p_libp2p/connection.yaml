@@ -64,8 +64,8 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/default:1.0.0:bafybeihlinyex5t3hzhkwl4wjxymkmx7vkg7k2vfkfr4sgylrmuxztccyy
-- valory/acn:1.1.0:bafybeidmnszlyff3itmiechxg3w5podslxpmueubdjz4f4k7mekf27fwii
+- fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4
+- valory/acn:1.1.0:bafybeignmc5uh3vgpuckljcj2tgg7hdqyytkm6m5b6v6mxtazdcvubibva
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
