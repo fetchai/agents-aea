@@ -17,6 +17,8 @@ fingerprint:
   serialization.py: bafybeif3qw3dbvjfxqwmlfaosps32ysrd4gg2mhgum6ysz6xys7bj6ynme
   tests/__init__.py: bafybeiejmbkzylap7xuv3wbduwwewybasdt6bxq3l3fkaoxazij2rgfre4
   tests/test_fipa.py: bafybeihh37hqvueezb56enmpxbithkmboomitt3cxaent6lnlin7ijq5py
+  tests/test_fipa_dialogues.py: bafybeifw4ux7p5o7fxlbj2vhi4wbfrav3xcvtixnattdulthrmqhviiadi
+  tests/test_fipa_messages.py: bafybeiccxkxuy4tpnn7ksb43qah34mgakkmy43s4orxpmifyhu3ciettmm
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

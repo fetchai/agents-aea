@@ -52,7 +52,6 @@ from packages.open_aea.protocols.signing.message import SigningMessage
 class TestMessages(BaseProtocolMessagesTestCase):
     """Base class to test message construction for the protocol."""
 
-    __test__ = True
     MESSAGE_CLASS = SigningMessage
 
     ledger_id = CosmosCrypto.identifier
@@ -66,7 +65,7 @@ class TestMessages(BaseProtocolMessagesTestCase):
         nonce="transaction nonce",
     )
 
-    def build_messages(self) -> List[SigningMessage]:
+    def build_messages(self) -> List[SigningMessage]:  # type: ignore[override]
         """Build the messages to be used for testing."""
         return [
             SigningMessage(
@@ -101,7 +100,7 @@ class TestMessages(BaseProtocolMessagesTestCase):
             ),
         ]
 
-    def build_inconsistent(self) -> List[SigningMessage]:
+    def build_inconsistent(self) -> List[SigningMessage]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
         return [
             SigningMessage(
@@ -123,7 +122,6 @@ class TestMessages(BaseProtocolMessagesTestCase):
 class TestDialogues(BaseProtocolDialoguesTestCase):
     """Test dialogues."""
 
-    __test__ = True
     MESSAGE_CLASS: Type[Message] = SigningMessage
     DIALOGUE_CLASS: Type[BaseDialogue] = BaseSigningDialogue
     DIALOGUES_CLASS: Type[Dialogues] = BaseSigningDialogues

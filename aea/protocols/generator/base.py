@@ -2129,6 +2129,8 @@ class ProtocolGenerator:
             self._serialization_class_str(),
         )
 
+        self._generate_tests()
+
         # Run black formatting
         try_run_black_formatting(self.path_to_generated_protocol_package)
 
@@ -2145,6 +2147,330 @@ class ProtocolGenerator:
             else:
                 full_mode_output = incomplete_generation_warning_msg
         return full_mode_output
+
+    def _generate_tests(self) -> None:
+        tests_dir = str(Path(self.path_to_generated_protocol_package) / "tests")
+        os.makedirs(tests_dir, exist_ok=True)
+
+        TESTS_MESSAGES_DOT_PY_FILE_NAME = (
+            f"test_{self.protocol_specification.name}_messages.py"
+        )
+        _create_protocol_file(
+            tests_dir,
+            TESTS_MESSAGES_DOT_PY_FILE_NAME,
+            self._test_messages_file_str(),
+        )
+
+        TESTS_DIALOGUES_DOT_PY_FILE_NAME = (
+            f"test_{self.protocol_specification.name}_dialogues.py"
+        )
+        _create_protocol_file(
+            tests_dir,
+            TESTS_DIALOGUES_DOT_PY_FILE_NAME,
+            self._test_dialogues_file_str(),
+        )
+
+    def _test_messages_file_str(self) -> str:
+        """
+        Produce the content of the test_messages.py.
+
+        :return: file content
+        """
+        self._change_indent(0, "s")
+
+        # Header
+        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
+
+        # Module docstring
+        cls_str += (
+            self.indent
+            + '"""Test messages module for {} protocol."""\n\n'.format(
+                self.protocol_specification.name
+            )
+        )
+
+        cls_str += f"# pylint: disable={','.join(PYLINT_DISABLE_SERIALIZATION_PY)}\n"
+
+        # Imports
+        cls_str += self.indent + "from typing import List\n\n"
+        cls_str += (
+            self.indent
+            + "from aea.test_tools.test_protocol import BaseProtocolMessagesTestCase\n"
+        )
+
+        for custom_type in self.spec.all_custom_types:
+            cls_str += (
+                self.indent
+                + "from {}.custom_types import (\n    {},\n)\n".format(
+                    self.dotted_path_to_protocol_package,
+                    custom_type,
+                )
+            )
+        cls_str += self.indent + "from {}.message import (\n    {}Message,\n)\n".format(
+            self.dotted_path_to_protocol_package,
+            self.protocol_specification_in_camel_case,
+        )
+
+        # Class Header
+        cls_str += (
+            self.indent
+            + "\n\nclass TestMessage{}(BaseProtocolMessagesTestCase):\n".format(
+                self.protocol_specification_in_camel_case,
+            )
+        )
+        self._change_indent(1)
+        cls_str += (
+            self.indent
+            + '"""Test for the \'{}\' protocol message."""\n\n'.format(
+                self.protocol_specification.name,
+            )
+        )
+
+        msg_class = f"{self.protocol_specification_in_camel_case}Message"
+        cls_str += self.indent + "\n"
+        cls_str += self.indent + f"MESSAGE_CLASS = {msg_class}\n\n"
+        cls_str += (
+            self.indent
+            + f"def build_messages(self) -> List[{msg_class}]: # type: ignore[override]\n"
+        )
+        self._change_indent(1)
+        cls_str += self.indent + '"""Build the messages to be used for testing."""\n'
+
+        cls_str += self.indent + "return [\n"
+
+        for performative, content in self.spec.speech_acts.items():
+            cls_str += (
+                self.indent
+                + f"""
+            {msg_class}(
+                performative={msg_class}.Performative.{performative.upper()}\n,
+            """
+            )
+            for content_name, content_type in content.items():
+                if content_type in self.spec.all_custom_types:
+                    cls_str += (
+                        self.indent
+                        + f"{content_name} = {content_type}(), # check it please!\n"
+                    )
+                else:
+                    cls_str += (
+                        self.indent
+                        + f"{content_name} = {self._make_type_value(content_type)},\n"
+                    )
+
+            cls_str += self.indent + "),\n"
+
+        cls_str += self.indent + "]\n"
+
+        self._change_indent(-1)
+
+        cls_str += (
+            self.indent
+            + f"def build_inconsistent(self) -> List[{msg_class}]: # type: ignore[override]\n"
+        )
+
+        self._change_indent(1)
+        cls_str += (
+            self.indent + '"""Build inconsistent messages to be used for testing."""\n'
+        )
+
+        cls_str += self.indent + "return [\n"
+
+        for performative, content in self.spec.speech_acts.items():
+            if len(content) == 0:
+                # no content to skip
+                continue
+
+            cls_str += (
+                self.indent
+                + f"""
+            {msg_class}(
+                performative={msg_class}.Performative.{performative.upper()}\n,
+            """
+            )
+            idx = 0
+            for content_name, content_type in content.items():
+                idx += 1
+                if idx == 1:
+                    cls_str += self.indent + f"# skip content: {content_name}\n"
+                    continue
+                if content_type in self.spec.all_custom_types:
+                    cls_str += (
+                        self.indent
+                        + f"{content_name} = {content_type}(), # check it please!\n"
+                    )
+                else:
+                    cls_str += (
+                        self.indent
+                        + f"{content_name} = {self._make_type_value(content_type)},\n"
+                    )
+
+            cls_str += self.indent + "),\n"
+
+        cls_str += self.indent + "]\n"
+
+        return cls_str
+
+    def _test_dialogues_file_str(self) -> str:
+        """
+        Produce the content of the test_dialogues.py.
+
+        :return: file content
+        """
+        self._change_indent(0, "s")
+
+        # Header
+        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
+
+        # Module docstring
+        cls_str += (
+            self.indent
+            + '"""Test dialogues module for {} protocol."""\n\n'.format(
+                self.protocol_specification.name
+            )
+        )
+
+        cls_str += f"# pylint: disable={','.join(PYLINT_DISABLE_SERIALIZATION_PY)}\n"
+
+        # Imports
+        cls_str += (
+            self.indent
+            + "from aea.test_tools.test_protocol import BaseProtocolDialoguesTestCase\n"
+        )
+
+        msg_class = f"{self.protocol_specification_in_camel_case}Message"
+        performative = self.spec.initial_performatives[0]
+        content = self.spec.speech_acts[performative.lower()]
+        role = self.spec.roles[0]
+
+        for custom_type in self.spec.all_custom_types:
+            if custom_type not in content.values():
+                # skip unused custom types
+                continue
+            cls_str += (
+                self.indent
+                + "from {}.custom_types import (\n    {},\n)\n".format(
+                    self.dotted_path_to_protocol_package,
+                    custom_type,
+                )
+            )
+        cls_str += self.indent + "from {}.message import (\n    {}Message,\n)\n".format(
+            self.dotted_path_to_protocol_package,
+            self.protocol_specification_in_camel_case,
+        )
+
+        cls_str += (
+            self.indent
+            + "from {}.dialogues import (\n    {}Dialogue,\n)\n".format(
+                self.dotted_path_to_protocol_package,
+                self.protocol_specification_in_camel_case,
+            )
+        )
+        cls_str += (
+            self.indent
+            + "from {}.dialogues import (\n    {}Dialogues,\n)\n".format(
+                self.dotted_path_to_protocol_package,
+                self.protocol_specification_in_camel_case,
+            )
+        )
+
+        # Class Header
+        cls_str += (
+            self.indent
+            + "\n\nclass TestDialogues{}(BaseProtocolDialoguesTestCase):\n".format(
+                self.protocol_specification_in_camel_case,
+            )
+        )
+        self._change_indent(1)
+        cls_str += (
+            self.indent
+            + '"""Test for the \'{}\' protocol dialogues."""\n\n'.format(
+                self.protocol_specification.name,
+            )
+        )
+
+        cls_str += self.indent + "\n"
+        cls_str += self.indent + f"MESSAGE_CLASS = {msg_class}\n\n"
+        cls_str += (
+            self.indent
+            + f"DIALOGUE_CLASS = {self.protocol_specification_in_camel_case}Dialogue\n\n"
+        )
+        cls_str += (
+            self.indent
+            + f"DIALOGUES_CLASS = {self.protocol_specification_in_camel_case}Dialogues\n\n"
+        )
+        cls_str += (
+            self.indent
+            + f"ROLE_FOR_THE_FIRST_MESSAGE = {self.protocol_specification_in_camel_case}Dialogue.Role.{role.upper()} # CHECK\n\n"
+        )
+
+        cls_str += self.indent + "def make_message_content(self) -> dict:\n"
+        self._change_indent(1)
+        cls_str += (
+            self.indent
+            + '"""Make a dict with message contruction content for dialogues.create."""\n'
+        )
+
+        cls_str += self.indent + "return dict(\n"
+        cls_str += (
+            self.indent
+            + f"performative={msg_class}.Performative.{performative.upper()},"
+        )
+
+        for content_name, content_type in content.items():
+            if content_type in self.spec.all_custom_types:
+                cls_str += (
+                    self.indent
+                    + f"{content_name} = {content_type}(), # check it please!\n"
+                )
+            else:
+                cls_str += (
+                    self.indent
+                    + f"{content_name} = {self._make_type_value(content_type)},\n"
+                )
+        cls_str += self.indent + ")\n"
+        return cls_str
+
+    def _make_type_value(self, content_type: str) -> str:
+        """
+        Make a value of type definition.
+
+        :param content_type: str type definition
+
+        :returns: str value
+        """
+        type_map = {
+            "bytes": 'b"some_bytes"',
+            "str": '"some str"',
+            "bool": "True",
+            "int": "12",
+            "float": "1.0",
+        }
+        if content_type in type_map:
+            return type_map[content_type]
+
+        if content_type.startswith("List"):
+            inner_type = content_type[5:-1]
+            return f"[{self._make_type_value(inner_type)}]"
+        elif content_type.startswith("FrozenSet"):
+            inner_type = content_type[10:-1]
+            return f"frozenset([{self._make_type_value(inner_type)}])"
+        elif content_type.startswith("Union"):
+            inner_type = content_type[6:-1].split(",")[0].strip()
+            return f"{self._make_type_value(inner_type)}"
+        elif content_type.startswith("Tuple"):
+            inner_type = content_type[6:-1].split(",")[0].strip()
+            return f"({self._make_type_value(inner_type)},)"
+        elif content_type.startswith("Dict"):
+            inner_type1, inner_type2 = [
+                i.strip() for i in content_type[5:-1].split(",")
+            ]
+            return f"{{ {self._make_type_value(inner_type1)} :  {self._make_type_value(inner_type2)}}}"
+        elif content_type.startswith("Optional"):
+            inner_type = content_type[9:-1]
+            return f"{self._make_type_value(inner_type)}"
+
+        return f"{content_type}()"
 
     def generate(
         self, protobuf_only: bool = False, language: str = PROTOCOL_LANGUAGE_PYTHON

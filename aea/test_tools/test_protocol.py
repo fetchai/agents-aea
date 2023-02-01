@@ -71,7 +71,9 @@ class BaseProtocolMessagesTestCase(ABC):
     def test_messages_inconsistent(self) -> None:
         """Run messages are inconsistent."""
         for msg in self.build_inconsistent():
-            assert not msg._is_consistent()  # pylint: disable=protected-access # nosec
+            assert (  # nosec
+                not msg._is_consistent()  # pylint: disable=protected-access
+            ), msg
 
     def test_messages_fail_to_encode_decode(self) -> None:
         """Run messages are failing to encode and decode."""
@@ -90,11 +92,11 @@ class BaseProtocolMessagesTestCase(ABC):
                 msg.serializer.decode(encoded_msg)
 
     @abstractmethod
-    def build_messages(self) -> List[Message]:
+    def build_messages(self) -> List[Message]:  # type: ignore[override]
         """Build the messages to be used for testing."""
 
     @abstractmethod
-    def build_inconsistent(self) -> List[Message]:
+    def build_inconsistent(self) -> List[Message]:  # type: ignore[override]
         """Build inconsistent messages to be used for testing."""
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,7 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
+from distutils.dir_util import copy_tree  # pylint: disable=deprecated-module
 from pathlib import Path
 from typing import Any, List, Tuple, cast
 
@@ -174,8 +175,9 @@ def _fix_generated_protocol(package_path: Path) -> None:
     tests_module = package_path / AEA_TEST_DIRNAME
     if tests_module.is_dir():
         log(f"Restore original `tests` directory in {package_path}")
-        shutil.copytree(
-            tests_module, Path(PROTOCOLS, package_path.name, AEA_TEST_DIRNAME)
+        copy_tree(
+            str(tests_module),
+            str(Path(PROTOCOLS, package_path.name, AEA_TEST_DIRNAME)),
         )
 
 

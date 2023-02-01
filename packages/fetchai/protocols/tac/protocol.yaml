@@ -18,6 +18,8 @@ fingerprint:
   tac_pb2.py: bafybeiduhujxst63ocjj4nh2pddbxqyqbpibmcvrx2xkqubo3dj247gqoa
   tests/__init__.py: bafybeigio4dcbzdb4zxbycaredo4l4a72z4rk6wt5bbvubhu6fdj73t6oe
   tests/test_tac.py: bafybeicwgqy3xhgaad3m7zlbk5yytoch45lvysf4l4g62hoyvb7lhzqobq
+  tests/test_tac_dialogues.py: bafybeigqdsgi3uecuf2vg3jz6fpowlto36777laz6bnsw5u3dfvbppjdei
+  tests/test_tac_messages.py: bafybeibjvtcqgr3yzfxvc4u64upqsyl7ewkhld6wvhxfwn4s3xihypsr7a
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
