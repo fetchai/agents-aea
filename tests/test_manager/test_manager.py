@@ -51,7 +51,12 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
+from tests.conftest import (
+    MAX_FLAKY_RERUNS,
+    MY_FIRST_AEA_PUBLIC_ID,
+    PACKAGES_DIR,
+    ROOT_DIR,
+)
 
 
 try:
@@ -162,6 +167,7 @@ class TestMultiAgentManagerDependencies(BaseCase):
             call_pip(install_cmd)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 @patch("aea.aea_builder.AEABuilder.check_project_dependencies")
 class BaseTestMultiAgentManager(BaseCase):
