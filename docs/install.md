@@ -5,7 +5,7 @@
 
 ## System Requirements
 
-1. <a name="python"></a>You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.8, 3.9 or 3.10</a> on your system.
+1. You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.8, 3.9 or 3.10</a> on your system.
 2. GCC installation is also required:
  
     === "Ubuntu"
@@ -34,8 +34,6 @@
 ### Alternatively: Use Docker
 
 We also provide a Docker image with all the needed dependencies.
-
-[//]: # (To use the image, you will first have to pull it, then run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.)
 
 1. Pull the image:
 
@@ -78,12 +76,12 @@ my_aea_projects
 
 Unless you are using the docker image, we highly recommend using a virtual environment so that your setup is isolated from the rest of your system. This prevents clashes and ensures consistency across dependencies.
 
-You can use any common virtual environment manager for Python, such as [`pipenv`](https://pypi.org/project/pipenv/) and [`poetry`](https://python-poetry.org/docs/#installation). If you do not have either, install one.
+You can use any common virtual environment manager for Python, such as <a href="https://pypi.org/project/pipenv/" target="_blank">`pipenv`</a> and <a href="https://python-poetry.org/docs/#installation" target="_blank">`poetry`</a>. If you do not have either, install one.
 
 Once installed, create a new virtual environment in the `my_aea_projects` directory and enter it:
 
 === "pipenv"
-    Use any <a href="#system-requirements">Python version supported</a> in the command:
+    Use any <a href="../install/#system-requirements">Python version supported</a> in the command:
     ``` bash
     pipenv --python 3.9 && pipenv shell
     ```
@@ -96,7 +94,9 @@ Once installed, create a new virtual environment in the `my_aea_projects` direct
 
 The latest version of the Python implementation of the AEA Framework is:
 
-<a href="https://pypi.org/project/aea/" target="_blank"><img alt="PyPI" src="https://img.shields.io/pypi/v/aea"></a>
+<a href="https://pypi.org/project/aea/" target="_blank"> 
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/aea"> 
+</a>
 
 !!! info "Note"
     If you are upgrading your AEA project from a previous version of the AEA framework, make sure you check out <a href="../upgrading/">the upgrading notes</a>.
@@ -127,7 +127,7 @@ pipx install aea[all]
 
 ## For Contributing to the AEA Framework
 
-To contribute to the development of the framework or related tools (e.g. ACN), please refer to the <a href="https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md">Contribution</a> and <a href="https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md">Development</a> guides in our GitHub repository.
+To contribute to the development of the framework or related tools (e.g. ACN), please refer to the <a href="https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md" target="_blank">Contribution</a> and <a href="https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md" target="_blank">Development</a> guides in our GitHub repository.
 
 ## Other Tools You Might Need
 
@@ -135,4 +135,4 @@ Depending on what you want to do, you might need extra tools on your system:
 
 - To use the Agent Communication Network (ACN) for peer-to-peer communication between agents (e.g. using the `fetchai/p2p_libp2p` connection) you will need <a href="https://go.dev/doc/install" target="_blank"> Golang 1.14.2 or higher</a>.
 - The framework uses <a href="https://protobuf.dev" target="_blank">Google Protocol Buffers</a> for message serialization. If you want to develop protocols, install the protobuf compiler on your system. The version you install must match the `protobuf` library installed with the project (see <a href="https://github.com/fetchai/agents-aea/blob/main/pyproject.toml" target="_blank">pyproject.toml</a>).
-- To update fingerprint hashes of packages, you will need the <a href="https://docs.ipfs.tech/install" target="_blank">IPFS daemon</a>.
+- To update fingerprint hashes of packages, you will need the <a href="https://docs.ipfs.tech/install/" target="_blank">IPFS daemon</a>.

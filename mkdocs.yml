@@ -11,7 +11,7 @@ strict: true
 
 nav:
   - AEA Overview:
-    - 'index.md'
+    - Overview: 'index.md'
     - Autonomous Economic Agents: 'aeas.md'
     - Application areas: 'application.md'
     - Agent ecosystem: 'ecosystem.md'
@@ -288,7 +288,7 @@ theme:
 #    - navigation.tabs.sticky
 #    - navigation.sections
 #    - navigation.expand
-    - navigation.indexes
+#    - navigation.indexes
     - navigation.top # Back-to-top button
     - navigation.footer # Add links to the previous and next page of the current page
     - search.suggest # Completion for the searched word (can be accepted with ->).

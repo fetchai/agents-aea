@@ -36,15 +36,15 @@ Some examples of the kinds of applications you can build with AEAs:
 
 **IoT**
 
-:   Agents representing objects in the IoT (Internet of Things) space. For example, AEAs paired with hardware devices such as drones, laptops, heat sensors, etc., providing control and receiving data from the device. An example is a <a href="../thermometer-skills"> thermometer agent</a>.
+:   Agents representing objects in the IoT (Internet of Things) space. For example, AEAs paired with hardware devices such as drones, laptops, heat sensors, etc., providing control and receiving data from the device. An example is a <a href="thermometer-skills">thermometer agent</a>.
 
 **Web 2.0 <--> Web 3.0 interface**
 
-:   Agents that interface and bridge the gap between existing (Web 2.0) and new (Web 3.0) economic models. An example is an <a href="../http-connection-and-skill"> AEA that communicates with HTTP clients/servers</a>.
+:   Agents that interface and bridge the gap between existing (Web 2.0) and new (Web 3.0) economic models. An example is an <a href="http-connection-and-skill"> AEA that communicates with HTTP clients/servers</a>.
 
 **Traders**
 
-:   Agents with access to some data sources that sell the data, access to the data, or access to the usage of the data. An example is an <a href="../ml-skills">AEA that continuously sells data to another AEA</a>, who in turn uses it to improve their reinforcement learning model.
+:   Agents with access to some data sources that sell the data, access to the data, or access to the usage of the data. An example is an <a href="ml-skills">AEA that continuously sells data to another AEA</a>, who in turn uses it to improve their reinforcement learning model.
 
 ## Who is This For?
 
@@ -61,7 +61,7 @@ The framework attempts to make agent development as straightforward an experienc
 Some of the characteristics of the AEA framework are:
 
 - **Python**: Using Python as an approachable programming language improves the on-boarding for those who just want to get started with agent development.
-- **Open source**: The framework is open source and licensed under [Apache 2.0](https://github.com/fetchai/agents-aea/blob/main/LICENSE).
+- **Open source**: The framework is open source and licensed under <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE" target="_blank">Apache 2.0</a>.
 - **Modular**: Modularity is at the heart of the framework's design. This makes it easy to extend the framework, add new functionality, and re-use others' contributions, therefore reducing the development cost.
 - **Blockchain ready**: Integration with blockchains is baked into the framework, enabling the creation of agents that take full advantage of the blockchain technology.
 - **Modern**: The framework is built from and can be integrated with the latest technologies (e.g. asynchronous programming, blockchains and smart contracts, machine-learning ready, ...).
@@ -73,12 +73,12 @@ Though they can work in isolation, AEAs are truly valuable when situated in a wi
 - The <a href="acn">Agent Communication Network (ACN)</a>: A peer-to-peer communication infrastructure that enables AEAs to directly communicate with one another without any intermediaries.
 - The <a href="simple-oef">sOEF</a>: A search and discovery system allowing AEAs to register themselves and the services they offer, and search for agents who offer specific services.
 - The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA Registry</a>: A space to store and share AEAs or individual agent components for anyone to find and use.
-- Blockchains: AEAs can use blockchains as a financial and commitment layer. Each <a href="ledger-integration">ledger plug-in</a> provided by the framework adds the ability for AEAs to interact with a specific ledger, such as the <a href="https://docs.fetch.ai/ledger_v2/">Fetch.ai blockchain</a> or <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+- Blockchains: AEAs can use blockchains as a financial and commitment layer. Each <a href="ledger-integration">ledger plug-in</a> provided by the framework adds the ability for AEAs to interact with a specific ledger, such as the <a href="https://docs.fetch.ai/ledger_v2/" target="_blank">Fetch.ai blockchain</a> or <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
 - Smart Contracts: <a href="contract">Contract packages</a> are wrappers around smart contracts that allow AEAs to interact with them through a common interface.
 
 ## How to get involved?
 
-There are many ways for you to get involved. You can create agents, develop new agent components, extend existing components, and contribute to the development of the framework or other related tools. Please refer to the <a href="https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md">Contribution</a> and <a href="https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md">Development</a> guides.
+There are many ways for you to get involved. You can create agents, develop new agent components, extend existing components, and contribute to the development of the framework or other related tools. Please refer to the <a href="https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md" target="_blank">Contribution</a> and <a href="https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md" target="_blank">Development</a> guides.
 
 ## Next Steps
 

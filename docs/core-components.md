@@ -1,55 +1,48 @@
 # Core Components
 
-!!! info
-    This page should introduce the user to the minimum knowledge of the framework and AEAs that they need to get started.
+AEAs can be made from various components, much like legos, and these components can be of differing types. Below are some of the more important types of components an agent can have.   
 
-The AEA framework consists of several core components, some required to run an AEA and others optional.
+## Skill
 
-The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
+A **Skill** is an isolated, self-contained, (and preferably atomic) functionality that AEAs can take on board to expand their capability. Skills contain the proactive and reactive behaviour that ultimately makes it possible for an AEA to deliver economic value to its owner.  
 
-## The Elements Each AEA Uses
+A Skill encapsulates implementations of three base classes `Handler`, `Behaviour`, `Model`, and is closely related with `Task`:
 
-### Protocol
+- Handler: Handlers implement AEAs' **reactive** behaviour. If an AEA understands a protocol referenced in a received `Envelope`, this envelope is sent to the corresponding handler which executes the AEA's reaction to this message.
+- Behaviour: Behaviours implement AEAs' **proactiveness**, encapsulating actions which further an AEA's goals, and are initiated by internals of the AEA rather than external events. 
+- Model: Encapsulate arbitrary objects and is made available to all components of the skill.
+- Task: Tasks encapsulate background work internal to the AEA. 
 
-<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent-to-agent as well as component-to-component interactions within AEAs. As such, they include:
+A skill can read (parts of) an AEA's state and propose actions to the AEA according to its specific logic. As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. 
 
-- `Messages` defining the syntax of messages;
-- `Serialization` defining how a `Message` is encoded for transport; and, optionally
-- `Dialogues`, which define rules over `Message` sequences.
+For instance, an AEA which is trading goods, could subscribe to more than one skill, where each corresponds to a different trading strategy.
 
-The framework provides one default `Protocol`, called `default` (current version `fetchai/default:1.1.7`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework places no limits on the complexity of `Skills`. They can implement simple (e.g. if-this-then-that) logic or be complex (e.g. a deep learning model or reinforcement learning agent).
 
-Additional `Protocols`, for new types of interactions, can be added as packages. For more details on `Protocols` you can read the <a href="../protocol">protocol guide</a>. To learn how you can easily automate protocol definition, head to the guide for the <a href="../protocol-generator">protocol generator</a>.
+The framework provides one default `error` skill. Additional `Skills` can be added as packages. For more details on skills, head over to the <a href="../skill"> `Skill` guide </a>.
 
-Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to other agents, agent components and services via `Connections`.
+## Protocol
 
-### Connection
+A **Protocol** defines the structure and nature of an interaction that can happen between agents, or between components of an agent. You can think of a protocol as the language that two agents speak and a skill for this protocol as a particular way of speaking this language. From a game-theoretic viewpoint, a protocol defines the rules of a game and a skill for this protocol defines a particular strategy for playing this game. 
 
-A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to networks, ledgers or other services. Where necessary, a `Connection` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
+Protocols define agent-to-agent as well as component-to-component interactions within AEAs. As such, they include:
 
-The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.21.3`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
+- `Messages`: defining the syntax of messages.
+- `Serialization`: defining how a message is encoded for transport.
+- `Dialogues`: defines rules over sequences of messages.
 
-Additional `Connections` can be added as packages. For more details on `Connections` read the <a href="../connection"> `Connection` guide </a>.
+The framework provides one `default` protocol. This protocol provides a bare-bones implementation which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
-An AEA runs and manages `Connections` via a `Multiplexer`.
+Additional protocols for new types of interactions, can be added as packages. For more details on protocols, you can read the <a href="../protocol">protocol guide</a>. To learn how you can easily automate protocol definition, head to the guide for the <a href="../protocol-generator">protocol generator</a>.
 
-### Skill
+Protocol specific messages, wrapped in `Envelopes`, are sent and received to other agents, agent components and services via **Connections**.
 
-<img src="../assets/skills.jpg" alt="Skills of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+## Connection
 
-<a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
+**Connections** act as interfaces between an agent and the outside world. As such, a connection allows the agent to communicate with some entity outside of it, for example, another agent, a traditional HTTP server, a database, a reinforcement learning training environment, a blockchain, etc.
 
-A `Skill` encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
+Where necessary, a Connection is responsible for translating between the framework specific `Envelope` with its contained message and the external service or third-party protocol (e.g. HTTP).
 
-- <a href="../api/skills/base#handler-objects">`Handler`</a>: each `Skill` has zero, one or more `Handler` objects. There is a one-to-one correspondence between `Handlers` and the protocols in an AEA (also known as the _registered protocols_). Handlers implement AEAs' **reactive** behaviour. If an AEA understands a `Protocol` referenced in a received `Envelope` (i.e. the protocol is registered in this AEA), this envelope is sent to the corresponding `Handler` which executes the AEA's reaction to this `Message`.
-- <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: a `skill` can have zero, one or more `Behaviours`, each encapsulating actions which further the AEAs goal and are initiated by internals of the AEA rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of simple and composite behaviours (e.g. cyclic, one-shot, finite-state-machine, etc), and these define how often and in what order a behaviour and its sub-behaviours must be executed.
-- <a href="../api/skills/base#model-objects">`Model`</a>: zero, one or more `Models` that inherit from the `Model` abstract base class and are accessible via the `SkillContext`.
-- <a href="../api/skills/tasks#task-objects">`Task`</a>: zero, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of `Skills`, but `Tasks` are declared in or from `Skills` if a packaging approach for AEA creation is used.
+The framework provides one default `stub` connection. It implements an I/O reader and writer to send messages to the agent from a local file.
 
-A `Skill` can read (parts of) an AEA's state (as summarised in the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>), and propose actions to the AEA according to its specific logic. As such, more than one `Skill` could exist per `Protocol`, competing with each other in suggesting to the AEA the best course of actions to take. In technical terms, this means `Skills` are horizontally arranged.
-
-For instance, an AEA which is trading goods, could subscribe to more than one `Skill`, where each corresponds to a different trading strategy.
-
-The framework places no limits on the complexity of `Skills`. They can implement simple (e.g. `if-this-then-that`) logic or be complex (e.g. a deep learning model or reinforcement learning agent).
-
-The framework provides one default `Skill`, called `error`. Additional `Skills` can be added as packages. For more details on `Skills` head over to the <a href="../skill"> `Skill` guide </a>.
+Additional connections can be added as packages. For more details on `Connections` read the <a href="../connection">`Connection` guide</a>.

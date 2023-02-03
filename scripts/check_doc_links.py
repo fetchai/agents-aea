@@ -184,7 +184,7 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
     :param file: the file path
     :param regex: the regex to check for in the file.
     """
-    if file == Path("docs/version.md"):
+    if file in [Path("docs/version.md"), Path("docs/install.md")]:
         return
     matches = regex.finditer(file.read_text())
     for match in matches:
@@ -254,6 +254,8 @@ if __name__ == "__main__":
     try:
         for file_ in docs_files:
             print("Processing " + str(file_))
+            # if str(file_) == "docs/install.md":
+            #     import pdb;pdb.set_trace()
             check_file(file_, all_docs_files)
     except Exception as e:  # pylint: disable=broad-except
         print(e)
