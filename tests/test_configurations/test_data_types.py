@@ -36,6 +36,7 @@ from aea.configurations.data_types import (
     PublicId,
 )
 
+from tests.conftest import MAX_FLAKY_RERUNS
 from tests.strategies.data_types import (
     package_id_strategy,
     public_id_strategy,
@@ -78,6 +79,8 @@ def test_self_type_comparison(self_type):
         assert isinstance(f(other, self), bool)
 
 
+# possible issue with bad generated version specifier
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @given(
     st.one_of(list(map(st.from_type, ALL_TYPES))),
     st.one_of(list(map(st.from_type, CUSTOM_TYPES))),
