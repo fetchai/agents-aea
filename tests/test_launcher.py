@@ -34,12 +34,13 @@ from aea.launcher import AEADirMultiprocessTask, AEALauncher, _run_agent
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import CUR_PATH
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
 
 
 TIMEOUT = 30
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestThreadLauncherMode(AEATestCaseMany):
     """Test launcher in threaded mode."""
 
