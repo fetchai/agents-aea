@@ -286,7 +286,7 @@ jobs:
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-ethereum && aea generate-key ethereum && echo aea-ledger-ethereum checked!"
       - name: Check plugin aea-ledger-fetchai
         run: |
-          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-fetchai && aea generate-key fetchai && echo aea-ledger-fetchai checked!"
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && pip install ./plugins/aea-ledger-fetchai && aea generate-key fetchai && echo aea-ledger-fetchai checked!"
       - name: Check plugin aea-cli-ipfs
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
