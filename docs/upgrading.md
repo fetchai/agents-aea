@@ -9,6 +9,10 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
+## `v1.28.0.post1` to `v1.29.0`
+
+- No backwards incompatible changes
+  
 ## `v1.28.0` to `v1.28.0.post1`
 
 - No backwards incompatible changes

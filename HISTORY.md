@@ -1,6 +1,20 @@
 # Release History - open AEA
 
 
+## 1.29.0 (2023-02-02)
+
+AEA:
+- Adds support for retries on the `aea push-all` command using `--retries` flag
+- Updates the `aea test` command to load dependencies for an agent when running test for an agent package
+- Updated the protocol generator to generate tests
+- Fixes for process termination in the test tools on windows
+
+Packages:
+- Replaces the usage of `time.sleep` with `asyncio.sleep` in asynchronous functions
+
+Test:
+- Adds more tests for `aea test` command group
+
 ## 1.28.0.post1 (2023-01-16)
 
 AEA:
