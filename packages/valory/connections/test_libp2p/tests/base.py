@@ -306,7 +306,9 @@ class BaseP2PLibp2pTest:
         cls._disconnect()
         cls.multiplexers.clear()
         cls.log_files.clear()
-        os.chdir(cls.cwd)
+        if Path(cls.cwd).exists():
+            # can be triggered second time by atexit
+            os.chdir(cls.cwd)
         if Path(cls.tmp).exists():
             cls.remove_temp_test_dir()
         logging.debug(f"Teardown of {cls.__name__} completed")
