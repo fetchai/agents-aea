@@ -38,6 +38,10 @@
 
    This will create a new virtual environment using poetry with the project and all the development dependencies installed.
 
+   > We use <a href="https://python-poetry.org" target="_blank">poetry</a> to manage dependencies. All python specific dependencies are specified in `pyproject.toml` and installed with the framework. 
+   > 
+   > You can have more control on the installed dependencies by leveraging poetry's features.
+
 3. ``` shell
    poetry shell
    ```
