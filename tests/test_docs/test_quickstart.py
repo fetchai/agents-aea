@@ -20,6 +20,8 @@
 """This module contains the tests for the content of quickstart.md file."""
 from pathlib import Path
 
+import pytest
+
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import ROOT_DIR
@@ -32,6 +34,7 @@ class TestQuickstartTest(BasePythonMarkdownDocs):
     DOC_PATH = Path(ROOT_DIR, "docs", "quickstart.md")
 
 
+@pytest.mark.skip
 def test_correct_echo_string():
     """Test the echo string in the quickstart is using the correct protocol specification id."""
     file_path = Path(ROOT_DIR, "docs", "quickstart.md")

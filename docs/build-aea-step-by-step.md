@@ -10,4 +10,4 @@ Building an AEA step by step (ensure you have followed the <a href="../quickstar
 1. Where required, scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a> or generate a protocol with the <a href="../protocol-generator/">protocol generator</a>.
 1. Now, run your AEA: `aea run --connections [public_id]`
 
-See information on the CLI tool <a href="../cli-how-to/" target="_blank">here</a> for all the available commands.
+See information on the CLI tool <a href="../cli-commands/" target="_blank">here</a> for all the available commands.

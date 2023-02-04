@@ -1,47 +1,84 @@
 # AEA Framework Documentation
 
-The AEA framework provides the tools for creating Autonomous Economic Agents (AEA).
+!!! target "Vision"
+    Our aim with the AEA framework is to enable businesses of all sizes, from independent developers to large corporations and consortiums, to create and deploy agent-based solutions in various domains, thus contributing to and advancing a decentralized mixed-initiative economy: one whose actors are both humans and machines.
 
-## Autonomous Economic Agents (AEAs)
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-### What is an AEA?
+## What is an AEA?
 
 !!! info "Definition"
     An Autonomous Economic Agent (AEA) is an intelligent agent that acts on its owner's behalf, with limited or no interference, and whose goal is to generate economic value for its owner.
 
-- **Agent**: An AEA represents an individual, organisation or object and looks after their interests. 
-- **Autonomous**: AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goals. 
-- **Economic**: Their purpose is to create economic value for their owner, in clearly defined domains. 
+Breaking it down:
 
-AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
+**AGENT**: An AEA represents an individual, organisation or object and looks after their interests.
 
-### What is not an AEA
+**AUTONOMOUS**: AEAs operate independently of constant input from their owners and act autonomously to achieve their goals.
 
-- Any <a href="https://en.wikipedia.org/wiki/Software_agent" target="_blank">agent</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
-- APIs or sensors which do not have agency.
-- <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactivity and are purely reactive to external requests (=contract calls and transactions).
-- <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
+**ECONOMIC**: AEAs have a narrow and specific focus: creating economic value for their owner.
 
-!!! note
-    In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.
+## What Can You Do with AEAs?
 
-## What is the AEA Framework?
+[//]: # (AEAs have the potential of being the next "apps", by enabling p2p. Most importantly,   )
 
-The AEA framework is a development suite, currently implemented in Python, which equips you with an efficient and accessible set of tools for building and running AEAs. The framework is modular, extensible, and composable. It attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
+Some examples of the kinds of applications you can build with AEAs:
 
-AEAs achieve their goals with the help of a search & discovery service for AEAs -- the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a> -- a decentralized agent communication system -- the <a href="acn">Agent Communication Network (ACN)</a> -- and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+**Automation**
 
-## Why Build with the AEA Framework?
+:   AEAs can automate well-defined processes in different domains, such as supply chain, mobility, finance, ...
 
-The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
+**Micro-transactions**
 
-- The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
-- The search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs to find other AEAs.
-- The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
-- The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
-- The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts in Fetch.ai and other third-party decentralized ledgers.
+:   AEAs make it economically viable to execute trade involving small values. An example is use-cases with many small sellers (e.g. of data) on the supply side.
+
+**Wallet**
+
+:   AEAs can simplify interactions with blockchains. By acting as "smart wallets", they can hide away the majority of the complexities involved in using blockchains for end users.
+
+**IoT**
+
+:   Agents representing objects in the IoT (Internet of Things) space. For example, AEAs paired with hardware devices such as drones, laptops, heat sensors, etc., providing control and receiving data from the device. An example is a <a href="thermometer-skills">thermometer agent</a>.
+
+**Web 2.0 <--> Web 3.0 interface**
+
+:   Agents that interface and bridge the gap between existing (Web 2.0) and new (Web 3.0) economic models. An example is an <a href="http-connection-and-skill"> AEA that communicates with HTTP clients/servers</a>.
+
+**Traders**
+
+:   Agents with access to some data sources that sell the data, access to the data, or access to the usage of the data. An example is an <a href="ml-skills">AEA that continuously sells data to another AEA</a>, who in turn uses it to improve their reinforcement learning model.
+
+## Who is This For?
+
+The AEA technology is for anyone who wants to build or contribute to a "mixed-initiative economy": one whose actors are humans as well as machines. 
+
+This includes (amongst others): developers, data scientists and machine learning experts, economists, students, academics and researchers (in Artificial Intelligence, Machine Learning, Multi-Agent Systems, etc), engineers, and so forth.
+
+## The AEA Framework
+
+The AEA framework is a development suite which equips you with an efficient and accessible set of tools for building and running AEAs and their components. 
+
+The framework attempts to make agent development as straightforward an experience as possible, similar to what popular web frameworks enable for web development.
+
+Some of the characteristics of the AEA framework are:
+
+- **Python**: Using Python as an approachable programming language improves the on-boarding for those who just want to get started with agent development.
+- **Open source**: The framework is open source and licensed under <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE" target="_blank">Apache 2.0</a>.
+- **Modular**: Modularity is at the heart of the framework's design. This makes it easy to extend the framework, add new functionality, and re-use others' contributions, therefore reducing the development cost.
+- **Blockchain ready**: Integration with blockchains is baked into the framework, enabling the creation of agents that take full advantage of the blockchain technology.
+- **Modern**: The framework is built from and can be integrated with the latest technologies (e.g. asynchronous programming, blockchains and smart contracts, machine-learning ready, ...).
+
+## The Ecosystem
+
+Though they can work in isolation, AEAs are truly valuable when situated in a wider ecosystem consisting of tools and infrastructure that enable them to cooperate and compete, and interact with services as well as traditional or modern systems. These include:
+
+- The <a href="acn">Agent Communication Network (ACN)</a>: A peer-to-peer communication infrastructure that enables AEAs to directly communicate with one another without any intermediaries.
+- The <a href="simple-oef">sOEF</a>: A search and discovery system allowing AEAs to register themselves and the services they offer, and search for agents who offer specific services.
+- The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA Registry</a>: A space to store and share AEAs or individual agent components for anyone to find and use.
+- Blockchains: AEAs can use blockchains as a financial and commitment layer. Each <a href="ledger-integration">ledger plug-in</a> provided by the framework adds the ability for AEAs to interact with a specific ledger, such as the <a href="https://docs.fetch.ai/ledger_v2/" target="_blank">Fetch.ai blockchain</a> or <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+- Smart Contracts: <a href="contract">Contract packages</a> are wrappers around smart contracts that allow AEAs to interact with them through a common interface.
+
+## How to get involved?
+
+There are many ways for you to get involved. You can create agents, develop new agent components, extend existing components, and contribute to the development of the framework or other related tools. Please refer to the <a href="https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md" target="_blank">Contribution</a> and <a href="https://github.com/fetchai/agents-aea/blob/main/DEVELOPING.md" target="_blank">Development</a> guides.
 
 ## Next Steps
 
