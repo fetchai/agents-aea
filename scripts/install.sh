@@ -27,9 +27,9 @@ function is_python_version_ok() {
 	if which python3 2>&1 >/dev/null;
 	then
 		version=`python3 -V 2>/dev/null`
-		if [[ -z `echo $version|grep -E 'Python 3\.[(6789]\.[0-9]+'` ]];
+		if [[ -z `echo $version|grep -E 'Python 3\.([(89]|10)\.[0-9]+'` ]];
 		then
-			echo "Python3 version: ${version} is not supported. Supported versions are 3.6, 3.7, 3.8."
+			echo "Python3 version: ${version} is not supported. Supported versions are 3.8, 3.9, and 3.10."
 			return 1
 		fi
 		return 0
@@ -42,7 +42,7 @@ function is_python_version_ok() {
 
 function install_aea (){
 	echo "Install AEA"
-	output=$(pip3 install --user aea[all]==1.1.1 --force --no-cache-dir)
+	output=$(pip3 install --user aea[all]==1.2.5 --force --no-cache-dir)
 	if [[  $? -ne 0 ]];
 	then
 		echo "$output"
@@ -70,7 +70,7 @@ function install_aea (){
 function install_ubuntu_deps(){
 	# always install it cause python3-dev can be missing! also it's not consuming much time.
 	echo "Install python3 and dependencies"
-	output=$(sudo bash -c "apt update &&  apt install python3 python3-pip python3-dev -y" 2>&1)
+	output=$(sudo bash -c "apt update && apt install python3 python3-pip python3-dev -y" 2>&1)
 	if [[  $? -ne 0 ]];
 	then
 		echo "$output"
@@ -100,7 +100,7 @@ function ensure_brew(){
 	output=`which brew`
 	if [[ $? -ne 0 ]];
 	then
-		echo "Installing homebrew. Please pay attention, it can ask for the password and aggree to install xcode tools."
+		echo "Installing homebrew. Please pay attention, it can ask for the password and agree to install xcode tools."
 		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 		if [[ $? -eq 0 ]];
 		then
