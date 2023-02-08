@@ -24,6 +24,7 @@ import gzip
 import hashlib
 import json
 import logging
+import sys
 import time
 from collections import namedtuple
 from itertools import chain
@@ -63,6 +64,13 @@ from .hashfuncs import ripemd160, sha256
 def lazy_load():  # Python caches all imported modules
     """Temporary solution because of protos mismatch."""
     # pylint: disable=import-error
+
+    # do modules cleanup to have fresh on import
+    for module_name in list(sys.modules.keys()):
+        for prefix in ["cosmpy.", "cosmos."]:
+            if module_name.startswith(prefix):
+                sys.modules.pop(module_name)
+
     from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import (  # isort: skip  # Load Coin first
         Coin,
     )
