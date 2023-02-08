@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 fetchai
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class DataModel:
         :param data_model_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'data_model_protobuf_object' argument.
         """
-        return DataModel(
+        return cls(
             bytes_field=data_model_protobuf_object.bytes_field,
             int_field=data_model_protobuf_object.int_field,
             float_field=data_model_protobuf_object.float_field,
@@ -90,7 +90,7 @@ class DataModel:
 
     def __eq__(self, other):
         """Overrides the default implementation"""
-        if not isinstance(other, DataModel):
+        if not isinstance(other, self.__class__):
             return False
         return (
             self.bytes_field == other.bytes_field
@@ -103,3 +103,19 @@ class DataModel:
             and self.list_field == other.list_field
             and self.dict_field == other.dict_field
         )
+
+
+class DataModel1(DataModel):
+    """This class represents an instance of DataModel1."""
+
+
+class DataModel2(DataModel):
+    """This class represents an instance of DataModel2."""
+
+
+class DataModel3(DataModel):
+    """This class represents an instance of DataModel3."""
+
+
+class DataModel4(DataModel):
+    """This class represents an instance of DataModel3."""

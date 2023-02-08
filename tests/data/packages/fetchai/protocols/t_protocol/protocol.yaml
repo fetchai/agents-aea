@@ -7,14 +7,14 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeiaigc4yhuesn7hiud5egmqhgwbo5vgi7hcmk5cq4etzcqhctvs5oe
+  README.md: bafybeib74jwgkmfjbcpson5lbh2gefkybu23bm46j7jkzeep4rbe5x276m
   __init__.py: bafybeiezmna733wnmpp6rvzs5s3joxcunukxnyuhxmeggft3j2dw2uopvu
-  custom_types.py: bafybeicwf62cvvnn3izbkvbkag7clz45kw6ihvg7lh3cwgckwfw24gtui4
+  custom_types.py: bafybeiaqxtoq6b4xnve3p2uiw55povolzg3yon3ptvzxbeg2wtssiumxkq
   dialogues.py: bafybeihms4z37odeus6tfzxsdyd75vrhpuzcomg5mhrcvhckoewkpyn6wm
-  message.py: bafybeibkkq6biaimvo76r6lrzeunpmjwqd5h2ytva6fes3jzfzs6rkfl7u
-  serialization.py: bafybeibjlzisc3gktlal6qko7jhgg33jwyxgmzh2qbcoluxkf46xeysy4a
-  t_protocol.proto: bafybeihsbutc6dfokbgn5zuub6qnm3gqrivvaymt3gp42fbfnamebrfvce
-  t_protocol_pb2.py: bafybeig7n2qvngwpdjpuqewgoklii42bkfxyfkzq24gnkzrb32o5e4kdem
+  message.py: bafybeibrpishgcfaanq5iau6cuqxey6xr6vm2s5fygjzgk2mi6ulan4gqa
+  serialization.py: bafybeic4oyqt4vz5gmcqvl3icwrab6vkix7yp36gs6nu3n5j3b7cz27q2e
+  t_protocol.proto: bafybeiae7r2aq55x3txrqkvfilnurysqfxbao6x6dc2yikwvwng4pc66t4
+  t_protocol_pb2.py: bafybeidcj5mgphjes7bpxuen6lukeju56bfslniw5jr2opgze7nmdgseym
   tests/test_t_protocol_dialogues.py: bafybeidxzkiqbbyo5zu37udk6v6jcwrvwsm6eqznurvmljxjia7xk3qgcy
   tests/test_t_protocol_messages.py: bafybeibzqolqclgo4td6yzxsvn4l7ht5qoe2jq5edo7kj532pd2nvdpdae
 fingerprint_ignore_patterns: []
