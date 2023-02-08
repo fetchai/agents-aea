@@ -24,7 +24,6 @@ import gzip
 import hashlib
 import json
 import logging
-import sys
 import time
 from collections import namedtuple
 from itertools import chain
@@ -64,16 +63,6 @@ from .hashfuncs import ripemd160, sha256
 def lazy_load():  # Python caches all imported modules
     """Temporary solution because of protos mismatch."""
     # pylint: disable=import-error
-
-    # do modules cleanup to have fresh on import
-    for module_name in list(sys.modules.keys()):
-        for prefix in ["cosmpy.", "cosmos."]:
-            if module_name.startswith(prefix):
-                sys.modules.pop(module_name)
-
-    from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import (  # isort: skip  # Load Coin first
-        Coin,
-    )
     from cosmpy.auth.rest_client import AuthRestClient
     from cosmpy.bank.rest_client import BankRestClient, QueryBalanceRequest
     from cosmpy.common.rest_client import RestClient
@@ -81,6 +70,7 @@ def lazy_load():  # Python caches all imported modules
     from cosmpy.protos.cosmos.auth.v1beta1.auth_pb2 import BaseAccount
     from cosmpy.protos.cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
     from cosmpy.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
+    from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
     from cosmpy.protos.cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
     from cosmpy.protos.cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
     from cosmpy.protos.cosmos.tx.v1beta1.service_pb2 import (
