@@ -761,7 +761,8 @@ Check equality.
 #### compute`_`specifier`_`from`_`version
 
 ```python
-def compute_specifier_from_version(version: Version) -> str
+def compute_specifier_from_version(version: Version,
+                                   use_version_as_lower: bool = False) -> str
 ```
 
 Compute the specifier set from a version.
@@ -771,6 +772,7 @@ version specifier is:  >=major.minor.0, <next_major.0.0
 **Arguments**:
 
 - `version`: the version
+- `use_version_as_lower`: use the version as lower bound for specifier
 
 **Returns**:
 

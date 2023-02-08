@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,8 +103,12 @@ def update_plugin_version_specifiers(
     :param new_version: the new version.
     :return: True if the update has been done, False otherwise.
     """
-    old_specifier_set = compute_specifier_from_version(old_version)
-    new_specifier_set = compute_specifier_from_version(new_version)
+    old_specifier_set = compute_specifier_from_version(
+        old_version, use_version_as_lower=True
+    )
+    new_specifier_set = compute_specifier_from_version(
+        new_version, use_version_as_lower=True
+    )
     print(f"Old version specifier: {old_specifier_set}")
     print(f"New version specifier: {new_specifier_set}")
     if old_specifier_set == new_specifier_set:

@@ -997,13 +997,16 @@ class CertRequest:
         )
 
 
-def compute_specifier_from_version(version: Version) -> str:
+def compute_specifier_from_version(
+    version: Version, use_version_as_lower: bool = False
+) -> str:
     """
     Compute the specifier set from a version.
 
     version specifier is:  >=major.minor.0, <next_major.0.0
 
     :param version: the version
+    :param use_version_as_lower: use the version as lower bound for specifier
     :return: the specifier set
     """
     new_major_low = version.major
@@ -1018,6 +1021,8 @@ def compute_specifier_from_version(version: Version) -> str:
         lower_bound = Version(f"{new_major_low}.{version.minor}.0")
         lower_bound = lower_bound if lower_bound < version else version
         upper_bound = Version(f"{new_major_high}.0.0")
+    if use_version_as_lower:
+        lower_bound = version
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set
 
