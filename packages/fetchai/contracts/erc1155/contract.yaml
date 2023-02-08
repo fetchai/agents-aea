@@ -11,13 +11,13 @@ fingerprint:
   build/Migrations.json: bafybeih3i7gw7wekpsw7eylufug26dqphxara7acclv45mgkwy2bsookye
   build/erc1155.json: bafybeifopttvhbk7gsi3iqwewwfhtytrld6o4ooeb7xjmlons3v6m25zna
   build/erc1155.wasm: bafybeicabhxaz2syhzmoobrmbi5gt47txtvhkavs5mum2fxcgo2nb2vxl4
-  contract.py: bafybeifyt7leblaiclunhfpfr4zyyrvjzqbfzn647cq4fxik5zxmhdrmre
+  contract.py: bafybeifasrplvubavbk7kjrzbbt3p7edve5foze3kjzchyhpb4q5hr67ni
   contracts/Migrations.sol: bafybeigdr5xyir4mhnqk4vp6hpivu2m2kq4jnlq7orwb7wqtgjzfihw2cm
   contracts/erc1155.vy: bafybeieoxkgqprmmgvl2xdqtch4payvxzpw3c76thmtrl7vbmc6zxzl2a4
   migrations/1_initial_migration.js: bafybeigzg7dadlq7sepncquzoo5hgs7q2pwvbhzilolgkjkr3jacb2owvy
   migrations/2_deploy_contracts.js: bafybeihnzburnurq4gvp4rj36b57uzrlgif5y73ggyu3rfc3iot4e5zppy
   tests/__init__.py: bafybeig4dvxi35qewu667l3hktdygp33p5r6hzsz4abqzkgggptl3d4vje
-  tests/test_contract.py: bafybeiearu7rv4qug5zdoajgsillqxt2j67olpenjq5sk6ryqlupvyxr3i
+  tests/test_contract.py: bafybeidch3vyukqnpsmr3hbibzq2z5adjea7xmcde3zietnelewwpa6mda
 fingerprint_ignore_patterns: []
 class_name: ERC1155Contract
 contract_interface_paths:
