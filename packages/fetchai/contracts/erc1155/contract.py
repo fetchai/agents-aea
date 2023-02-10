@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -124,7 +124,10 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             gas = gas if gas is not None else DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT
             tokens = []
             for token_id in token_ids:
@@ -176,7 +179,10 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             gas = gas if gas is not None else DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT
             msg = {
                 "create_single": {
@@ -233,7 +239,10 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             gas = gas if gas is not None else DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT
             tokens = []
             for token_id, quantity in zip(token_ids, mint_quantities):
@@ -328,7 +337,10 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             gas = gas if gas is not None else DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT
             msg = {
                 "mint_single": {
@@ -367,7 +379,10 @@ class ERC1155Contract(Contract):
             balance = instance.functions.balanceOf(agent_address, token_id).call()
             result = {token_id: balance}
             return {"balance": result}
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             cosmos_api = cast(CosmosApi, ledger_api)
             msg: JSONLike = {
                 "balance": {"address": str(agent_address), "id": str(token_id)}
@@ -456,7 +471,10 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             if signature is not None:
                 raise RuntimeError(
                     "Signature not expected for Cosmos/Fetch based contract."
@@ -582,7 +600,10 @@ class ERC1155Contract(Contract):
             ).call()
             result = dict(zip(token_ids, balances))
             return {"balances": result}
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             tokens = []
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})
@@ -671,7 +692,10 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [
+            CosmosApi.identifier,
+            FetchAIApi.identifier,
+        ]:  # pragma: nocover # ledger not supported
             if signature is not None:
                 raise RuntimeError(
                     "Signature not expected for Cosmos/Fetch based contract."
