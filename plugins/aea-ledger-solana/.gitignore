@@ -154,5 +154,6 @@ temp/
 agent_name/
 leak_report
 *solana_private_key.txt
+*solana_private_key.json
 test-ledger
 Pipfile*
