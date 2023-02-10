@@ -1,0 +1,11 @@
+version: 2
+updates:
+
+  # Maintain dependencies for Pip
+  - package-ecosystem: "pip"
+    directory: "."
+    schedule:
+      interval: "weekly"
+    target-branch: "develop"
+    labels:
+      - "dependencies"

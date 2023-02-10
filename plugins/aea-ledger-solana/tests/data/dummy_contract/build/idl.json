@@ -1,0 +1,4063 @@
+{
+  "version": "0.0.0",
+  "name": "zeta",
+  "instructions": [
+    {
+      "name": "initializeZetaGroup",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "underlyingMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "underlying",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "socializedLossAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "usdcMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeZetaGroupArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "overrideExpiry",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "OverrideExpiryArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initializeMarginAccount",
+      "accounts": [
+        {
+          "name": "marginAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "zetaProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeMarketIndexes",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketIndexes",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeMarketNode",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketNode",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeMarketNodeArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "haltZetaGroup",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "unhaltZetaGroup",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateHaltState",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "HaltZetaGroupArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateVolatility",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateVolatilityArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateInterestRate",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateInterestRateArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "addMarketIndexes",
+      "accounts": [
+        {
+          "name": "marketIndexes",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initializeZetaState",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serumAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeStateArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateAdmin",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newAdmin",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateZetaState",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateStateArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updatePricingParameters",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdatePricingParametersArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateMarginParameters",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateMarginParametersArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cleanZetaMarkets",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cleanZetaMarketsHalted",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "settlePositions",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "settlementAccount",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "expiryTs",
+          "type": "u64"
+        },
+        {
+          "name": "settlementNonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "settlePositionsHalted",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initializeMarketStrikes",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "expireSeriesOverride",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "settlementAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "ExpireSeriesOverrideArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "expireSeries",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "settlementAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "settlementNonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeZetaMarket",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketIndexes",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "market",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "requestQueue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventQueue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bids",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "asks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "baseMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "quoteMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zetaBaseVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zetaQuoteVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "dexBaseVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "dexQuoteVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serumAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "dexProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeMarketArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "retreatMarketNodes",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "expiryIndex",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "cleanMarketNodes",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "expiryIndex",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateVolatilityNodes",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "nodes",
+          "type": {
+            "array": [
+              "u64",
+              5
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "updatePricing",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "expiryIndex",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updatePricingHalted",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expiryIndex",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deposit",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marginAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "socializedLossAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "depositInsuranceVault",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceDepositAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zetaVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "socializedLossAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "marginAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "socializedLossAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdrawInsuranceVault",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceDepositAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "percentageAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initializeOpenOrders",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "dexProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "openOrders",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "marginAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "market",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serumAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "openOrdersMap",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        },
+        {
+          "name": "mapNonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeWhitelistDepositAccount",
+      "accounts": [
+        {
+          "name": "whitelistDepositAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeWhitelistInsuranceAccount",
+      "accounts": [
+        {
+          "name": "whitelistInsuranceAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeWhitelistTradingFeesAccount",
+      "accounts": [
+        {
+          "name": "whitelistTradingFeesAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initializeInsuranceDepositAccount",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceDepositAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistInsuranceAccount",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "placeOrder",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marginAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "dexProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serumAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "openOrders",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketAccounts",
+          "accounts": [
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "requestQueue",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "eventQueue",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "bids",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "asks",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "orderPayerTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "coinVault",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "pcVault",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "coinWallet",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "pcWallet",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketNode",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "marketMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "size",
+          "type": "u64"
+        },
+        {
+          "name": "side",
+          "type": {
+            "defined": "Side"
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "type": {
+            "option": "u64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancelOrder",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "cancelAccounts",
+          "accounts": [
+            {
+              "name": "zetaGroup",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "state",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "marginAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "dexProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "serumAuthority",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "bids",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "asks",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "eventQueue",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": {
+            "defined": "Side"
+          }
+        },
+        {
+          "name": "orderId",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "cancelOrderHalted",
+      "accounts": [
+        {
+          "name": "cancelAccounts",
+          "accounts": [
+            {
+              "name": "zetaGroup",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "state",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "marginAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "dexProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "serumAuthority",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "bids",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "asks",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "eventQueue",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": {
+            "defined": "Side"
+          }
+        },
+        {
+          "name": "orderId",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "cancelOrderByClientOrderId",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "cancelAccounts",
+          "accounts": [
+            {
+              "name": "zetaGroup",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "state",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "marginAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "dexProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "serumAuthority",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "bids",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "asks",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "eventQueue",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "clientOrderId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "cancelExpiredOrder",
+      "accounts": [
+        {
+          "name": "cancelAccounts",
+          "accounts": [
+            {
+              "name": "zetaGroup",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "state",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "marginAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "dexProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "serumAuthority",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "bids",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "asks",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "eventQueue",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": {
+            "defined": "Side"
+          }
+        },
+        {
+          "name": "orderId",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "forceCancelOrders",
+      "accounts": [
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "cancelAccounts",
+          "accounts": [
+            {
+              "name": "zetaGroup",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "state",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "marginAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "dexProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "serumAuthority",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "bids",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "asks",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "eventQueue",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "crankEventQueue",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "market",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventQueue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "dexProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serumAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "rebalanceInsuranceVault",
+      "accounts": [
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "insuranceVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "socializedLossAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "liquidate",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "liquidator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "liquidatorMarginAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "greeks",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "market",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "zetaGroup",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "liquidatedMarginAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "size",
+          "type": "u32"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Greeks",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "markPrices",
+            "type": {
+              "array": [
+                "u64",
+                46
+              ]
+            }
+          },
+          {
+            "name": "markPricesPadding",
+            "type": {
+              "array": [
+                "u64",
+                92
+              ]
+            }
+          },
+          {
+            "name": "productGreeks",
+            "type": {
+              "array": [
+                {
+                  "defined": "ProductGreeks"
+                },
+                22
+              ]
+            }
+          },
+          {
+            "name": "productGreeksPadding",
+            "type": {
+              "array": [
+                {
+                  "defined": "ProductGreeks"
+                },
+                44
+              ]
+            }
+          },
+          {
+            "name": "updateTimestamp",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "updateTimestampPadding",
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "retreatExpirationTimestamp",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "retreatExpirationTimestampPadding",
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "interestRate",
+            "type": {
+              "array": [
+                "i64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "interestRatePadding",
+            "type": {
+              "array": [
+                "i64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "nodes",
+            "type": {
+              "array": [
+                "u64",
+                5
+              ]
+            }
+          },
+          {
+            "name": "volatility",
+            "type": {
+              "array": [
+                "u64",
+                10
+              ]
+            }
+          },
+          {
+            "name": "volatilityPadding",
+            "type": {
+              "array": [
+                "u64",
+                20
+              ]
+            }
+          },
+          {
+            "name": "nodeKeys",
+            "type": {
+              "array": [
+                "publicKey",
+                138
+              ]
+            }
+          },
+          {
+            "name": "haltForcePricing",
+            "type": {
+              "array": [
+                "bool",
+                6
+              ]
+            }
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                1641
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketIndexes",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "indexes",
+            "type": {
+              "array": [
+                "u8",
+                138
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OpenOrdersMap",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "userKey",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "State",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "stateNonce",
+            "type": "u8"
+          },
+          {
+            "name": "serumNonce",
+            "type": "u8"
+          },
+          {
+            "name": "mintAuthNonce",
+            "type": "u8"
+          },
+          {
+            "name": "numUnderlyings",
+            "type": "u8"
+          },
+          {
+            "name": "expiryIntervalSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "newExpiryThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "strikeInitializationThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "pricingFrequencySeconds",
+            "type": "u32"
+          },
+          {
+            "name": "liquidatorLiquidationPercentage",
+            "type": "u32"
+          },
+          {
+            "name": "insuranceVaultLiquidationPercentage",
+            "type": "u32"
+          },
+          {
+            "name": "nativeTradeFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeUnderlyingFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeWhitelistUnderlyingFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeDepositLimit",
+            "type": "u64"
+          },
+          {
+            "name": "expirationThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                159
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Underlying",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SettlementAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "settlementPrice",
+            "type": "u64"
+          },
+          {
+            "name": "strikes",
+            "type": {
+              "array": [
+                "u64",
+                23
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZetaGroup",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "vaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "insuranceVaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "frontExpiryIndex",
+            "type": "u8"
+          },
+          {
+            "name": "haltState",
+            "type": {
+              "defined": "HaltState"
+            }
+          },
+          {
+            "name": "underlyingMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "oracle",
+            "type": "publicKey"
+          },
+          {
+            "name": "greeks",
+            "type": "publicKey"
+          },
+          {
+            "name": "pricingParameters",
+            "type": {
+              "defined": "PricingParameters"
+            }
+          },
+          {
+            "name": "marginParameters",
+            "type": {
+              "defined": "MarginParameters"
+            }
+          },
+          {
+            "name": "products",
+            "type": {
+              "array": [
+                {
+                  "defined": "Product"
+                },
+                46
+              ]
+            }
+          },
+          {
+            "name": "productsPadding",
+            "type": {
+              "array": [
+                {
+                  "defined": "Product"
+                },
+                92
+              ]
+            }
+          },
+          {
+            "name": "expirySeries",
+            "type": {
+              "array": [
+                {
+                  "defined": "ExpirySeries"
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "expirySeriesPadding",
+            "type": {
+              "array": [
+                {
+                  "defined": "ExpirySeries"
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "totalInsuranceVaultDeposits",
+            "type": "u64"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                1063
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketNode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "nodeUpdates",
+            "type": {
+              "array": [
+                "i64",
+                5
+              ]
+            }
+          },
+          {
+            "name": "interestUpdate",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarginAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "forceCancelFlag",
+            "type": "bool"
+          },
+          {
+            "name": "openOrdersNonce",
+            "type": {
+              "array": [
+                "u8",
+                138
+              ]
+            }
+          },
+          {
+            "name": "seriesExpiry",
+            "type": {
+              "array": [
+                "u64",
+                6
+              ]
+            }
+          },
+          {
+            "name": "positions",
+            "type": {
+              "array": [
+                {
+                  "defined": "Position"
+                },
+                46
+              ]
+            }
+          },
+          {
+            "name": "positionsPadding",
+            "type": {
+              "array": [
+                {
+                  "defined": "Position"
+                },
+                92
+              ]
+            }
+          },
+          {
+            "name": "rebalanceAmount",
+            "type": "i64"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                388
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SocializedLossAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "overbankruptAmount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistDepositAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "userKey",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistInsuranceAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "userKey",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InsuranceDepositAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistTradingFeesAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "userKey",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "ProductGreeks",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "delta",
+            "type": "u64"
+          },
+          {
+            "name": "vega",
+            "type": {
+              "defined": "AnchorDecimal"
+            }
+          },
+          {
+            "name": "volatility",
+            "type": {
+              "defined": "AnchorDecimal"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AnchorDecimal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flags",
+            "type": "u32"
+          },
+          {
+            "name": "hi",
+            "type": "u32"
+          },
+          {
+            "name": "lo",
+            "type": "u32"
+          },
+          {
+            "name": "mid",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HaltState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "halted",
+            "type": "bool"
+          },
+          {
+            "name": "spotPrice",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "u64"
+          },
+          {
+            "name": "markPricesSet",
+            "type": {
+              "array": [
+                "bool",
+                2
+              ]
+            }
+          },
+          {
+            "name": "markPricesSetPadding",
+            "type": {
+              "array": [
+                "bool",
+                4
+              ]
+            }
+          },
+          {
+            "name": "marketNodesCleaned",
+            "type": {
+              "array": [
+                "bool",
+                2
+              ]
+            }
+          },
+          {
+            "name": "marketNodesCleanedPadding",
+            "type": {
+              "array": [
+                "bool",
+                4
+              ]
+            }
+          },
+          {
+            "name": "marketCleaned",
+            "type": {
+              "array": [
+                "bool",
+                46
+              ]
+            }
+          },
+          {
+            "name": "marketCleanedPadding",
+            "type": {
+              "array": [
+                "bool",
+                92
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PricingParameters",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "optionTradeNormalizer",
+            "type": {
+              "defined": "AnchorDecimal"
+            }
+          },
+          {
+            "name": "futureTradeNormalizer",
+            "type": {
+              "defined": "AnchorDecimal"
+            }
+          },
+          {
+            "name": "maxVolatilityRetreat",
+            "type": {
+              "defined": "AnchorDecimal"
+            }
+          },
+          {
+            "name": "maxInterestRetreat",
+            "type": {
+              "defined": "AnchorDecimal"
+            }
+          },
+          {
+            "name": "maxDelta",
+            "type": "u64"
+          },
+          {
+            "name": "minDelta",
+            "type": "u64"
+          },
+          {
+            "name": "minVolatility",
+            "type": "u64"
+          },
+          {
+            "name": "maxVolatility",
+            "type": "u64"
+          },
+          {
+            "name": "minInterestRate",
+            "type": "i64"
+          },
+          {
+            "name": "maxInterestRate",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarginParameters",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "futureMarginInitial",
+            "type": "u64"
+          },
+          {
+            "name": "futureMarginMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionMarkPercentageLongInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageLongInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageShortInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionDynamicPercentageShortInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionMarkPercentageLongMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageLongMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageShortMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionDynamicPercentageShortMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionShortPutCapPercentage",
+            "type": "u64"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExpirySeries",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "activeTs",
+            "type": "u64"
+          },
+          {
+            "name": "expiryTs",
+            "type": "u64"
+          },
+          {
+            "name": "dirty",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                15
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Strike",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "isSet",
+            "type": "bool"
+          },
+          {
+            "name": "value",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Product",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "publicKey"
+          },
+          {
+            "name": "strike",
+            "type": {
+              "defined": "Strike"
+            }
+          },
+          {
+            "name": "dirty",
+            "type": "bool"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "Kind"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "position",
+            "type": "i64"
+          },
+          {
+            "name": "costOfTrades",
+            "type": "u64"
+          },
+          {
+            "name": "closingOrders",
+            "type": "u64"
+          },
+          {
+            "name": "openingOrders",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "HaltZetaGroupArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "spotPrice",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateVolatilityArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiryIndex",
+            "type": "u8"
+          },
+          {
+            "name": "volatility",
+            "type": {
+              "array": [
+                "u64",
+                5
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateInterestRateArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiryIndex",
+            "type": "u8"
+          },
+          {
+            "name": "interestRate",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExpireSeriesOverrideArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "settlementNonce",
+            "type": "u8"
+          },
+          {
+            "name": "settlementPrice",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeMarketArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "marketNonce",
+            "type": "u8"
+          },
+          {
+            "name": "baseMintNonce",
+            "type": "u8"
+          },
+          {
+            "name": "quoteMintNonce",
+            "type": "u8"
+          },
+          {
+            "name": "zetaBaseVaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "zetaQuoteVaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "dexBaseVaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "dexQuoteVaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "vaultSignerNonce",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeStateArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stateNonce",
+            "type": "u8"
+          },
+          {
+            "name": "serumNonce",
+            "type": "u8"
+          },
+          {
+            "name": "mintAuthNonce",
+            "type": "u8"
+          },
+          {
+            "name": "expiryIntervalSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "newExpiryThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "strikeInitializationThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "pricingFrequencySeconds",
+            "type": "u32"
+          },
+          {
+            "name": "liquidatorLiquidationPercentage",
+            "type": "u32"
+          },
+          {
+            "name": "insuranceVaultLiquidationPercentage",
+            "type": "u32"
+          },
+          {
+            "name": "nativeTradeFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeUnderlyingFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeWhitelistUnderlyingFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeDepositLimit",
+            "type": "u64"
+          },
+          {
+            "name": "expirationThresholdSeconds",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeMarketNodeArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OverrideExpiryArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiryIndex",
+            "type": "u8"
+          },
+          {
+            "name": "activeTs",
+            "type": "u64"
+          },
+          {
+            "name": "expiryTs",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateStateArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiryIntervalSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "newExpiryThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "strikeInitializationThresholdSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "pricingFrequencySeconds",
+            "type": "u32"
+          },
+          {
+            "name": "liquidatorLiquidationPercentage",
+            "type": "u32"
+          },
+          {
+            "name": "insuranceVaultLiquidationPercentage",
+            "type": "u32"
+          },
+          {
+            "name": "nativeTradeFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeUnderlyingFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeWhitelistUnderlyingFeePercentage",
+            "type": "u64"
+          },
+          {
+            "name": "nativeDepositLimit",
+            "type": "u64"
+          },
+          {
+            "name": "expirationThresholdSeconds",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdatePricingParametersArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "optionTradeNormalizer",
+            "type": "u64"
+          },
+          {
+            "name": "futureTradeNormalizer",
+            "type": "u64"
+          },
+          {
+            "name": "maxVolatilityRetreat",
+            "type": "u64"
+          },
+          {
+            "name": "maxInterestRetreat",
+            "type": "u64"
+          },
+          {
+            "name": "minDelta",
+            "type": "u64"
+          },
+          {
+            "name": "maxDelta",
+            "type": "u64"
+          },
+          {
+            "name": "minInterestRate",
+            "type": "i64"
+          },
+          {
+            "name": "maxInterestRate",
+            "type": "i64"
+          },
+          {
+            "name": "minVolatility",
+            "type": "u64"
+          },
+          {
+            "name": "maxVolatility",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateMarginParametersArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "futureMarginInitial",
+            "type": "u64"
+          },
+          {
+            "name": "futureMarginMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionMarkPercentageLongInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageLongInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageShortInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionDynamicPercentageShortInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionMarkPercentageLongMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageLongMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageShortMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionDynamicPercentageShortMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionShortPutCapPercentage",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeZetaGroupArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "zetaGroupNonce",
+            "type": "u8"
+          },
+          {
+            "name": "underlyingNonce",
+            "type": "u8"
+          },
+          {
+            "name": "greeksNonce",
+            "type": "u8"
+          },
+          {
+            "name": "vaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "insuranceVaultNonce",
+            "type": "u8"
+          },
+          {
+            "name": "socializedLossAccountNonce",
+            "type": "u8"
+          },
+          {
+            "name": "interestRate",
+            "type": "i64"
+          },
+          {
+            "name": "volatility",
+            "type": {
+              "array": [
+                "u64",
+                5
+              ]
+            }
+          },
+          {
+            "name": "optionTradeNormalizer",
+            "type": "u64"
+          },
+          {
+            "name": "futureTradeNormalizer",
+            "type": "u64"
+          },
+          {
+            "name": "maxVolatilityRetreat",
+            "type": "u64"
+          },
+          {
+            "name": "maxInterestRetreat",
+            "type": "u64"
+          },
+          {
+            "name": "maxDelta",
+            "type": "u64"
+          },
+          {
+            "name": "minDelta",
+            "type": "u64"
+          },
+          {
+            "name": "minInterestRate",
+            "type": "i64"
+          },
+          {
+            "name": "maxInterestRate",
+            "type": "i64"
+          },
+          {
+            "name": "minVolatility",
+            "type": "u64"
+          },
+          {
+            "name": "maxVolatility",
+            "type": "u64"
+          },
+          {
+            "name": "futureMarginInitial",
+            "type": "u64"
+          },
+          {
+            "name": "futureMarginMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionMarkPercentageLongInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageLongInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageShortInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionDynamicPercentageShortInitial",
+            "type": "u64"
+          },
+          {
+            "name": "optionMarkPercentageLongMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageLongMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionSpotPercentageShortMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionDynamicPercentageShortMaintenance",
+            "type": "u64"
+          },
+          {
+            "name": "optionShortPutCapPercentage",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateGreeksArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "theo",
+            "type": "u64"
+          },
+          {
+            "name": "delta",
+            "type": "u32"
+          },
+          {
+            "name": "gamma",
+            "type": "u32"
+          },
+          {
+            "name": "volatility",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExpirySeriesStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "Initialized"
+          },
+          {
+            "name": "Live"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "ExpiredDirty"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "Call"
+          },
+          {
+            "name": "Put"
+          },
+          {
+            "name": "Future"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Side",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "Bid"
+          },
+          {
+            "name": "Ask"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "TradeEvent",
+      "fields": [
+        {
+          "name": "marginAccount",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "index",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "size",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "costOfTrades",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "isBid",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "clientOrderId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 300,
+      "name": "DepositOverflow",
+      "msg": "Deposit overflow"
+    },
+    {
+      "code": 301,
+      "name": "Unreachable",
+      "msg": "Unreachable"
+    },
+    {
+      "code": 302,
+      "name": "FailedInitialMarginRequirement",
+      "msg": "Failed initial margin requirement"
+    },
+    {
+      "code": 303,
+      "name": "LiquidatorFailedMarginRequirement",
+      "msg": "Liquidator failed margin requirement"
+    },
+    {
+      "code": 304,
+      "name": "CannotLiquidateOwnAccount",
+      "msg": "Cannot liquidate own account"
+    },
+    {
+      "code": 305,
+      "name": "CrankInvalidRemainingAccounts",
+      "msg": "Invalid cranking remaining accounts"
+    },
+    {
+      "code": 306,
+      "name": "IncorrectTickSize",
+      "msg": "Incorrect tick size"
+    },
+    {
+      "code": 307,
+      "name": "ZeroPrice",
+      "msg": "ZeroPrice"
+    },
+    {
+      "code": 308,
+      "name": "ZeroSize",
+      "msg": "ZeroSize"
+    },
+    {
+      "code": 309,
+      "name": "ZeroWithdrawableBalance",
+      "msg": "Zero withdrawable balance"
+    },
+    {
+      "code": 310,
+      "name": "DepositAmountExceeded",
+      "msg": "Deposit amount exceeds limit and user is not whitelisted"
+    },
+    {
+      "code": 311,
+      "name": "WithdrawalAmountExceedsWithdrawableBalance",
+      "msg": "Withdrawal amount exceeds withdrawable balance"
+    },
+    {
+      "code": 312,
+      "name": "AccountHasSufficientMarginPostCancels",
+      "msg": "Account has sufficient margin post cancels"
+    },
+    {
+      "code": 313,
+      "name": "OverBankrupt",
+      "msg": "Over bankrupt"
+    },
+    {
+      "code": 314,
+      "name": "AccountHasSufficientMargin",
+      "msg": "Account has sufficient margin"
+    },
+    {
+      "code": 315,
+      "name": "UserHasNoActiveOrders",
+      "msg": "User has no active orders"
+    },
+    {
+      "code": 316,
+      "name": "InvalidExpirationInterval",
+      "msg": "Invalid expiration interval"
+    },
+    {
+      "code": 317,
+      "name": "ProductMarketsAlreadyInitialized",
+      "msg": "Product markets already initialized"
+    },
+    {
+      "code": 318,
+      "name": "InvalidProductMarketKey",
+      "msg": "Invalid product market key"
+    },
+    {
+      "code": 319,
+      "name": "MarketNotLive",
+      "msg": "Market not live"
+    },
+    {
+      "code": 320,
+      "name": "MarketPricingNotReady",
+      "msg": "Market pricing not ready"
+    },
+    {
+      "code": 321,
+      "name": "UserHasRemainingOrdersOnExpiredMarket",
+      "msg": "User has remaining orders on expired market"
+    },
+    {
+      "code": 322,
+      "name": "InvalidSeriesExpiration",
+      "msg": "Invalid series expiration"
+    },
+    {
+      "code": 323,
+      "name": "InvalidExpiredOrderCancel",
+      "msg": "Invalid expired order cancel"
+    },
+    {
+      "code": 324,
+      "name": "NoMarketsToAdd",
+      "msg": "No markets to add"
+    },
+    {
+      "code": 325,
+      "name": "UserHasUnsettledPositions",
+      "msg": "User has unsettled positions"
+    },
+    {
+      "code": 326,
+      "name": "NoMarginAccountsToSettle",
+      "msg": "No margin accounts to settle"
+    },
+    {
+      "code": 327,
+      "name": "CannotSettleUserWithActiveOrders",
+      "msg": "Cannot settle users with active orders"
+    },
+    {
+      "code": 328,
+      "name": "OrderbookNotEmpty",
+      "msg": "Orderbook not empty"
+    },
+    {
+      "code": 329,
+      "name": "InvalidNumberOfAccounts",
+      "msg": "Invalid number of accounts"
+    },
+    {
+      "code": 330,
+      "name": "InvalidMarketAccounts",
+      "msg": "Bids or Asks don't match the Market"
+    },
+    {
+      "code": 331,
+      "name": "ProductStrikeUninitialized",
+      "msg": "Product strike uninitialized"
+    },
+    {
+      "code": 332,
+      "name": "PricingNotUpToDate",
+      "msg": "Pricing not up to date"
+    },
+    {
+      "code": 333,
+      "name": "RetreatsAreStale",
+      "msg": "Retreats are stale"
+    },
+    {
+      "code": 334,
+      "name": "ProductDirty",
+      "msg": "Product dirty"
+    },
+    {
+      "code": 335,
+      "name": "ProductStrikesInitialized",
+      "msg": "Product strikes initialized"
+    },
+    {
+      "code": 336,
+      "name": "StrikeInitializationNotReady",
+      "msg": "Strike initialization not ready"
+    },
+    {
+      "code": 337,
+      "name": "UnsupportedKind",
+      "msg": "Unsupported kind"
+    },
+    {
+      "code": 338,
+      "name": "InvalidZetaGroup",
+      "msg": "Invalid zeta group"
+    },
+    {
+      "code": 339,
+      "name": "InvalidMarginAccount",
+      "msg": "Invalid margin account"
+    },
+    {
+      "code": 340,
+      "name": "InvalidGreeksAccount",
+      "msg": "Invalid greeks account"
+    },
+    {
+      "code": 341,
+      "name": "InvalidSettlementAccount",
+      "msg": "Invalid settlement account"
+    },
+    {
+      "code": 342,
+      "name": "InvalidCancelAuthority",
+      "msg": "Invalid cancel authority"
+    },
+    {
+      "code": 343,
+      "name": "CannotUpdatePricingAfterExpiry",
+      "msg": "Cannot update pricing after expiry"
+    },
+    {
+      "code": 344,
+      "name": "LoadAccountDiscriminatorAlreadySet",
+      "msg": "Account discriminator already set"
+    },
+    {
+      "code": 345,
+      "name": "AccountAlreadyInitialized",
+      "msg": "Account already initialized"
+    },
+    {
+      "code": 346,
+      "name": "GreeksAccountSeedsMismatch",
+      "msg": "Greeks account seeds mismatch"
+    },
+    {
+      "code": 347,
+      "name": "ZetaGroupAccountSeedsMismatch",
+      "msg": "Zeta group account seeds mismatch"
+    },
+    {
+      "code": 348,
+      "name": "MarginAccountSeedsMismatch",
+      "msg": "Margin account seeds mismatch"
+    },
+    {
+      "code": 349,
+      "name": "OpenOrdersAccountSeedsMismatch",
+      "msg": "Open orders account seeds mismatch"
+    },
+    {
+      "code": 350,
+      "name": "MarketNodeAccountSeedsMismatch",
+      "msg": "Market node seeds mismatch"
+    },
+    {
+      "code": 351,
+      "name": "UserTradingFeeWhitelistAccountSeedsMismatch",
+      "msg": "User trading fee whitelist account seeds mismatch"
+    },
+    {
+      "code": 352,
+      "name": "UserDepositWhitelistAccountSeedsMismatch",
+      "msg": "User deposit whitelist account seeds mismatch"
+    },
+    {
+      "code": 353,
+      "name": "MarketIndexesUninitialized",
+      "msg": "Market indexes uninitialized"
+    },
+    {
+      "code": 354,
+      "name": "MarketIndexesAlreadyInitialized",
+      "msg": "Market indexes already initialized"
+    },
+    {
+      "code": 355,
+      "name": "CannotGetUnsetStrike",
+      "msg": "Cannot get unset strike"
+    },
+    {
+      "code": 356,
+      "name": "CannotSetInitializedStrike",
+      "msg": "Cannot set initialized strike"
+    },
+    {
+      "code": 357,
+      "name": "CannotResetUninitializedStrike",
+      "msg": "Cannot set initialized strike"
+    },
+    {
+      "code": 358,
+      "name": "CrankMarginAccountNotMutable",
+      "msg": "CrankMarginAccountNotMutable"
+    },
+    {
+      "code": 359,
+      "name": "InvalidAdminSigner",
+      "msg": "InvalidAdminSigner"
+    },
+    {
+      "code": 360,
+      "name": "UserHasActiveOrders",
+      "msg": "User still has active orders"
+    },
+    {
+      "code": 361,
+      "name": "UserForceCancelInProgress",
+      "msg": "User has a force cancel in progress"
+    },
+    {
+      "code": 362,
+      "name": "FailedPriceBandCheck",
+      "msg": "Failed price band check"
+    },
+    {
+      "code": 363,
+      "name": "UnsortedOpenOrdersAccounts",
+      "msg": "Unsorted open orders accounts"
+    },
+    {
+      "code": 364,
+      "name": "AccountNotMutable",
+      "msg": "Account not mutable"
+    },
+    {
+      "code": 365,
+      "name": "AccountDiscriminatorMismatch",
+      "msg": "Account discriminator mismatch"
+    },
+    {
+      "code": 366,
+      "name": "InvalidMarketNodeIndex",
+      "msg": "Invalid market node index"
+    },
+    {
+      "code": 367,
+      "name": "InvalidMarketNode",
+      "msg": "Invalid market node"
+    },
+    {
+      "code": 368,
+      "name": "LUTOutOfBounds",
+      "msg": "Lut out of bounds"
+    },
+    {
+      "code": 369,
+      "name": "RebalanceInsuranceInvalidRemainingAccounts",
+      "msg": "Rebalance insurance vault with no margin accounts"
+    },
+    {
+      "code": 370,
+      "name": "InvalidMintDecimals",
+      "msg": "Invalid mint decimals"
+    },
+    {
+      "code": 371,
+      "name": "InvalidZetaGroupOracle",
+      "msg": "Invalid oracle for this zeta group"
+    },
+    {
+      "code": 372,
+      "name": "InvalidZetaGroupDepositMint",
+      "msg": "Invalid zeta group deposit mint"
+    },
+    {
+      "code": 373,
+      "name": "InvalidZetaGroupRebalanceMint",
+      "msg": "Invalid zeta group rebalance insurance vault mint"
+    },
+    {
+      "code": 374,
+      "name": "InvalidDepositAmount",
+      "msg": "Invalid deposit amount"
+    },
+    {
+      "code": 375,
+      "name": "InvalidTokenAccountOwner",
+      "msg": "Invalid token account owner"
+    },
+    {
+      "code": 376,
+      "name": "InvalidWithdrawAmount",
+      "msg": "Invalid withdraw amount"
+    },
+    {
+      "code": 377,
+      "name": "InvalidDepositRemainingAccounts",
+      "msg": "Invalid number of remaining accounts in deposit"
+    },
+    {
+      "code": 378,
+      "name": "InvalidPlaceOrderRemainingAccounts",
+      "msg": "Invalid number of remaining accounts in place order"
+    },
+    {
+      "code": 379,
+      "name": "ClientOrderIdCannotBeZero",
+      "msg": "ClientOrderIdCannotBeZero"
+    },
+    {
+      "code": 380,
+      "name": "ZetaGroupHalted",
+      "msg": "Zeta group halted"
+    },
+    {
+      "code": 381,
+      "name": "ZetaGroupNotHalted",
+      "msg": "Zeta group not halted"
+    },
+    {
+      "code": 382,
+      "name": "HaltMarkPriceNotSet",
+      "msg": "Halt mark price not set"
+    },
+    {
+      "code": 383,
+      "name": "HaltMarketsNotCleaned",
+      "msg": "Halt markets not cleaned"
+    },
+    {
+      "code": 384,
+      "name": "HaltMarketNodesNotCleaned",
+      "msg": "Halt market nodes not cleaned"
+    },
+    {
+      "code": 385,
+      "name": "CannotExpireOptionsAfterExpirationThreshold",
+      "msg": "Cannot expire options after expiration threshold"
+    }
+  ]
+}
