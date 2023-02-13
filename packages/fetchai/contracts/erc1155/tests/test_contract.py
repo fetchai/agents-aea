@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -504,6 +504,23 @@ class TestERC1155ContractEthereum(BaseContractTestCase):
                 ]
             ]
         ), "Error, found: {}".format(tx)
+
+        with pytest.raises(
+            RuntimeError,
+            match="Can't determine direction of swap because from_supply and to_supply are both non-zero",
+        ):
+            self.contract.get_atomic_swap_single_transaction(
+                ledger_api=self.ledger_api,
+                contract_address=self.contract_address,
+                from_address=from_address,
+                to_address=to_address,
+                token_id=token_id,
+                from_supply=10,
+                to_supply=10,
+                value=value,
+                trade_nonce=trade_nonce,
+                signature=signature,
+            )
 
     @pytest.mark.integration
     def test_get_batch_atomic_swap(self) -> None:

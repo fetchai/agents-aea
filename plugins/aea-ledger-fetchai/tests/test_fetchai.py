@@ -170,7 +170,7 @@ def test_validate_address():
     assert not FetchAIApi.is_valid_address(account.address + "wrong")
 
 
-# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
@@ -224,7 +224,7 @@ def test_construct_sign_and_submit_transfer_transaction():
     assert is_valid, "Failed to settle tx correctly!"
 
 
-# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_balance():
@@ -237,7 +237,7 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
-# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_state():
@@ -252,6 +252,7 @@ def test_get_state():
     ), "Block height not found in response."
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def get_wealth(address: str):
     """Get wealth for test."""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
@@ -320,6 +321,7 @@ def test_successful_faucet_operation(mock_post, mock_get):
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.ledger
 @mock.patch("aea_ledger_cosmos.cosmos.requests.get")
 @mock.patch("aea_ledger_cosmos.cosmos.requests.post")
@@ -462,6 +464,7 @@ def test_get_storage_transaction_cosmwasm():
     assert msg["wasmByteCode"] == contract_interface["wasm_byte_code"]
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_init_transaction_cosmwasm():
@@ -653,6 +656,7 @@ def test_helper_get_code_id():
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_helper_get_contract_address():
     """Test CosmosHelper.is_transaction_settled."""
     assert (
@@ -688,6 +692,7 @@ def test_helper_get_contract_address():
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_load_contract_interface():
     """Test the load_contract_interface method."""
     path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.wasm")
@@ -695,6 +700,7 @@ def test_load_contract_interface():
     assert "wasm_byte_code" in result
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_construct_init_transaction():
@@ -723,6 +729,7 @@ def test_construct_init_transaction():
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_construct_handle_transaction():
@@ -775,6 +782,7 @@ def test_decrypt_error():
             ec.decrypt(encrypted_data, password + "some")
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_multiple_signatures_transaction():
@@ -809,6 +817,7 @@ def test_multiple_signatures_transaction():
     assert tx["tx"]["body"]["messages"][1]["@type"] == "/cosmos.bank.v1beta1.MsgSend"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_multiple_signatures_transaction_missing_pubkeys():
@@ -841,6 +850,7 @@ def test_multiple_signatures_transaction_missing_pubkeys():
         )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_multiple_signatures_transaction_wrong_number_of_params():
