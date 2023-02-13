@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@ from aea.configurations.base import (
 from aea.protocols.generator.common import (
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
+    _is_compositional_type,
 )
 
 
@@ -212,6 +213,15 @@ def extract(
             spec.speech_acts[performative][content_name] = pythonic_content_type
             if content_type.startswith("ct:"):
                 all_custom_types_set.add(pythonic_content_type)
+
+            for sub_type in (
+                list(_get_sub_types_of_compositional_types(content_type))
+                if _is_compositional_type(content_type)
+                else []
+            ):
+                if sub_type.startswith("ct:"):
+                    pythonic_content_type = _specification_type_to_python_type(sub_type)
+                    all_custom_types_set.add(pythonic_content_type)
 
     # sort the sets
     spec.all_performatives = sorted(all_performatives_set)
