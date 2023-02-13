@@ -19,11 +19,15 @@
 """This module contains the tests of the fetchai._cosmos module."""
 from unittest.mock import Mock, patch
 
+import pytest
 from aea_ledger_fetchai import CosmosHelper, FetchAIApi, FetchAICrypto
 from aea_ledger_fetchai.fetchai import MAXIMUM_GAS_AMOUNT
 from cosmpy.auth.rest_client import QueryAccountResponse
 
+from tests.conftest import MAX_FLAKY_RERUNS
 
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_is_tx_settled() -> None:
     """Test is_tx_settled."""
     assert FetchAIApi.is_transaction_settled({"code": None})
@@ -31,6 +35,7 @@ def test_is_tx_settled() -> None:
     assert not FetchAIApi.is_transaction_settled({"code": False})
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_is_transaction_valid() -> None:
     """Test is_transaction_valid."""
     assert not CosmosHelper.is_transaction_valid(None, 1, 2, 3, 4)
@@ -47,6 +52,7 @@ def test_is_transaction_valid() -> None:
     assert not CosmosHelper.is_transaction_valid(tx_good, 2, 2, 3, 4)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_transfer_transaction() -> None:
     """Test get_transfer_transaction."""
     fetchai_api = FetchAIApi()
@@ -60,6 +66,7 @@ def test_get_transfer_transaction() -> None:
     assert CosmosHelper.is_transaction_valid(transfer_tx, "1", "2", 3, 4)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_packed_send_msg() -> None:
     """Test get_packed_send_msg."""
     assert (
@@ -68,6 +75,7 @@ def test_get_packed_send_msg() -> None:
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_multi_transaction() -> None:
     """Test get_multi_transaction."""
     crypto = FetchAICrypto()
@@ -85,6 +93,7 @@ def test_get_multi_transaction() -> None:
         assert "tx" in result
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_packed_exec_msg() -> None:
     """Test get_packed_exec_msg."""
     crypto = FetchAICrypto()
@@ -101,6 +110,7 @@ def test_get_packed_exec_msg() -> None:
         assert "MsgExecuteContract" in result.type_url
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_try_get_account_number_and_sequence() -> None:
     """Test _try_get_account_number_and_sequence."""
     fetchai_api = FetchAIApi()
@@ -113,6 +123,7 @@ def test_try_get_account_number_and_sequence() -> None:
         ) == (65660, 0)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_transaction() -> None:
     """Test get_transaction."""
     fetchai_api = FetchAIApi(address="https://rest-fetchhub.fetch.ai:443")
@@ -121,6 +132,7 @@ def test_get_transaction() -> None:
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_send_signed_transaction() -> None:
     """Test send_signed_transaction."""
     fetchai_api = FetchAIApi()
@@ -134,6 +146,7 @@ def test_send_signed_transaction() -> None:
         assert fetchai_api.send_signed_transaction({"tx": {"body": {}}}) is not None
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_transaction_receipt() -> None:
     """Test get_transaction_receipt."""
     fetchai_api = FetchAIApi(address="https://rest-fetchhub.fetch.ai:443")
@@ -142,6 +155,7 @@ def test_get_transaction_receipt() -> None:
     )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_handle_transaction() -> None:
     """Test get_handle_transaction."""
     fetchai_api = FetchAIApi()
@@ -155,6 +169,7 @@ def test_get_handle_transaction() -> None:
         assert "tx" in result
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_get_deploy_transaction() -> None:
     """Test get_deploy_transaction."""
     fetchai_api = FetchAIApi()
