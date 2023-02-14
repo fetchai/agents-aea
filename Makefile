@@ -27,18 +27,22 @@ clean-pyc:
 	find . -name '.DS_Store' -exec rm -fr {} +
 
 .PHONY: clean-test
-clean-test:
+clean-test: clean-cache
 	rm -fr .tox/
 	rm -f .coverage
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 	rm -fr coverage.xml
 	rm -fr htmlcov/
-	rm -fr .hypothesis
-	rm -fr .pytest_cache
-	rm -fr .mypy_cache/
-	rm -fr .hypothesis/
 	find . -name 'log.txt' -exec rm -fr {} +
 	find . -name 'log.*.txt' -exec rm -fr {} +
+
+# removes various cache files
+.PHONY: clean-cache
+clean-cache:
+	rm -fr .hypothesis/
+	rm -fr .pytest_cache
+	rm -fr .mypy_cache/
+
 
 .PHONY: package-checks
 package_checks:
@@ -159,7 +163,7 @@ security:
 # generate docs for updated packages
 # update copyright headers
 .PHONY: generators
-generators:
+generators: clean-cache
 	rm -rf packages/fetchai/connections/stub/input_file
 	tox -e fix-copyright
 	tox -e lock-packages

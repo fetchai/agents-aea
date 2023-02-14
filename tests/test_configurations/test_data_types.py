@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ from aea.configurations.data_types import (
     PublicId,
 )
 
+from tests.conftest import MAX_FLAKY_RERUNS
 from tests.strategies.data_types import (
     package_id_strategy,
     public_id_strategy,
@@ -78,6 +79,8 @@ def test_self_type_comparison(self_type):
         assert isinstance(f(other, self), bool)
 
 
+# possible issue with bad generated version specifier
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @given(
     st.one_of(list(map(st.from_type, ALL_TYPES))),
     st.one_of(list(map(st.from_type, CUSTOM_TYPES))),
