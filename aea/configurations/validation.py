@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -243,7 +243,7 @@ class ConfigValidator:
     @staticmethod
     def _build_message_from_errors(errors: List[jsonschema.ValidationError]) -> str:
         """Build an error message from validation errors."""
-        path = lambda error: ".".join(list(error.path))  # noqa # type: ignore
+        path = lambda error: "::".join(map(str, error.path))  # noqa
         result = [f"{path(error)}: {error.message}" for error in errors]
         return "The following errors occurred during validation:\n - " + "\n - ".join(
             result
