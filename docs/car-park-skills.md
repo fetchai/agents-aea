@@ -150,7 +150,7 @@ aea build
     aea add connection fetchai/p2p_libp2p:0.27.5
     aea add connection fetchai/soef:0.27.6
     aea add connection fetchai/ledger:0.21.5
-    aea add skill fetchai/carpark_client:0.27.6
+    aea add skill fetchai/carpark_client:0.28.0
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
@@ -413,7 +413,7 @@ aea build
     aea add connection fetchai/p2p_libp2p:0.27.5
     aea add connection fetchai/soef:0.27.6
     aea add connection fetchai/ledger:0.21.5
-    aea add skill fetchai/carpark_client:0.27.6
+    aea add skill fetchai/carpark_client:0.28.0
     aea config set --type dict agent.dependencies \
     '{
       "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
