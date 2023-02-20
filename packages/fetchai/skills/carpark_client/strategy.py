@@ -19,7 +19,25 @@
 
 """This module contains the strategy class."""
 
+from typing import List
+
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-Strategy = GenericStrategy
+class Strategy(GenericStrategy):
+    """This class defines a strategy for the agent."""
+
+    def get_cheapest_proposal(self, agents: List) -> dict:
+        """
+        Get the cheapest proposal from a given list.
+
+        e.g. agents = [
+                {'sender': 'agent_1', 'message': {'price': 10, ...}},
+                {'sender': 'agent_2', 'message': {'price': 5, ...}}
+            ]
+        """
+        return sorted(
+            agents,
+            key=lambda agent: agent["message"].proposal.values["price"],
+            reverse=False,
+        )[0]
