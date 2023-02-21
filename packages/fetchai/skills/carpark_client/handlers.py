@@ -18,11 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the handlers of the agent."""
-
-from typing import Any, cast
+from typing import Any, List, cast
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.carpark_client.strategy import Strategy
 from packages.fetchai.skills.generic_buyer.dialogues import (
     FipaDialogue,
     FipaDialogues,
@@ -34,8 +34,7 @@ from packages.fetchai.skills.generic_buyer.handlers import (
     GenericOefSearchHandler,
     GenericSigningHandler,
 )
-from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
-from packages.fetchai.skills.carpark_client.strategy import Strategy
+
 
 LedgerApiHandler = GenericLedgerApiHandler
 SigningHandler = GenericSigningHandler
@@ -45,8 +44,9 @@ class FipaHandler(GenericFipaHandler):
     """This class handles fipa messages."""
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize the handler."""
         super().__init__(**kwargs)
-        self.context.carpark_data = cast(list, [])
+        self.context.carpark_data = cast(List, [])
 
     def _handle_propose(
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
@@ -72,9 +72,6 @@ class FipaHandler(GenericFipaHandler):
                 else None,
             }
         )
-        # self.context.logger.info(
-        #     f"fipa_message_id={fipa_msg.message_id} with target={fipa_msg.target} added to carpark_data."
-        # )
 
         # makes more sense to only wait for a certain time
         if len(self.context.carpark_data) == len(self.context.carpark_agents):
@@ -82,21 +79,22 @@ class FipaHandler(GenericFipaHandler):
             undecided_proposals = list(
                 filter(lambda x: x["decision"] is None, self.context.carpark_data)
             )
-            cheapest_proposal = strategy.get_cheapest_proposal(undecided_proposals)
-            for carpark in undecided_proposals:
-                cheapest = cheapest_proposal["sender"] == carpark["sender"]
-                carpark["decision"] = (
-                    FipaMessage.Performative.ACCEPT
-                    if cheapest
-                    else FipaMessage.Performative.DECLINE
-                )
+            if undecided_proposals:
+                cheapest_proposal = strategy.get_cheapest_proposal(undecided_proposals)
+                for carpark in undecided_proposals:
+                    cheapest = cheapest_proposal["sender"] == carpark["sender"]
+                    carpark["decision"] = (
+                        FipaMessage.Performative.ACCEPT
+                        if cheapest
+                        else FipaMessage.Performative.DECLINE
+                    )
             self._handle_propose_send(strategy)
 
-    def _handle_propose_send(self, strategy: GenericStrategy) -> None:
+    def _handle_propose_send(self, strategy: Strategy) -> None:
         """
         The actual sending of the accept/decline messages.
 
-        :param strategy: _description_
+        :param strategy: the strategy object
         """
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
         for carpark in self.context.carpark_data:
@@ -124,8 +122,9 @@ class OefSearchHandler(GenericOefSearchHandler):
     """This class handles oef search messages."""
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize the handler."""
         super().__init__(**kwargs)
-        self.context.carpark_agents = cast(list, [])
+        self.context.carpark_agents = cast(List, [])
 
     def _handle_search(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -141,7 +140,7 @@ class OefSearchHandler(GenericOefSearchHandler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         agents = list(map(lambda x: x[-5:], oef_search_msg.agents))
         if strategy.is_stop_searching_on_result:
             self.context.logger.info(f"found agents={agents}, stopping search.")
