@@ -8,13 +8,13 @@ This means that in principle, there could be different implementations of the AE
 
 An AEA, in technical terms, must satisfy the following requirements:
 
-- It MUST be capable of receiving and sending `Envelopes` which satisfy the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
+- It MUST be capable of receiving and sending `Envelopes` which satisfy the following <a href="https://protobuf.dev/" target="_blank">protobuf</a> schema:
 
     ``` proto
     syntax = "proto3";
-    
+
     package aea.base.v0_1_0;
-    
+
     message Envelope{
       string to = 1;
       string sender = 2;
@@ -35,12 +35,12 @@ An AEA, in technical terms, must satisfy the following requirements:
 
     ``` proto
     syntax = "proto3";
-    
+
     package aea.base.v0_1_0;
-    
+
     import "google/protobuf/struct.proto";
-    
-    
+
+
     message DialogueMessage {
       int32 message_id = 1;
       string dialogue_starter_reference = 2;
@@ -48,14 +48,14 @@ An AEA, in technical terms, must satisfy the following requirements:
       int32 target = 4;
       bytes content = 5;
     }
-    
+
     message Message {
       oneof message {
         google.protobuf.Struct body = 1;
         DialogueMessage dialogue_message = 2;
       }
     }
-    
+
     message Envelope{
       string to = 1;
       string sender = 2;
@@ -73,11 +73,11 @@ An AEA, in technical terms, must satisfy the following requirements:
 
     ``` proto
     syntax = "proto3";
-    
+
     package aea.fetchai.default.v1_0_0;
-    
+
     message DefaultMessage{
-    
+
       // Custom Types
       message ErrorCode{
         enum ErrorCodeEnum {
@@ -89,23 +89,23 @@ An AEA, in technical terms, must satisfy the following requirements:
         }
         ErrorCodeEnum error_code = 1;
       }
-    
-    
+
+
       // Performatives and contents
       message Bytes_Performative{
         bytes content = 1;
       }
-    
+
       message Error_Performative{
         ErrorCode error_code = 1;
         string error_msg = 2;
         map<string, bytes> error_data = 3;
       }
-    
+
       message End_Performative{
       }
-    
-    
+
+
       oneof performative{
         Bytes_Performative bytes = 5;
         End_Performative end = 6;
