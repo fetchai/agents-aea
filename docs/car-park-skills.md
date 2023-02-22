@@ -524,3 +524,42 @@ You will see that the AEAs negotiate and then transact using the Fetch.ai testne
 When you're finished, delete your AEAs:
 
 First `cd ..` out to the parent directory and then `aea delete <your_agent_name>` each of the AEAs that you created for this demo.
+
+## Extension #2:
+**n carpark_client AEAs <-> n carpark_detection AEAs**
+In this scenario we add an arbitrary amount of carpark_client AEAs to simulate a situation where multiple cars in the city are querying multiple carparks to check for free parking spots.
+
+**Note:** This again only demonstrates the agents capability to query the sOEF for multiple counterparties, sending each a CFP and picking one based on configuration or application logic.
+This scenario will lay the foundation for most decentralised `n:n` communication setups and should be seen as just that.
+
+Possible next steps could include:
+- Check the next carpark if the cheapest carpark that was queried has no free spots available
+- Book or reserve a spot to reduce the number of available parking spots for a certain amount of time
+- Feed the availability data into your own prediction model for future parking
+
+### Summary / Layout
+- have (at least) 2 carpark_detection AEAs
+- configure each to have different `location` & `price` and `entry points / IPs`
+- have (at least) 2 carpark_client AEAs
+- configure each to also have different `entry point / IP` to be able to connect to the other AEAs
+- *optional: modify configuration to impact buying behaviour*
+
+### Communication
+The communication is similar to the one in Extension#1 so there is no different figure shown here.
+
+### Demo instructions
+At this point it is assumed that you did all of the above steps from Extension #1 and successfully set up one (1) car_data_buyer AEA and multiple (>=2) car_detector AEAs.
+
+**Steps:**
+- Add at least one other car_data_buyer AEA and give it a unique `name` and `entry point / IP`
+- Now change the configuration of both car_data_buyer AEAs to continue searching for spots even if they found one (`stop_searching_on_result` to `false`) and change the `max_negotiations` and `max_unit_price` to some other values to see how it affects the AEAs behaviour
+
+``` bash
+cd <your_car_buyer_aea_directory>
+aea config set --type dict vendor.fetchai.skills.carpark_client.models.strategy.args \
+'{
+  "max_negotiations": 5
+  "max_unit_price": 20
+  "stop_searching_on_result": false
+}'
+```
