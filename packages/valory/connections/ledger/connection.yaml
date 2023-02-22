@@ -52,5 +52,6 @@ excluded_protocols: []
 restricted_to_protocols:
 - valory/contract_api:1.0.0
 - valory/ledger_api:1.0.0
-dependencies: {}
+dependencies:
+  pytest-asyncio: {}
 is_abstract: false
