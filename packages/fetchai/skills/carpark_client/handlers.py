@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the handlers of the agent."""
-from typing import Any, List, cast
+from typing import cast
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -43,11 +43,6 @@ SigningHandler = GenericSigningHandler
 class FipaHandler(GenericFipaHandler):
     """This class handles fipa messages."""
 
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.context.carpark_data = cast(List, [])
-
     def _handle_propose(
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
     ) -> None:
@@ -62,7 +57,7 @@ class FipaHandler(GenericFipaHandler):
             f"received proposal={fipa_msg.proposal.values} from sender={sender}"
         )
         strategy = cast(Strategy, self.context.strategy)
-        self.context.carpark_data.append(
+        strategy.received_proposals.append(
             {
                 "sender": fipa_msg.sender,
                 "message": fipa_msg,
@@ -74,10 +69,10 @@ class FipaHandler(GenericFipaHandler):
         )
 
         # makes more sense to only wait for a certain time
-        if len(self.context.carpark_data) == len(self.context.carpark_agents):
+        if len(strategy.received_proposals) == len(strategy.sent_proposals):
             self.context.logger.info("received all proposals, making decision...")
             undecided_proposals = list(
-                filter(lambda x: x["decision"] is None, self.context.carpark_data)
+                filter(lambda x: x["decision"] is None, strategy.received_proposals)
             )
             if undecided_proposals:
                 cheapest_proposal = strategy.get_cheapest_proposal(undecided_proposals)
@@ -97,7 +92,7 @@ class FipaHandler(GenericFipaHandler):
         :param strategy: the strategy object
         """
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        for carpark in self.context.carpark_data:
+        for carpark in strategy.received_proposals:
             fipa_dialogue = cast(
                 FipaDialogue, fipa_dialogues.get_dialogue(carpark["message"])
             )
@@ -114,17 +109,12 @@ class FipaHandler(GenericFipaHandler):
                 target_message=carpark["message"],
             )
             self.context.outbox.put_message(message=msg)
-        self.context.carpark_data = []
-        self.context.carpark_agents = []
+        strategy.received_proposals = []
+        strategy.sent_proposals = []
 
 
 class OefSearchHandler(GenericOefSearchHandler):
     """This class handles oef search messages."""
-
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.context.carpark_agents = cast(List, [])
 
     def _handle_search(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -156,7 +146,7 @@ class OefSearchHandler(GenericOefSearchHandler):
                 performative=FipaMessage.Performative.CFP,
                 query=query,
             )
-            self.context.carpark_agents.append(counterparty)
+            strategy.sent_proposals.append(counterparty)
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(f"sending CFP to agent={counterparty[-5:]}")
         self.context.logger.info(f"CFPs sent to {len(counterparties)} agents")
