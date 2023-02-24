@@ -20,7 +20,7 @@ This documentation page is structured as follows:
 
 ## Messages and Data Structures
 
-At the foundation of the ACN there is the _ACN protocol_. The protocol messages and the reply structure are generated from this <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>, using the <a href="../protocol-generator" target="_blank">protocol generator</a>. Therefore, it uses <a href="https://developers.google.com/protocol-buffers" target="_blank">Protocol Buffers</a> as a serialization format, and the definition of the data structures involved is defined in this <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
+At the foundation of the ACN there is the _ACN protocol_. The protocol messages and the reply structure are generated from this <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>, using the <a href="../protocol-generator" target="_blank">protocol generator</a>. Therefore, it uses <a href="https://protobuf.dev" target="_blank">Protocol Buffers</a> as a serialization format, and the definition of the data structures involved is defined in this <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
 
 To know more about the protocol generator, refer to the relevant section of the documentation: <a href="../protocol-generator" target="_blank">Protocol Generator</a>.
 
@@ -78,7 +78,7 @@ A status code `0`, identified as `SUCCESS`, means that the request has been proc
     - `ERROR_UNSUPPORTED_LEDGER`, with integer value `13`: the ledger of the PoR is not supported by the peer;
 
 - Lookup and delivery errors: errors that occur during lookup to the DHT and envelope delivery operations in the ACN.
-  
+
     - `ERROR_UNKNOWN_AGENT_ADDRESS`, with integer value `20`: the requested agent address has not been found in the local DHT of the peer;
     - `ERROR_AGENT_NOT_READY`, with integer value `21`: the agent is not ready for envelope delivery.
 
@@ -163,7 +163,7 @@ The routing interaction is used by agents and peers to route the envelope throug
         else error on decoding of Envelope payload
             Peer2->>Peer1: Status(ERROR_SERIALIZATION)
         else PoR errors
-            note over Peer1,Peer2: see above 
+            note over Peer1,Peer2: see above
         end
 ```
 
@@ -197,7 +197,7 @@ Then, it sets up the notification stream and notifies the bootstrap peers (if an
         note over Peer2,Peer3: Peer1 registered to DHT
         deactivate Peer2
         deactivate Peer3
-        loop for each local/relay/delegate address 
+        loop for each local/relay/delegate address
             Peer1->>Peer1: compute CID from address
             Peer1->>Peer2: register address
             Peer1->>Peer3: register address
@@ -249,7 +249,7 @@ In the following sections, we describe the main three steps of the routing of an
 - _ACN entrance_: when an envelope sent by an agent enters the peer-to-peer network via the peer the agent is connected to i.e. agent-to-peer communication;
 - _ACN routing_: when an envelope gets routed through the peer-to-peer network, i.e. peer-to-peer communication;
 - _ACN exit_: when an envelope gets delivered to the receiving agent through its representative peer, i.e. peer-to-agent communication.
-  
+
 ### ACN Envelope Entrance: Agent -> Peer
 
 In this section, we will describe the interaction protocols between agents and peers for the messages sent by the agent to the ACN network; in particular, the communication from the contact peer of an agent to the agent.
@@ -401,7 +401,7 @@ Let `Peer3` the contact peer of the recipient of the envelope. The following dia
         else unexpected payload
             Peer3->>Peer1: Status(ERROR_UNEXPECTED_PAYLOAD)
         else decoding error of envelope payload
-            Peer3->>Peer1: Status(ERROR_SERIALIZATION)        
+            Peer3->>Peer1: Status(ERROR_SERIALIZATION)
         else PoR check fails
             alt wrong agent address
                 Peer3->>Peer1: Status(ERROR_WRONG_AGENT_ADDRESS)
@@ -468,7 +468,7 @@ The source code of the `fetchai/p2p_libp2p` connection can be downloaded from <a
 
 The package provides the connection class `P2PLibp2pConnection`, which implements the `Connection` interface and therefore can be used by the Multiplexer as any other connection.
 
-- The `connect` method of this connection spawns a new instance of the <a href="https://github.com/fetchai/agents-aea/blob/main/libs/go/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a> (i.e. an ACN peer node) and connects to it through OS pipes. Then, it sets up the _message receiving loop_, which enqueues messages in the input queue to be read by `read` method calls, and the _message sending loop_, which dequeues messages from the output queue and forwards them to the Libp2p node. The loops are run concurrently in the Multiplexer thread, using the Python asynchronous programming library `asyncio`.  
+- The `connect` method of this connection spawns a new instance of the <a href="https://github.com/fetchai/agents-aea/blob/main/libs/go/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a> (i.e. an ACN peer node) and connects to it through OS pipes. Then, it sets up the _message receiving loop_, which enqueues messages in the input queue to be read by `read` method calls, and the _message sending loop_, which dequeues messages from the output queue and forwards them to the Libp2p node. The loops are run concurrently in the Multiplexer thread, using the Python asynchronous programming library `asyncio`.
 
 ``` mermaid
     sequenceDiagram
@@ -510,11 +510,11 @@ The package provides the connection class `P2PLibp2pConnection`, which implement
             note over sending loop: OK
         else timed out
             note over sending loop: raise with error
-        else acn message decoding error 
+        else acn message decoding error
             Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
         else unexpected payload
             Libp2p Node->>sending loop: Status(ERROR_UNEXPECTED_PAYLOAD)
-        else envelope decoding error 
+        else envelope decoding error
             Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
         end
 ```
@@ -538,11 +538,11 @@ The package provides the connection class `P2PLibp2pConnection`, which implement
             note over receiving loop: OK
         else timed out
             note over Libp2p Node: ignore
-        else acn message decoding error 
+        else acn message decoding error
             receiving loop->>Libp2p Node: Status(ERROR_SERIALIZATION)
         else unexpected payload
             receiving loop->>Libp2p Node: Status(ERROR_UNEXPECTED_PAYLOAD)
-        else envelope decoding error 
+        else envelope decoding error
             receiving loop->>Libp2p Node: Status(ERROR_SERIALIZATION)
         end
         Libp2p Connection->>receiving loop: read message from output queue
@@ -584,7 +584,7 @@ The package provides the connection class `P2PLibp2pClientConnection`, which imp
         else PoR check succeeds
             Libp2p Node->>Libp2p Client Connection: Status(SUCCESS)
             note over Libp2p Node: announce agent<br/>address to<br/>other peers
-            Libp2p Node->>Libp2p Node: wait data from socket 
+            Libp2p Node->>Libp2p Node: wait data from socket
             activate Libp2p Node
             deactivate Libp2p Node
         end

@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/carpark_client:0.27.6")
+PUBLIC_ID = PublicId.from_str("fetchai/carpark_client:0.28.0")

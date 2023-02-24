@@ -20,7 +20,7 @@ protocols:
 - fetchai/signing:1.1.7
 - fetchai/state_update:1.1.7
 skills:
-- fetchai/carpark_client:0.27.6
+- fetchai/carpark_client:0.28.0
 - fetchai/generic_buyer:0.27.6
 default_connection: fetchai/p2p_libp2p:0.27.5
 default_ledger: fetchai

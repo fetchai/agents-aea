@@ -1,18 +1,18 @@
 name: carpark_client
 author: fetchai
-version: 0.27.6
+version: 0.28.0
 type: skill
 description: The carpark client skill implements the functionality to run a client
   for carpark data.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmdrvGfoAncV3e76Aiq5irJSKYXXwmhJTv7w8hPoadcFgt
-  __init__.py: QmVsQFQFm8gBa2cKGmERfJYkq1aufHahgv2p1dF5eRwXhb
-  behaviours.py: QmSr6fB3N7dhVo1cLY1TGd2q8usjGwNmTCNjBBbtgtVf9j
+  README.md: QmVKVYw1FjmPmjhxLP9bBAWbdKmFpr6qoiQ1fkizeekvSa
+  __init__.py: QmWWerZQs3kA6xzhxVhiHmHRgJfxsdk9uFHu3xT9JXUiY8
+  behaviours.py: QmR1RethYTW5tLQhfDDjuHA6dZKxLTszjKGr8WBAREzsrm
   dialogues.py: QmXgXcs25v9ob9a9XwT49wvK788vbUdZyYxUgG3ndHjrix
-  handlers.py: QmP3Q6x3NMcWgRi6H5GtDtvnLWSoB1HeG8vTd4zcRZUgNj
-  strategy.py: QmdHPLehqRr1dxuCbp4ENYmVMb8Ykvzg2Uzfos5kFJSr3D
+  handlers.py: Qmabega8oKoh5nMuyNZDwLs4VQjd2FumdQdu3h3e1xwzXj
+  strategy.py: QmY5Bpr5XLK7WkKb6GCa3ktFL5mZJSi4pUFySyMWYGHXDm
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -25,6 +25,9 @@ protocols:
 skills:
 - fetchai/generic_buyer:0.27.6
 behaviours:
+  check:
+    args: {}
+    class_name: ProposalCheckBehaviour
   search:
     args:
       search_interval: 5
@@ -69,11 +72,12 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
-      max_negotiations: 1
+      max_negotiations: 5
       max_quantity: 100
       max_tx_fee: 3550000000000000
-      max_unit_price: 20
+      max_unit_price: 10
       min_quantity: 1
+      proposal_check_timeout: 30.0
       search_query:
         constraint_type: ==
         search_key: seller_service
