@@ -102,7 +102,7 @@ class OefSearchHandler(GenericOefSearchHandler):
                 performative=FipaMessage.Performative.CFP,
                 query=query,
             )
-            strategy.sent_proposals.append(counterparty)
+            strategy.sent_cfps.append(counterparty)
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(f"sending CFP to agent={counterparty[-5:]}")
         self.context.logger.info(f"CFPs sent to {len(counterparties)} agents")

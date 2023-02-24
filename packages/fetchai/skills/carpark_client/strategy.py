@@ -39,7 +39,7 @@ class Strategy(GenericStrategy):
         )  # type: int
         super().__init__(**kwargs)
         self._received_proposals = cast(List, [])
-        self._sent_proposals = cast(List, [])
+        self._sent_cfps = cast(List, [])
         self._waiting_for_proposals = False
 
     def get_cheapest_proposal(self, agents: List) -> dict:
@@ -78,12 +78,12 @@ class Strategy(GenericStrategy):
         self._received_proposals = proposals
 
     @property
-    def sent_proposals(self) -> List:
+    def sent_cfps(self) -> List:
         """Get all sent proposals."""
-        return self._sent_proposals
+        return self._sent_cfps
 
-    @sent_proposals.setter
-    def sent_proposals(self, proposals: List) -> None:
+    @sent_cfps.setter
+    def sent_cfps(self, proposals: List) -> None:
         """
         Set proposals that were sent.
 
@@ -91,7 +91,7 @@ class Strategy(GenericStrategy):
             'agent_wallet_address_1',
         ]
         """
-        self._sent_proposals = proposals
+        self._sent_cfps = proposals
 
     @property
     def waiting_for_proposals(self) -> bool:
