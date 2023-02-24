@@ -26,7 +26,7 @@ from aea.exceptions import enforce
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-DEFAULT_PROPOSAL_CHECK_INTERVAL = 30.0
+DEFAULT_PROPOSAL_CHECK_TIMEOUT = 30.0
 
 
 class Strategy(GenericStrategy):
@@ -34,8 +34,8 @@ class Strategy(GenericStrategy):
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
-        self.proposal_check_interval = kwargs.pop(
-            "proposal_check_interval", DEFAULT_PROPOSAL_CHECK_INTERVAL
+        self.proposal_check_timeout = kwargs.pop(
+            "proposal_check_timeout", DEFAULT_PROPOSAL_CHECK_TIMEOUT
         )  # type: int
         super().__init__(**kwargs)
         self._received_proposals = cast(List, [])

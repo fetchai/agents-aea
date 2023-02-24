@@ -44,7 +44,7 @@ class ProposalCheckBehaviour(TickerBehaviour):
     """
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize the search behaviour."""
+        """Initialize the proposal check behaviour."""
         super().__init__(**kwargs)
         self.counter = 0
 
@@ -62,7 +62,7 @@ class ProposalCheckBehaviour(TickerBehaviour):
             list(map(lambda x: x["sender"], strategy.received_proposals))
         ):
             self.context.logger.info("received all proposals, making decision...")
-        elif self.counter > strategy.proposal_check_interval - 1:
+        elif self.counter > strategy.proposal_check_timeout - 1:
             self.context.logger.info(
                 "waiting for proposals timed out, making decision..."
             )
