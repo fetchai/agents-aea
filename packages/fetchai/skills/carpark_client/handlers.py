@@ -47,7 +47,7 @@ class FipaHandler(GenericFipaHandler):
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
     ) -> None:
         """
-        Handle the propose.
+        Add received proposals to the current search stack.
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
@@ -67,50 +67,6 @@ class FipaHandler(GenericFipaHandler):
                 else None,
             }
         )
-
-        # makes more sense to only wait for a certain time
-        if len(strategy.received_proposals) == len(strategy.sent_proposals):
-            self.context.logger.info("received all proposals, making decision...")
-            undecided_proposals = list(
-                filter(lambda x: x["decision"] is None, strategy.received_proposals)
-            )
-            if undecided_proposals:
-                cheapest_proposal = strategy.get_cheapest_proposal(undecided_proposals)
-                for carpark in undecided_proposals:
-                    cheapest = cheapest_proposal["sender"] == carpark["sender"]
-                    carpark["decision"] = (
-                        FipaMessage.Performative.ACCEPT
-                        if cheapest
-                        else FipaMessage.Performative.DECLINE
-                    )
-            self._handle_propose_send(strategy)
-
-    def _handle_propose_send(self, strategy: Strategy) -> None:
-        """
-        The actual sending of the accept/decline messages.
-
-        :param strategy: the strategy object
-        """
-        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        for carpark in strategy.received_proposals:
-            fipa_dialogue = cast(
-                FipaDialogue, fipa_dialogues.get_dialogue(carpark["message"])
-            )
-            self.context.logger.info(
-                f"{carpark['decision']} the proposal from sender={carpark['sender'][-5:]}"
-            )
-            if carpark["decision"] == FipaMessage.Performative.ACCEPT:
-                terms = strategy.terms_from_proposal(
-                    carpark["message"].proposal, carpark["sender"]
-                )
-                fipa_dialogue.terms = terms
-            msg = fipa_dialogue.reply(
-                performative=carpark["decision"],
-                target_message=carpark["message"],
-            )
-            self.context.outbox.put_message(message=msg)
-        strategy.received_proposals = []
-        strategy.sent_proposals = []
 
 
 class OefSearchHandler(GenericOefSearchHandler):
@@ -150,3 +106,4 @@ class OefSearchHandler(GenericOefSearchHandler):
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(f"sending CFP to agent={counterparty[-5:]}")
         self.context.logger.info(f"CFPs sent to {len(counterparties)} agents")
+        strategy.waiting_for_proposals = True  # start timer

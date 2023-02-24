@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmVKVYw1FjmPmjhxLP9bBAWbdKmFpr6qoiQ1fkizeekvSa
   __init__.py: QmWWerZQs3kA6xzhxVhiHmHRgJfxsdk9uFHu3xT9JXUiY8
-  behaviours.py: QmSr6fB3N7dhVo1cLY1TGd2q8usjGwNmTCNjBBbtgtVf9j
+  behaviours.py: QmWngNRGA7aXpYppKaWW1yWGvyuQAHSAw3WyDqu5g9YtFW
   dialogues.py: QmXgXcs25v9ob9a9XwT49wvK788vbUdZyYxUgG3ndHjrix
-  handlers.py: QmZRydY9F7ornEozpUTKLQ6HKc3vEDyt6uRZHyddqCx8WB
-  strategy.py: QmXzLq7PgfVHTKWagJ2K4GwWTYW6Lrr4YmXbqwq58UfuDz
+  handlers.py: QmP8P26j6YDtQLvTn7QzdiVj6ZmaneoUFfBBeK4Wdq8i5J
+  strategy.py: QmSJkG3BBwhAimsdvgV48KfnYqVEsgriRuqPukLMpJrKCM
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -25,6 +25,9 @@ protocols:
 skills:
 - fetchai/generic_buyer:0.27.6
 behaviours:
+  check:
+    args: {}
+    class_name: ProposalCheckBehaviour
   search:
     args:
       search_interval: 5
@@ -74,6 +77,7 @@ models:
       max_tx_fee: 3550000000000000
       max_unit_price: 10
       min_quantity: 1
+      proposal_check_interval: 30.0
       search_query:
         constraint_type: ==
         search_key: seller_service

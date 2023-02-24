@@ -21,7 +21,12 @@
 
 from typing import Any, List, cast
 
+from aea.exceptions import enforce
+
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+
+
+DEFAULT_PROPOSAL_CHECK_INTERVAL = 30.0
 
 
 class Strategy(GenericStrategy):
@@ -29,9 +34,13 @@ class Strategy(GenericStrategy):
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
+        self.proposal_check_interval = kwargs.pop(
+            "proposal_check_interval", DEFAULT_PROPOSAL_CHECK_INTERVAL
+        )  # type: int
         super().__init__(**kwargs)
         self._received_proposals = cast(List, [])
         self._sent_proposals = cast(List, [])
+        self._waiting_for_proposals = False
 
     def get_cheapest_proposal(self, agents: List) -> dict:
         """
@@ -83,3 +92,17 @@ class Strategy(GenericStrategy):
         ]
         """
         self._sent_proposals = proposals
+
+    @property
+    def waiting_for_proposals(self) -> bool:
+        """Check if the agent started to listen for proposals."""
+        return self._waiting_for_proposals
+
+    @waiting_for_proposals.setter
+    def waiting_for_proposals(self, waiting_for_proposals: bool) -> None:
+        """Set whether the agent should start to listen for proposals"""
+        enforce(
+            isinstance(waiting_for_proposals, bool),
+            "Can only set bool on waiting_for_proposals!",
+        )
+        self._waiting_for_proposals = waiting_for_proposals
