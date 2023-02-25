@@ -11,7 +11,7 @@ require (
 	github.com/libp2p/go-libp2p-core v0.8.5
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/rs/zerolog v1.20.0
-	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+	golang.org/x/crypto v0.1.0
 	google.golang.org/protobuf v1.25.0
 	gotest.tools v2.2.0+incompatible
 )
