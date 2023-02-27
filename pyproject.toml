@@ -51,7 +51,7 @@ protobuf = ">=3.19.4,<4"
 pymultihash = "==0.8.2"
 pyyaml = ">=4.2b1,<6.0"
 requests = ">=2.22.0,<3.0.0"
-python-dotenv = ">=0.14.0,<0.18.0"
+python-dotenv = ">=0.14.0,<1.1.0"
 ecdsa = ">=0.15,<0.17.0"
 importlib-metadata = ">4,<5"
 
