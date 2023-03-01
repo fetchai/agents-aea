@@ -22,6 +22,7 @@
 
 import json
 import logging
+import re
 import shutil
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -49,6 +50,7 @@ except (ImportError, ModuleNotFoundError):  # pragma: nocover  # cause obvious
     IS_IPFS_PLUGIN_INSTALLED = False
 
 PACKAGES_FILE = "packages.json"
+PACKAGE_SOURCE_RE = re.compile(r"([a-z-_0-9]+\/[a-z-_0-9]+)((:)([a-z\.0-9_-]+))?")
 
 PackageIdToHashMapping = OrderedDictType[PackageId, str]
 ConfigLoaderCallableType = Callable[[PackageType, Path], PackageConfiguration]

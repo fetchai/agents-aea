@@ -19,15 +19,19 @@
 
 """Package manager V1"""
 
+import copy
 import json
 import traceback
 from collections import OrderedDict
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from typing import OrderedDict as OrderedDictType
 from typing import Union, cast
 
+from requests import get as r_get
+
+from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -35,10 +39,17 @@ from aea.package_manager.base import (
     BasePackageManager,
     ConfigLoaderCallableType,
     PACKAGES_FILE,
+    PACKAGE_SOURCE_RE,
     PackageFileNotValid,
     PackageIdToHashMapping,
     PackageNotValid,
     load_configuration,
+)
+
+
+GIT_TAGS_URL = "https://api.github.com/repos/{repo}/tags"
+PACKAGE_FILE_REMOTE_URL = (
+    "https://raw.githubusercontent.com/{repo}/{tag}/packages/packages.json"
 )
 
 
@@ -116,12 +127,66 @@ class PackageManagerV1(BasePackageManager):
         self._dev_packages[package_id] = self.calculate_hash_from_package_id(package_id)
         return self
 
+    @staticmethod
+    def _get_latest_tag(repo: str) -> str:
+        """Get latest tag for the repository."""
+
+        response = r_get(GIT_TAGS_URL.format(repo=repo))
+        if response.status_code != 200:
+            raise ValueError(
+                f"Fetching packages from `{repo}` failed with message '"
+                + response.json()["message"]
+                + "'"
+            )
+
+        latest_tag_data, *_ = response.json()
+        return latest_tag_data["name"]
+
+    @staticmethod
+    def _get_packages_json(repo: str, tag: str) -> Dict:
+        """Get `packages.json`."""
+
+        response = r_get(PACKAGE_FILE_REMOTE_URL.format(repo=repo, tag=tag))
+        return response.json()
+
+    def _update_hashes_from_sources(self, sources: List[str]) -> None:
+        """Update hashes from sources"""
+
+        _updated_third_party_packages = copy.deepcopy(self.third_party_packages)
+
+        self._logger.info("Fetching hashes from sources")
+        for source in sources:
+            source_regex = PACKAGE_SOURCE_RE.match(source)
+            if source_regex is None:
+                raise ValueError(f"Provided source name is not valid `{source}`")
+
+            repo, _, _, tag = source_regex.groups()
+            if tag is None:
+                tag = self._get_latest_tag(repo=repo)
+
+            packages = self._get_packages_json(repo=repo, tag=tag)
+            package_manager = self.from_json(packages=packages)
+
+            for package_id in _updated_third_party_packages:
+                latest_hash = package_manager.get_package_hash(package_id=package_id)
+                if latest_hash is None:
+                    continue
+
+                self._logger.info(
+                    f"Found hash for third party package {package_id} in source `{repo}`, updating hash"
+                )
+                _updated_third_party_packages[package_id] = latest_hash
+
+        self._third_party_packages = _updated_third_party_packages
+        self.dump(file=self._packages_file)
+
     def sync(
         self,
         dev: bool = False,
         third_party: bool = True,
         update_packages: bool = False,
         update_hashes: bool = False,
+        sources: Optional[List[str]] = None,
     ) -> "PackageManagerV1":
         """Sync local packages to the remote registry."""
 
@@ -129,11 +194,12 @@ class PackageManagerV1(BasePackageManager):
             raise ValueError(
                 "Both `update_packages` and `update_hashes` cannot be set to `True`."
             )
-
         self._logger.info(f"Performing sync @ {self.path}")
 
-        sync_needed = False
+        if sources is not None and len(sources) > 0:
+            self._update_hashes_from_sources(sources=sources)
 
+        sync_needed = False
         if third_party:
             self._logger.info("Checking third party packages.")
             (
@@ -310,6 +376,33 @@ class PackageManagerV1(BasePackageManager):
         return cast(Dict, json.loads(packages_file.read_text()))
 
     @classmethod
+    def from_json(
+        cls,
+        packages: Dict[str, Dict[str, str]],
+        packages_dir: Optional[Path] = None,
+        config_loader: ConfigLoaderCallableType = load_configuration,
+    ) -> "PackageManagerV1":
+        """Initialize from json object"""
+
+        if "dev" not in packages or "third_party" not in packages:
+            raise PackageFileNotValid("Package file not valid.")
+
+        dev_packages = OrderedDict()
+        for package_id, package_hash in packages["dev"].items():
+            dev_packages[PackageId.from_uri_path(package_id)] = package_hash
+
+        third_party_packages = OrderedDict()
+        for package_id, package_hash in packages["third_party"].items():
+            third_party_packages[PackageId.from_uri_path(package_id)] = package_hash
+
+        return cls(
+            path=(packages_dir or Path.cwd() / PACKAGES),
+            dev_packages=dev_packages,
+            third_party_packages=third_party_packages,
+            config_loader=config_loader,
+        )
+
+    @classmethod
     def from_dir(
         cls,
         packages_dir: Path,
@@ -317,22 +410,7 @@ class PackageManagerV1(BasePackageManager):
     ) -> "PackageManagerV1":
         """Initialize from packages directory."""
         packages_file = packages_dir / PACKAGES_FILE
-        _packages = cls._load_packages(packages_file)
-
-        if "dev" not in _packages or "third_party" not in _packages:
-            raise PackageFileNotValid("Package file not valid.")
-
-        dev_packages = OrderedDict()
-        for package_id, package_hash in _packages["dev"].items():
-            dev_packages[PackageId.from_uri_path(package_id)] = package_hash
-
-        third_party_packages = OrderedDict()
-        for package_id, package_hash in _packages["third_party"].items():
-            third_party_packages[PackageId.from_uri_path(package_id)] = package_hash
-
-        return cls(
-            path=packages_dir,
-            dev_packages=dev_packages,
-            third_party_packages=third_party_packages,
-            config_loader=config_loader,
+        packages = cls._load_packages(packages_file)
+        return cls.from_json(
+            packages=packages, packages_dir=packages_dir, config_loader=config_loader
         )
