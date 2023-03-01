@@ -47,6 +47,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.data_types import PackageType, PublicId
 from aea.helpers.io import open_file
+from aea.package_manager.base import PACKAGE_SOURCE_RE
 
 
 class ConnectionsOption(click.Option):
@@ -222,6 +223,25 @@ class AgentDirectory(click.Path):
             )
         finally:
             os.chdir(cwd)
+
+
+class PackagesSource(click.ParamType):
+    """Click paramater for package sources."""
+
+    def __init__(self) -> None:
+        """Initialize the package source parameter."""
+
+    def get_metavar(self, param: Any) -> str:
+        """Return the metavar default for this param if it provides one."""
+        return "SOURCE"  # pragma: no cover
+
+    def convert(self, value: str, param: Any, ctx: click.Context) -> str:
+        """Convert the value."""
+        if PACKAGE_SOURCE_RE.match(value) is None:
+            raise click.ClickException(
+                f"Bad value provided for package source `{value}`"
+            )
+        return value
 
 
 def registry_flag(

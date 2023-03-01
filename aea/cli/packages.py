@@ -22,10 +22,12 @@
 
 import sys
 from pathlib import Path
+from typing import List, cast
 from warnings import warn
 
 import click
 
+from aea.cli.utils.click_utils import PackagesSource
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.package_manager.base import (
@@ -86,8 +88,20 @@ def package_manager(
     help="To sync all available packages.",
     default=False,
 )
+@click.option(
+    "-s",
+    "--source",
+    "sources",
+    type=PackagesSource(),
+    help="Provide source name from where hashes can be synced.",
+    multiple=True,
+)
 def sync(
-    ctx: Context, update_packages: bool, update_hashes: bool, sync_type: str
+    ctx: Context,
+    update_packages: bool,
+    update_hashes: bool,
+    sync_type: str,
+    sources: List[str],
 ) -> None:
     """Sync packages between packages.json and a local registry."""
 
@@ -103,14 +117,26 @@ def sync(
 
     packages_dir = Path(ctx.registry_path)
     try:
-        get_package_manager(packages_dir).sync(
-            dev=(sync_type == SyncTypes.DEV or sync_type == SyncTypes.ALL),
-            third_party=(
-                sync_type == SyncTypes.THIRD_PARTY or sync_type == SyncTypes.ALL
-            ),
-            update_packages=update_packages,
-            update_hashes=update_hashes,
-        )
+        manager = get_package_manager(packages_dir)
+        if isinstance(manager, PackageManagerV0):
+            cast(PackageManagerV0, manager).sync(
+                dev=(sync_type == SyncTypes.DEV or sync_type == SyncTypes.ALL),
+                third_party=(
+                    sync_type == SyncTypes.THIRD_PARTY or sync_type == SyncTypes.ALL
+                ),
+                update_packages=update_packages,
+                update_hashes=update_hashes,
+            )
+        else:
+            cast(PackageManagerV1, manager).sync(
+                dev=(sync_type == SyncTypes.DEV or sync_type == SyncTypes.ALL),
+                third_party=(
+                    sync_type == SyncTypes.THIRD_PARTY or sync_type == SyncTypes.ALL
+                ),
+                update_packages=update_packages,
+                update_hashes=update_hashes,
+                sources=sources,
+            )
     except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e)) from e
 
