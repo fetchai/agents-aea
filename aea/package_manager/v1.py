@@ -43,6 +43,7 @@ from aea.package_manager.base import (
     PackageFileNotValid,
     PackageIdToHashMapping,
     PackageNotValid,
+    PackagesSourceNotValid,
     load_configuration,
 )
 
@@ -133,8 +134,8 @@ class PackageManagerV1(BasePackageManager):
 
         response = r_get(GIT_TAGS_URL.format(repo=repo))
         if response.status_code != 200:
-            raise ValueError(
-                f"Fetching packages from `{repo}` failed with message '"
+            raise PackagesSourceNotValid(
+                f"Fetching tags from `{repo}` failed with message '"
                 + response.json()["message"]
                 + "'"
             )
@@ -143,10 +144,16 @@ class PackageManagerV1(BasePackageManager):
         return latest_tag_data["name"]
 
     @staticmethod
-    def _get_packages_json(repo: str, tag: str) -> Dict:
+    def _get_packages_json(repo: str, tag: str) -> Dict[str, Dict[str, str]]:
         """Get `packages.json`."""
 
         response = r_get(PACKAGE_FILE_REMOTE_URL.format(repo=repo, tag=tag))
+        if response.status_code != 200:
+            raise PackagesSourceNotValid(
+                f"Fetching packages from `{repo}` failed with message '"
+                + response.text
+                + "'"
+            )
         return response.json()
 
     def _update_hashes_from_sources(self, sources: List[str]) -> None:
@@ -158,7 +165,9 @@ class PackageManagerV1(BasePackageManager):
         for source in sources:
             source_regex = PACKAGE_SOURCE_RE.match(source)
             if source_regex is None:
-                raise ValueError(f"Provided source name is not valid `{source}`")
+                raise PackagesSourceNotValid(
+                    f"Provided source name is not valid `{source}`"
+                )
 
             repo, _, _, tag = source_regex.groups()
             if tag is None:

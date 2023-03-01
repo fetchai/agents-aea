@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Test package manager base."""
+import copy
 import json
 import logging
 import os
@@ -38,6 +39,7 @@ from aea.package_manager.base import (
     PackageFileNotValid,
     PackageHashDoesNotMatch,
     PackageNotValid,
+    PackagesSourceNotValid,
 )
 from aea.package_manager.v1 import PackageManagerV1
 from aea.protocols.generator.common import INIT_FILE_NAME
@@ -206,6 +208,93 @@ class TestPackageManagerV1Sync(TestPackageManagerV1):
         ):
             pm.sync(dev=False, third_party=True, update_packages=True)
             update_patch.assert_called_with(package_id=DUMMY_PACKAGE_ID)
+
+
+class TestPackageManagerV1SourceSync(TestPackageManagerV1):
+    """Test sync."""
+
+    sources = [
+        "author/repo",
+    ]
+    dummy_dev_package_hash = (
+        "bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhnx"
+    )
+    dummy_third_party_package_hash = (
+        "bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+    )
+    dummy_third_party_package_latest = (
+        "bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhnz"
+    )
+    dummy_dev_package = PackageId(
+        package_type=PackageType.PROTOCOL,
+        public_id=PublicId(author="author", name="dev_package"),
+    )
+    dummy_third_party_package = PackageId(
+        package_type=PackageType.PROTOCOL,
+        public_id=PublicId(author="author", name="third_party_package"),
+    )
+    dummy_packages = {
+        "dev": {dummy_dev_package.to_uri_path: dummy_dev_package_hash},
+        "third_party": {
+            dummy_third_party_package.to_uri_path: dummy_third_party_package_hash
+        },
+    }
+
+    def test_source_sync(
+        self,
+    ) -> None:
+        """Test source sync."""
+
+        latest_packages = copy.deepcopy(self.dummy_packages)
+        latest_packages["third_party"][
+            self.dummy_third_party_package.to_uri_path
+        ] = self.dummy_third_party_package_latest
+
+        pm = PackageManagerV1.from_json(packages=self.dummy_packages)
+        with mock.patch.object(pm, "_get_latest_tag"), mock.patch.object(
+            pm, "_get_packages_json", return_value=latest_packages
+        ):
+            pm.sync(third_party=False, sources=self.sources)
+
+        assert (
+            pm.get_package_hash(self.dummy_third_party_package)
+            == self.dummy_third_party_package_latest
+        )
+
+    def test_source_sync_failures(
+        self,
+    ) -> None:
+        """Test source sync failures."""
+
+        pm = PackageManagerV1.from_json(packages=self.dummy_packages)
+        with pytest.raises(
+            PackagesSourceNotValid, match="Provided source name is not valid `source`"
+        ):
+            pm.sync(
+                third_party=False,
+                sources=[
+                    "source",
+                ],
+            )
+
+        with pytest.raises(
+            PackagesSourceNotValid,
+            match="Fetching tags from `author/repo` failed with message 'Not Found'",
+        ):
+            pm.sync(
+                third_party=False,
+                sources=self.sources,
+            )
+
+        with pytest.raises(
+            PackagesSourceNotValid,
+            match="Fetching packages from `author/repo` failed with message '404: Not Found'",
+        ):
+            with mock.patch.object(pm, "_get_latest_tag", return_value="latest"):
+                pm.sync(
+                    third_party=False,
+                    sources=self.sources,
+                )
 
 
 class TestPackageManagerV1UpdateFingerprint(TestPackageManagerV1):

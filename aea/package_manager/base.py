@@ -475,3 +475,7 @@ class PackageNotValid(Exception):
 
 class PackageFileNotValid(Exception):
     """Package file not valid."""
+
+
+class PackagesSourceNotValid(Exception):
+    """Packages source not valid."""
