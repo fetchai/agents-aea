@@ -246,7 +246,7 @@ class TestPackageManagerV1SourceSync(TestPackageManagerV1):
         """Test source sync."""
 
         latest_packages = copy.deepcopy(self.dummy_packages)
-        latest_packages["third_party"][
+        latest_packages["dev"][
             self.dummy_third_party_package.to_uri_path
         ] = self.dummy_third_party_package_latest
 
