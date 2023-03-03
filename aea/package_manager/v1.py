@@ -177,7 +177,7 @@ class PackageManagerV1(BasePackageManager):
             package_manager = self.from_json(packages=packages)
 
             for package_id in _updated_third_party_packages:
-                latest_hash = package_manager.get_package_hash(package_id=package_id)
+                latest_hash = package_manager.dev_packages.get(package_id)
                 if latest_hash is None:
                     continue
 
