@@ -338,3 +338,13 @@ class PackageFileNotValid(Exception)
 
 Package file not valid.
 
+<a id="aea.package_manager.base.PackagesSourceNotValid"></a>
+
+## PackagesSourceNotValid Objects
+
+```python
+class PackagesSourceNotValid(Exception)
+```
+
+Packages source not valid.
+
