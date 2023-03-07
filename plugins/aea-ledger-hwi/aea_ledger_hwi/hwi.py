@@ -178,6 +178,7 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
         :param private_key_path: the private key path of the agent
         :param password: the password to encrypt/decrypt the private key.
         :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :param kwargs: extra keyword arguments
         """
         self._device_index = kwargs.pop(
             "default_device_index",
@@ -204,10 +205,9 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
         Return a private key.
 
         64 random hex characters (i.e. 32 bytes) + "0x" prefix.
-
-        :return: a private key string in hex format
         """
-        raise NotImplemented
+
+        raise NotImplementedError()
 
     @property
     def public_key(self) -> str:
@@ -240,10 +240,9 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
 
         :param file_name: the path to the hex file.
         :param password: the password to encrypt/decrypt the private key.
-        :return: the Entity.
         """
 
-        raise NotImplemented
+        raise NotImplementedError()
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -271,6 +270,7 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
         Sign a transaction in bytes string form.
 
         :param transaction: the transaction to be signed
+        :param kwargs: extra keyword arguments
         :return: signed transaction
         """
         signed_transaction = cast(HWIAccount, self.entity).sign_transaction(
@@ -289,20 +289,18 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
         Generate a key pair for ethereum network.
 
         :param extra_entropy: add extra randomness to whatever randomness your OS can provide
-        :return: account object
         """
 
-        raise NotImplemented
+        raise NotImplementedError()
 
     def encrypt(self, password: str) -> str:
         """
         Encrypt the private key and return in json.
 
         :param password: the password to decrypt.
-        :return: json string containing encrypted private key.
         """
 
-        raise NotImplemented
+        raise NotImplementedError()
 
     @classmethod
     def decrypt(cls, keyfile_json: str, password: str) -> str:
@@ -311,10 +309,9 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
 
         :param keyfile_json: json str containing encrypted private key.
         :param password: the password to decrypt.
-        :return: the raw private key (without leading "0x").
         """
 
-        raise NotImplemented
+        raise NotImplementedError()
 
 
 class EthereumHWIHelper(EthereumHelper):

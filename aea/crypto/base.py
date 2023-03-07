@@ -55,6 +55,7 @@ class Crypto(Generic[EntityClass], ABC):
                 If not None, the path will be processed by 'load_private_key_from_path()'.
         :param password: the password to encrypt/decrypt the private key.
         :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :param entity: Custom entity object
         :param kwargs: keyword arguments.
         """
         self._kwargs = kwargs

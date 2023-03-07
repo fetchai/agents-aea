@@ -19,7 +19,7 @@
 
 """Python package wrapping the public and private key cryptography and support for hardware wallet interactions."""
 
-from .hwi import (
+from .hwi import (  # noqa: F401
     EthereumHWIApi,
     EthereumHWICrypto,
     EthereumHWIFaucetApi,

@@ -22,7 +22,7 @@
 from typing import Any, List, NamedTuple, Optional
 
 import rlp
-from apduboy.ethereum import GetEthPublicAddressOpts, get_eth_public_address
+from apduboy.ethereum import GetEthPublicAddressOpts
 from apduboy.lib.bip32 import h, m
 from apduboy.utils import chunk
 from construct import (
@@ -38,7 +38,6 @@ from construct import (
     Struct,
 )
 from cytoolz import dissoc
-from eth_account import Account
 from eth_account._utils.legacy_transactions import (
     UnsignedTransaction,
     encode_transaction,
@@ -69,12 +68,16 @@ access_list_sede_type = rlp.sedes.CountableList(
 
 
 class HWIAccountData(NamedTuple):
+    """Hardware wallet account data"""
+
     public_key: bytes
     address: str
     chain_code: Optional[bytes]
 
 
 class HWISignedTransaction(NamedTuple):
+    """Hardware wallet signed transaction"""
+
     v: int
     r: int
     s: int
@@ -182,7 +185,7 @@ class HWIAccount:
     ) -> SignedMessage:
         """Sign a EIP191 message"""
 
-        raise NotImplemented
+        raise NotImplementedError()
 
     @staticmethod
     def encode_transaction(
