@@ -40,6 +40,7 @@ class Crypto(Generic[EntityClass], ABC):
         private_key_path: Optional[str] = None,
         password: Optional[str] = None,
         extra_entropy: Union[str, bytes, int] = "",
+        entity: Optional[EntityClass] = None,
         **kwargs: Any,
     ) -> None:  # pylint: disable=unused-argument
         """
@@ -57,7 +58,7 @@ class Crypto(Generic[EntityClass], ABC):
         :param kwargs: keyword arguments.
         """
         self._kwargs = kwargs
-        self._entity = (
+        self._entity = entity or (
             self.generate_private_key(extra_entropy)
             if private_key_path is None
             else self.load_private_key_from_path(private_key_path, password)
