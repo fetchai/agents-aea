@@ -34,6 +34,47 @@ class UnsignedDynamicTransaction(HashableRLP)
 
 Unsigned dynamic transaction.
 
+<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.SignTransactionAPDU"></a>
+
+## SignTransactionAPDU Objects
+
+```python
+class SignTransactionAPDU()
+```
+
+Sign transaction APDU codes
+
+<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.GetAccountAPDU"></a>
+
+## GetAccountAPDU Objects
+
+```python
+class GetAccountAPDU()
+```
+
+Get account APDU codes
+
+<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIErrorCodes"></a>
+
+## HWIErrorCodes Objects
+
+```python
+class HWIErrorCodes()
+```
+
+HWI com errors.
+
+<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.reraise_from_hwi_com_error"></a>
+
+#### reraise`_`from`_`hwi`_`com`_`error
+
+```python
+@contextmanager
+def reraise_from_hwi_com_error() -> Generator
+```
+
+Reraise ledger communication exception as `HWIError`
+
 <a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount"></a>
 
 ## HWIAccount Objects
@@ -42,7 +83,7 @@ Unsigned dynamic transaction.
 class HWIAccount()
 ```
 
-Hardware wallet interface as ethereum account
+Hardware wallet interface as ethereum account similar to `eth_account.Account` to represent `Crypto.entity`
 
 <a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.__init__"></a>
 
