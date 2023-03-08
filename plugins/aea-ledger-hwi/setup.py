@@ -25,7 +25,7 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="open-aea-ledger-hwi",
+    name="open-aea-ledger-ethereum-hwi",
     version="0.1.0",
     author="Valory AG",
     license="Apache-2.0",
