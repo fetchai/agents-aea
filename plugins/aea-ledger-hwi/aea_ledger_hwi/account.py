@@ -320,9 +320,7 @@ class HWIAccount:
                     ),
                     p2=SignTransactionAPDU.P2,
                 )
-                print(idx)
 
-        print(raw_response)
         parsed_response = SignedTransactionStruct.parse(raw_response)
 
         if is_eip1559_tx:
