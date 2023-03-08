@@ -125,6 +125,13 @@ SignedTransactionStruct = Struct(
 )
 
 
+AccountStruct = Struct(
+    public_key=Prefixed(Int8ub, GreedyBytes),
+    address=PascalString(Int8ub, "ascii"),
+    chain_code=Bytes(32),
+)
+
+
 class HWIErrorCodes:
     """HWI com errors."""
 
@@ -201,14 +208,7 @@ class HWIAccount:
                 p2=GetAccountAPDU.P2,
             )
 
-        struct_kwargs = dict(
-            public_key=Prefixed(Int8ub, GreedyBytes),
-            address=PascalString(Int8ub, "ascii"),
-        )
-        struct_kwargs["chain_code"] = Bytes(32)
-
-        response_template = Struct(**struct_kwargs)
-        parsed_response = response_template.parse(response)
+        parsed_response = AccountStruct.parse(response)
         pbk = PublicKey(parsed_response.public_key[1:])
 
         return HWIAccountData(
@@ -320,7 +320,9 @@ class HWIAccount:
                     ),
                     p2=SignTransactionAPDU.P2,
                 )
+                print(idx)
 
+        print(raw_response)
         parsed_response = SignedTransactionStruct.parse(raw_response)
 
         if is_eip1559_tx:
