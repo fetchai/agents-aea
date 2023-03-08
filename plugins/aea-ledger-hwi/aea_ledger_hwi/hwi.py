@@ -229,7 +229,7 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
 
         :return: an address string in hex format
         """
-        return "0x" + self.entity.address
+        return self.entity.address
 
     @classmethod
     def load_private_key_from_path(

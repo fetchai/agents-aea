@@ -19,10 +19,11 @@
 
 """Custom implementation of `eth_account.Account` for hardware wallets."""
 
-from typing import Any, List, NamedTuple, Optional
+from contextlib import contextmanager
+from typing import Any, Generator, List, NamedTuple, Optional, Type
 
 import rlp
-from apduboy.ethereum import GetEthPublicAddressOpts
+from aea_ledger_hwi.exceptions import HWIError
 from apduboy.lib.bip32 import h, m
 from apduboy.utils import chunk
 from construct import (
@@ -46,10 +47,11 @@ from eth_account._utils.legacy_transactions import (
 from eth_account._utils.typed_transactions import TypedTransaction
 from eth_account.datastructures import HexBytes, SignedMessage, SignedTransaction
 from eth_account.messages import SignableMessage
+from eth_keys.main import PublicKey
 from eth_rlp import HashableRLP
 from eth_typing.evm import ChecksumAddress
 from eth_utils.curried import keccak
-from ledgerwallet.client import LedgerClient
+from ledgerwallet.client import CommException, LedgerClient
 from ledgerwallet.transport import enumerate_devices
 from ledgerwallet.transport.device import Device
 
@@ -70,7 +72,7 @@ access_list_sede_type = rlp.sedes.CountableList(
 class HWIAccountData(NamedTuple):
     """Hardware wallet account data"""
 
-    public_key: bytes
+    public_key: str
     address: str
     chain_code: Optional[bytes]
 
@@ -99,8 +101,54 @@ class UnsignedDynamicTransaction(HashableRLP):
     ]
 
 
+class SignTransactionAPDU:
+    """Sign transaction APDU codes"""
+
+    INS = 0x04
+    P1_0 = 0x00
+    P1 = 0x80
+    P2 = 0x00
+
+
+class GetAccountAPDU:
+    """Get account APDU codes"""
+
+    INS = 0x02
+    P1 = 0x01
+    P2 = 0x01
+
+
+SignedTransactionStruct = Struct(
+    v=BytesInteger(1),
+    r=BytesInteger(32),
+    s=BytesInteger(32),
+)
+
+
+class HWIErrorCodes:
+    """HWI com errors."""
+
+    DEVICE_LOCKED = 21781
+    EHTEREUM_APP_NOT_OPEN = 25870
+
+
+@contextmanager
+def reraise_from_hwi_com_error() -> Generator:
+    """Reraise ledger communication exception as `HWIError`"""
+
+    try:
+        yield
+    except CommException as e:
+        if e.sw == HWIErrorCodes.DEVICE_LOCKED:
+            raise HWIError(message="Device is locked", sw=e.sw)
+        elif e.sw == HWIErrorCodes.EHTEREUM_APP_NOT_OPEN:
+            raise HWIError(message="Please open ethereum app in your device", sw=e.sw)
+        else:
+            raise HWIError(message=e.message, sw=e.sw, data=e.data)
+
+
 class HWIAccount:
-    """Hardware wallet interface as ethereum account"""
+    """Hardware wallet interface as ethereum account similar to `eth_account.Account` to represent `Crypto.entity`"""
 
     default_account: Optional[HWIAccountData]
 
@@ -118,8 +166,10 @@ class HWIAccount:
     @property
     def devices(self) -> List[Device]:
         """Returns the list of available devices."""
-
-        return enumerate_devices()
+        devices = enumerate_devices()
+        if len(devices) == 0:
+            raise HWIError(message="Cannot find any ledger device", sw=0)
+        return devices
 
     def get_client(
         self,
@@ -138,32 +188,33 @@ class HWIAccount:
 
         key_index = key_index or self.default_key_index
         path = m / h(44) / h(60) / h(key_index) / 0 / 0
-        opts = GetEthPublicAddressOpts(display_address=True, return_chain_code=True)
 
         path_construct = PrefixedArray(Byte, Int32ub)
         path_apdu = path_construct.build(path.to_list())
         client = self.get_client(device_index=device_index)
-        response = client.apdu_exchange(
-            ins=0x02,
-            data=path_apdu,
-            p1=0x01 if opts.display_address else 0x00,
-            p2=0x01 if opts.return_chain_code else 0x00,
-        )
+
+        with reraise_from_hwi_com_error():
+            response = client.apdu_exchange(
+                ins=GetAccountAPDU.INS,
+                data=path_apdu,
+                p1=GetAccountAPDU.P1,
+                p2=GetAccountAPDU.P2,
+            )
 
         struct_kwargs = dict(
             public_key=Prefixed(Int8ub, GreedyBytes),
             address=PascalString(Int8ub, "ascii"),
         )
-        if opts.return_chain_code:
-            struct_kwargs["chain_code"] = Bytes(32)
+        struct_kwargs["chain_code"] = Bytes(32)
 
         response_template = Struct(**struct_kwargs)
-
         parsed_response = response_template.parse(response)
+        pbk = PublicKey(parsed_response.public_key[1:])
+
         return HWIAccountData(
-            public_key=parsed_response.public_key,
-            address=("0x" + parsed_response.address),
-            chain_code=parsed_response.chain_code if opts.return_chain_code else None,
+            public_key=str(pbk),
+            address=pbk.to_address(),
+            chain_code=parsed_response.chain_code,
         )
 
     @property
@@ -243,9 +294,6 @@ class HWIAccount:
     ) -> HWISignedTransaction:
         """Hardware wallet signed transaction"""
 
-        ins = 0x04
-        p2 = 0x00
-
         client = self.get_client(
             device_index=device_index,
         )
@@ -260,16 +308,20 @@ class HWIAccount:
             is_eip1559_tx=is_eip1559_tx,
             key_index=key_index,
         )
-        raw_response = bytes()
-        for idx, each in enumerate(chunk(request_data, 255)):
-            p1 = 0x00 if idx == 0 else 0x80
-            raw_response = client.apdu_exchange(ins=ins, data=each, p1=p1, p2=p2)
 
-        parsed_response = Struct(
-            v=BytesInteger(1),
-            r=BytesInteger(32),
-            s=BytesInteger(32),
-        ).parse(raw_response)
+        with reraise_from_hwi_com_error():
+            raw_response = bytes()
+            for idx, each in enumerate(chunk(request_data, 255)):
+                raw_response = client.apdu_exchange(
+                    ins=SignTransactionAPDU.INS,
+                    data=each,
+                    p1=(
+                        SignTransactionAPDU.P1_0 if idx == 0 else SignTransactionAPDU.P1
+                    ),
+                    p2=SignTransactionAPDU.P2,
+                )
+
+        parsed_response = SignedTransactionStruct.parse(raw_response)
 
         if is_eip1559_tx:
             return HWISignedTransaction(
