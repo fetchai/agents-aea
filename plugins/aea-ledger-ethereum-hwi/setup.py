@@ -50,7 +50,9 @@ setup(
     entry_points={
         "aea.cryptos": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWICrypto"],
         "aea.ledger_apis": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIApi"],
-        "aea.faucet_apis": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIFaucetApi"],
+        "aea.faucet_apis": [
+            "ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIFaucetApi"
+        ],
     },
     classifiers=[
         "Environment :: Console",
