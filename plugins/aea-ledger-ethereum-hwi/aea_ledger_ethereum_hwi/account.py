@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from typing import Any, Generator, List, NamedTuple, Optional
 
 import rlp
-from aea_ledger_hwi.exceptions import HWIError
+from aea_ledger_ethereum_hwi.exceptions import HWIError
 from apduboy.lib.bip32 import h, m
 from apduboy.utils import chunk
 from construct import (

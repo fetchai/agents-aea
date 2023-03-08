@@ -19,7 +19,7 @@
 
 """Python package wrapping the public and private key cryptography and support for hardware wallet interactions."""
 
-from aea_ledger_hwi.hwi import (  # noqa: F401
+from aea_ledger_ethereum_hwi.hwi import (  # noqa: F401
     EthereumHWIApi,
     EthereumHWICrypto,
     EthereumHWIFaucetApi,

@@ -1,10 +1,10 @@
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account"></a>
 
-# plugins.aea-ledger-hwi.aea`_`ledger`_`hwi.account
+# plugins.aea-ledger-ethereum-hwi.aea`_`ledger`_`ethereum`_`hwi.account
 
 Custom implementation of `eth_account.Account` for hardware wallets.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccountData"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccountData"></a>
 
 ## HWIAccountData Objects
 
@@ -14,7 +14,7 @@ class HWIAccountData(NamedTuple)
 
 Hardware wallet account data
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWISignedTransaction"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWISignedTransaction"></a>
 
 ## HWISignedTransaction Objects
 
@@ -24,7 +24,7 @@ class HWISignedTransaction(NamedTuple)
 
 Hardware wallet signed transaction
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.UnsignedDynamicTransaction"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.UnsignedDynamicTransaction"></a>
 
 ## UnsignedDynamicTransaction Objects
 
@@ -34,7 +34,7 @@ class UnsignedDynamicTransaction(HashableRLP)
 
 Unsigned dynamic transaction.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.SignTransactionAPDU"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.SignTransactionAPDU"></a>
 
 ## SignTransactionAPDU Objects
 
@@ -44,7 +44,7 @@ class SignTransactionAPDU()
 
 Sign transaction APDU codes
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.GetAccountAPDU"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.GetAccountAPDU"></a>
 
 ## GetAccountAPDU Objects
 
@@ -54,7 +54,7 @@ class GetAccountAPDU()
 
 Get account APDU codes
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIErrorCodes"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIErrorCodes"></a>
 
 ## HWIErrorCodes Objects
 
@@ -64,7 +64,7 @@ class HWIErrorCodes()
 
 HWI com errors.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.reraise_from_hwi_com_error"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.reraise_from_hwi_com_error"></a>
 
 #### reraise`_`from`_`hwi`_`com`_`error
 
@@ -75,7 +75,7 @@ def reraise_from_hwi_com_error() -> Generator
 
 Reraise ledger communication exception as `HWIError`
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount"></a>
 
 ## HWIAccount Objects
 
@@ -85,7 +85,7 @@ class HWIAccount()
 
 Hardware wallet interface as ethereum account similar to `eth_account.Account` to represent `Crypto.entity`
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.__init__"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.__init__"></a>
 
 #### `__`init`__`
 
@@ -95,7 +95,7 @@ def __init__(default_device: int = 0, default_key_index: int = 0) -> None
 
 Initialize object.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.devices"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.devices"></a>
 
 #### devices
 
@@ -106,7 +106,7 @@ def devices() -> List[Device]
 
 Returns the list of available devices.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.get_client"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.get_client"></a>
 
 #### get`_`client
 
@@ -116,7 +116,7 @@ def get_client(device_index: Optional[int] = None) -> LedgerClient
 
 Get ledger client.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.get_account"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.get_account"></a>
 
 #### get`_`account
 
@@ -127,7 +127,7 @@ def get_account(key_index: Optional[int] = None,
 
 Get hardware wallet account.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.address"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.address"></a>
 
 #### address
 
@@ -138,7 +138,7 @@ def address() -> ChecksumAddress
 
 Address
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.public_key"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.public_key"></a>
 
 #### public`_`key
 
@@ -149,7 +149,7 @@ def public_key() -> ChecksumAddress
 
 Public key
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.sign_message"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.sign_message"></a>
 
 #### sign`_`message
 
@@ -160,7 +160,7 @@ def sign_message(signable_message: SignableMessage,
 
 Sign a EIP191 message
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.encode_transaction"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.encode_transaction"></a>
 
 #### encode`_`transaction
 
@@ -173,7 +173,7 @@ def encode_transaction(transaction: TypedTransaction,
 
 Build and encode transaction
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.account.HWIAccount.sign_transaction"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccount.sign_transaction"></a>
 
 #### sign`_`transaction
 

@@ -22,8 +22,8 @@
 from unittest import mock
 
 import pytest
-from aea_ledger_hwi.account import HWIAccount, HWIErrorCodes
-from aea_ledger_hwi.exceptions import HWIError
+from aea_ledger_ethereum_hwi.account import HWIAccount, HWIErrorCodes
+from aea_ledger_ethereum_hwi.exceptions import HWIError
 from hexbytes import HexBytes
 from ledgerwallet.client import CommException, LedgerClient
 
@@ -36,7 +36,7 @@ ETH_ACCOUNT = "0xe81de7001292e482d4d1851ff7ed50c56093f8bb"
 ETH_PUBLIC_KEY = "0xfb02c37fdc3742d89735625b2a30c4b0632d1f3a507cc27d2b3008949ff9c33f9b69684f037e63ae6b6edaddfa514d6fcda8a0b136549c2a8f8ec9649046f0cc"
 
 enumerate_devices_patch = mock.patch(
-    "aea_ledger_hwi.account.enumerate_devices",
+    "aea_ledger_ethereum_hwi.account.enumerate_devices",
     return_value=[
         mock.MagicMock(),
     ],
@@ -149,7 +149,7 @@ def test_exceptions() -> None:
         "apdu_exchange",
         side_effect=CommException(message="0", sw=HWIErrorCodes.DEVICE_LOCKED),
     ), pytest.raises(HWIError, match="Device is locked"), mock.patch(
-        "aea_ledger_hwi.account.enumerate_devices",
+        "aea_ledger_ethereum_hwi.account.enumerate_devices",
         return_value=[
             mock.MagicMock(),
         ],
@@ -163,7 +163,7 @@ def test_exceptions() -> None:
     ), pytest.raises(
         HWIError, match="Please open ethereum app in your device"
     ), mock.patch(
-        "aea_ledger_hwi.account.enumerate_devices",
+        "aea_ledger_ethereum_hwi.account.enumerate_devices",
         return_value=[
             mock.MagicMock(),
         ],
