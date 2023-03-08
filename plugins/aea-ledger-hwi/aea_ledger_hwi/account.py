@@ -20,7 +20,7 @@
 """Custom implementation of `eth_account.Account` for hardware wallets."""
 
 from contextlib import contextmanager
-from typing import Any, Generator, List, NamedTuple, Optional, Type
+from typing import Any, Generator, List, NamedTuple, Optional
 
 import rlp
 from aea_ledger_hwi.exceptions import HWIError
