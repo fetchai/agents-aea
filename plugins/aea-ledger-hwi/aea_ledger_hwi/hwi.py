@@ -21,21 +21,22 @@
 
 import logging
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 from aea_ledger_ethereum.ethereum import (
-    EthereumApi,
-    EthereumFaucetApi,
-    EthereumHelper,
+    AttributeDictTranslator as BaseAttributeDictTranslator,
+)
+from aea_ledger_ethereum.ethereum import EthereumApi, EthereumFaucetApi, EthereumHelper
+from aea_ledger_ethereum.ethereum import (
+    SignedTransactionTranslator as BaseSignedTransactionTranslator,
+)
+from aea_ledger_ethereum.ethereum import (
     TESTNET_NAME,
     set_wrapper_for_web3py_session_cache,
 )
 from aea_ledger_hwi.account import HWIAccount
-from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import encode_defunct
 from eth_account.signers.local import LocalAccount
-from web3.datastructures import AttributeDict
-from web3.types import TxData, TxReceipt
 
 from aea.common import JSONLike
 from aea.crypto.base import Crypto
@@ -43,121 +44,12 @@ from aea.crypto.base import Crypto
 
 _default_logger = logging.getLogger(__name__)
 
+SignedTransactionTranslator = BaseSignedTransactionTranslator
+AttributeDictTranslator = BaseAttributeDictTranslator
+
 _ETHEREUM_HWI = "ethereum_hwi"
 DEFAULT_DEVICE_INDEX = 0
 DEFAULT_KEYPAIR_INDEX = 0
-
-
-class SignedTransactionTranslator:
-    """Translator for SignedTransaction."""
-
-    @staticmethod
-    def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]:
-        """Write SignedTransaction to dict."""
-        signed_transaction_dict: Dict[str, Union[str, int]] = {
-            "raw_transaction": cast(str, signed_transaction.rawTransaction.hex()),
-            "hash": cast(str, signed_transaction.hash.hex()),
-            "r": cast(int, signed_transaction.r),
-            "s": cast(int, signed_transaction.s),
-            "v": cast(int, signed_transaction.v),
-        }
-        return signed_transaction_dict
-
-    @staticmethod
-    def from_dict(signed_transaction_dict: JSONLike) -> SignedTransaction:
-        """Get SignedTransaction from dict."""
-        if (
-            not isinstance(signed_transaction_dict, dict)
-            and len(signed_transaction_dict) == 5
-        ):
-            raise ValueError(  # pragma: nocover
-                f"Invalid for conversion. Found object: {signed_transaction_dict}."
-            )
-        signed_transaction = SignedTransaction(
-            rawTransaction=HexBytes(
-                cast(str, signed_transaction_dict["raw_transaction"])
-            ),
-            hash=HexBytes(cast(str, signed_transaction_dict["hash"])),
-            r=cast(int, signed_transaction_dict["r"]),
-            s=cast(int, signed_transaction_dict["s"]),
-            v=cast(int, signed_transaction_dict["v"]),
-        )
-        return signed_transaction
-
-
-class AttributeDictTranslator:
-    """Translator for AttributeDict."""
-
-    @classmethod
-    def _remove_hexbytes(cls, value: Any) -> Any:
-        """Process value to remove hexbytes."""
-        if value is None:
-            return value
-        if isinstance(value, HexBytes):
-            return value.hex()
-        if isinstance(value, list):
-            return cls._process_list(value, cls._remove_hexbytes)
-        if type(value) in (bool, int, float, str, bytes):
-            return value
-        if isinstance(value, AttributeDict):
-            return cls.to_dict(value)
-        raise NotImplementedError(  # pragma: nocover
-            f"Unknown type conversion. Found type: {type(value)}"
-        )
-
-    @classmethod
-    def _add_hexbytes(cls, value: Any) -> Any:
-        """Process value to add hexbytes."""
-        if value is None:
-            return value
-        if isinstance(value, str):
-            try:
-                int(value, 16)
-                return HexBytes(value)
-            except Exception:  # pylint: disable=broad-except
-                return value
-        if isinstance(value, list):
-            return cls._process_list(value, cls._add_hexbytes)
-        if isinstance(value, dict):
-            return cls.from_dict(value)
-        if type(value) in (bool, int, float, bytes):
-            return value
-        raise NotImplementedError(  # pragma: nocover
-            f"Unknown type conversion. Found type: {type(value)}"
-        )
-
-    @classmethod
-    def _process_list(cls, li: list, callable_name: Callable) -> List:
-        """Simplify a list with process value."""
-        return [callable_name(el) for el in li]
-
-    @classmethod
-    def _valid_key(cls, key: Any) -> str:
-        """Check validity of key."""
-        if isinstance(key, str):
-            return key
-        raise ValueError("Key must be string.")  # pragma: nocover
-
-    @classmethod
-    def to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike:
-        """Simplify to dict."""
-        if not isinstance(attr_dict, AttributeDict):
-            raise ValueError("No AttributeDict provided.")  # pragma: nocover
-        result = {
-            cls._valid_key(key): cls._remove_hexbytes(value)
-            for key, value in attr_dict.items()
-        }
-        return result
-
-    @classmethod
-    def from_dict(cls, di: JSONLike) -> AttributeDict:
-        """Get back attribute dict."""
-        if not isinstance(di, dict):
-            raise ValueError("No dict provided.")  # pragma: nocover
-        processed_dict = {
-            cls._valid_key(key): cls._add_hexbytes(value) for key, value in di.items()
-        }
-        return AttributeDict(processed_dict)
 
 
 class EthereumHWICrypto(Crypto[HWIAccount]):
