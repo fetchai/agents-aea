@@ -20,12 +20,12 @@
 """Custom implementation of `eth_account.Account` for hardware wallets."""
 
 from contextlib import contextmanager
+from itertools import islice
 from typing import Any, Generator, List, NamedTuple, Optional
 
 import rlp
 from aea_ledger_ethereum_hwi.exceptions import HWIError
 from apduboy.lib.bip32 import h, m
-from apduboy.utils import chunk
 from construct import (
     Byte,
     Bytes,
@@ -66,6 +66,13 @@ access_list_sede_type = rlp.sedes.CountableList(
         ]
     ),
 )
+
+
+def chunk(seq: bytes, size: int) -> List[bytes]:
+    """Converts a byte sequence to a list of chunks"""
+    it = iter(seq)
+    chunks = list(iter(lambda: tuple(islice(it, size)), ()))
+    return [bytes(each) for each in chunks]
 
 
 class HWIAccountData(NamedTuple):
