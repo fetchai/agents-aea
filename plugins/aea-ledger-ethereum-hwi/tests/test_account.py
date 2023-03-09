@@ -79,10 +79,10 @@ def test_sign_transaction_legacy() -> None:
         signed_tx = account.sign_transaction(transaction_dict=tx)
 
     assert signed_tx.rawTransaction == HexBytes(
-        "0xf86301843b9aca0082520894e81de7001292e482d4d1851ff7ed50c56093f8bb018023a00e14610af513df91f0ba4580bb39876b3ad201bc878a2d34f9654454222401daa00bf694eb1a2d3e5acaa05c659ee9ef82b9f82bacf5c60b0650b2d9f033e72713"
+        "0x01f8658001843b9aca0082520894e81de7001292e482d4d1851ff7ed50c56093f8bb0180c080a00e14610af513df91f0ba4580bb39876b3ad201bc878a2d34f9654454222401daa00bf694eb1a2d3e5acaa05c659ee9ef82b9f82bacf5c60b0650b2d9f033e72713"
     )
     assert signed_tx.hash == HexBytes(
-        "0x965d2ade0852683f62af96c01cf81c16cb50cb9e4a06fa4aa5b54379d52be112"
+        "0x0c6d3de9e1546f28d17a643c5dab1beb0354d33c3a91f046d30eb805a926009b"
     )
     assert (
         signed_tx.r
@@ -92,7 +92,7 @@ def test_sign_transaction_legacy() -> None:
         signed_tx.s
         == 5411113509154936310743584815502120361180052194242088038643232853217736337171
     )
-    assert signed_tx.v == 35
+    assert signed_tx.v == 0
 
 
 def test_sign_transaction_eip1559() -> None:

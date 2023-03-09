@@ -40,7 +40,6 @@ from construct import (
 )
 from cytoolz import dissoc
 from eth_account._utils.legacy_transactions import (
-    UnsignedTransaction,
     encode_transaction,
     serializable_unsigned_transaction_from_dict,
 )
@@ -98,6 +97,21 @@ class UnsignedDynamicTransaction(HashableRLP):
         ("amount", rlp.sedes.big_endian_int),
         ("data", rlp.sedes.binary),
         ("access_list", access_list_sede_type),
+    ]
+
+
+class UnsignedType1Transaction(HashableRLP):
+    """Unsigned typ1 transaction"""
+
+    fields = [
+        ("chainId", rlp.sedes.big_endian_int),
+        ("nonce", rlp.sedes.big_endian_int),
+        ("gasPrice", rlp.sedes.big_endian_int),
+        ("gas", rlp.sedes.big_endian_int),
+        ("to", address),
+        ("value", rlp.sedes.big_endian_int),
+        ("data", rlp.sedes.binary),
+        ("accessList", access_list_sede_type),
     ]
 
 
@@ -161,13 +175,16 @@ class HWIAccount:
 
     def __init__(
         self,
-        default_device: int = 0,
+        default_device_index: int = 0,
+        default_account_index: int = 0,
         default_key_index: int = 0,
     ) -> None:
         """Initialize object."""
 
-        self.default_device = default_device
-        self.default_key_index = default_key_index
+        self._default_device_index = default_device_index
+        self._default_key_index = default_key_index
+        self._default_account_index = default_account_index
+
         self.default_account = None
 
     @property
@@ -183,18 +200,20 @@ class HWIAccount:
         device_index: Optional[int] = None,
     ) -> LedgerClient:
         """Get ledger client."""
-        device_index = device_index or self.default_device
+        device_index = device_index or self._default_device_index
         return LedgerClient(device=self.devices[device_index])
 
     def get_account(
         self,
         key_index: Optional[int] = None,
+        account_index: Optional[int] = None,
         device_index: Optional[int] = None,
     ) -> HWIAccountData:
         """Get hardware wallet account."""
 
-        key_index = key_index or self.default_key_index
-        path = m / h(44) / h(60) / h(key_index) / 0 / 0
+        key_index = key_index or self._default_key_index
+        account_index = account_index or self._default_account_index
+        path = m / h(44) / h(60) / h(account_index) / 0 / key_index
 
         path_construct = PrefixedArray(Byte, Int32ub)
         path_apdu = path_construct.build(path.to_list())
@@ -213,7 +232,7 @@ class HWIAccount:
 
         return HWIAccountData(
             public_key=str(pbk),
-            address=pbk.to_address(),
+            address=pbk.to_checksum_address(),
             chain_code=parsed_response.chain_code,
         )
 
@@ -243,11 +262,15 @@ class HWIAccount:
         transaction: TypedTransaction,
         is_eip1559_tx: bool = False,
         key_index: Optional[int] = None,
+        account_index: Optional[int] = None,
     ) -> bytes:
         """Build and encode transaction"""
 
-        # BIP32 Path m/44'/cointype'/account'/change/address
-        path = m / h(44) / h(60) / h(key_index or 0) / 0 / 0
+        account_index = account_index or 0
+        key_index = key_index or 0
+
+        # BIP44 Path m/44'/cointype'/account'/change/address
+        path = m / h(44) / h(60) / h(account_index) / 0 / key_index
         path_construct = PrefixedArray(Byte, Int32ub)
         path_apdu = path_construct.build(path.to_list())
 
@@ -273,24 +296,28 @@ class HWIAccount:
             )
 
         as_dict = transaction.as_dict()
-        tx = UnsignedTransaction.from_dict(
+        tx = UnsignedType1Transaction.from_dict(
             field_dict=dict(
+                chainId=as_dict["chainId"],
                 nonce=as_dict["nonce"],
                 gasPrice=as_dict["gasPrice"],
                 gas=as_dict["gas"],
                 to=as_dict["to"],
                 value=as_dict["value"],
                 data=as_dict["data"],
+                accessList=as_dict.get("accessList", []),
             )
         )
-        return path_apdu + rlp.encode(tx)
+        return (
+            path_apdu + transaction.transaction_type.to_bytes(1, "big") + rlp.encode(tx)
+        )
 
     def _sign_transaction_on_hwi(
         self,
         unsigned_transaction: TypedTransaction,
         key_index: Optional[int] = None,
+        account_index: Optional[int] = None,
         device_index: Optional[int] = None,
-        chain_id: int = 1,
     ) -> HWISignedTransaction:
         """Hardware wallet signed transaction"""
 
@@ -307,6 +334,7 @@ class HWIAccount:
             transaction=unsigned_transaction,
             is_eip1559_tx=is_eip1559_tx,
             key_index=key_index,
+            account_index=account_index,
         )
 
         with reraise_from_hwi_com_error():
@@ -320,18 +348,10 @@ class HWIAccount:
                     ),
                     p2=SignTransactionAPDU.P2,
                 )
-
         parsed_response = SignedTransactionStruct.parse(raw_response)
 
-        if is_eip1559_tx:
-            return HWISignedTransaction(
-                v=parsed_response.v,
-                r=parsed_response.r,
-                s=parsed_response.s,
-            )
-
         return HWISignedTransaction(
-            v=(35 + (2 * chain_id)),
+            v=parsed_response.v,
             r=parsed_response.r,
             s=parsed_response.s,
         )
@@ -345,7 +365,13 @@ class HWIAccount:
 
         key_index: Optional[int] = kwargs.get("key_index")
         device_index: Optional[int] = kwargs.get("device_index")
-        account = self.get_account(key_index=key_index, device_index=device_index)
+        account_index: Optional[int] = kwargs.get("account_index")
+
+        account = self.get_account(
+            key_index=key_index, account_index=account_index, device_index=device_index
+        )
+        self.default_account = account
+
         chain_id = transaction_dict.get(
             "chainId",
             transaction_dict.get(
@@ -375,6 +401,16 @@ class HWIAccount:
         if isinstance(to_address, bytes) and to_address.startswith(b"0x"):
             sanitized_transaction["to"] = to_address[2:]
 
+        if (
+            "maxPriorityFeePerGas" in sanitized_transaction
+            or "max_priority_fee_per_gas" in sanitized_transaction
+        ):
+            sanitized_transaction["type"] = 2
+        else:
+            sanitized_transaction["type"] = 1
+
+        transaction_dict["chainId"] = chain_id
+
         # encode transaction
         unsigned_transaction = serializable_unsigned_transaction_from_dict(
             sanitized_transaction
@@ -385,7 +421,7 @@ class HWIAccount:
             unsigned_transaction=unsigned_transaction,
             device_index=device_index,
             key_index=key_index,
-            chain_id=chain_id,
+            account_index=account_index,
         )
 
         # serialize transaction with rlp

@@ -45,6 +45,7 @@ setup(
         "eth-account==0.5.6",
         "open-aea-ledger-ethereum~=1.30.0",
         "apduboy>=0.5.0",
+        "protobuf>=3.20,<4",
     ],
     tests_require=["pytest"],
     entry_points={
