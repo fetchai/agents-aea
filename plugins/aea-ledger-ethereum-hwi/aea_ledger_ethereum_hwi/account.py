@@ -232,7 +232,7 @@ class HWIAccount:
 
         return HWIAccountData(
             public_key=str(pbk),
-            address=pbk.to_address(),
+            address=pbk.to_checksum_address(),
             chain_code=parsed_response.chain_code,
         )
 
