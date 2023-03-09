@@ -32,7 +32,7 @@ DEFAULT_ACCOUNT_RESPONSE = b"A\x01\xfb\x02\xc3\x7f\xdc7B\xd8\x975b[*0\xc4\xb0c-\
 DEFAULT_TX_RESPONSE = b"\x00\x0e\x14a\n\xf5\x13\xdf\x91\xf0\xbaE\x80\xbb9\x87k:\xd2\x01\xbc\x87\x8a-4\xf9eDT\"$\x01\xda\x0b\xf6\x94\xeb\x1a->Z\xca\xa0\\e\x9e\xe9\xef\x82\xb9\xf8+\xac\xf5\xc6\x0b\x06P\xb2\xd9\xf03\xe7'\x13"
 CHAIN_ID = 0
 NONCE = 1
-ETH_ACCOUNT = "0xe81de7001292e482d4d1851ff7ed50c56093f8bb"
+ETH_ACCOUNT = "0xe81DE7001292e482D4d1851FF7eD50c56093F8bb"
 ETH_PUBLIC_KEY = "0xfb02c37fdc3742d89735625b2a30c4b0632d1f3a507cc27d2b3008949ff9c33f9b69684f037e63ae6b6edaddfa514d6fcda8a0b136549c2a8f8ec9649046f0cc"
 
 enumerate_devices_patch = mock.patch(
