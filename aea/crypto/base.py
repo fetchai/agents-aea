@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,7 @@ class Crypto(Generic[EntityClass], ABC):
         private_key_path: Optional[str] = None,
         password: Optional[str] = None,
         extra_entropy: Union[str, bytes, int] = "",
+        entity: Optional[EntityClass] = None,
         **kwargs: Any,
     ) -> None:  # pylint: disable=unused-argument
         """
@@ -54,10 +55,11 @@ class Crypto(Generic[EntityClass], ABC):
                 If not None, the path will be processed by 'load_private_key_from_path()'.
         :param password: the password to encrypt/decrypt the private key.
         :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :param entity: Custom entity object
         :param kwargs: keyword arguments.
         """
         self._kwargs = kwargs
-        self._entity = (
+        self._entity = entity or (
             self.generate_private_key(extra_entropy)
             if private_key_path is None
             else self.load_private_key_from_path(private_key_path, password)

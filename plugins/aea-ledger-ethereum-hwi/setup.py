@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022-2023 Valory AG
-#   Copyright 2018-2021 Fetch.AI Limited
+#   Copyright 2021-2023 Valory AG
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,25 +18,43 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Setup script for the plug-in."""
 
-from setuptools import find_packages  # type: ignore
-from setuptools import setup  # type: ignore
+"""Setup script for "aea_ledger_ethereum_hwi" package."""
+
+from setuptools import find_packages, setup
 
 
 setup(
-    name="open-aea-cli-benchmark",
+    name="open-aea-ledger-ethereum-hwi",
     version="1.30.0",
     author="Valory AG",
     license="Apache-2.0",
-    description="CLI extension for AEA framework benchmarking.",
-    long_description="CLI extension for AEA framework benchmarking.",
+    description="Python package wrapping the public and private key cryptography and support for hardware wallet interactions.",
+    long_description="Python package wrapping the public and private key cryptography and support for hardware wallet interactions.",
     long_description_content_type="text/markdown",
-    packages=find_packages(
-        where=".", include=["aea_cli_benchmark", "aea_cli_benchmark.*"]
-    ),
-    entry_points={"aea.cli": ["benchmark = aea_cli_benchmark.core:benchmark"]},
-    install_requires=["open-aea>=1.0.0, <2.0.0", "psutil==5.7.0"],
+    packages=find_packages(include=["aea_ledger_ethereum_hwi*"]),
+    package_data={
+        "aea_ledger_ethereum_hwi": [
+            "py.typed",
+        ]
+    },
+    install_requires=[
+        "open-aea>=1.0.0, <2.0.0",
+        "web3==5.25.0",
+        "ipfshttpclient==0.8.0a2",
+        "eth-account==0.5.6",
+        "open-aea-ledger-ethereum~=1.30.0",
+        "apduboy>=0.5.0",
+        "protobuf>=3.20,<4",
+    ],
+    tests_require=["pytest"],
+    entry_points={
+        "aea.cryptos": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWICrypto"],
+        "aea.ledger_apis": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIApi"],
+        "aea.faucet_apis": [
+            "ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIFaucetApi"
+        ],
+    },
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",

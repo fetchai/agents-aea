@@ -51,6 +51,11 @@ jobs:
           pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
+          echo Processing aea-ledger-ethereum-hwi
+          cd plugins/aea-ledger-ethereum-hwi
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
           echo Processing aea-ledger-fetchai
           cd plugins/aea-ledger-fetchai
           pipenv run python setup.py sdist bdist_wheel
@@ -96,6 +101,14 @@ jobs:
           skip_existing: true
           packages_dir: plugins/aea-ledger-ethereum/dist/
 
+      - name: Publish open-aea-ledger-ethereum-hwi Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-ethereum-hwi/dist/
+
       - name: Publish open-aea-ledger-fetchai Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -103,7 +116,6 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip_existing: true
           packages_dir: plugins/aea-ledger-fetchai/dist/
-
 
   publish-aea-packages:
     name: Push Open AEA Packages
@@ -140,40 +152,40 @@ jobs:
     needs:
       - publish-aea-packages
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up tag
-      run: echo export TAG=$(python3 -c "from setup import about; print(about[\"__version__\"])") > env.sh
-    - name: Build version tagged images
-      run: |
-        source env.sh
-        docker build -t valory/open-aea-docs:$TAG -f docs-image/Dockerfile . && \
-        docker build -t valory/open-aea-develop:$TAG -f develop-image/Dockerfile . && \
-        docker build -t valory/open-aea-user:$TAG -f user-image/Dockerfile . && \
-        docker build -t valory/open-aea-deploy:$TAG -f deploy-image/Dockerfile . 
-    - name: Tag to latest
-      run:  |
-        source env.sh
-        docker tag valory/open-aea-docs:$TAG valory/open-aea-docs:latest
-        docker tag valory/open-aea-develop:$TAG valory/open-aea-develop:latest
-        docker tag valory/open-aea-user:$TAG valory/open-aea-user:latest
-        docker tag valory/open-aea-deploy:$TAG valory/open-aea-deploy:latest
-    - name: Docker login
-      env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
-    - name: Docker Push
-      run: |
-        source env.sh
-        docker push valory/open-aea-docs:$TAG 
-        docker push valory/open-aea-docs:latest
-      
-        docker push valory/open-aea-develop:$TAG 
-        docker push valory/open-aea-develop:latest
-      
-        docker push valory/open-aea-user:$TAG 
-        docker push valory/open-aea-user:latest
-      
-        docker push valory/open-aea-deploy:$TAG 
-        docker push valory/open-aea-deploy:latest
+      - uses: actions/checkout@v2
+      - name: Set up tag
+        run: echo export TAG=$(python3 -c "from setup import about; print(about[\"__version__\"])") > env.sh
+      - name: Build version tagged images
+        run: |
+          source env.sh
+          docker build -t valory/open-aea-docs:$TAG -f docs-image/Dockerfile . && \
+          docker build -t valory/open-aea-develop:$TAG -f develop-image/Dockerfile . && \
+          docker build -t valory/open-aea-user:$TAG -f user-image/Dockerfile . && \
+          docker build -t valory/open-aea-deploy:$TAG -f deploy-image/Dockerfile .
+      - name: Tag to latest
+        run: |
+          source env.sh
+          docker tag valory/open-aea-docs:$TAG valory/open-aea-docs:latest
+          docker tag valory/open-aea-develop:$TAG valory/open-aea-develop:latest
+          docker tag valory/open-aea-user:$TAG valory/open-aea-user:latest
+          docker tag valory/open-aea-deploy:$TAG valory/open-aea-deploy:latest
+      - name: Docker login
+        env:
+          DOCKER_USER: ${{secrets.DOCKER_USER}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Docker Push
+        run: |
+          source env.sh
+          docker push valory/open-aea-docs:$TAG 
+          docker push valory/open-aea-docs:latest
+
+          docker push valory/open-aea-develop:$TAG 
+          docker push valory/open-aea-develop:latest
+
+          docker push valory/open-aea-user:$TAG 
+          docker push valory/open-aea-user:latest
+
+          docker push valory/open-aea-deploy:$TAG 
+          docker push valory/open-aea-deploy:latest

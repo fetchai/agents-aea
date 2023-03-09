@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022-2023 Valory AG
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,12 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the AEA package."""
+"""Python package wrapping the public and private key cryptography and support for hardware wallet interactions."""
 
-__title__ = "open-aea"
-__description__ = "Open Autonomous Economic Agent framework (without vendor lock-in)"
-__url__ = "https://github.com/valory-xyz/open-aea.git"
-__version__ = "1.30.0"
-__author__ = "Valory AG"
-__license__ = "Apache-2.0"
-__copyright__ = "2021 Valory AG, 2019 Fetch.AI Limited"
+from aea_ledger_ethereum_hwi.hwi import (  # noqa: F401
+    EthereumHWIApi,
+    EthereumHWICrypto,
+    EthereumHWIFaucetApi,
+    EthereumHWIHelper,
+)
