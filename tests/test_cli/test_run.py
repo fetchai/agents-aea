@@ -536,8 +536,8 @@ def test_run_unknown_private_key():
     )
 
     s = (
-        "Unsupported identifier `fetchai_not` in private key paths. Supported identifiers: ['cosmos', 'ethereum', "
-        "'fetchai']."
+        "Unsupported identifier `fetchai_not` in private key paths. "
+        "Supported identifiers: ['cosmos', 'ethereum', 'ethereum_hwi', 'fetchai']."
     )
     assert result.exception.message == s
 
