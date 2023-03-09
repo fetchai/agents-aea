@@ -4,6 +4,16 @@
 
 Custom implementation of `eth_account.Account` for hardware wallets.
 
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.chunk"></a>
+
+#### chunk
+
+```python
+def chunk(seq: bytes, size: int) -> List[bytes]
+```
+
+Converts a byte sequence to a list of chunks
+
 <a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.HWIAccountData"></a>
 
 ## HWIAccountData Objects
@@ -33,6 +43,16 @@ class UnsignedDynamicTransaction(HashableRLP)
 ```
 
 Unsigned dynamic transaction.
+
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.UnsignedType1Transaction"></a>
+
+## UnsignedType1Transaction Objects
+
+```python
+class UnsignedType1Transaction(HashableRLP)
+```
+
+Unsigned typ1 transaction
 
 <a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.account.SignTransactionAPDU"></a>
 
@@ -90,7 +110,9 @@ Hardware wallet interface as ethereum account similar to `eth_account.Account` t
 #### `__`init`__`
 
 ```python
-def __init__(default_device: int = 0, default_key_index: int = 0) -> None
+def __init__(default_device_index: int = 0,
+             default_account_index: int = 0,
+             default_key_index: int = 0) -> None
 ```
 
 Initialize object.
@@ -122,6 +144,7 @@ Get ledger client.
 
 ```python
 def get_account(key_index: Optional[int] = None,
+                account_index: Optional[int] = None,
                 device_index: Optional[int] = None) -> HWIAccountData
 ```
 
@@ -168,7 +191,8 @@ Sign a EIP191 message
 @staticmethod
 def encode_transaction(transaction: TypedTransaction,
                        is_eip1559_tx: bool = False,
-                       key_index: Optional[int] = None) -> bytes
+                       key_index: Optional[int] = None,
+                       account_index: Optional[int] = None) -> bytes
 ```
 
 Build and encode transaction
