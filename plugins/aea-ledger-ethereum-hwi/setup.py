@@ -19,22 +19,22 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "aea_ledger_hwi" package."""
+"""Setup script for "aea_ledger_ethereum_hwi" package."""
 
 from setuptools import find_packages, setup
 
 
 setup(
     name="open-aea-ledger-ethereum-hwi",
-    version="0.1.0",
+    version="1.30.0",
     author="Valory AG",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and support for hardware wallet interactions.",
     long_description="Python package wrapping the public and private key cryptography and support for hardware wallet interactions.",
     long_description_content_type="text/markdown",
-    packages=find_packages(include=["aea_ledger_hwi*"]),
+    packages=find_packages(include=["aea_ledger_ethereum_hwi*"]),
     package_data={
-        "aea_ledger_hwi": [
+        "aea_ledger_ethereum_hwi": [
             "py.typed",
         ]
     },
@@ -43,14 +43,17 @@ setup(
         "web3==5.25.0",
         "ipfshttpclient==0.8.0a2",
         "eth-account==0.5.6",
-        "open-aea-ledger-ethereum~=1.29.0",
+        "open-aea-ledger-ethereum~=1.30.0",
         "apduboy>=0.5.0",
+        "protobuf>=3.20,<4",
     ],
     tests_require=["pytest"],
     entry_points={
-        "aea.cryptos": ["ethereum_hwi = aea_ledger_hwi:EthereumHWICrypto"],
-        "aea.ledger_apis": ["ethereum_hwi = aea_ledger_hwi:EthereumHWIApi"],
-        "aea.faucet_apis": ["ethereum_hwi = aea_ledger_hwi:EthereumHWIFaucetApi"],
+        "aea.cryptos": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWICrypto"],
+        "aea.ledger_apis": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIApi"],
+        "aea.faucet_apis": [
+            "ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIFaucetApi"
+        ],
     },
     classifiers=[
         "Environment :: Console",

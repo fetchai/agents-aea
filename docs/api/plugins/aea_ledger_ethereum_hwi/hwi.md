@@ -1,10 +1,10 @@
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi"></a>
 
-# plugins.aea-ledger-hwi.aea`_`ledger`_`hwi.hwi
+# plugins.aea-ledger-ethereum-hwi.aea`_`ledger`_`ethereum`_`hwi.hwi
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto"></a>
 
 ## EthereumHWICrypto Objects
 
@@ -14,7 +14,7 @@ class EthereumHWICrypto(Crypto[HWIAccount])
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.__init__"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.__init__"></a>
 
 #### `__`init`__`
 
@@ -34,7 +34,7 @@ Instantiate an ethereum crypto object.
 - `extra_entropy`: add extra randomness to whatever randomness your OS can provide
 - `kwargs`: extra keyword arguments
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.private_key"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.private_key"></a>
 
 #### private`_`key
 
@@ -47,7 +47,7 @@ Return a private key.
 
 64 random hex characters (i.e. 32 bytes) + "0x" prefix.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.public_key"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.public_key"></a>
 
 #### public`_`key
 
@@ -64,7 +64,7 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.address"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.address"></a>
 
 #### address
 
@@ -81,7 +81,7 @@ Return the address for the key pair.
 
 an address string in hex format
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.load_private_key_from_path"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.load_private_key_from_path"></a>
 
 #### load`_`private`_`key`_`from`_`path
 
@@ -99,7 +99,7 @@ Load a private key in hex format from a file.
 - `file_name`: the path to the hex file.
 - `password`: the password to encrypt/decrypt the private key.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.sign_message"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.sign_message"></a>
 
 #### sign`_`message
 
@@ -118,7 +118,7 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.sign_transaction"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.sign_transaction"></a>
 
 #### sign`_`transaction
 
@@ -137,7 +137,7 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.generate_private_key"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.generate_private_key"></a>
 
 #### generate`_`private`_`key
 
@@ -154,7 +154,7 @@ Generate a key pair for ethereum network.
 
 - `extra_entropy`: add extra randomness to whatever randomness your OS can provide
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.encrypt"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.encrypt"></a>
 
 #### encrypt
 
@@ -168,7 +168,7 @@ Encrypt the private key and return in json.
 
 - `password`: the password to decrypt.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWICrypto.decrypt"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWICrypto.decrypt"></a>
 
 #### decrypt
 
@@ -184,7 +184,7 @@ Decrypt the private key and return in raw form.
 - `keyfile_json`: json str containing encrypted private key.
 - `password`: the password to decrypt.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWIHelper"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWIHelper"></a>
 
 ## EthereumHWIHelper Objects
 
@@ -194,7 +194,7 @@ class EthereumHWIHelper(EthereumHelper)
 
 Helper class usable as Mixin for EthereumApi or as standalone class.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWIApi"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWIApi"></a>
 
 ## EthereumHWIApi Objects
 
@@ -204,7 +204,7 @@ class EthereumHWIApi(EthereumApi, EthereumHWIHelper)
 
 Class to interact with the Ethereum Web3 APIs.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWIApi.__init__"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWIApi.__init__"></a>
 
 #### `__`init`__`
 
@@ -214,7 +214,7 @@ def __init__(**kwargs: Any)
 
 Initialize object.
 
-<a id="plugins.aea-ledger-hwi.aea_ledger_hwi.hwi.EthereumHWIFaucetApi"></a>
+<a id="plugins.aea-ledger-ethereum-hwi.aea_ledger_ethereum_hwi.hwi.EthereumHWIFaucetApi"></a>
 
 ## EthereumHWIFaucetApi Objects
 

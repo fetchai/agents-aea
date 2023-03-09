@@ -34,7 +34,7 @@ from aea_ledger_ethereum.ethereum import (
     TESTNET_NAME,
     set_wrapper_for_web3py_session_cache,
 )
-from aea_ledger_hwi.account import HWIAccount
+from aea_ledger_ethereum_hwi.account import HWIAccount
 from eth_account.messages import encode_defunct
 from eth_account.signers.local import LocalAccount
 
@@ -50,6 +50,7 @@ AttributeDictTranslator = BaseAttributeDictTranslator
 _ETHEREUM_HWI = "ethereum_hwi"
 DEFAULT_DEVICE_INDEX = 0
 DEFAULT_KEYPAIR_INDEX = 0
+DEFAULT_ACCOUNT_INDEX = 0
 
 
 class EthereumHWICrypto(Crypto[HWIAccount]):
@@ -76,12 +77,17 @@ class EthereumHWICrypto(Crypto[HWIAccount]):
             "default_device_index",
             DEFAULT_DEVICE_INDEX,
         )
+        self._account_index = kwargs.pop(
+            "default_account_index",
+            DEFAULT_ACCOUNT_INDEX,
+        )
         self._keypair_index = kwargs.pop(
             "default_keypair_index",
             DEFAULT_KEYPAIR_INDEX,
         )
         account = HWIAccount(
-            default_device=self._device_index,
+            default_device_index=self._device_index,
+            default_account_index=self._account_index,
             default_key_index=self._keypair_index,
         )
         super().__init__(

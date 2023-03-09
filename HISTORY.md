@@ -1,6 +1,19 @@
 # Release History - open AEA
 
 
+## 1.30.0 (2023-03-08)
+
+AEA:
+- Adds support for syncing third party package hashes from `github` repositories
+- Adds support for custom union types on the protocol generator
+- Fixes message formatting on the configuration validator
+
+Packages:
+- Adds `pytest-asyncio` as a dependency on the ledger connection
+
+Plugin:
+- Introduces the `open-aea-ledger-ethereum-hwi` plugin to support hardware wallet interactions
+
 ## 1.29.0 (2023-02-02)
 
 AEA:
