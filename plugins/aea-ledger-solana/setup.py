@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,8 +31,7 @@ setup(
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of solana.",
     packages=find_packages(include=["aea_ledger_solana*"]),
-    package_data={
-    },
+    package_data={},
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
         "ipfshttpclient==0.8.0a2",

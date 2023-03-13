@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,20 +25,17 @@ import os
 import platform
 import shutil
 import tempfile
-import time
 from functools import wraps
 from pathlib import Path
-from typing import Callable, Generator
+from typing import Callable
 
 import pytest
-from aea_ledger_solana import SolanaCrypto, SolanaFaucetApi
-
+from aea_ledger_solana import SolanaCrypto
 
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 
 
-CUR_PATH = os.path.dirname(inspect.getfile(
-    inspect.currentframe()))  # type: ignore
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 MAX_FLAKY_RERUNS = 3
 AIRDROP_AMOUNT = 1
@@ -52,7 +49,7 @@ SOLANA_PRIVATE_KEY_PATH = os.path.join(
 )
 
 SOLANA_PRIVATE_KEY_FILE_1 = os.path.join(
-    ROOT_DIR, "tests", "data", SOLANA_PRIVATE_KEY_FILE[:-4]+"_1"+".txt"
+    ROOT_DIR, "tests", "data", SOLANA_PRIVATE_KEY_FILE[:-4] + "_1" + ".txt"
 )
 
 
@@ -141,7 +138,7 @@ def solana_private_key_file():
         shutil.rmtree(temp_dir)
 
 
-@ pytest.fixture(scope="session")
+@pytest.fixture(scope="session")
 def solana_testnet_config(ganache_addr, ganache_port):
     """Get Solana ledger api configurations using Ganache."""
     new_uri = f"{ganache_addr}:{ganache_port}"

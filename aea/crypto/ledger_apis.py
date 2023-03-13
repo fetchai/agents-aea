@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,7 @@ from aea.configurations.constants import (
     _COSMOS_IDENTIFIER,
     _ETHEREUM_IDENTIFIER,
     _FETCHAI_IDENTIFIER,
+    _SOLANA_IDENTIFIER,
 )
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import (
@@ -63,6 +64,9 @@ DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {
         "address": FETCHAI_DEFAULT_ADDRESS,
         "chain_id": FETCHAI_DEFAULT_CHAIN_ID,
         "denom": FETCHAI_DEFAULT_CURRENCY_DENOM,
+    },
+    _SOLANA_IDENTIFIER: {
+        # plugin has own default values
     },
 }
 DEFAULT_CURRENCY_DENOMINATIONS = {

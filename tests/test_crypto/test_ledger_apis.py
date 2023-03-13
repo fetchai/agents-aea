@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_ADDRESS_ONE
 from aea_ledger_fetchai import FetchAICrypto
 from aea_ledger_fetchai.test_tools.constants import FETCHAI_ADDRESS_ONE
+from aea_ledger_solana import SolanaCrypto
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
@@ -53,6 +54,8 @@ def test_initialisation():
     assert type(LedgerApis.get_api(EthereumCrypto.identifier)).__name__ == "EthereumApi"
     assert LedgerApis.has_ledger(CosmosCrypto.identifier)
     assert type(LedgerApis.get_api(CosmosCrypto.identifier)).__name__ == "CosmosApi"
+    assert LedgerApis.has_ledger(SolanaCrypto.identifier)
+    assert type(LedgerApis.get_api(SolanaCrypto.identifier)).__name__ == "SolanaApi"
     with pytest.raises(AEAEnforceError):
         ledger_apis.get_api("UNKNOWN")
 
@@ -206,3 +209,9 @@ def test_is_valid_address():
     assert LedgerApis.is_valid_address(DEFAULT_LEDGER, ETHEREUM_ADDRESS_ONE)
     assert LedgerApis.is_valid_address(FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE)
     assert LedgerApis.is_valid_address(CosmosCrypto.identifier, COSMOS_ADDRESS_ONE)
+
+    # solana plugin check
+    assert LedgerApis.is_valid_address(
+        SolanaCrypto.identifier, "DUSxui5NhmDSQQKqUNhYxDKp1KTKpTRyDTrQGwEtmvp8"
+    )
+    assert not LedgerApis.is_valid_address(SolanaCrypto.identifier, COSMOS_ADDRESS_ONE)
