@@ -4,6 +4,12 @@
 
 This module contains utility code for generator modules.
 
+<a id="aea.protocols.generator.common.CURRENT_DIR"></a>
+
+#### CURRENT`_`DIR
+
+type: ignore
+
 <a id="aea.protocols.generator.common.is_installed"></a>
 
 #### is`_`installed
