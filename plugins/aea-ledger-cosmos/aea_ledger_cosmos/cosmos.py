@@ -17,7 +17,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
+
 # pylint: disable = import-outside-toplevel, possibly-unused-variable
 import base64
 import gzip
@@ -49,7 +51,6 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
 )
 from google.protobuf.any_pb2 import Any as ProtoAny
 from google.protobuf.json_format import MessageToDict, ParseDict
-from hexbytes import HexBytes
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -1545,7 +1546,7 @@ class _CosmosApi(LedgerApi):
 
     def bundle_and_send(
         self,
-        raw_signed_transactions: List[HexBytes],
+        raw_signed_transactions: List[str],
         target_blocks: List[int],
     ) -> Optional[List[str]]:
         """

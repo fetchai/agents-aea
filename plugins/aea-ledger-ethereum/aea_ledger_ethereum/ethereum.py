@@ -17,7 +17,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+
 import decimal
 import json
 import logging
@@ -1517,7 +1519,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     def bundle_and_send(
         self,
-        raw_signed_transactions: List[HexBytes],
+        raw_signed_transactions: List[str],
         target_blocks: List[int],
     ) -> Optional[List[str]]:
         """

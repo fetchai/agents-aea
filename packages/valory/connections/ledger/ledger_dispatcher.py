@@ -24,8 +24,6 @@ import asyncio
 import logging
 from typing import Any, List, Optional, cast
 
-from hexbytes import HexBytes
-
 from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
 from aea.helpers.transaction.base import RawTransaction, State, TransactionDigest
@@ -365,9 +363,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             target_blocks = cast(List[int], target_blocks)
 
             # at the moment we do not support multiple transactions, though flashbots can support this
-            raw_transaction = message.signed_transaction.body["raw_transaction"]
-            raw_transactions = [HexBytes(raw_transaction)]
-            tx_hashes = api.bundle_and_send(raw_transactions, target_blocks)
+            raw_transaction = str(message.signed_transaction.body["raw_transaction"])
+            tx_hashes = api.bundle_and_send([raw_transaction], target_blocks)
             if tx_hashes is not None:
                 return tx_hashes[0]
             return None

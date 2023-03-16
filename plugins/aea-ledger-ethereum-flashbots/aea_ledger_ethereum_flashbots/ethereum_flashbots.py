@@ -69,11 +69,11 @@ class EthereumFlashbotApi(EthereumApi):
 
     @staticmethod
     def bundle_transactions(
-        raw_signed_transactions: List[HexBytes],
+        raw_signed_transactions: List[str],
     ) -> List[FlashbotsBundleRawTx]:
         """Bundle transactions."""
         return [
-            FlashbotsBundleRawTx(signed_transaction=signed_transaction)
+            FlashbotsBundleRawTx(signed_transaction=HexBytes(signed_transaction))
             for signed_transaction in raw_signed_transactions
         ]
 
@@ -163,7 +163,7 @@ class EthereumFlashbotApi(EthereumApi):
 
     def bundle_and_send(
         self,
-        raw_signed_transactions: List[HexBytes],
+        raw_signed_transactions: List[str],
         target_blocks: List[int],
     ) -> Optional[List[str]]:
         """

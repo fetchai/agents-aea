@@ -17,6 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 from typing import Any, Dict, List, Optional
@@ -28,7 +29,6 @@ from aea_ledger_cosmos.cosmos import (
     MAXIMUM_GAS_AMOUNT,
     _CosmosApi,
 )
-from hexbytes import HexBytes
 
 from aea.common import JSONLike
 
@@ -120,7 +120,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
 
     def bundle_and_send(
         self,
-        raw_signed_transactions: List[HexBytes],
+        raw_signed_transactions: List[str],
         target_blocks: List[int],
     ) -> Optional[List[str]]:
         """

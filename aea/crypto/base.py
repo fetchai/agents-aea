@@ -17,13 +17,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union
-
-from hexbytes import HexBytes
 
 from aea.common import Address, JSONLike
 from aea.helpers.io import open_file
@@ -431,7 +430,7 @@ class LedgerApi(Helper, ABC):
     @abstractmethod
     def bundle_and_send(
         self,
-        raw_signed_transactions: List[HexBytes],
+        raw_signed_transactions: List[str],
         target_blocks: List[int],
     ) -> Optional[List[str]]:
         """
