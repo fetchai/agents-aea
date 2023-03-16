@@ -118,6 +118,7 @@ new_env: clean
 		pipenv install --dev --skip-lock;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
+		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum-flashbots;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
 		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\

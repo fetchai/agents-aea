@@ -32,14 +32,16 @@ jobs:
           time pipenv install --verbose --dev --skip-lock
           time pipenv run pip install -e .[all]
           time pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
+          time pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum-flashbots
           time pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
           time pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
           time pipenv lock
       - name: Check plugin consistency
         run: |
           # check diff between plugins' LICENSE and main LICENSE
-          diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-ethereum/LICENSE
+          diff LICENSE plugins/aea-ledger-ethereum-flashbots/LICENSE
+          diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-fetchai/LICENSE
   common_checks_2:
     continue-on-error: False
