@@ -4,8 +4,10 @@ Solana crypto plug-in for the AEA framework.
 
 ## Install
 
-```bash
+```
+pip install open-aea[all]
 python setup.py install
+
 ```
 
 ## Run tests
@@ -13,6 +15,8 @@ python setup.py install
 ```bash
 pytest
 ```
+
+
 
 ## Start
 
@@ -30,11 +34,3 @@ docker pull dassy23/solana-test-ledger:latest
 docker run -d -p 8899:8899 -p 8900:8900 dassy23/solana-test-ledger:latest
 ```
 
-```
-python setup.py install
-pip install open-aea[all]
-```
-
-```
-twine upload dist/*
-```
