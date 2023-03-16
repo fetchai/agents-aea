@@ -106,7 +106,7 @@ release:
 v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: all-checks
-all-checks: clean formatters code-checks common-checks-1 common-checks-2 security
+all-checks: clean formatters code-checks generators common-checks-1 common-checks-2 security
 
 .PHONY: new_env
 new_env: clean
