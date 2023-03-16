@@ -20,11 +20,17 @@
 """This module contains the tests of the solana module."""
 
 import logging
+import platform
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import pytest
+
+
+if platform.system() != "Linux":
+    pytest.skip("Runs only on linux", allow_module_level=True)
+
 from aea_ledger_solana import (
     LAMPORTS_PER_SOL,
     PublicKey,
