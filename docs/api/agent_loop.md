@@ -165,12 +165,6 @@ class AsyncAgentLoop(BaseAgentLoop)
 
 Asyncio based agent loop suitable only for AEA.
 
-<a id="aea.agent_loop.AsyncAgentLoop.NEW_BEHAVIOURS_PROCESS_SLEEP"></a>
-
-#### NEW`_`BEHAVIOURS`_`PROCESS`_`SLEEP
-
-check new behaviours registered every second.
-
 <a id="aea.agent_loop.AsyncAgentLoop.__init__"></a>
 
 #### `__`init`__`
@@ -217,10 +211,4 @@ If message passed it will be wrapped into envelope with optional envelope contex
 
 - `message_or_envelope`: envelope to send to another skill.
 - `context`: envelope context
-
-<a id="aea.agent_loop.SyncAgentLoop"></a>
-
-#### SyncAgentLoop
-
-temporary solution!
 

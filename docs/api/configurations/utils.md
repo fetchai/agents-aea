@@ -24,7 +24,7 @@ This depends on the actual configuration being considered.
 #### `_`
 
 ```python
-@replace_component_ids.register(AgentConfig)
+@replace_component_ids.register(AgentConfig)  # type: ignore
 def _(arg: AgentConfig, replacements: Dict[ComponentType,
                                            Dict[PublicId, PublicId]]) -> None
 ```
@@ -47,7 +47,7 @@ It breaks down in:
 #### `_`
 
 ```python
-@replace_component_ids.register(ProtocolConfig)
+@replace_component_ids.register(ProtocolConfig)  # type: ignore
 def _(_arg: ProtocolConfig,
       _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
@@ -59,7 +59,7 @@ Do nothing - protocols have no references.
 #### `_`
 
 ```python
-@replace_component_ids.register(ConnectionConfig)
+@replace_component_ids.register(ConnectionConfig)  # type: ignore
 def _(arg: ConnectionConfig,
       replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
@@ -71,7 +71,7 @@ Replace references in a connection configuration.
 #### `_`
 
 ```python
-@replace_component_ids.register(ContractConfig)
+@replace_component_ids.register(ContractConfig)  # type: ignore
 def _(_arg: ContractConfig,
       _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
@@ -83,7 +83,7 @@ Do nothing - contracts have no references.
 #### `_`
 
 ```python
-@replace_component_ids.register(SkillConfig)
+@replace_component_ids.register(SkillConfig)  # type: ignore
 def _(arg: SkillConfig, replacements: Dict[ComponentType,
                                            Dict[PublicId, PublicId]]) -> None
 ```

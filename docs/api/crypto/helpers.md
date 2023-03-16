@@ -4,12 +4,6 @@
 
 Module wrapping the helpers of public and private key cryptography.
 
-<a id="aea.crypto.helpers._"></a>
-
-#### `_`
-
-some modules expect this here
-
 <a id="aea.crypto.helpers.try_validate_private_key_path"></a>
 
 #### try`_`validate`_`private`_`key`_`path

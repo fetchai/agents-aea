@@ -209,12 +209,6 @@ class SolanaHelper(Helper)
 
 Helper class usable as Mixin for SolanaApi or as standalone class.
 
-<a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaHelper.BlockhashCache"></a>
-
-#### BlockhashCache
-
-defined in SolanaAPi.__init__
-
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaHelper.load_contract_interface"></a>
 
 #### load`_`contract`_`interface

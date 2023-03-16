@@ -226,24 +226,6 @@ class Dialogue(metaclass=_DialogueMeta)
 
 The dialogue class maintains state of a dialogue and manages it.
 
-<a id="aea.protocols.dialogue.base.Dialogue.INITIAL_PERFORMATIVES"></a>
-
-#### INITIAL`_`PERFORMATIVES
-
-type: FrozenSet[Message.Performative]
-
-<a id="aea.protocols.dialogue.base.Dialogue.TERMINAL_PERFORMATIVES"></a>
-
-#### TERMINAL`_`PERFORMATIVES
-
-type: FrozenSet[Message.Performative]
-
-<a id="aea.protocols.dialogue.base.Dialogue.VALID_REPLIES"></a>
-
-#### VALID`_`REPLIES
-
-type: Dict[Message.Performative, FrozenSet[Message.Performative]]
-
 <a id="aea.protocols.dialogue.base.Dialogue.Rules"></a>
 
 ## Rules Objects

@@ -972,30 +972,6 @@ class CosmosFaucetApi(FaucetApi)
 
 Cosmos testnet faucet API.
 
-<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_PENDING"></a>
-
-#### FAUCET`_`STATUS`_`PENDING
-
-noqa: F841
-
-<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_PROCESSING"></a>
-
-#### FAUCET`_`STATUS`_`PROCESSING
-
-noqa: F841
-
-<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_COMPLETED"></a>
-
-#### FAUCET`_`STATUS`_`COMPLETED
-
-noqa: F841
-
-<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_FAILED"></a>
-
-#### FAUCET`_`STATUS`_`FAILED
-
-noqa: F841
-
 <a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.__init__"></a>
 
 #### `__`init`__`
