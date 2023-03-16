@@ -173,7 +173,7 @@ generators: clean-cache
 	tox -e fix-doc-hashes
 
 .PHONY: common-checks-1
-common-checks:
+common-checks-1:
 	tox -p -e check-copyright -e hash-check -e package-dependencies-checks
 
 .PHONY: common-checks-2
