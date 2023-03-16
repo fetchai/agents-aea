@@ -43,7 +43,9 @@ INDEX_FILE_PATH = Path("docs/index.md")
 
 # Special links that are allowed to respond with an error status
 # Remove non-url-allowed characters like ` before adding them here
-URL_SKIPS: List[str] = []
+URL_SKIPS: List[str] = [
+    "https://faucet.dimensions.network/",
+]
 
 # Define here custom timeouts for some edge cases
 CUSTOM_TIMEOUTS: Dict[str, int] = {}
