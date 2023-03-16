@@ -120,6 +120,7 @@ class LedgerApiMessage(Message):
             "raw_transaction",
             "retry_attempts",
             "retry_timeout",
+            "rpc_config",
             "signed_transaction",
             "state",
             "target",
@@ -251,6 +252,11 @@ class LedgerApiMessage(Message):
         return cast(Optional[int], self.get("retry_timeout"))
 
     @property
+    def rpc_config(self) -> Optional[CustomKwargs]:
+        """Get the 'rpc_config' content from the message."""
+        return cast(Optional[CustomKwargs], self.get("rpc_config"))
+
+    @property
     def signed_transaction(self) -> CustomSignedTransaction:
         """Get the 'signed_transaction' content from the message."""
         enforce(
@@ -368,6 +374,15 @@ class LedgerApiMessage(Message):
                         type(self.signed_transaction)
                     ),
                 )
+                if self.is_set("rpc_config"):
+                    expected_nb_of_contents += 1
+                    rpc_config = cast(CustomKwargs, self.rpc_config)
+                    enforce(
+                        isinstance(rpc_config, CustomKwargs),
+                        "Invalid type for content 'rpc_config'. Expected 'Kwargs'. Found '{}'.".format(
+                            type(rpc_config)
+                        ),
+                    )
             elif (
                 self.performative
                 == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT

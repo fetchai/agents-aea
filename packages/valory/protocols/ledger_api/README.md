@@ -23,6 +23,7 @@ speech_acts:
     terms: ct:Terms
   send_signed_transaction:
     signed_transaction: ct:SignedTransaction
+    rpc_config: pt:optional[ct:Kwargs]
   get_transaction_receipt:
     transaction_digest: ct:TransactionDigest
     retry_timeout: pt:optional[pt:int]

@@ -46,6 +46,8 @@ message LedgerApiMessage{
 
   message Send_Signed_Transaction_Performative{
     SignedTransaction signed_transaction = 1;
+    Kwargs rpc_config = 2;
+    bool rpc_config_is_set = 3;
   }
 
   message Get_Transaction_Receipt_Performative{

@@ -80,6 +80,10 @@ class LedgerApiSerializer(Serializer):
             SignedTransaction.encode(
                 performative.signed_transaction, signed_transaction
             )
+            if msg.is_set("rpc_config"):
+                performative.rpc_config_is_set = True
+                rpc_config = cast(Kwargs, msg.rpc_config)
+                Kwargs.encode(performative.rpc_config, rpc_config)
             ledger_api_msg.send_signed_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Get_Transaction_Receipt_Performative()  # type: ignore
@@ -199,6 +203,10 @@ class LedgerApiSerializer(Serializer):
             )
             signed_transaction = SignedTransaction.decode(pb2_signed_transaction)
             performative_content["signed_transaction"] = signed_transaction
+            if ledger_api_pb.send_signed_transaction.rpc_config_is_set:
+                pb2_rpc_config = ledger_api_pb.send_signed_transaction.rpc_config
+                rpc_config = Kwargs.decode(pb2_rpc_config)
+                performative_content["rpc_config"] = rpc_config
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:
             pb2_transaction_digest = (
                 ledger_api_pb.get_transaction_receipt.transaction_digest
