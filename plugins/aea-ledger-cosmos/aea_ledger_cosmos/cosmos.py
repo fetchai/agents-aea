@@ -49,6 +49,7 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
 )
 from google.protobuf.any_pb2 import Any as ProtoAny
 from google.protobuf.json_format import MessageToDict, ParseDict
+from hexbytes import HexBytes
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -1541,6 +1542,21 @@ class _CosmosApi(LedgerApi):
         :param target_address: optional address to filter tranfer events to just those that affect it
         """
         raise NotImplementedError
+
+    def bundle_and_send(
+        self,
+        raw_signed_transactions: List[HexBytes],
+        target_blocks: List[int],
+    ) -> Optional[List[str]]:
+        """
+        Simulate and send a bundle of transactions.
+
+        :param raw_signed_transactions: the raw signed transactions to bundle together and send.
+        :param target_blocks: the target blocks for the transactions.
+        """
+        raise NotImplementedError(  # pragma: nocover
+            f"Sending a bundle of transactions is not supported for the {self.identifier} plugin"
+        )
 
 
 class CosmosApi(_CosmosApi, CosmosHelper):

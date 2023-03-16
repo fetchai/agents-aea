@@ -1500,7 +1500,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         :param contract_instance: the contract
         :param tx_hash: the transaction hash
-        :param target_address: optional address to filter tranfer events to just those that affect it
+        :param target_address: optional address to filter transfer events to just those that affect it
         :return: the transfer logs
         """
         try:
@@ -1514,6 +1514,21 @@ class EthereumApi(LedgerApi, EthereumHelper):
         transfer_logs = contract_instance.events.Transfer().processReceipt(tx_receipt)
 
         return dict(logs=transfer_logs)
+
+    def bundle_and_send(
+        self,
+        raw_signed_transactions: List[HexBytes],
+        target_blocks: List[int],
+    ) -> Optional[List[str]]:
+        """
+        Simulate and send a bundle of transactions.
+
+        :param raw_signed_transactions: the raw signed transactions to bundle together and send.
+        :param target_blocks: the target blocks for the transactions.
+        """
+        raise NotImplementedError(  # pragma: nocover
+            f"Sending a bundle of transactions is not supported for the {self.identifier} plugin"
+        )
 
 
 class EthereumFaucetApi(FaucetApi):

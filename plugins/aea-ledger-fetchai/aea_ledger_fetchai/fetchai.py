@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from aea_ledger_cosmos.cosmos import (
     CosmosCrypto,
@@ -28,6 +28,7 @@ from aea_ledger_cosmos.cosmos import (
     MAXIMUM_GAS_AMOUNT,
     _CosmosApi,
 )
+from hexbytes import HexBytes
 
 from aea.common import JSONLike
 
@@ -116,6 +117,21 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         :param target_address: optional address to filter transfer events to just those that affect it
         """
         raise NotImplementedError  # pragma: nocover
+
+    def bundle_and_send(
+        self,
+        raw_signed_transactions: List[HexBytes],
+        target_blocks: List[int],
+    ) -> Optional[List[str]]:
+        """
+        Simulate and send a bundle of transactions.
+
+        :param raw_signed_transactions: the raw signed transactions to bundle together and send.
+        :param target_blocks: the target blocks for the transactions.
+        """
+        raise NotImplementedError(  # pragma: nocover
+            f"Sending a bundle of transactions is not supported for the {self.identifier} plugin"
+        )
 
 
 class FetchAIFaucetApi(CosmosFaucetApi):

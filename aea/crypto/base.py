@@ -21,7 +21,9 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Generic, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union
+
+from hexbytes import HexBytes
 
 from aea.common import Address, JSONLike
 from aea.helpers.io import open_file
@@ -424,6 +426,20 @@ class LedgerApi(Helper, ABC):
         :param tx_digest: the digest associated to the transaction.
         :param raise_on_try: whether the method will raise or log on error
         :return: the tx, if present
+        """
+
+    @abstractmethod
+    def bundle_and_send(
+        self,
+        raw_signed_transactions: List[HexBytes],
+        target_blocks: List[int],
+    ) -> Optional[List[str]]:
+        """
+        Simulate and send a bundle of transactions.
+
+        :param raw_signed_transactions: the signed transactions to bundle together and send.
+        :param target_blocks: the target blocks for the transactions.
+        :return: the transaction digest if the transactions went through, None otherwise.
         """
 
     @abstractmethod
