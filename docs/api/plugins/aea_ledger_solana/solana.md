@@ -367,15 +367,20 @@ the recovered public keys
 #### generate`_`tx`_`nonce
 
 ```python
-@try_decorator("Unable to get nonce: {}", logger_method="warning")
-def generate_tx_nonce() -> str
+@staticmethod
+def generate_tx_nonce(seller: Address, client: Address) -> str
 ```
 
-Fetch a latest blockhash to distinguish transactions with the same terms.
+Generate a unique hash to distinguish transactions with the same terms.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
 
 **Returns**:
 
-return the blockhash as a nonce.
+return the hash in hex.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaHelper.add_nonce"></a>
 
@@ -400,6 +405,7 @@ True if the random_message is equals to tx['input']
 #### to`_`transaction`_`format
 
 ```python
+@staticmethod
 def to_transaction_format(tx: dict) -> Any
 ```
 
@@ -418,6 +424,7 @@ True if the random_message is equals to tx['input']
 #### to`_`dict`_`format
 
 ```python
+@staticmethod
 def to_dict_format(tx) -> JSONLike
 ```
 
@@ -659,6 +666,7 @@ the tx, if present
 #### create`_`default`_`account
 
 ```python
+@staticmethod
 def create_default_account(from_address: str,
                            new_account_address: str,
                            lamports: int,
@@ -685,6 +693,7 @@ the tx, if present
 #### create`_`pda
 
 ```python
+@staticmethod
 def create_pda(from_address: str, new_account_address: str, base_address: str,
                seed: str, lamports: int, space: int, program_id: str)
 ```
@@ -754,25 +763,17 @@ Get the transaction to deploy the smart contract.
 #### contract`_`method`_`call
 
 ```python
-@classmethod
-def contract_method_call(cls, contract_instance: Any, method_name: str,
+def contract_method_call(contract_instance: Any, method_name: str,
                          **method_args: Any) -> Optional[JSONLike]
 ```
 
 Call a contract's method
-
-**TOBEIMPLEMENTED**
 
 **Arguments**:
 
 - `contract_instance`: the contract to use
 - `method_name`: the contract method to call
 - `method_args`: the contract call parameters
-# noqa: DAR202
-
-**Returns**:
-
-the call result
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.build_transaction"></a>
 

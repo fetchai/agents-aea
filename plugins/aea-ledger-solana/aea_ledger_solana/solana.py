@@ -22,8 +22,8 @@ import base64
 import hashlib
 import json
 import logging
+import time
 import zlib
-from ast import literal_eval
 from pathlib import Path
 from typing import Any, Dict, NewType, Optional, Tuple, Union, cast
 
@@ -145,24 +145,14 @@ class SolanaCrypto(Crypto[Keypair]):
         :return: the Entity.
         """
         key_path = Path(file_name)
-        if key_path.name.endswith(".json"):
-            private_key = open(key_path, "r").read()
-            try:
-                key = Keypair.from_secret_key(bytes(literal_eval(private_key)))
-            except Exception as e:
+        private_key = cls.load(file_name, password)
+        try:
+            key = Keypair.from_secret_key(base58.b58decode(private_key))
+        except Exception as e:
 
-                raise KeyIsIncorrect(
-                    f"Error on key `{key_path}` load! : Error: {repr(e)} "
-                ) from e
-        else:
-            private_key = open(key_path, "r").read()
-            try:
-                key = Keypair.from_secret_key(base58.b58decode(private_key))
-            except Exception as e:
-
-                raise KeyIsIncorrect(
-                    f"Error on key `{key_path}` load! : Error: {repr(e)} "
-                ) from e
+            raise KeyIsIncorrect(
+                f"Error on key `{key_path}` load! : Error: {repr(e)}.{'try password?' if password is None else ''}"
+            ) from e
 
         return key
 
@@ -174,7 +164,8 @@ class SolanaCrypto(Crypto[Keypair]):
         :param is_deprecated_mode: if the deprecated signing is used
         :return: signature of the message in string form
         """
-
+        if is_deprecated_mode:
+            raise ValueError("is_deprecated_mode is not supported at the moment")
         keypair = Keypair.from_secret_key(base58.b58decode(self.private_key))
         signed_msg = keypair.sign(message)
 
@@ -207,7 +198,7 @@ class SolanaCrypto(Crypto[Keypair]):
         except Exception as e:
             raise Exception(e)
 
-        tx = txn._solders.to_json()
+        tx = txn._solders.to_json()  # pylint: disable=protected-access
         return json.loads(tx)
 
     @classmethod
@@ -220,6 +211,8 @@ class SolanaCrypto(Crypto[Keypair]):
         :param extra_entropy: add extra randomness to whatever randomness your OS can provide
         :return: keypair object
         """
+        if extra_entropy:
+            raise ValueError("extra_entropy is not supported at the moment")
         account = Keypair.generate()  # pylint: disable=no-value-for-parameter
         return account
 
@@ -427,16 +420,17 @@ class SolanaHelper(Helper):
         raise NotImplementedError
 
     @try_decorator("Unable to get nonce: {}", logger_method="warning")
-    def generate_tx_nonce(self) -> str:
+    def _generate_tx_nonce(self) -> str:
         """
         Fetch a latest blockhash to distinguish transactions with the same terms.
 
         :return: return the blockhash as a nonce.
         """
+
         try:
             blockhash = self.BlockhashCache.get()
             return blockhash
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             result = self._api.get_latest_blockhash()
             blockhash_json = result.value.to_json()
             blockhash = json.loads(blockhash_json)
@@ -444,6 +438,21 @@ class SolanaHelper(Helper):
                 blockhash=blockhash["blockhash"], slot=result.context.slot
             )
             return blockhash["blockhash"]
+
+    @staticmethod
+    def generate_tx_nonce(seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish transactions with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = hashlib.sha256(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hexdigest()
 
     def add_nonce(self, tx: dict) -> JSONLike:
         """
@@ -456,11 +465,12 @@ class SolanaHelper(Helper):
         stxn = sTransaction.from_json(jsonTx)
         txObj = Transaction.from_solders(stxn)
         # blockash in string format
-        nonce = self.generate_tx_nonce()
+        nonce = self._generate_tx_nonce()
         txObj.recent_blockhash = nonce
-        return json.loads(txObj._solders.to_json())
+        return json.loads(txObj._solders.to_json())  # pylint: disable=protected-access
 
-    def to_transaction_format(self, tx: dict) -> Any:
+    @staticmethod
+    def to_transaction_format(tx: dict) -> Any:
         """
         Check whether a transaction is valid or not.
 
@@ -471,7 +481,8 @@ class SolanaHelper(Helper):
         stxn = sTransaction.from_json(jsonTx)
         return Transaction.from_solders(stxn)
 
-    def to_dict_format(self, tx) -> JSONLike:
+    @staticmethod
+    def to_dict_format(tx) -> JSONLike:
         """
         Check whether a transaction is valid or not.
 
@@ -479,7 +490,7 @@ class SolanaHelper(Helper):
         :return: True if the random_message is equals to tx['input']
         """
 
-        return json.loads(tx._solders.to_json())
+        return json.loads(tx._solders.to_json())  # pylint: disable=protected-access
 
     @staticmethod
     def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
@@ -520,7 +531,7 @@ class SolanaHelper(Helper):
         try:
             PublicKey(address)
             return True
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             return False
 
 
@@ -549,8 +560,8 @@ class SolanaApi(LedgerApi, SolanaHelper):
         result = self._api.get_latest_blockhash()
         blockhash_json = result.value.to_json()
         blockhash = json.loads(blockhash_json)
-        hash = blockhash["blockhash"]
-        self.BlockhashCache.set(blockhash=hash, slot=result.context.slot)
+        hash_ = blockhash["blockhash"]
+        self.BlockhashCache.set(blockhash=hash_, slot=result.context.slot)
 
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self._version = _VERSION
@@ -603,7 +614,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
 
         if "raise_on_try" in kwargs:
             logging.info(
-                f"popping `raise_on_try` from {self.__class__.__name__}.get_state kwargs"
+                f"popping `raise_on_try` from {self.__class__.__name__}.get_state kwargs"  # pylint: disable=protected-access
             )
             kwargs.pop("raise_on_try")
 
@@ -683,7 +694,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
                 )
             )
 
-        tx = txn._solders.to_json()
+        tx = txn._solders.to_json()  # pylint: disable=protected-access
 
         return json.loads(tx)
 
@@ -698,10 +709,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :return: tx_digest, if present
         """
         tx_digest = self._try_send_signed_transaction(tx_signed, raise_on_try=True)
-        try:
-            tx = json.loads(tx_digest)
-        except Exception as e:
-            print(e)
+        tx = json.loads(tx_digest)
         return tx["result"]
 
     @try_decorator("Unable to send transaction: {}", logger_method="warning")
@@ -796,8 +804,8 @@ class SolanaApi(LedgerApi, SolanaHelper):
         # pylint: disable=no-member
         return json.loads(tx.value.to_json())
 
+    @staticmethod
     def create_default_account(
-        self,
         from_address: str,
         new_account_address: str,
         lamports: int,
@@ -823,11 +831,11 @@ class SolanaApi(LedgerApi, SolanaHelper):
         )
         createAccountInstruction = create_account(params)
         txn = Transaction(fee_payer=from_address).add(createAccountInstruction)
-        tx = txn._solders.to_json()
+        tx = txn._solders.to_json()  # pylint: disable=protected-access
         return json.loads(tx)
 
+    @staticmethod
     def create_pda(
-        self,
         from_address: str,
         new_account_address: str,
         base_address: str,
@@ -861,7 +869,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
             ssp.create_account_with_seed(params.to_solders())
         )
         txn = Transaction().add(createPDAInstruction)
-        tx = txn._solders.to_json()
+        tx = txn._solders.to_json()  # pylint: disable=protected-access
         return json.loads(tx)
 
     def get_contract_instance(
@@ -905,7 +913,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :param kwargs: the keyword arguments.
         :returns tx: the transaction dictionary.
         """
-        raise NotImplementedError
+
         """
         if contract_interface["bytecode"] is None or contract_interface["program_keypair"] is None:
             raise ValueError("Bytecode or program_keypair is required")
@@ -947,14 +955,20 @@ class SolanaApi(LedgerApi, SolanaHelper):
 
         return result.stdout
         """
+        raise NotImplementedError
 
-    @classmethod
     def contract_method_call(
-        cls,
+        self,
         contract_instance: Any,
         method_name: str,
         **method_args: Any,
     ) -> Optional[JSONLike]:
+        """Call a contract's method
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract method to call
+        :param method_args: the contract call parameters
+        """
         """
         Call a contract's method
 
@@ -1005,7 +1019,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
         txn = contract_instance.transaction[method_name](
             *data, ctx=Context(accounts=accounts, remaining_accounts=remaining_accounts)
         )
-        tx = txn._solders.to_json()
+        tx = txn._solders.to_json()  # pylint: disable=protected-access
         return json.loads(tx)
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
@@ -1027,7 +1041,10 @@ class SolanaApi(LedgerApi, SolanaHelper):
             if tx_receipt is None:
                 raise ValueError  # pragma: nocover
 
-        except (Exception, ValueError):  # pragma: nocover
+        except (  # pragma: nocover # pylint: disable=broad-except
+            Exception,
+            ValueError,
+        ):
             return dict()
 
         keys = tx_receipt["transaction"]["message"]["accountKeys"]  # type: ignore

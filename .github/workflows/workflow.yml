@@ -34,6 +34,7 @@ jobs:
           time pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
           time pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
           time pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
+          time pipenv run pip install --no-deps file:plugins/aea-ledger-solana
           time pipenv lock
       - name: Check plugin consistency
         run: |
@@ -41,6 +42,7 @@ jobs:
           diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-ethereum/LICENSE
           diff LICENSE plugins/aea-ledger-fetchai/LICENSE
+          diff LICENSE plugins/aea-ledger-solana/LICENSE
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -293,6 +295,9 @@ jobs:
       - name: Check plugin aea-cli-ipfs
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
+      - name: Check plugin aea-ledger-solana
+        run: |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-solana && aea generate-key solana && echo aea-ledger-solana checked!"
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
