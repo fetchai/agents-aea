@@ -30,6 +30,7 @@ import click
 from aea.cli.utils.click_utils import PackagesSource
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
+from aea.configurations.constants import PACKAGES
 from aea.package_manager.base import (
     BasePackageManager,
     IS_IPFS_PLUGIN_INSTALLED,
@@ -169,6 +170,21 @@ def lock_packages(ctx: Context, check: bool) -> None:
         click.echo("Done")
     except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e)) from e
+
+
+@package_manager.command(name="init")
+def _init_packages_repo() -> None:
+    """Initialize packages repository."""
+
+    packages_dir = Path.cwd() / PACKAGES
+    if packages_dir.exists():
+        raise click.ClickException(
+            f"Packages repository already exists @ {packages_dir}"
+        )
+
+    packages_dir.mkdir()
+    PackageManagerV1(path=packages_dir).dump()
+    click.echo(f"Initialized packages repository @ {packages_dir}")
 
 
 def get_package_manager(package_dir: Path) -> BasePackageManager:
