@@ -952,6 +952,22 @@ Get all transfer events derived from a transaction.
 - `tx_hash`: the transaction hash
 - `target_address`: optional address to filter tranfer events to just those that affect it
 
+<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.bundle_and_send"></a>
+
+#### bundle`_`and`_`send
+
+```python
+def bundle_and_send(raw_signed_transactions: List[str],
+                    target_blocks: List[int]) -> Optional[List[str]]
+```
+
+Simulate and send a bundle of transactions.
+
+**Arguments**:
+
+- `raw_signed_transactions`: the raw signed transactions to bundle together and send.
+- `target_blocks`: the target blocks for the transactions.
+
 <a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosApi"></a>
 
 ## CosmosApi Objects
@@ -971,6 +987,30 @@ class CosmosFaucetApi(FaucetApi)
 ```
 
 Cosmos testnet faucet API.
+
+<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_PENDING"></a>
+
+#### FAUCET`_`STATUS`_`PENDING
+
+noqa: F841
+
+<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_PROCESSING"></a>
+
+#### FAUCET`_`STATUS`_`PROCESSING
+
+noqa: F841
+
+<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_COMPLETED"></a>
+
+#### FAUCET`_`STATUS`_`COMPLETED
+
+noqa: F841
+
+<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.FAUCET_STATUS_FAILED"></a>
+
+#### FAUCET`_`STATUS`_`FAILED
+
+noqa: F841
 
 <a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.__init__"></a>
 

@@ -102,6 +102,22 @@ Get all transfer events derived from a transaction.
 - `tx_hash`: the transaction hash
 - `target_address`: optional address to filter transfer events to just those that affect it
 
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai.fetchai.FetchAIApi.bundle_and_send"></a>
+
+#### bundle`_`and`_`send
+
+```python
+def bundle_and_send(raw_signed_transactions: List[str],
+                    target_blocks: List[int]) -> Optional[List[str]]
+```
+
+Simulate and send a bundle of transactions.
+
+**Arguments**:
+
+- `raw_signed_transactions`: the raw signed transactions to bundle together and send.
+- `target_blocks`: the target blocks for the transactions.
+
 <a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai.fetchai.FetchAIFaucetApi"></a>
 
 ## FetchAIFaucetApi Objects

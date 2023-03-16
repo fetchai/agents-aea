@@ -4,6 +4,18 @@
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SPEED_FAST"></a>
+
+#### SPEED`_`FAST
+
+safeLow, standard, fast
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.PRIORITY_FEE_INCREASE_BOUNDARY"></a>
+
+#### PRIORITY`_`FEE`_`INCREASE`_`BOUNDARY
+
+percentage
+
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.wei_to_gwei"></a>
 
 #### wei`_`to`_`gwei
@@ -898,11 +910,27 @@ Get all transfer events derived from a transaction.
 
 - `contract_instance`: the contract
 - `tx_hash`: the transaction hash
-- `target_address`: optional address to filter tranfer events to just those that affect it
+- `target_address`: optional address to filter transfer events to just those that affect it
 
 **Returns**:
 
 the transfer logs
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.bundle_and_send"></a>
+
+#### bundle`_`and`_`send
+
+```python
+def bundle_and_send(raw_signed_transactions: List[str],
+                    target_blocks: List[int]) -> Optional[List[str]]
+```
+
+Simulate and send a bundle of transactions.
+
+**Arguments**:
+
+- `raw_signed_transactions`: the raw signed transactions to bundle together and send.
+- `target_blocks`: the target blocks for the transactions.
 
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
 

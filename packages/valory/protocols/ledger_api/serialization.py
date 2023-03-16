@@ -82,7 +82,7 @@ class LedgerApiSerializer(Serializer):
             )
             if msg.is_set("rpc_config"):
                 performative.rpc_config_is_set = True
-                rpc_config = cast(Kwargs, msg.rpc_config)
+                rpc_config = msg.rpc_config
                 Kwargs.encode(performative.rpc_config, rpc_config)
             ledger_api_msg.send_signed_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:

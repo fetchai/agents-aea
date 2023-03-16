@@ -497,6 +497,12 @@ class LedgerApi(Helper, ABC)
 
 Interface for ledger APIs.
 
+<a id="aea.crypto.base.LedgerApi.identifier"></a>
+
+#### identifier
+
+type: str
+
 <a id="aea.crypto.base.LedgerApi.api"></a>
 
 #### api
@@ -653,6 +659,27 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
+<a id="aea.crypto.base.LedgerApi.bundle_and_send"></a>
+
+#### bundle`_`and`_`send
+
+```python
+@abstractmethod
+def bundle_and_send(raw_signed_transactions: List[str],
+                    target_blocks: List[int]) -> Optional[List[str]]
+```
+
+Simulate and send a bundle of transactions.
+
+**Arguments**:
+
+- `raw_signed_transactions`: the signed transactions to bundle together and send.
+- `target_blocks`: the target blocks for the transactions.
+
+**Returns**:
+
+the transaction digest if the transactions went through, None otherwise.
+
 <a id="aea.crypto.base.LedgerApi.get_contract_instance"></a>
 
 #### get`_`contract`_`instance
@@ -788,6 +815,18 @@ class FaucetApi(ABC)
 ```
 
 Interface for testnet faucet APIs.
+
+<a id="aea.crypto.base.FaucetApi.identifier"></a>
+
+#### identifier
+
+type: str
+
+<a id="aea.crypto.base.FaucetApi.network_name"></a>
+
+#### network`_`name
+
+type: str
 
 <a id="aea.crypto.base.FaucetApi.get_wealth"></a>
 

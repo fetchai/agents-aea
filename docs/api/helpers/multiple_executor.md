@@ -14,6 +14,24 @@ class ExecutorExceptionPolicies(Enum)
 
 Runner exception policy modes.
 
+<a id="aea.helpers.multiple_executor.ExecutorExceptionPolicies.stop_all"></a>
+
+#### stop`_`all
+
+stop all agents on one agent's failure, log exception
+
+<a id="aea.helpers.multiple_executor.ExecutorExceptionPolicies.propagate"></a>
+
+#### propagate
+
+log exception and reraise it to upper level
+
+<a id="aea.helpers.multiple_executor.ExecutorExceptionPolicies.log_only"></a>
+
+#### log`_`only
+
+log exception and skip it
+
 <a id="aea.helpers.multiple_executor.AbstractExecutorTask"></a>
 
 ## AbstractExecutorTask Objects
