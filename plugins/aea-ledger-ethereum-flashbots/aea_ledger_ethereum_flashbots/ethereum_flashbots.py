@@ -35,9 +35,13 @@ from web3.exceptions import TransactionNotFound
 
 _default_logger = logging.getLogger(__name__)
 
+_ETHEREUM_FLASHBOTS = "ethereum_flashbots"
+
 
 class EthereumFlashbotApi(EthereumApi):
     """Class to interact with the Ethereum Web3 APIs."""
+
+    identifier = _ETHEREUM_FLASHBOTS
 
     def __init__(self, **kwargs: Any):
         """
