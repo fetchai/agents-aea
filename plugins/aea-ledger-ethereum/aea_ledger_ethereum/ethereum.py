@@ -1525,6 +1525,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         Simulate and send a bundle of transactions.
 
+        This operation is not supported for ethereum. Please use the ethereum_flashbots instead.
+
         :param raw_signed_transactions: the raw signed transactions to bundle together and send.
         :param target_blocks: the target blocks for the transactions.
         """

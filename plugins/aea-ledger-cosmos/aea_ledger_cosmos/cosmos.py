@@ -1552,6 +1552,8 @@ class _CosmosApi(LedgerApi):
         """
         Simulate and send a bundle of transactions.
 
+        This operation is not supported for cosmos.
+
         :param raw_signed_transactions: the raw signed transactions to bundle together and send.
         :param target_blocks: the target blocks for the transactions.
         """
