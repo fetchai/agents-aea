@@ -295,6 +295,11 @@ class TestPackageManagerV1SourceSync(TestPackageManagerV1):
         with pytest.raises(
             PackagesSourceNotValid,
             match="Fetching tags from `author/repo` failed with message 'Not Found'",
+        ), mock.patch(
+            "aea.package_manager.v1.r_get",
+            return_value=mock.MagicMock(
+                status_code=404, json=lambda: {"message": "Not Found"}
+            ),
         ):
             pm.sync(
                 third_party=False,
@@ -304,6 +309,12 @@ class TestPackageManagerV1SourceSync(TestPackageManagerV1):
         with pytest.raises(
             PackagesSourceNotValid,
             match="Fetching packages from `author/repo` failed with message '404: Not Found'",
+        ), mock.patch(
+            "aea.package_manager.v1.r_get",
+            return_value=mock.MagicMock(
+                status_code=404,
+                text="404: Not Found",
+            ),
         ):
             with mock.patch.object(pm, "_get_latest_tag", return_value="latest"):
                 pm.sync(
