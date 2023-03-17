@@ -29,7 +29,9 @@ setup(
     author="Valory AG",
     license="Apache-2.0",
     description="Python package extending the default open-aea ethereum ledger plugin to add support for flashbots.",
-    long_description="Python package extending the default open-aea ethereum ledger plugin to add support for flashbots.",
+    long_description=(
+        "Python package extending the default open-aea ethereum ledger plugin to add support for flashbots."
+    ),
     long_description_content_type="text/markdown",
     packages=find_packages(include=["aea_ledger_ethereum_flashbots*"]),
     package_data={

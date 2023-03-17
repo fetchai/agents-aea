@@ -120,3 +120,13 @@ Simulate and send a bundle of transactions.
 
 the transaction digest if the transactions went through, None otherwise.
 
+<a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.EthereumFlashbotCrypto"></a>
+
+## EthereumFlashbotCrypto Objects
+
+```python
+class EthereumFlashbotCrypto(EthereumCrypto)
+```
+
+Class wrapping the Account Generation from Ethereum ledger.
+
