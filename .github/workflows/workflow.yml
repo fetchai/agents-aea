@@ -40,7 +40,6 @@ jobs:
         run: |
           # check diff between plugins' LICENSE and main LICENSE
           diff LICENSE plugins/aea-ledger-ethereum/LICENSE
-          diff LICENSE plugins/aea-ledger-ethereum-flashbots/LICENSE
           diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-fetchai/LICENSE
   common_checks_2:
