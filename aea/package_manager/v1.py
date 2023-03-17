@@ -395,12 +395,12 @@ class PackageManagerV1(BasePackageManager):
 
         if "dev" not in packages:
             raise PackageFileNotValid(
-                "Package file not valid, no development packages found"
+                "`packages.json` file not valid, no development packages found"
             )
 
         if "third_party" not in packages:
             raise PackageFileNotValid(
-                "Package file not valid, no third party packages found"
+                "`packages.json` file not valid, no third party packages found"
             )
 
         dev_packages = OrderedDict()

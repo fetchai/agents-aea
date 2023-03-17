@@ -107,13 +107,13 @@ class TestPackageManagerV1Initialization(TestPackageManagerV1):
 
         with pytest.raises(
             PackageFileNotValid,
-            match="Package file not valid, no development packages found",
+            match="`packages.json` file not valid, no development packages found",
         ):
             PackageManagerV1.from_json(packages={})
 
         with pytest.raises(
             PackageFileNotValid,
-            match="Package file not valid, no third party packages found",
+            match="`packages.json` file not valid, no third party packages found",
         ):
             PackageManagerV1.from_json(packages={"dev": {}})
 
