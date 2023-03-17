@@ -102,6 +102,21 @@ class TestPackageManagerV1Initialization(TestPackageManagerV1):
             with pytest.raises(PackageFileNotValid):
                 PackageManagerV1.from_dir(self.packages_dir_path)
 
+    def test_parse_failures(self) -> None:
+        """Test parse failures."""
+
+        with pytest.raises(
+            PackageFileNotValid,
+            match="Package file not valid, no development packages found",
+        ):
+            PackageManagerV1.from_json(packages={})
+
+        with pytest.raises(
+            PackageFileNotValid,
+            match="Package file not valid, no third party packages found",
+        ):
+            PackageManagerV1.from_json(packages={"dev": {}})
+
 
 class TestPackageManagerV1Sync(TestPackageManagerV1):
     """Test sync."""
