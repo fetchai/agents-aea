@@ -393,8 +393,15 @@ class PackageManagerV1(BasePackageManager):
     ) -> "PackageManagerV1":
         """Initialize from json object"""
 
-        if "dev" not in packages or "third_party" not in packages:
-            raise PackageFileNotValid("Package file not valid.")
+        if "dev" not in packages:
+            raise PackageFileNotValid(
+                "`packages.json` file not valid, no development packages found"
+            )
+
+        if "third_party" not in packages:
+            raise PackageFileNotValid(
+                "`packages.json` file not valid, no third party packages found"
+            )
 
         dev_packages = OrderedDict()
         for package_id, package_hash in packages["dev"].items():

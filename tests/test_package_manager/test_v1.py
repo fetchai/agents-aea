@@ -102,6 +102,21 @@ class TestPackageManagerV1Initialization(TestPackageManagerV1):
             with pytest.raises(PackageFileNotValid):
                 PackageManagerV1.from_dir(self.packages_dir_path)
 
+    def test_parse_failures(self) -> None:
+        """Test parse failures."""
+
+        with pytest.raises(
+            PackageFileNotValid,
+            match="`packages.json` file not valid, no development packages found",
+        ):
+            PackageManagerV1.from_json(packages={})
+
+        with pytest.raises(
+            PackageFileNotValid,
+            match="`packages.json` file not valid, no third party packages found",
+        ):
+            PackageManagerV1.from_json(packages={"dev": {}})
+
 
 class TestPackageManagerV1Sync(TestPackageManagerV1):
     """Test sync."""
@@ -280,6 +295,11 @@ class TestPackageManagerV1SourceSync(TestPackageManagerV1):
         with pytest.raises(
             PackagesSourceNotValid,
             match="Fetching tags from `author/repo` failed with message 'Not Found'",
+        ), mock.patch(
+            "aea.package_manager.v1.r_get",
+            return_value=mock.MagicMock(
+                status_code=404, json=lambda: {"message": "Not Found"}
+            ),
         ):
             pm.sync(
                 third_party=False,
@@ -289,6 +309,12 @@ class TestPackageManagerV1SourceSync(TestPackageManagerV1):
         with pytest.raises(
             PackagesSourceNotValid,
             match="Fetching packages from `author/repo` failed with message '404: Not Found'",
+        ), mock.patch(
+            "aea.package_manager.v1.r_get",
+            return_value=mock.MagicMock(
+                status_code=404,
+                text="404: Not Found",
+            ),
         ):
             with mock.patch.object(pm, "_get_latest_tag", return_value="latest"):
                 pm.sync(
