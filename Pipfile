@@ -48,6 +48,8 @@ certifi = "<=2022.6.15.1"
 mistune = "==2.0.3"
 tomte = {version = "==0.2.2", extras = ["tox", "tests"]}
 apduboy = ">=0.5.0"
+docspec = "==2.0.2"
+docspec-python = "==2.0.2"
 hexbytes = "==0.3.0"
 flashbots = "==1.1.1"
 

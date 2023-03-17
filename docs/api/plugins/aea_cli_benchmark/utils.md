@@ -4,12 +4,6 @@
 
 Performance checks utils.
 
-<a id="plugins.aea-cli-benchmark.aea_cli_benchmark.utils.ROOT_DIR"></a>
-
-#### ROOT`_`DIR
-
-type: ignore
-
 <a id="plugins.aea-cli-benchmark.aea_cli_benchmark.utils.wait_for_condition"></a>
 
 #### wait`_`for`_`condition

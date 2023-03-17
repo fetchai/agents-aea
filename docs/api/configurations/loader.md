@@ -4,12 +4,6 @@
 
 Implementation of the parser for configuration file.
 
-<a id="aea.configurations.loader._"></a>
-
-#### `_`
-
-for tests compatibility
-
 <a id="aea.configurations.loader.BaseConfigLoader"></a>
 
 ## BaseConfigLoader Objects

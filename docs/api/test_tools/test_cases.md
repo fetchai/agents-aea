@@ -25,66 +25,6 @@ def set_capfd_on_cli_runner(capfd: CaptureFixture) -> None
 
 Set pytest capfd on CLI runner
 
-<a id="aea.test_tools.test_cases.BaseAEATestCase.runner"></a>
-
-#### runner
-
-CLI runner
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.author"></a>
-
-#### author
-
-author
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.subprocesses"></a>
-
-#### subprocesses
-
-list of launched subprocesses
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.threads"></a>
-
-#### threads
-
-list of started threads
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.old_cwd"></a>
-
-#### old`_`cwd
-
-current working directory path
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.t"></a>
-
-#### t
-
-temporary directory path
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.current_agent_context"></a>
-
-#### current`_`agent`_`context
-
-the name of the current agent
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.agents"></a>
-
-#### agents
-
-the set of created agents
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.stdout"></a>
-
-#### stdout
-
-dict of process.pid: string stdout
-
-<a id="aea.test_tools.test_cases.BaseAEATestCase.stderr"></a>
-
-#### stderr
-
-dict of process.pid: string stderr
-
 <a id="aea.test_tools.test_cases.BaseAEATestCase.set_agent_context"></a>
 
 #### set`_`agent`_`context
@@ -965,12 +905,6 @@ Test case from an existing AEA project.
 
 Subclass this class and set `path_to_aea` properly. By default,
 it is assumed the project is inside the current working directory.
-
-<a id="aea.test_tools.test_cases.AEATestCase.t"></a>
-
-#### t
-
-temporary directory path
 
 <a id="aea.test_tools.test_cases.AEATestCase.setup_class"></a>
 
