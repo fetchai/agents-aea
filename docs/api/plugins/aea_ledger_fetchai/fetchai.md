@@ -113,6 +113,8 @@ def bundle_and_send(raw_signed_transactions: List[str],
 
 Simulate and send a bundle of transactions.
 
+This operation is not supported for fetchai.
+
 **Arguments**:
 
 - `raw_signed_transactions`: the raw signed transactions to bundle together and send.
