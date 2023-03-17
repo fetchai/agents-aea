@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,9 @@ INDEX_FILE_PATH = Path("docs/index.md")
 
 # Special links that are allowed to respond with an error status
 # Remove non-url-allowed characters like ` before adding them here
-URL_SKIPS: List[str] = []
+URL_SKIPS: List[str] = [
+    "https://faucet.dimensions.network/",
+]
 
 # Define here custom timeouts for some edge cases
 CUSTOM_TIMEOUTS: Dict[str, int] = {}

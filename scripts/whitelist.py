@@ -334,3 +334,4 @@ set_capfd_on_cli_runner  # unused method (aea/test_tools/test_cases.py:102)
 reraise_as_click_exception  # unused function (aea/cli/utils/click_utils.py:387)
 run_cli_subprocess  # unused method (aea/test_tools/click_testing.py:195)
 fetch_agent  # method is used by after cli utlity method rename vulture reports
+_init_packages_repo  # unused function (aea/cli/packages.py:175)
