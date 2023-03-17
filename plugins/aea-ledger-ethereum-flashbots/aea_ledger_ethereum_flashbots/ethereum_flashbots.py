@@ -25,7 +25,7 @@ import logging
 from typing import Any, List, Optional, Union, cast
 from uuid import uuid4
 
-from aea_ledger_ethereum import EthereumApi
+from aea_ledger_ethereum import EthereumApi, EthereumCrypto
 from eth_account import Account
 from flashbots import Flashbots, flashbot
 from flashbots.types import FlashbotsBundleRawTx, FlashbotsBundleTx
@@ -180,3 +180,9 @@ class EthereumFlashbotApi(EthereumApi):
         bundle = self.bundle_transactions(raw_signed_transactions)
         tx_hashes = self.send_bundle(bundle, target_blocks)
         return tx_hashes
+
+
+class EthereumFlashbotCrypto(EthereumCrypto):
+    """Class wrapping the Account Generation from Ethereum ledger."""
+
+    identifier = _ETHEREUM_FLASHBOTS
