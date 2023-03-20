@@ -42,7 +42,6 @@ jobs:
           diff LICENSE plugins/aea-ledger-cosmos/LICENSE
           diff LICENSE plugins/aea-ledger-ethereum/LICENSE
           diff LICENSE plugins/aea-ledger-fetchai/LICENSE
-          diff LICENSE plugins/aea-ledger-solana/LICENSE
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
