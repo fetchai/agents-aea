@@ -202,7 +202,7 @@ class TestLedgerApis:
 
     def test_send_signed_transactions(self):
         """Test generate_tx_nonce positive result."""
-        with pytest.raises(ValueError, match="Not supported!"):
+        with pytest.raises(NotImplementedError):
             LedgerApis.send_signed_transactions(
                 CosmosCrypto.identifier, signed_transactions=[]
             )
