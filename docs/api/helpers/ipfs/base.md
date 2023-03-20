@@ -4,18 +4,6 @@
 
 This module contains helper methods and classes for the 'aea' package.
 
-<a id="aea.helpers.ipfs.base.SHA256_ID"></a>
-
-#### SHA256`_`ID
-
-0x12
-
-<a id="aea.helpers.ipfs.base.LEN_SHA256"></a>
-
-#### LEN`_`SHA256
-
-0x20
-
 <a id="aea.helpers.ipfs.base.chunks"></a>
 
 #### chunks

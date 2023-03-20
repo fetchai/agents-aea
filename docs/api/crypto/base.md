@@ -497,12 +497,6 @@ class LedgerApi(Helper, ABC)
 
 Interface for ledger APIs.
 
-<a id="aea.crypto.base.LedgerApi.identifier"></a>
-
-#### identifier
-
-type: str
-
 <a id="aea.crypto.base.LedgerApi.api"></a>
 
 #### api
@@ -794,18 +788,6 @@ class FaucetApi(ABC)
 ```
 
 Interface for testnet faucet APIs.
-
-<a id="aea.crypto.base.FaucetApi.identifier"></a>
-
-#### identifier
-
-type: str
-
-<a id="aea.crypto.base.FaucetApi.network_name"></a>
-
-#### network`_`name
-
-type: str
 
 <a id="aea.crypto.base.FaucetApi.get_wealth"></a>
 

@@ -156,7 +156,7 @@ def test_get_wealth(caplog, solana_private_key_file):
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_state_from_address(solana_private_key_file):
+def test_get_state(solana_private_key_file):
     """Test the get_address_from_public_key method"""
 
     solana_api = SolanaApi()
@@ -535,8 +535,6 @@ def test_contract_method_call():
         contract_interface=interface, contract_address=program_kp.address
     )
 
-    program = instance["program"]
-
     player1 = payer
     player2 = SolanaCrypto("./tests/data/solana_private_key2.txt")
     game = SolanaCrypto()
@@ -548,6 +546,7 @@ def test_contract_method_call():
     assert resp != "failed", "Failed to generate wealth"
 
     # setup game
+    program = instance["program"]
     program.provider.wallet = payer.entity
 
     accounts = {
@@ -572,6 +571,7 @@ def test_contract_method_call():
 
     transaction_digest = sa.send_signed_transaction(signed_transaction)
     assert transaction_digest is not None
+
     _, is_settled = _wait_get_receipt(sa, transaction_digest)
     assert is_settled is True
     state = sa.get_state(game.public_key)

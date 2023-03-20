@@ -209,12 +209,6 @@ class SolanaHelper(Helper)
 
 Helper class usable as Mixin for SolanaApi or as standalone class.
 
-<a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaHelper.BlockhashCache"></a>
-
-#### BlockhashCache
-
-defined in SolanaAPi.__init__
-
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaHelper.load_contract_interface"></a>
 
 #### load`_`contract`_`interface
@@ -573,7 +567,20 @@ def get_state(callable_name: str,
               **kwargs: Any) -> Optional[JSONLike]
 ```
 
-Call a specified function on the ledger API.
+Call a specified function on the underlying ledger API.
+
+This usually takes the form of a web request to be waited synchronously.
+
+**Arguments**:
+
+- `callable_name`: the name of the API function to be called.
+- `args`: the positional arguments for the API function.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments for the API function.
+
+**Returns**:
+
+the ledger API response.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.get_transfer_transaction"></a>
 
@@ -769,11 +776,18 @@ def contract_method_call(contract_instance: Any, method_name: str,
 
 Call a contract's method
 
+**TOBEIMPLEMENTED**
+
 **Arguments**:
 
 - `contract_instance`: the contract to use
 - `method_name`: the contract method to call
 - `method_args`: the contract call parameters
+# noqa: DAR202
+
+**Returns**:
+
+the call result
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.build_transaction"></a>
 

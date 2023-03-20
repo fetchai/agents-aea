@@ -215,12 +215,6 @@ builder.add_component_instance(...)
 # second call
 my_aea_2 = builder.builder()
 
-<a id="aea.aea_builder.AEABuilder.DEFAULT_AGENT_ACT_PERIOD"></a>
-
-#### DEFAULT`_`AGENT`_`ACT`_`PERIOD
-
-seconds
-
 <a id="aea.aea_builder.AEABuilder.__init__"></a>
 
 #### `__`init`__`

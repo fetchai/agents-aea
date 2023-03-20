@@ -14,24 +14,6 @@ class Message()
 
 This class implements a message.
 
-<a id="aea.protocols.base.Message.protocol_id"></a>
-
-#### protocol`_`id
-
-type: PublicId
-
-<a id="aea.protocols.base.Message.protocol_specification_id"></a>
-
-#### protocol`_`specification`_`id
-
-type: PublicId
-
-<a id="aea.protocols.base.Message.serializer"></a>
-
-#### serializer
-
-type: Type["Serializer"]
-
 <a id="aea.protocols.base.Message.Performative"></a>
 
 ## Performative Objects

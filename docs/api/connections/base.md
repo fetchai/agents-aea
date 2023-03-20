@@ -24,12 +24,6 @@ class Connection(Component, ABC)
 
 Abstract definition of a connection.
 
-<a id="aea.connections.base.Connection.connection_id"></a>
-
-#### connection`_`id
-
-type: PublicId
-
 <a id="aea.connections.base.Connection.__init__"></a>
 
 #### `__`init`__`

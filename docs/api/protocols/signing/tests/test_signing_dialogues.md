@@ -14,12 +14,6 @@ class TestDialoguesSigning(BaseProtocolDialoguesTestCase)
 
 Test for the 'signing' protocol dialogues.
 
-<a id="packages.open_aea.protocols.signing.tests.test_signing_dialogues.TestDialoguesSigning.ROLE_FOR_THE_FIRST_MESSAGE"></a>
-
-#### ROLE`_`FOR`_`THE`_`FIRST`_`MESSAGE
-
-CHECK
-
 <a id="packages.open_aea.protocols.signing.tests.test_signing_dialogues.TestDialoguesSigning.make_message_content"></a>
 
 #### make`_`message`_`content

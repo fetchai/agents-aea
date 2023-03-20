@@ -24,12 +24,6 @@ class Contract(Component)
 
 Abstract definition of a contract.
 
-<a id="aea.contracts.base.Contract.contract_id"></a>
-
-#### contract`_`id
-
-type: PublicId
-
 <a id="aea.contracts.base.Contract.__init__"></a>
 
 #### `__`init`__`

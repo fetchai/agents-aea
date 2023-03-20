@@ -600,17 +600,26 @@ class SolanaApi(LedgerApi, SolanaHelper):
     def get_state(
         self, callable_name: str, *args: Any, raise_on_try: bool = False, **kwargs: Any
     ) -> Optional[JSONLike]:
-        """Call a specified function on the ledger API."""
-        response = self._try_get_state(
-            callable_name, *args, raise_on_try=raise_on_try, **kwargs
+        """
+        Call a specified function on the underlying ledger API.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param callable_name: the name of the API function to be called.
+        :param args: the positional arguments for the API function.
+        :param raise_on_try: whether the method will raise or log on error
+        :param kwargs: the keyword arguments for the API function.
+        :return: the ledger API response.
+        """
+        return self._get_account_state(
+            address=callable_name, *args, raise_on_try=raise_on_try, **kwargs
         )
-        return response
 
     @try_decorator("Unable to get state: {}", logger_method="warning")
-    def _try_get_state(  # pylint: disable=unused-argument
+    def _get_account_state(  # pylint: disable=unused-argument
         self, address: str, *args: Any, **kwargs: Any
     ) -> Optional[JSONLike]:
-        """Try to call a function on the ledger API."""
+        """Try to get account state.."""
 
         if "raise_on_try" in kwargs:
             logging.info(
@@ -963,12 +972,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
         method_name: str,
         **method_args: Any,
     ) -> Optional[JSONLike]:
-        """Call a contract's method
-
-        :param contract_instance: the contract to use
-        :param method_name: the contract method to call
-        :param method_args: the contract call parameters
-        """
         """
         Call a contract's method
 
@@ -982,7 +985,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
 
         :return: the call result
         """
-
         raise NotImplementedError
 
     def build_transaction(  # pylint: disable=too-many-arguments
