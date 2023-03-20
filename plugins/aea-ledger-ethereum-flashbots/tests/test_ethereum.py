@@ -30,8 +30,6 @@ from hexbytes import HexBytes
 from web3.exceptions import TransactionNotFound
 from web3.types import TxReceipt
 
-from aea.helpers.transaction.base import SignedTransaction
-
 
 @pytest.fixture
 def ethereum_flashbot_api() -> EthereumFlashbotApi:
@@ -61,10 +59,15 @@ def test_init_without_signature_private_key() -> None:
 @pytest.mark.parametrize("signed_txs", (("0x1234", "0x0000", "0x5232"), ("0x1234",)))
 def test_bundle_transactions(ethereum_flashbot_api, signed_txs: Tuple[str]) -> None:
     """Test bundle transactions."""
-    dummy_signed_transactions = [HexBytes(signed_tx) for signed_tx in signed_txs]
+    dummy_signed_transactions = [
+        dict(raw_transaction=signed_tx) for signed_tx in signed_txs
+    ]
     bundle = ethereum_flashbot_api.bundle_transactions(dummy_signed_transactions)
-    bundled_signed_txs = [tx.get("signed_transaction", None) for tx in bundle]
-    assert bundled_signed_txs == dummy_signed_transactions
+    actual_bundle = [tx.get("signed_transaction", None) for tx in bundle]
+    expected_bundle = [
+        HexBytes(tx.get("raw_transaction", None)) for tx in dummy_signed_transactions
+    ]
+    assert expected_bundle == actual_bundle
 
 
 def test_simulate_with_successful_simulation(ethereum_flashbot_api) -> None:
@@ -153,19 +156,21 @@ def test_bundle_and_send_with_successful_transaction(ethereum_flashbot_api) -> N
         return_value=[TxReceipt(blockNumber=1), TxReceipt(blockNumber=2)]
     )
     response_mock.bundle = [{"hash": b"0x1234"}, {"hash": b"0x5678"}]
+    ethereum_flashbot_api._get_next_blocks = MagicMock(return_value=1)
     ethereum_flashbot_api.flashbots.simulate = MagicMock(return_value=True)
     ethereum_flashbot_api.flashbots.send_bundle = MagicMock(return_value=response_mock)
 
     # run
     signed_transactions = [
-        MagicMock(SignedTransaction, body=dict(raw_transaction="0x1234")),
-        MagicMock(SignedTransaction, body=dict(raw_transaction="0x5678")),
+        dict(raw_transaction="0x1234"),
+        dict(raw_transaction="0x5678"),
     ]
     target_blocks = [123]
 
     # check
-    tx_hashes = ethereum_flashbot_api.bundle_and_send(
-        signed_transactions, target_blocks
+    tx_hashes = ethereum_flashbot_api.send_signed_transactions(
+        signed_transactions,
+        target_blocks=target_blocks,
     )
     ethereum_flashbot_api.flashbots.simulate.assert_called_once()
     ethereum_flashbot_api.flashbots.send_bundle.assert_called_once()
@@ -180,6 +185,7 @@ def test_bundle_and_send_with_failed_simulation(ethereum_flashbot_api) -> None:
     response_mock.wait = MagicMock()
     response_mock.bundle_hash = MagicMock()
     response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
+    ethereum_flashbot_api._get_next_blocks = MagicMock(return_value=1)
     ethereum_flashbot_api.flashbots.simulate = MagicMock(return_value=True)
     ethereum_flashbot_api.flashbots.send_bundle = MagicMock(return_value=response_mock)
     ethereum_flashbot_api.flashbots.cancel_bundles = MagicMock()
@@ -190,12 +196,13 @@ def test_bundle_and_send_with_failed_simulation(ethereum_flashbot_api) -> None:
 
     # run
     signed_transactions = [
-        MagicMock(SignedTransaction, body=dict(raw_transaction="0x1234")),
-        MagicMock(SignedTransaction, body=dict(raw_transaction="0x5678")),
+        dict(raw_transaction="0x1234"),
+        dict(raw_transaction="0x5678"),
     ]
     target_blocks = [123]
-    tx_hashes = ethereum_flashbot_api.bundle_and_send(
-        signed_transactions, target_blocks
+    tx_hashes = ethereum_flashbot_api.send_signed_transactions(
+        signed_transactions,
+        target_blocks=target_blocks,
     )
 
     # check

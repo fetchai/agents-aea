@@ -46,7 +46,7 @@ Get the flashbots Web3 module.
 ```python
 @staticmethod
 def bundle_transactions(
-        raw_signed_transactions: List[str]) -> List[FlashbotsBundleRawTx]
+        signed_transactions: List[JSONLike]) -> List[FlashbotsBundleRawTx]
 ```
 
 Bundle transactions.
@@ -100,21 +100,23 @@ Send a bundle.
 
 the transaction digest if the transaction went through, None otherwise.
 
-<a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.EthereumFlashbotApi.bundle_and_send"></a>
+<a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.EthereumFlashbotApi.send_signed_transactions"></a>
 
-#### bundle`_`and`_`send
+#### send`_`signed`_`transactions
 
 ```python
-def bundle_and_send(raw_signed_transactions: List[str],
-                    target_blocks: List[int]) -> Optional[List[str]]
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
 ```
 
 Simulate and send a bundle of transactions.
 
 **Arguments**:
 
-- `raw_signed_transactions`: the raw signed transactions to bundle together and send.
-- `target_blocks`: the target blocks for the transactions.
+- `signed_transactions`: the raw signed transactions to bundle together and send.
+- `raise_on_try`: whether to raise an exception if the transaction is not successful.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
