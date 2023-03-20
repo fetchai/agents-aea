@@ -33,7 +33,13 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
 from packages.valory.protocols.ledger_api import LedgerApiMessage, message
-from packages.valory.protocols.ledger_api.custom_types import Kwargs, State, Terms
+from packages.valory.protocols.ledger_api.custom_types import (
+    Kwargs,
+    SignedTransactions,
+    State,
+    Terms,
+    TransactionDigests,
+)
 from packages.valory.protocols.ledger_api.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
@@ -529,6 +535,73 @@ def test_incorrect_message(
         )
 
         mock_logger.assert_any_call("some error")
+
+
+def test_send_signed_transactions_serialization() -> None:
+    """Test that the serialization for 'send_signed_transactions' works."""
+    msg = LedgerApiMessage(
+        performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTIONS,
+        signed_transactions=SignedTransactions(
+            ledger_id=LEDGER_ID, signed_transactions=[dict(), dict(), dict(), dict()]
+        ),
+        kwargs=Kwargs(body={}),
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = LedgerApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
+def test_transaction_digests_serialization() -> None:
+    """Test that the serialization for 'transaction_digests' works."""
+    msg = LedgerApiMessage(
+        performative=LedgerApiMessage.Performative.TRANSACTION_DIGESTS,
+        transaction_digests=TransactionDigests(
+            ledger_id=LEDGER_ID, transaction_digests=["", "", "", ""]
+        ),
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = LedgerApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
 class BaseTestMessageConstruction:
