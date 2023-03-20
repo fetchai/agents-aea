@@ -101,6 +101,11 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             ledger_id = message.signed_transaction.ledger_id
         elif (
             message.performative
+            is LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTIONS
+        ):
+            ledger_id = message.signed_transactions.ledger_id
+        elif (
+            message.performative
             is LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
         ):
             ledger_id = message.transaction_digest.ledger_id
