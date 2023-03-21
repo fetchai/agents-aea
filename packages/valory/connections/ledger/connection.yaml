@@ -55,6 +55,13 @@ config:
       poa_chain: false
       authentication_private_key: null
       flashbot_relayer_uri: null
+    solana:
+      address: http://127.0.0.1:8545
+      chain_id: 1337
+      default_gas_price_strategy: eip1559
+      gas_price_strategies: *id001
+      is_gas_estimation_enabled: true
+      poa_chain: false
   retry_attempts: 240
   retry_timeout: 3
 excluded_protocols: []
