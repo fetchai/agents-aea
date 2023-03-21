@@ -646,10 +646,6 @@ Atomically send multiple of transactions.
 - `raise_on_try`: whether the method will raise or log on error
 - `kwargs`: the keyword arguments.
 
-**Returns**:
-
-the transaction digest if the transactions went through, None otherwise.
-
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.get_transaction_receipt"></a>
 
 #### get`_`transaction`_`receipt
