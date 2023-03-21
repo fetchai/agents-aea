@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
     _COSMOS_IDENTIFIER,
@@ -163,6 +163,33 @@ class LedgerApis:
         )
         api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx_digest = api.send_signed_transaction(tx_signed)
+        return tx_digest
+
+    @classmethod
+    def send_signed_transactions(
+        cls,
+        identifier: str,
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
+    ) -> Optional[List[str]]:
+        """
+        Send a signed transaction and wait for confirmation.
+
+        :param identifier: the identifier of the ledger.
+        :param signed_transactions: the signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error
+        :param kwargs: the keyword arguments.
+        :return: the tx_digests, if present
+        """
+        enforce(
+            identifier in ledger_apis_registry.supported_ids,
+            "Not a registered ledger api identifier.",
+        )
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
+        tx_digest = api.send_signed_transactions(
+            signed_transactions, raise_on_try, **kwargs
+        )
         return tx_digest
 
     @classmethod

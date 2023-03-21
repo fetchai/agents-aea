@@ -23,7 +23,9 @@ speech_acts:
     terms: ct:Terms
   send_signed_transaction:
     signed_transaction: ct:SignedTransaction
-    rpc_config: pt:optional[ct:Kwargs]
+  send_signed_transactions:
+    signed_transactions: ct:SignedTransactions
+    kwargs: ct:Kwargs
   get_transaction_receipt:
     transaction_digest: ct:TransactionDigest
     retry_timeout: pt:optional[pt:int]
@@ -35,6 +37,8 @@ speech_acts:
     raw_transaction: ct:RawTransaction
   transaction_digest:
     transaction_digest: ct:TransactionDigest
+  transaction_digests:
+    transaction_digests: ct:TransactionDigests
   transaction_receipt:
     transaction_receipt: ct:TransactionReceipt
   get_state:
@@ -59,10 +63,16 @@ ct:State: |
   bytes state = 1;
 ct:SignedTransaction: |
   bytes signed_transaction = 1;
+ct:SignedTransactions: |
+  string ledger_id = 1;
+  repeated bytes signed_transactions = 2;
 ct:RawTransaction: |
   bytes raw_transaction = 1;
 ct:TransactionDigest: |
   bytes transaction_digest = 1;
+ct:TransactionDigests: |
+  string ledger_id = 1;
+  repeated string transaction_digests = 2;
 ct:TransactionReceipt: |
   bytes transaction_receipt = 1;
 ...
@@ -76,11 +86,13 @@ reply:
   get_raw_transaction: [raw_transaction, error]
   raw_transaction: []
   send_signed_transaction: [transaction_digest, error]
+  send_signed_transactions: [transaction_digests, error]
   transaction_digest: []
+  transaction_digests: []
   get_transaction_receipt: [transaction_receipt, error]
   transaction_receipt: []
   error: []
-termination: [balance, state, raw_transaction, transaction_digest, transaction_receipt, error]
+termination: [balance, state, raw_transaction, transaction_digest, transaction_digests, transaction_receipt, error]
 roles: {agent, ledger}
 end_states: [successful]
 keep_terminal_state_dialogues: false

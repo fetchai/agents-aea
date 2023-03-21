@@ -904,23 +904,25 @@ Get all transfer events derived from a transaction.
 
 the transfer logs
 
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.bundle_and_send"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.send_signed_transactions"></a>
 
-#### bundle`_`and`_`send
+#### send`_`signed`_`transactions
 
 ```python
-def bundle_and_send(raw_signed_transactions: List[str],
-                    target_blocks: List[int]) -> Optional[List[str]]
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
 ```
 
-Simulate and send a bundle of transactions.
+Atomically send multiple of transactions.
 
 This operation is not supported for ethereum. Please use the ethereum_flashbots instead.
 
 **Arguments**:
 
-- `raw_signed_transactions`: the raw signed transactions to bundle together and send.
-- `target_blocks`: the target blocks for the transactions.
+- `signed_transactions`: the signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments.
 
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
 

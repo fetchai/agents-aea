@@ -17,6 +17,11 @@ message LedgerApiMessage{
     bytes signed_transaction = 1;
   }
 
+  message SignedTransactions{
+    string ledger_id = 1;
+    repeated bytes signed_transactions = 2;
+  }
+
   message State{
     bytes state = 1;
   }
@@ -27,6 +32,11 @@ message LedgerApiMessage{
 
   message TransactionDigest{
     bytes transaction_digest = 1;
+  }
+
+  message TransactionDigests{
+    string ledger_id = 1;
+    repeated string transaction_digests = 2;
   }
 
   message TransactionReceipt{
@@ -46,8 +56,11 @@ message LedgerApiMessage{
 
   message Send_Signed_Transaction_Performative{
     SignedTransaction signed_transaction = 1;
-    Kwargs rpc_config = 2;
-    bool rpc_config_is_set = 3;
+  }
+
+  message Send_Signed_Transactions_Performative{
+    SignedTransactions signed_transactions = 1;
+    Kwargs kwargs = 2;
   }
 
   message Get_Transaction_Receipt_Performative{
@@ -69,6 +82,10 @@ message LedgerApiMessage{
 
   message Transaction_Digest_Performative{
     TransactionDigest transaction_digest = 1;
+  }
+
+  message Transaction_Digests_Performative{
+    TransactionDigests transaction_digests = 1;
   }
 
   message Transaction_Receipt_Performative{
@@ -105,8 +122,10 @@ message LedgerApiMessage{
     Get_Transaction_Receipt_Performative get_transaction_receipt = 10;
     Raw_Transaction_Performative raw_transaction = 11;
     Send_Signed_Transaction_Performative send_signed_transaction = 12;
-    State_Performative state = 13;
-    Transaction_Digest_Performative transaction_digest = 14;
-    Transaction_Receipt_Performative transaction_receipt = 15;
+    Send_Signed_Transactions_Performative send_signed_transactions = 13;
+    State_Performative state = 14;
+    Transaction_Digest_Performative transaction_digest = 15;
+    Transaction_Digests_Performative transaction_digests = 16;
+    Transaction_Receipt_Performative transaction_receipt = 17;
   }
 }

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -199,6 +199,13 @@ class TestLedgerApis:
             CosmosCrypto.identifier, "seller", "client"
         )
         assert int(result, 16)
+
+    def test_send_signed_transactions(self):
+        """Test generate_tx_nonce positive result."""
+        with pytest.raises(NotImplementedError):
+            LedgerApis.send_signed_transactions(
+                CosmosCrypto.identifier, signed_transactions=[]
+            )
 
 
 def test_is_valid_address():

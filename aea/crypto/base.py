@@ -428,16 +428,18 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def bundle_and_send(
+    def send_signed_transactions(
         self,
-        raw_signed_transactions: List[str],
-        target_blocks: List[int],
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
     ) -> Optional[List[str]]:
         """
-        Simulate and send a bundle of transactions.
+        Atomically send multiple of transactions.
 
-        :param raw_signed_transactions: the signed transactions to bundle together and send.
-        :param target_blocks: the target blocks for the transactions.
+        :param signed_transactions: the signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error
+        :param kwargs: the keyword arguments.
         :return: the transaction digest if the transactions went through, None otherwise.
         """
 

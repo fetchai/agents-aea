@@ -653,22 +653,24 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a id="aea.crypto.base.LedgerApi.bundle_and_send"></a>
+<a id="aea.crypto.base.LedgerApi.send_signed_transactions"></a>
 
-#### bundle`_`and`_`send
+#### send`_`signed`_`transactions
 
 ```python
 @abstractmethod
-def bundle_and_send(raw_signed_transactions: List[str],
-                    target_blocks: List[int]) -> Optional[List[str]]
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
 ```
 
-Simulate and send a bundle of transactions.
+Atomically send multiple of transactions.
 
 **Arguments**:
 
-- `raw_signed_transactions`: the signed transactions to bundle together and send.
-- `target_blocks`: the target blocks for the transactions.
+- `signed_transactions`: the signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 

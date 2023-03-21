@@ -118,18 +118,20 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         """
         raise NotImplementedError  # pragma: nocover
 
-    def bundle_and_send(
+    def send_signed_transactions(
         self,
-        raw_signed_transactions: List[str],
-        target_blocks: List[int],
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
     ) -> Optional[List[str]]:
         """
         Simulate and send a bundle of transactions.
 
         This operation is not supported for fetchai.
 
-        :param raw_signed_transactions: the raw signed transactions to bundle together and send.
-        :param target_blocks: the target blocks for the transactions.
+        :param signed_transactions: the raw signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error.
+        :param kwargs: the keyword arguments.
         """
         raise NotImplementedError(  # pragma: nocover
             f"Sending a bundle of transactions is not supported for the {self.identifier} plugin"

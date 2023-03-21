@@ -32,10 +32,17 @@ from flashbots.types import FlashbotsBundleRawTx, FlashbotsBundleTx
 from hexbytes import HexBytes
 from web3.exceptions import TransactionNotFound
 
+from aea.common import JSONLike
+from aea.helpers.base import try_decorator
+
 
 _default_logger = logging.getLogger(__name__)
 
 _ETHEREUM_FLASHBOTS = "ethereum_flashbots"
+
+_TARGET_BLOCKS = "target_blocks"
+
+_DEFAULT_TARGET_BLOCKS = 25
 
 
 class EthereumFlashbotApi(EthereumApi):
@@ -73,12 +80,14 @@ class EthereumFlashbotApi(EthereumApi):
 
     @staticmethod
     def bundle_transactions(
-        raw_signed_transactions: List[str],
+        signed_transactions: List[JSONLike],
     ) -> List[FlashbotsBundleRawTx]:
         """Bundle transactions."""
         return [
-            FlashbotsBundleRawTx(signed_transaction=HexBytes(signed_transaction))
-            for signed_transaction in raw_signed_transactions
+            FlashbotsBundleRawTx(
+                signed_transaction=HexBytes(signed_transaction.get("raw_transaction"))
+            )
+            for signed_transaction in signed_transactions
         ]
 
     def simulate(
@@ -165,20 +174,53 @@ class EthereumFlashbotApi(EthereumApi):
                 )
         return None
 
-    def bundle_and_send(
+    def _get_next_blocks(self, num_blocks: int = _DEFAULT_TARGET_BLOCKS) -> List[int]:
+        """
+        Get the next blocks.
+
+        :param num_blocks: the number of blocks to get.
+        :return: the next blocks.
+        """
+        current_block = self.api.eth.blockNumber
+        return list(range(current_block, current_block + num_blocks))
+
+    @try_decorator("Unable to send transactions: {}", logger_method="warning")
+    def _try_send_signed_transactions(
+        self, signed_transactions: List[JSONLike], **_kwargs: Any
+    ) -> Optional[List[str]]:
+        """
+        Try sending a bundle of transactions.
+
+        :param signed_transactions: the raw signed transactions to bundle together and send.
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
+            `target_blocks`: the target blocks for the transactions.
+        :return: the transaction digest if the transactions went through, None otherwise.
+        """
+        bundle = self.bundle_transactions(signed_transactions)
+        target_blocks = _kwargs.get(_TARGET_BLOCKS, self._get_next_blocks())
+        tx_hashes = self.send_bundle(bundle, target_blocks)
+        return tx_hashes
+
+    def send_signed_transactions(
         self,
-        raw_signed_transactions: List[str],
-        target_blocks: List[int],
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
     ) -> Optional[List[str]]:
         """
         Simulate and send a bundle of transactions.
 
-        :param raw_signed_transactions: the raw signed transactions to bundle together and send.
-        :param target_blocks: the target blocks for the transactions.
+        :param signed_transactions: the raw signed transactions to bundle together and send.
+        :param raise_on_try: whether to raise an exception if the transaction is not successful.
+        :param kwargs: the keyword arguments.
         :return: the transaction digest if the transactions went through, None otherwise.
         """
-        bundle = self.bundle_transactions(raw_signed_transactions)
-        tx_hashes = self.send_bundle(bundle, target_blocks)
+        tx_hashes = self._try_send_signed_transactions(
+            signed_transactions,
+            **kwargs,
+            raise_on_try=raise_on_try,
+        )
         return tx_hashes
 
 
