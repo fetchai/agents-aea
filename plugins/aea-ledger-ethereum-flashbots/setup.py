@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2023 Valory AG
-#   Copyright 2018-2021 Fetch.AI Limited
+#   Copyright 2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,28 +18,41 @@
 #
 # ------------------------------------------------------------------------------
 
+"""Setup script for "aea_ledger_ethereum_flashbots" package."""
 
-"""Setup script for the plug-in."""
-
-
-from setuptools import setup  # type: ignore
+from setuptools import find_packages, setup
 
 
 setup(
-    name="open-aea-cli-ipfs",
+    name="open-aea-ledger-ethereum-flashbots",
     version="1.31.0",
     author="Valory AG",
     license="Apache-2.0",
-    description="CLI extension for open AEA framework wrapping IPFS functionality.",
-    long_description="CLI extension for open AEA framework wrapping IPFS functionality.",
+    description="Python package extending the default open-aea ethereum ledger plugin to add support for flashbots.",
+    long_description=(
+        "Python package extending the default open-aea ethereum ledger plugin to add support for flashbots."
+    ),
     long_description_content_type="text/markdown",
-    packages=["aea_cli_ipfs"],
-    entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
+    packages=find_packages(include=["aea_ledger_ethereum_flashbots*"]),
+    package_data={
+        "aea_ledger_ethereum_flashbots": [
+            "py.typed",
+        ]
+    },
+    python_requires=">=3.9,<4.0",
     install_requires=[
-        "open-aea>=1.0.0, <2.0.0",
-        "ipfshttpclient>=0.8.0a2",
-        "pytest>=7.0.0,<7.3.0",
+        "open-aea-ledger-ethereum~=1.31.0",
+        "flashbots==1.1.1",
     ],
+    tests_require=["pytest"],
+    entry_points={
+        "aea.cryptos": [
+            "ethereum_flashbots = aea_ledger_ethereum_flashbots:EthereumFlashbotCrypto"
+        ],
+        "aea.ledger_apis": [
+            "ethereum_flashbots = aea_ledger_ethereum_flashbots:EthereumFlashbotApi"
+        ],
+    },
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",

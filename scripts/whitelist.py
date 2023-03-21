@@ -335,3 +335,7 @@ reraise_as_click_exception  # unused function (aea/cli/utils/click_utils.py:387)
 run_cli_subprocess  # unused method (aea/test_tools/click_testing.py:195)
 fetch_agent  # method is used by after cli utlity method rename vulture reports
 _init_packages_repo  # unused function (aea/cli/packages.py:175)
+fetch_agent  # method is used by after cli utility method rename vulture reports
+bundle_and_send  # unused function (aea/crypto/base.py:432)
+raw_signed_transactions  # unused variable (aea/crypto/base.py:434)
+target_blocks  # unused variable (aea/crypto/base.py:435)

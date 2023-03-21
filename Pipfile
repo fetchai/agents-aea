@@ -50,6 +50,7 @@ tomte = {version = "==0.2.2", extras = ["tox", "tests"]}
 apduboy = ">=0.5.0"
 docspec = "==2.0.2"
 docspec-python = "==2.0.2"
+hexbytes = "==0.3.0"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy

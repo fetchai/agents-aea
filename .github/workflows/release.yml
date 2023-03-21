@@ -56,6 +56,11 @@ jobs:
           pipenv run python setup.py sdist bdist_wheel
           cd ../..
 
+          echo Processing aea-ledger-ethereum-flashbots
+          cd plugins/aea-ledger-ethereum-flashbots
+          pipenv run python setup.py sdist bdist_wheel
+          cd ../..
+
           echo Processing aea-ledger-fetchai
           cd plugins/aea-ledger-fetchai
           pipenv run python setup.py sdist bdist_wheel
@@ -108,6 +113,14 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip_existing: true
           packages_dir: plugins/aea-ledger-ethereum-hwi/dist/
+
+      - name: Publish open-aea-ledger-ethereum-flashbots Plugin to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+          packages_dir: plugins/aea-ledger-ethereum-flashbots/dist/
 
       - name: Publish open-aea-ledger-fetchai Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

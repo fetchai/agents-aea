@@ -30,7 +30,10 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
 from packages.valory.connections.ledger.base import RequestDispatcher
-from packages.valory.protocols.ledger_api.custom_types import TransactionReceipt
+from packages.valory.protocols.ledger_api.custom_types import (
+    TransactionDigests,
+    TransactionReceipt,
+)
 from packages.valory.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.valory.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
@@ -96,6 +99,11 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             is LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
         ):
             ledger_id = message.signed_transaction.ledger_id
+        elif (
+            message.performative
+            is LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTIONS
+        ):
+            ledger_id = message.signed_transactions.ledger_id
         elif (
             message.performative
             is LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
@@ -337,6 +345,46 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 ),
             )
         return response
+
+    def send_signed_transactions(
+        self,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'send_signed_transactions'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :param dialogue: the Ledger API dialogue
+        :return: response Ledger API message
+        """
+        try:
+            signed_transactions = message.signed_transactions.signed_transactions
+            transaction_digests = api.send_signed_transactions(
+                signed_transactions,
+                raise_on_try=True,
+                **message.kwargs.body,
+            )
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            return self.get_error_message(e, api, message, dialogue)
+
+        if transaction_digests is None:  # pragma: nocover
+            return self.get_error_message(
+                ValueError("No transaction_digest returned"), api, message, dialogue
+            )
+
+        return cast(
+            LedgerApiMessage,
+            dialogue.reply(
+                performative=LedgerApiMessage.Performative.TRANSACTION_DIGESTS,
+                target_message=message,
+                transaction_digests=TransactionDigests(
+                    message.signed_transaction.ledger_id, transaction_digests
+                ),
+            ),
+        )
 
     def send_signed_transaction(
         self,

@@ -17,11 +17,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Generic, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union
 
 from aea.common import Address, JSONLike
 from aea.helpers.io import open_file
@@ -424,6 +425,22 @@ class LedgerApi(Helper, ABC):
         :param tx_digest: the digest associated to the transaction.
         :param raise_on_try: whether the method will raise or log on error
         :return: the tx, if present
+        """
+
+    @abstractmethod
+    def send_signed_transactions(
+        self,
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
+    ) -> Optional[List[str]]:
+        """
+        Atomically send multiple of transactions.
+
+        :param signed_transactions: the signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error
+        :param kwargs: the keyword arguments.
+        :return: the transaction digest if the transactions went through, None otherwise.
         """
 
     @abstractmethod

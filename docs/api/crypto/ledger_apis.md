@@ -105,6 +105,32 @@ Send a signed transaction and wait for confirmation.
 
 the tx_digest, if present
 
+<a id="aea.crypto.ledger_apis.LedgerApis.send_signed_transactions"></a>
+
+#### send`_`signed`_`transactions
+
+```python
+@classmethod
+def send_signed_transactions(cls,
+                             identifier: str,
+                             signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
+```
+
+Send a signed transaction and wait for confirmation.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger.
+- `signed_transactions`: the signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments.
+
+**Returns**:
+
+the tx_digests, if present
+
 <a id="aea.crypto.ledger_apis.LedgerApis.get_transaction_receipt"></a>
 
 #### get`_`transaction`_`receipt

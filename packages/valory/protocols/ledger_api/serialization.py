@@ -31,9 +31,11 @@ from packages.valory.protocols.ledger_api.custom_types import (
     Kwargs,
     RawTransaction,
     SignedTransaction,
+    SignedTransactions,
     State,
     Terms,
     TransactionDigest,
+    TransactionDigests,
     TransactionReceipt,
 )
 from packages.valory.protocols.ledger_api.message import LedgerApiMessage
@@ -81,6 +83,15 @@ class LedgerApiSerializer(Serializer):
                 performative.signed_transaction, signed_transaction
             )
             ledger_api_msg.send_signed_transaction.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTIONS:
+            performative = ledger_api_pb2.LedgerApiMessage.Send_Signed_Transactions_Performative()  # type: ignore
+            signed_transactions = msg.signed_transactions
+            SignedTransactions.encode(
+                performative.signed_transactions, signed_transactions
+            )
+            kwargs = msg.kwargs
+            Kwargs.encode(performative.kwargs, kwargs)
+            ledger_api_msg.send_signed_transactions.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Get_Transaction_Receipt_Performative()  # type: ignore
             transaction_digest = msg.transaction_digest
@@ -115,6 +126,13 @@ class LedgerApiSerializer(Serializer):
                 performative.transaction_digest, transaction_digest
             )
             ledger_api_msg.transaction_digest.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.TRANSACTION_DIGESTS:
+            performative = ledger_api_pb2.LedgerApiMessage.Transaction_Digests_Performative()  # type: ignore
+            transaction_digests = msg.transaction_digests
+            TransactionDigests.encode(
+                performative.transaction_digests, transaction_digests
+            )
+            ledger_api_msg.transaction_digests.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Transaction_Receipt_Performative()  # type: ignore
             transaction_receipt = msg.transaction_receipt
@@ -199,6 +217,15 @@ class LedgerApiSerializer(Serializer):
             )
             signed_transaction = SignedTransaction.decode(pb2_signed_transaction)
             performative_content["signed_transaction"] = signed_transaction
+        elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTIONS:
+            pb2_signed_transactions = (
+                ledger_api_pb.send_signed_transactions.signed_transactions
+            )
+            signed_transactions = SignedTransactions.decode(pb2_signed_transactions)
+            performative_content["signed_transactions"] = signed_transactions
+            pb2_kwargs = ledger_api_pb.send_signed_transactions.kwargs
+            kwargs = Kwargs.decode(pb2_kwargs)
+            performative_content["kwargs"] = kwargs
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:
             pb2_transaction_digest = (
                 ledger_api_pb.get_transaction_receipt.transaction_digest
@@ -224,6 +251,12 @@ class LedgerApiSerializer(Serializer):
             pb2_transaction_digest = ledger_api_pb.transaction_digest.transaction_digest
             transaction_digest = TransactionDigest.decode(pb2_transaction_digest)
             performative_content["transaction_digest"] = transaction_digest
+        elif performative_id == LedgerApiMessage.Performative.TRANSACTION_DIGESTS:
+            pb2_transaction_digests = (
+                ledger_api_pb.transaction_digests.transaction_digests
+            )
+            transaction_digests = TransactionDigests.decode(pb2_transaction_digests)
+            performative_content["transaction_digests"] = transaction_digests
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:
             pb2_transaction_receipt = (
                 ledger_api_pb.transaction_receipt.transaction_receipt

@@ -34,10 +34,16 @@ from packages.valory.protocols.ledger_api.custom_types import (
 from packages.valory.protocols.ledger_api.custom_types import (
     SignedTransaction as CustomSignedTransaction,
 )
+from packages.valory.protocols.ledger_api.custom_types import (
+    SignedTransactions as CustomSignedTransactions,
+)
 from packages.valory.protocols.ledger_api.custom_types import State as CustomState
 from packages.valory.protocols.ledger_api.custom_types import Terms as CustomTerms
 from packages.valory.protocols.ledger_api.custom_types import (
     TransactionDigest as CustomTransactionDigest,
+)
+from packages.valory.protocols.ledger_api.custom_types import (
+    TransactionDigests as CustomTransactionDigests,
 )
 from packages.valory.protocols.ledger_api.custom_types import (
     TransactionReceipt as CustomTransactionReceipt,
@@ -61,11 +67,15 @@ class LedgerApiMessage(Message):
 
     SignedTransaction = CustomSignedTransaction
 
+    SignedTransactions = CustomSignedTransactions
+
     State = CustomState
 
     Terms = CustomTerms
 
     TransactionDigest = CustomTransactionDigest
+
+    TransactionDigests = CustomTransactionDigests
 
     TransactionReceipt = CustomTransactionReceipt
 
@@ -80,8 +90,10 @@ class LedgerApiMessage(Message):
         GET_TRANSACTION_RECEIPT = "get_transaction_receipt"
         RAW_TRANSACTION = "raw_transaction"
         SEND_SIGNED_TRANSACTION = "send_signed_transaction"
+        SEND_SIGNED_TRANSACTIONS = "send_signed_transactions"
         STATE = "state"
         TRANSACTION_DIGEST = "transaction_digest"
+        TRANSACTION_DIGESTS = "transaction_digests"
         TRANSACTION_RECEIPT = "transaction_receipt"
 
         def __str__(self) -> str:
@@ -97,8 +109,10 @@ class LedgerApiMessage(Message):
         "get_transaction_receipt",
         "raw_transaction",
         "send_signed_transaction",
+        "send_signed_transactions",
         "state",
         "transaction_digest",
+        "transaction_digests",
         "transaction_receipt",
     }
     __slots__: Tuple[str, ...] = tuple()
@@ -121,10 +135,12 @@ class LedgerApiMessage(Message):
             "retry_attempts",
             "retry_timeout",
             "signed_transaction",
+            "signed_transactions",
             "state",
             "target",
             "terms",
             "transaction_digest",
+            "transaction_digests",
             "transaction_receipt",
         )
 
@@ -260,6 +276,15 @@ class LedgerApiMessage(Message):
         return cast(CustomSignedTransaction, self.get("signed_transaction"))
 
     @property
+    def signed_transactions(self) -> CustomSignedTransactions:
+        """Get the 'signed_transactions' content from the message."""
+        enforce(
+            self.is_set("signed_transactions"),
+            "'signed_transactions' content is not set.",
+        )
+        return cast(CustomSignedTransactions, self.get("signed_transactions"))
+
+    @property
     def state(self) -> CustomState:
         """Get the 'state' content from the message."""
         enforce(self.is_set("state"), "'state' content is not set.")
@@ -279,6 +304,15 @@ class LedgerApiMessage(Message):
             "'transaction_digest' content is not set.",
         )
         return cast(CustomTransactionDigest, self.get("transaction_digest"))
+
+    @property
+    def transaction_digests(self) -> CustomTransactionDigests:
+        """Get the 'transaction_digests' content from the message."""
+        enforce(
+            self.is_set("transaction_digests"),
+            "'transaction_digests' content is not set.",
+        )
+        return cast(CustomTransactionDigests, self.get("transaction_digests"))
 
     @property
     def transaction_receipt(self) -> CustomTransactionReceipt:
@@ -370,6 +404,23 @@ class LedgerApiMessage(Message):
                 )
             elif (
                 self.performative
+                == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTIONS
+            ):
+                expected_nb_of_contents = 2
+                enforce(
+                    isinstance(self.signed_transactions, CustomSignedTransactions),
+                    "Invalid type for content 'signed_transactions'. Expected 'SignedTransactions'. Found '{}'.".format(
+                        type(self.signed_transactions)
+                    ),
+                )
+                enforce(
+                    isinstance(self.kwargs, CustomKwargs),
+                    "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
+                        type(self.kwargs)
+                    ),
+                )
+            elif (
+                self.performative
                 == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
             ):
                 expected_nb_of_contents = 1
@@ -425,6 +476,14 @@ class LedgerApiMessage(Message):
                     isinstance(self.transaction_digest, CustomTransactionDigest),
                     "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
                         type(self.transaction_digest)
+                    ),
+                )
+            elif self.performative == LedgerApiMessage.Performative.TRANSACTION_DIGESTS:
+                expected_nb_of_contents = 1
+                enforce(
+                    isinstance(self.transaction_digests, CustomTransactionDigests),
+                    "Invalid type for content 'transaction_digests'. Expected 'TransactionDigests'. Found '{}'.".format(
+                        type(self.transaction_digests)
                     ),
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:

@@ -17,9 +17,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from aea_ledger_cosmos.cosmos import (
     CosmosCrypto,
@@ -116,6 +117,25 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         :param target_address: optional address to filter transfer events to just those that affect it
         """
         raise NotImplementedError  # pragma: nocover
+
+    def send_signed_transactions(
+        self,
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
+    ) -> Optional[List[str]]:
+        """
+        Simulate and send a bundle of transactions.
+
+        This operation is not supported for fetchai.
+
+        :param signed_transactions: the raw signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error.
+        :param kwargs: the keyword arguments.
+        """
+        raise NotImplementedError(  # pragma: nocover
+            f"Sending a bundle of transactions is not supported for the {self.identifier} plugin"
+        )
 
 
 class FetchAIFaucetApi(CosmosFaucetApi):

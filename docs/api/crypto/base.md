@@ -653,6 +653,29 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
+<a id="aea.crypto.base.LedgerApi.send_signed_transactions"></a>
+
+#### send`_`signed`_`transactions
+
+```python
+@abstractmethod
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
+```
+
+Atomically send multiple of transactions.
+
+**Arguments**:
+
+- `signed_transactions`: the signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments.
+
+**Returns**:
+
+the transaction digest if the transactions went through, None otherwise.
+
 <a id="aea.crypto.base.LedgerApi.get_contract_instance"></a>
 
 #### get`_`contract`_`instance

@@ -952,6 +952,26 @@ Get all transfer events derived from a transaction.
 - `tx_hash`: the transaction hash
 - `target_address`: optional address to filter tranfer events to just those that affect it
 
+<a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.send_signed_transactions"></a>
+
+#### send`_`signed`_`transactions
+
+```python
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
+```
+
+Atomically send multiple of transactions.
+
+This operation is not supported for cosmos.
+
+**Arguments**:
+
+- `signed_transactions`: the raw signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error.
+- `kwargs`: the keyword arguments.
+
 <a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosApi"></a>
 
 ## CosmosApi Objects

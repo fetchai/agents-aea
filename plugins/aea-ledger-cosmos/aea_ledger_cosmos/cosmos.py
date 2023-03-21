@@ -17,7 +17,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
+
 # pylint: disable = import-outside-toplevel, possibly-unused-variable
 import base64
 import gzip
@@ -1541,6 +1543,25 @@ class _CosmosApi(LedgerApi):
         :param target_address: optional address to filter tranfer events to just those that affect it
         """
         raise NotImplementedError
+
+    def send_signed_transactions(
+        self,
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
+    ) -> Optional[List[str]]:
+        """
+        Atomically send multiple of transactions.
+
+        This operation is not supported for cosmos.
+
+        :param signed_transactions: the raw signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error.
+        :param kwargs: the keyword arguments.
+        """
+        raise NotImplementedError(  # pragma: nocover
+            f"Sending a bundle of transactions is not supported for the {self.identifier} plugin"
+        )
 
 
 class CosmosApi(_CosmosApi, CosmosHelper):

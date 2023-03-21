@@ -898,11 +898,31 @@ Get all transfer events derived from a transaction.
 
 - `contract_instance`: the contract
 - `tx_hash`: the transaction hash
-- `target_address`: optional address to filter tranfer events to just those that affect it
+- `target_address`: optional address to filter transfer events to just those that affect it
 
 **Returns**:
 
 the transfer logs
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.send_signed_transactions"></a>
+
+#### send`_`signed`_`transactions
+
+```python
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
+```
+
+Atomically send multiple of transactions.
+
+This operation is not supported for ethereum. Please use the ethereum_flashbots instead.
+
+**Arguments**:
+
+- `signed_transactions`: the signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments.
 
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
 

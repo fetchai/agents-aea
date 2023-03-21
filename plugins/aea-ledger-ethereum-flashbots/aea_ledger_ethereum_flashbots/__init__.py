@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022-2023 Valory AG
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,12 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the AEA package."""
+"""Python package extending the default open-aea ethereum ledger plugin to add support for flashbots."""
 
-__title__ = "open-aea"
-__description__ = "Open Autonomous Economic Agent framework (without vendor lock-in)"
-__url__ = "https://github.com/valory-xyz/open-aea.git"
-__version__ = "1.31.0"
-__author__ = "Valory AG"
-__license__ = "Apache-2.0"
-__copyright__ = "2021 Valory AG, 2019 Fetch.AI Limited"
+from .ethereum_flashbots import *  # noqa isort:skip

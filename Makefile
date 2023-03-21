@@ -106,7 +106,7 @@ release:
 v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: all-checks
-all-checks: clean formatters code-checks common-checks-1 common-checks-2 security
+all-checks: clean formatters code-checks generators common-checks-1 common-checks-2 security
 
 .PHONY: new_env
 new_env: clean
@@ -118,6 +118,7 @@ new_env: clean
 		pipenv install --dev --skip-lock;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
+		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum-flashbots;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
 		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\
@@ -172,7 +173,7 @@ generators: clean-cache
 	tox -e fix-doc-hashes
 
 .PHONY: common-checks-1
-common-checks:
+common-checks-1:
 	tox -p -e check-copyright -e hash-check -e package-dependencies-checks
 
 .PHONY: common-checks-2

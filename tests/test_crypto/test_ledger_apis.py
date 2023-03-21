@@ -200,6 +200,13 @@ class TestLedgerApis:
         )
         assert int(result, 16)
 
+    def test_send_signed_transactions(self):
+        """Test generate_tx_nonce positive result."""
+        with pytest.raises(NotImplementedError):
+            LedgerApis.send_signed_transactions(
+                CosmosCrypto.identifier, signed_transactions=[]
+            )
+
 
 def test_is_valid_address():
     """Test LedgerApis.is_valid_address."""

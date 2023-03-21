@@ -34,7 +34,7 @@ function instal_choco_golang_gcc {
 }
 function install_aea {
 	echo "Install aea"
-    $output=pip install open-aea[all]==1.30.0 --force --no-cache-dir 2>&1 |out-string;
+    $output=pip install open-aea[all]==1.31.0 --force --no-cache-dir 2>&1 |out-string;
     if ($LastExitCode -ne 0) {
         echo $output
         echo "AEA install failed!"

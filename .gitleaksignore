@@ -103,4 +103,4 @@ b066c84e7e62a3d96a28b2e87f192fe66fa516bf:my_new_agent/default_private_key.pem:pr
 cf58e02a94d1428933d6c1e109d79650a819a87f:tests/data/priv_wrong.pem:private-key:1
 946eb2e9058006b6a1e171c7ca18171a424018f3:m_agent/default_private_key.pem:private-key:1
 03f84ef8d9f2aa1c69f9d4744344381120d26e78:tests/data/priv.pem:private-key:1
-
+24169dd5f707cfae52b34f1db752f98ca3d3595e:plugins/aea-ledger-solana/tests/data/spl-token-faucet/Anchor.toml:generic-api-key:2
