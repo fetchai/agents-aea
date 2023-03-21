@@ -378,7 +378,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         return cast(
             LedgerApiMessage,
             dialogue.reply(
-                performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
+                performative=LedgerApiMessage.Performative.TRANSACTION_DIGESTS,
                 target_message=message,
                 transaction_digests=TransactionDigests(
                     message.signed_transaction.ledger_id, transaction_digests
