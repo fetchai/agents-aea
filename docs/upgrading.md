@@ -9,7 +9,7 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
-## `v1.29.0` to `v1.30.0`
+## `v1.30.0` to `v1.31.0`
 
 - No backwards incompatible changes
 
