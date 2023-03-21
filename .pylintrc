@@ -36,7 +36,7 @@ disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611,C0209,
 # C0206: consider-using-dict-items
 
 [IMPORTS]
-ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto,asn1crypto,cosmpy,google,coverage,pylint,pytest,gitpython,protobuf,docker,signal
+ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto,asn1crypto,cosmpy,google,coverage,pylint,pytest,gitpython,protobuf,docker,signal,anchorpy,cryptography.fernet,solana,solders
 
 [DESIGN]
 min-public-methods=1

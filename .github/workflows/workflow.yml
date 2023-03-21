@@ -34,6 +34,7 @@ jobs:
           time pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
           time pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
           time pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
+          time pipenv run pip install --no-deps file:plugins/aea-ledger-solana
           time pipenv lock
       - name: Check plugin consistency
         run: |
@@ -293,6 +294,9 @@ jobs:
       - name: Check plugin aea-cli-ipfs
         run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
+      - name: Check plugin aea-ledger-solana
+        run: |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-solana && aea generate-key solana && echo aea-ledger-solana checked!"
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -453,6 +457,8 @@ jobs:
           cd ..
           rm -rf go-ipfs
           ipfs init
+          mkdir ~/.config/solana
+          echo "[6,206,143,203,220,22,227,247,237,23,114,181,56,70,53,98,224,64,192,221,134,115,153,146,252,81,8,41,237,224,225,176,195,11,129,62,207,146,39,47,172,98,101,87,102,166,105,202,33,169,134,76,27,149,148,68,4,15,215,47,196,227,216,48]" > ~/.config/solana/id.json
       # sudo apt-get install -y protobuf-compiler
       # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
       # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
@@ -501,13 +507,16 @@ jobs:
           cp ~\Apps\go-ipfs\ipfs.exe C:\Users\runneradmin\go\bin\
           ipfs init
 
+
       - if: True
         name: Framework unit tests
         run: |
           tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
+      
       - name: Packages unit tests
         run: |
           tox -e packages-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
+
       - name: Plugin unit tests
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'

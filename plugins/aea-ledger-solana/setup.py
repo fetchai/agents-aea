@@ -18,41 +18,35 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "aea_ledger_ethereum_hwi" package."""
+"""Setup script for "aea_ledger_solana" package."""
 
 from setuptools import find_packages, setup
 
 
 setup(
-    name="open-aea-ledger-ethereum-hwi",
-    version="1.30.0",
-    author="Valory AG",
+    name="open-aea-ledger-solana",
+    version="1.24.17",
+    author="dassy23",
     license="Apache-2.0",
-    description="Python package wrapping the public and private key cryptography and support for hardware wallet interactions.",
-    long_description="Python package wrapping the public and private key cryptography and support for hardware wallet interactions.",
-    long_description_content_type="text/markdown",
-    packages=find_packages(include=["aea_ledger_ethereum_hwi*"]),
-    package_data={
-        "aea_ledger_ethereum_hwi": [
-            "py.typed",
-        ]
-    },
+    description="Python package wrapping the public and private key cryptography and ledger api of solana.",
+    packages=find_packages(include=["aea_ledger_solana*"]),
+    package_data={},
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
-        "web3==5.25.0",
         "ipfshttpclient==0.8.0a2",
-        "eth-account==0.5.6",
-        "open-aea-ledger-ethereum~=1.30.0",
-        "apduboy>=0.5.0",
-        "protobuf>=3.20,<4",
+        "solana==0.28.1",
+        "solders==0.10.0",
+        "anchorpy==0.14.0",
+        "base58==2.1.1",
+        "cryptography",
+        "PyNaCl==1.5.0",
+        "pythclient==0.1.2",
     ],
     tests_require=["pytest"],
     entry_points={
-        "aea.cryptos": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWICrypto"],
-        "aea.ledger_apis": ["ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIApi"],
-        "aea.faucet_apis": [
-            "ethereum_hwi = aea_ledger_ethereum_hwi:EthereumHWIFaucetApi"
-        ],
+        "aea.cryptos": ["solana = aea_ledger_solana:SolanaCrypto"],
+        "aea.ledger_apis": ["solana = aea_ledger_solana:SolanaApi"],
+        "aea.faucet_apis": ["solana = aea_ledger_solana:SolanaFaucetApi"],
     },
     classifiers=[
         "Environment :: Console",
@@ -64,8 +58,6 @@ setup(
         "Operating System :: MacOS",
         "Operating System :: Microsoft",
         "Operating System :: Unix",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Topic :: Communications",
