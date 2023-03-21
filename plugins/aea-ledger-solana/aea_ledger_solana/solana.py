@@ -753,7 +753,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :param signed_transactions: the signed transactions to bundle together and send.
         :param raise_on_try: whether the method will raise or log on error
         :param kwargs: the keyword arguments.
-        :return: the transaction digest if the transactions went through, None otherwise.
         """
         raise NotImplementedError
 
