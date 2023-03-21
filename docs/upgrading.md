@@ -9,6 +9,11 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
+## `v1.29.0` to `v1.30.0`
+
+- No backwards incompatible changes
+
+**Note** The `Ethereum Flashbots` ledger plugin and `Solana` ledger plugin are only supported on the Python 3.9 or greater.
 
 ## `v1.29.0` to `v1.30.0`
 
