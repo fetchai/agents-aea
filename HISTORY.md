@@ -1,6 +1,20 @@
 # Release History - open AEA
 
 
+## 1.31.0 (2023-03-21)
+
+AEA:
+- Updates the error messages on the package manager for misconfigured `packages.json` files
+- Adds support for initialising empty local packages repository using `aea packkages init` command
+- Fixes licence headers on the newly introduced plugins
+- Adds two new performatives to the ledger api protocol 
+  - `SEND_SIGNED_TRANSACTIONS` to send multiple transactions at once
+  - `TRANSACTION_DIGESTS` to retrieve transaction digests for the transactions sent using `SEND_SIGNED_TRANSACTIONS`
+
+Plugin:
+- Introduces `Solana` ledger plugin
+- Introduces `Ethereum Flashbots` plugin
+
 ## 1.30.0 (2023-03-08)
 
 AEA:
