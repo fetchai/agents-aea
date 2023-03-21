@@ -24,7 +24,7 @@ import logging
 import time
 import zlib
 from pathlib import Path
-from typing import Any, Dict, NewType, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, NewType, Optional, Tuple, Union, cast
 
 import base58
 from anchorpy import Context, Idl, Program  # type: ignore
@@ -740,6 +740,22 @@ class SolanaApi(LedgerApi, SolanaHelper):
         txn_resp = self._api.send_raw_transaction(txn.serialize())
 
         return txn_resp.to_json()
+
+    def send_signed_transactions(
+        self,
+        signed_transactions: List[JSONLike],
+        raise_on_try: bool = False,
+        **kwargs: Any,
+    ) -> Optional[List[str]]:
+        """
+        Atomically send multiple of transactions.
+
+        :param signed_transactions: the signed transactions to bundle together and send.
+        :param raise_on_try: whether the method will raise or log on error
+        :param kwargs: the keyword arguments.
+        :return: the transaction digest if the transactions went through, None otherwise.
+        """
+        raise NotImplementedError
 
     def get_transaction_receipt(
         self, tx_digest: str, raise_on_try: bool = False
