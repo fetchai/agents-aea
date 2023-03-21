@@ -628,6 +628,28 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
+<a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.send_signed_transactions"></a>
+
+#### send`_`signed`_`transactions
+
+```python
+def send_signed_transactions(signed_transactions: List[JSONLike],
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[List[str]]
+```
+
+Atomically send multiple of transactions.
+
+**Arguments**:
+
+- `signed_transactions`: the signed transactions to bundle together and send.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: the keyword arguments.
+
+**Returns**:
+
+the transaction digest if the transactions went through, None otherwise.
+
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.get_transaction_receipt"></a>
 
 #### get`_`transaction`_`receipt
