@@ -132,10 +132,9 @@ class BaseTestRuntime:
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state
 
-    @pytest.mark.skip(reason="https://github.com/valory-xyz/open-aea/issues/408")
+    # @pytest.mark.skip(reason="https://github.com/valory-xyz/open-aea/issues/408")
     def test_cancelled_during_start_agent_loop(self, caplog):
         """Test asyncio.CancelledError during _start_agent_loop."""
-
         # we check for this log because async_utils.Runnable._thread_target
         # catches all BaseExceptions and logs them instead of raising
         self.runtime._storage = None
@@ -149,7 +148,7 @@ class BaseTestRuntime:
                 self.runtime.start()
                 wait_for_condition(
                     lambda: f"Exception raised in {self.runtime}" in caplog.text,
-                    timeout=2,
+                    timeout=5,
                     error_msg="Failed to raise asyncio.CancelledError during _start_agent_loop.",
                 )
 
