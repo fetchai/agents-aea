@@ -8,7 +8,7 @@ message TProtocolNoCtMessage{
   message Performative_Pt_Performative{
     bytes content_bytes = 1;
     int32 content_int = 2;
-    float content_float = 3;
+    double content_float = 3;
     bool content_bool = 4;
     string content_str = 5;
   }
@@ -16,12 +16,12 @@ message TProtocolNoCtMessage{
   message Performative_Pct_Performative{
     repeated bytes content_set_bytes = 1;
     repeated int32 content_set_int = 2;
-    repeated float content_set_float = 3;
+    repeated double content_set_float = 3;
     repeated bool content_set_bool = 4;
     repeated string content_set_str = 5;
     repeated bytes content_list_bytes = 6;
     repeated int32 content_list_int = 7;
-    repeated float content_list_float = 8;
+    repeated double content_list_float = 8;
     repeated bool content_list_bool = 9;
     repeated string content_list_str = 10;
   }
@@ -29,17 +29,17 @@ message TProtocolNoCtMessage{
   message Performative_Pmt_Performative{
     map<int32, bytes> content_dict_int_bytes = 1;
     map<int32, int32> content_dict_int_int = 2;
-    map<int32, float> content_dict_int_float = 3;
+    map<int32, double> content_dict_int_float = 3;
     map<int32, bool> content_dict_int_bool = 4;
     map<int32, string> content_dict_int_str = 5;
     map<bool, bytes> content_dict_bool_bytes = 6;
     map<bool, int32> content_dict_bool_int = 7;
-    map<bool, float> content_dict_bool_float = 8;
+    map<bool, double> content_dict_bool_float = 8;
     map<bool, bool> content_dict_bool_bool = 9;
     map<bool, string> content_dict_bool_str = 10;
     map<string, bytes> content_dict_str_bytes = 11;
     map<string, int32> content_dict_str_int = 12;
-    map<string, float> content_dict_str_float = 13;
+    map<string, double> content_dict_str_float = 13;
     map<string, bool> content_dict_str_bool = 14;
     map<string, string> content_dict_str_str = 15;
   }
@@ -49,7 +49,7 @@ message TProtocolNoCtMessage{
     bool content_union_1_type_bytes_is_set = 2;
     int32 content_union_1_type_int = 3;
     bool content_union_1_type_int_is_set = 4;
-    float content_union_1_type_float = 5;
+    double content_union_1_type_float = 5;
     bool content_union_1_type_float_is_set = 6;
     bool content_union_1_type_bool = 7;
     bool content_union_1_type_bool_is_set = 8;
@@ -67,7 +67,7 @@ message TProtocolNoCtMessage{
     bool content_union_2_type_set_of_int_is_set = 20;
     repeated string content_union_2_type_set_of_str = 21;
     bool content_union_2_type_set_of_str_is_set = 22;
-    repeated float content_union_2_type_list_of_float = 23;
+    repeated double content_union_2_type_list_of_float = 23;
     bool content_union_2_type_list_of_float_is_set = 24;
     repeated bool content_union_2_type_list_of_bool = 25;
     bool content_union_2_type_list_of_bool_is_set = 26;
@@ -75,7 +75,7 @@ message TProtocolNoCtMessage{
     bool content_union_2_type_list_of_bytes_is_set = 28;
     map<string, int32> content_union_2_type_dict_of_str_int = 29;
     bool content_union_2_type_dict_of_str_int_is_set = 30;
-    map<int32, float> content_union_2_type_dict_of_int_float = 31;
+    map<int32, double> content_union_2_type_dict_of_int_float = 31;
     bool content_union_2_type_dict_of_int_float_is_set = 32;
     map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 33;
     bool content_union_2_type_dict_of_bool_bytes_is_set = 34;

@@ -6,8 +6,8 @@ message StateUpdateMessage{
 
   // Performatives and contents
   message Initialize_Performative{
-    map<string, float> exchange_params_by_currency_id = 1;
-    map<string, float> utility_params_by_good_id = 2;
+    map<string, double> exchange_params_by_currency_id = 1;
+    map<string, double> utility_params_by_good_id = 2;
     map<string, int32> amount_by_currency_id = 3;
     map<string, int32> quantities_by_good_id = 4;
   }
