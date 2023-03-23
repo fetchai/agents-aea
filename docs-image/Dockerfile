@@ -19,7 +19,7 @@ WORKDIR /build
 COPY docs/ /build/docs
 COPY mkdocs.yml /build
 
-RUN python3 -m pip install "tomte[docs]==0.2.2"
+RUN python3 -m pip install "tomte[docs]==0.2.4"
 RUN python3 -m pip install git+https://github.com/pugong/mkdocs-mermaid-plugin.git
 RUN mkdocs build
 
