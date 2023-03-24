@@ -46,7 +46,7 @@ py-multicodec = ">=0.2.0"
 google-api-python-client = "<=2.60.0"
 certifi = "<=2022.6.15.1"
 mistune = "==2.0.3"
-tomte = {version = "==0.2.2", extras = ["tox", "tests"]}
+tomte = {version = "==0.2.4", extras = ["tox", "tests"]}
 apduboy = ">=0.5.0"
 docspec = "==2.0.2"
 docspec-python = "==2.0.2"

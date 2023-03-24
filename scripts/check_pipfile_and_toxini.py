@@ -28,17 +28,17 @@ from typing import Dict
 # specified in setup.py
 WHITELIST = {
     "base58": ">=1.0.3",
-    "tomte[tests]": "==0.2.2",
-    "tomte[bandit]": "==0.2.2",
-    "tomte[black]": "==0.2.2",
-    "tomte[isort]": "==0.2.2",
-    "tomte[docs]": "==0.2.2",
-    "tomte[flake8]": "==0.2.2",
-    "tomte[mypy]": "==0.2.2",
-    "tomte[pylint]": "==0.2.2",
-    "tomte[safety]": "==0.2.2",
-    "tomte[vulture]": "==0.2.2",
-    "tomte[darglint]": "==0.2.2",
+    "tomte[tests]": "==0.2.4",
+    "tomte[bandit]": "==0.2.4",
+    "tomte[black]": "==0.2.4",
+    "tomte[isort]": "==0.2.4",
+    "tomte[docs]": "==0.2.4",
+    "tomte[flake8]": "==0.2.4",
+    "tomte[mypy]": "==0.2.4",
+    "tomte[pylint]": "==0.2.4",
+    "tomte[safety]": "==0.2.4",
+    "tomte[vulture]": "==0.2.4",
+    "tomte[darglint]": "==0.2.4",
 }
 
 
