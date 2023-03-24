@@ -35,14 +35,10 @@ setup(
     package_data={},
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
-        "ipfshttpclient==0.8.0a2",
-        "solana==0.28.1",
-        "solders==0.10.0",
-        "anchorpy==0.14.0",
-        "base58==2.1.1",
+        "solders==0.14.0",
         "cryptography",
         "PyNaCl==1.5.0",
-        "pythclient==0.1.2",
+        "anchorpy @ git+https://github.com/8ball030/anchorpy.git",
     ],
     tests_require=["pytest"],
     entry_points={
