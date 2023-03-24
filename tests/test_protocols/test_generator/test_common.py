@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -327,7 +327,7 @@ class TestCommon(TestCase):
         assert _python_pt_or_ct_type_to_proto_type(content_type_int) == "int32"
 
         content_type_float = "float"
-        assert _python_pt_or_ct_type_to_proto_type(content_type_float) == "float"
+        assert _python_pt_or_ct_type_to_proto_type(content_type_float) == "double"
 
         content_type_bool = "bool"
         assert _python_pt_or_ct_type_to_proto_type(content_type_bool) == "bool"

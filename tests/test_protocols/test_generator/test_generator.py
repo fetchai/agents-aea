@@ -349,7 +349,9 @@ class TestSerialisations:
         assert decoded_message.performative == message.performative
         assert decoded_message.content_bytes == message.content_bytes
         assert decoded_message.content_int == message.content_int
-        # assert decoded_message.content_float == message.content_float # noqa: E800
+
+        assert decoded_message.content_float == message.content_float
+
         assert decoded_message.content_bool == message.content_bool
         assert decoded_message.content_str == message.content_str
 
@@ -386,12 +388,12 @@ class TestSerialisations:
         assert decoded_message.performative == message.performative
         assert decoded_message.content_set_bytes == message.content_set_bytes
         assert decoded_message.content_set_int == message.content_set_int
-        # assert decoded_message.content_set_float == message.content_set_float # noqa: E800
+        assert decoded_message.content_set_float == message.content_set_float
         assert decoded_message.content_set_bool == message.content_set_bool
         assert decoded_message.content_set_str == message.content_set_str
         assert decoded_message.content_list_bytes == message.content_list_bytes
         assert decoded_message.content_list_int == message.content_list_int
-        # assert decoded_message.content_list_float == message.content_list_float # noqa: E800
+        assert decoded_message.content_list_float == message.content_list_float
         assert decoded_message.content_list_bool == message.content_list_bool
         assert decoded_message.content_list_str == message.content_list_str
 
@@ -441,19 +443,21 @@ class TestSerialisations:
         assert decoded_message.performative == message.performative
         assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
         assert decoded_message.content_dict_int_int == message.content_dict_int_int
-        # assert decoded_message.content_dict_int_float == message.content_dict_int_float # noqa: E800
+        assert decoded_message.content_dict_int_float == message.content_dict_int_float
         assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
         assert decoded_message.content_dict_int_str == message.content_dict_int_str
         assert (
             decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
         )
         assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
-        # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float # noqa: E800
+        assert (
+            decoded_message.content_dict_bool_float == message.content_dict_bool_float
+        )
         assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
         assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
         assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
         assert decoded_message.content_dict_str_int == message.content_dict_str_int
-        # assert decoded_message.content_dict_str_float == message.content_dict_str_float # noqa: E800
+        assert decoded_message.content_dict_str_float == message.content_dict_str_float
         assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
         assert decoded_message.content_dict_str_str == message.content_dict_str_str
 

@@ -19,7 +19,7 @@ message GymMessage{
   message Percept_Performative{
     int32 step_id = 1;
     AnyObject observation = 2;
-    float reward = 3;
+    double reward = 3;
     bool done = 4;
     AnyObject info = 5;
   }
