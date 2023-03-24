@@ -199,22 +199,17 @@ def test_sign_message():
     wallet2 = SolanaCrypto()
     msg = bytes("hello", "utf8")
     msg2 = bytes("hellooo", "utf8")
-
     sig = wallet.sign_message(msg)
 
-    try:
+    with pytest.raises(Exception, match="Signature was forged or corrupt"):
         result = VerifyKey(bytes(wallet.public_key)).verify(
             smessage=msg2, signature=bytes(sig.to_bytes_array())
         )
-    except Exception as e:
-        assert e.args[0] == "Signature was forged or corrupt"
 
-    try:
+    with pytest.raises(Exception, match="Signature was forged or corrupt"):
         result = VerifyKey(bytes(wallet2.public_key)).verify(
             smessage=msg, signature=bytes(sig.to_bytes_array())
         )
-    except Exception as e:
-        assert e.args[0] == "Signature was forged or corrupt"
 
     result = VerifyKey(bytes(wallet.public_key)).verify(
         smessage=msg, signature=bytes(sig.to_bytes_array())
