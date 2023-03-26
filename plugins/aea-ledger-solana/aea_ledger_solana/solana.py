@@ -22,7 +22,6 @@ import hashlib
 import json
 import logging
 import time
-import zlib
 from pathlib import Path
 from typing import Any, Dict, List, NewType, Optional, Tuple, Union, cast
 
@@ -31,507 +30,59 @@ from anchorpy import Context, Idl, Program  # type: ignore
 from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE  # type: ignore
 from anchorpy.idl import _decode_idl_account  # type: ignore
 from cryptography.fernet import Fernet  # type: ignore
-from solana.blockhash import BlockhashCache  # type: ignore
-from solana.keypair import Keypair  # type: ignore
-from solana.publickey import PublicKey  # type: ignore
-from solana.rpc.api import Client  # type: ignore
-from solana.system_program import (  # type: ignore
+from solana.blockhash import BlockhashCache
+# from solana.system_program import (  # type: ignore
+#     CreateAccountParams,
+#     CreateAccountWithSeedParams,
+#     SYS_PROGRAM_ID,
+#     TransferParams,
+#     create_account,
+#     transfer,
+# )
+# from solana.transaction import Transaction, TransactionInstruction  # type: ignore
+from solders import system_program as ssp  # type: ignore
+from solders.null_signer import NullSigner
+from solders.signature import Signature  # type: ignore
+from solana.transaction import Transaction # type: ignore
+
+
+from solders.system_program import (  # type: ignore
     CreateAccountParams,
     CreateAccountWithSeedParams,
-    SYS_PROGRAM_ID,
+    # SYS_PROGRAM_ID,
     TransferParams,
-    create_account,
-    transfer,
+    create_account, transfer,
 )
-from solana.transaction import Transaction, TransactionInstruction  # type: ignore
-from solders import system_program as ssp  # type: ignore
-from solders.signature import Signature  # type: ignore
-from solders.transaction import Transaction as sTransaction  # type: ignore
 
+from solders.system_program import ID as SYS_PROGRAM_ID  # type: ignore
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 from aea.helpers.base import try_decorator
 from aea.helpers.io import open_file
 
-
-_default_logger = logging.getLogger(__name__)
-
-_VERSION = "1.24.17"
-_SOLANA = "solana"
-TESTNET_NAME = "n/a"
-DEFAULT_ADDRESS = "https://api.devnet.solana.com"
-DEFAULT_CHAIN_ID = 101
-DEFAULT_CURRENCY_DENOM = "lamports"
-RENT_EXEMPT_AMOUNT = 1000000
-
-LAMPORTS_PER_SOL = 1000000000
-_IDL = "idl"
-_BYTECODE = "bytecode"
-
-
-def _pako_inflate(data):
-    # https://stackoverflow.com/questions/46351275/using-pako-deflate-with-python
-    decompress = zlib.decompressobj(15)
-    decompressed_data = decompress.decompress(data)
-    decompressed_data += decompress.flush()
-    return decompressed_data
-
-
-class SolanaCrypto(Crypto[Keypair]):
-    """Class wrapping the Account Generation from Solana ledger."""
-
-    identifier = _SOLANA
-
-    def __init__(
-        self,
-        private_key_path: Optional[str] = None,
-        password: Optional[str] = None,
-        extra_entropy: Union[str, bytes, int] = "",
-    ) -> None:
-        """
-        Instantiate an solana crypto object.
-
-        :param private_key_path: the private key path of the agent
-        :param password: the password to encrypt/decrypt the private key.
-        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
-        """
-        super().__init__(
-            private_key_path=private_key_path,
-            password=password,
-            extra_entropy=extra_entropy,
-        )
-
-    @property
-    def private_key(self) -> str:
-        """
-        Return a private key.
-
-        64 random hex characters (i.e. 32 bytes) prefix.
-
-        :return: a private key string in hex format
-        """
-
-        return base58.b58encode(self.entity.secret_key).decode()
-
-    @property
-    def public_key(self) -> str:
-        """
-        Return a public key in hex format.
-
-        :return: a public key string in hex format
-        """
-        return self.entity.public_key
-
-    @property
-    def address(self) -> str:
-        """
-        Return the address for the key pair.
-
-        :return: an address string in hex format
-        """
-        return self.entity.public_key.to_base58().decode()
-
-    @classmethod
-    def load_private_key_from_path(
-        cls, file_name: str, password: Optional[str] = None
-    ) -> Keypair:
-        """
-        Load a private key in base58 or bytes format from a file.
-
-        :param file_name: the path to the hex file.
-        :param password: the password to encrypt/decrypt the private key.
-        :return: the Entity.
-        """
-        key_path = Path(file_name)
-        private_key = cls.load(file_name, password)
-        try:
-            key = Keypair.from_secret_key(base58.b58decode(private_key))
-        except Exception as e:
-
-            raise KeyIsIncorrect(
-                f"Error on key `{key_path}` load! : Error: {repr(e)}.{'try password?' if password is None else ''}"
-            ) from e
-
-        return key
-
-    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
-        """
-        Sign a message in bytes string form.
-
-        :param message: the message to be signed
-        :param is_deprecated_mode: if the deprecated signing is used
-        :return: signature of the message in string form
-        """
-        if is_deprecated_mode:
-            raise ValueError("is_deprecated_mode is not supported at the moment")
-        keypair = Keypair.from_secret_key(base58.b58decode(self.private_key))
-        signed_msg = keypair.sign(message)
-
-        return signed_msg
-
-    def sign_transaction(
-        self, transaction: JSONLike, signers: Optional[list] = None
-    ) -> JSONLike:
-        """
-        Sign a transaction in bytes string form.
-
-        :param transaction: the transaction to be signed
-        :param signers: list of signers
-        :return: signed transaction
-        """
-        signers = signers or []
-        jsonTx = json.dumps(transaction)
-        stxn = sTransaction.from_json(jsonTx)
-        txn = Transaction.from_solders(stxn)
-
-        keypair = Keypair.from_secret_key(base58.b58decode(self.private_key))
-        signers = [
-            Keypair.from_secret_key(base58.b58decode(signer.private_key))
-            for signer in signers
-        ]
-        signers.append(keypair)
-
-        try:
-            txn.sign(*signers)
-        except Exception as e:
-            raise Exception(e)
-
-        tx = txn._solders.to_json()  # pylint: disable=protected-access
-        return json.loads(tx)
-
-    @classmethod
-    def generate_private_key(
-        cls, extra_entropy: Union[str, bytes, int] = ""
-    ) -> Keypair:
-        """
-        Generate a key pair for Solana network.
-
-        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
-        :return: keypair object
-        """
-        if extra_entropy:
-            raise ValueError("extra_entropy is not supported at the moment")
-        account = Keypair.generate()  # pylint: disable=no-value-for-parameter
-        return account
-
-    def encrypt(self, password: str) -> str:
-        """
-        Encrypt the private key and return in json.
-
-        :param password: the password to decrypt.
-        :return: json string containing encrypted private key.
-        """
-        try:
-            pw = str.encode(password)
-            hash_object = hashlib.sha256(pw)
-            hex_dig = hash_object.digest()
-            base64_bytes = base64.b64encode(hex_dig)
-            fernet = Fernet(base64_bytes)
-            enc_mac = fernet.encrypt(self.private_key.encode())
-        except Exception as e:
-            raise Exception("Encryption failed") from e
-
-        return json.dumps(enc_mac.decode())
-
-    @classmethod
-    def decrypt(cls, keyfile_json: str, password: str) -> str:
-        """
-        Decrypt the private key and return in raw form.
-
-        :param keyfile_json: json str containing encrypted private key.
-        :param password: the password to decrypt.
-        :return: the raw private key.
-        """
-        try:
-            keyfile = json.loads(keyfile_json)
-            keyfile_bytes = keyfile.encode()
-            pw = str.encode(password)
-            hash_object = hashlib.sha256(pw)
-            hex_dig = hash_object.digest()
-            base64_bytes = base64.b64encode(hex_dig)
-            fernet = Fernet(base64_bytes)
-
-            dec_mac = fernet.decrypt(keyfile_bytes).decode()
-        except ValueError as e:
-            raise DecryptError() from e
-        return dec_mac
-
-
-class SolanaHelper(Helper):
-    """Helper class usable as Mixin for SolanaApi or as standalone class."""
-
-    BlockhashCache: BlockhashCache  # defined in SolanaAPi.__init__
-    _api: Client  # defined in SolanaAPi.__init__
-
-    @classmethod
-    def load_contract_interface(
-        cls,
-        idl_file_path: Optional[Path] = None,
-        program_keypair: Optional[Crypto] = None,
-        program_address: Optional[str] = None,
-        rpc_api: Optional[str] = None,
-        bytecode_path: Optional[Path] = None,
-    ) -> Dict[str, Any]:  # type: ignore
-        """
-        Load contract interface.
-
-        :param idl_file_path: the file path to the IDL
-        :param program_keypair: the program keypair
-        :param program_address: the program address
-        :param rpc_api: the rpc api
-        :param bytecode_path: the file path to the bytecode
-
-        :return: the interface
-        """
-        if bytecode_path is not None:
-            in_file = open(bytecode_path, "rb")
-            bytecode = in_file.read()
-        else:
-            bytecode = None
-
-        if (
-            program_keypair is not None or program_address is not None
-        ) and rpc_api is not None:
-            try:
-                pid = program_address or program_keypair.address  # type: ignore # mypy doesnt recognize `if` condition above
-
-                base = PublicKey.find_program_address([], PublicKey(pid))[0]
-                idl_address = PublicKey.create_with_seed(
-                    base, "anchor:idl", PublicKey(pid)
-                )
-                client = Client(endpoint=rpc_api)
-                account_info = client.get_account_info(idl_address)
-
-                account_info_val = account_info.value
-                idl_account = _decode_idl_account(
-                    bytes(account_info_val.data)[ACCOUNT_DISCRIMINATOR_SIZE:]
-                )
-                inflated_idl = _pako_inflate(bytes(idl_account["data"])).decode()
-                json_idl = json.loads(inflated_idl)
-                return {
-                    "idl": json_idl,
-                    "bytecode": bytecode,
-                    "program_address": program_address,
-                    "program_keypair": program_keypair,
-                }
-            except Exception as e:
-                raise Exception("Could not locate IDL") from e
-
-        elif idl_file_path is not None:
-            with open_file(idl_file_path, "r") as interface_file_solana:
-                json_idl = json.load(interface_file_solana)
-
-            return {
-                "idl": json_idl,
-                "bytecode": bytecode,
-                "program_address": program_address,
-                "program_keypair": program_keypair,
-            }
-        else:
-            raise Exception("Could not locate IDL")
-
-    @staticmethod
-    def is_transaction_valid(
-        tx: JSONLike,
-        seller: Address,
-        client: Address,
-        tx_nonce: str,
-        amount: int,
-    ) -> bool:
-        """
-        Check whether a transaction is valid or not.
-
-        :param tx: the transaction.
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :param tx_nonce: the transaction nonce.
-        :param amount: the amount we expect to get from the transaction.
-
-        # noqa: DAR202
-
-        :return: True if the random_message is equals to tx['input']
-        """
-        raise NotImplementedError
-
-    @staticmethod
-    def is_transaction_settled(tx_receipt: JSONLike) -> bool:
-        """
-        Check whether a transaction is settled or not.
-
-        :param tx_receipt: the receipt associated to the transaction.
-        :return: True if the transaction has been settled, False o/w.
-        """
-        is_successful = False
-        if tx_receipt is not None:
-            is_successful = tx_receipt["meta"]["status"] == {"Ok": None}  # type: ignore
-        return is_successful
-
-    @staticmethod
-    def get_hash(message: bytes) -> str:
-        """
-        Get the hash of a message.
-
-        :param message: the message to be hashed.
-        :return: the hash of the message as a hex string.
-        """
-        sha = hashlib.sha256()
-        sha.update(message)
-        return sha.hexdigest()
-
-    @classmethod
-    def recover_message(
-        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        **TOBEIMPLEMENTED**
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-
-        # noqa: DAR202
-
-        :return: the recovered addresses
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def recover_public_keys_from_message(
-        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[str, ...]:
-        """
-        Get the public key used to produce the `signature` of the `message`
-
-        **TOBEIMPLEMENTED**
-
-        :param message: raw bytes used to produce signature
-        :param signature: signature of the message
-        :param is_deprecated_mode: if the deprecated signing was used
-
-        # noqa: DAR202
-
-        :return: the recovered public keys
-        """
-
-        raise NotImplementedError
-
-    @try_decorator("Unable to get nonce: {}", logger_method="warning")
-    def _generate_tx_nonce(self) -> str:
-        """
-        Fetch a latest blockhash to distinguish transactions with the same terms.
-
-        :return: return the blockhash as a nonce.
-        """
-
-        try:
-            blockhash = self.BlockhashCache.get()
-            return blockhash
-        except Exception:  # pylint: disable=broad-except
-            result = self._api.get_latest_blockhash()
-            blockhash_json = result.value.to_json()
-            blockhash = json.loads(blockhash_json)
-            self.BlockhashCache.set(
-                blockhash=blockhash["blockhash"], slot=result.context.slot
-            )
-            return blockhash["blockhash"]
-
-    @staticmethod
-    def generate_tx_nonce(seller: Address, client: Address) -> str:
-        """
-        Generate a unique hash to distinguish transactions with the same terms.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
-        """
-        time_stamp = int(time.time())
-        aggregate_hash = hashlib.sha256(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-        )
-        return aggregate_hash.hexdigest()
-
-    def add_nonce(self, tx: dict) -> JSONLike:
-        """
-        Check whether a transaction is valid or not.
-
-        :param tx: the transaction.
-        :return: True if the random_message is equals to tx['input']
-        """
-        jsonTx = json.dumps(tx)
-        stxn = sTransaction.from_json(jsonTx)
-        txObj = Transaction.from_solders(stxn)
-        # blockash in string format
-        nonce = self._generate_tx_nonce()
-        txObj.recent_blockhash = nonce
-        return json.loads(txObj._solders.to_json())  # pylint: disable=protected-access
-
-    @staticmethod
-    def to_transaction_format(tx: dict) -> Any:
-        """
-        Check whether a transaction is valid or not.
-
-        :param tx: the transaction.
-        :return: True if the random_message is equals to tx['input']
-        """
-        jsonTx = json.dumps(tx)
-        stxn = sTransaction.from_json(jsonTx)
-        return Transaction.from_solders(stxn)
-
-    @staticmethod
-    def to_dict_format(tx) -> JSONLike:
-        """
-        Check whether a transaction is valid or not.
-
-        :param tx: the transaction.
-        :return: True if the random_message is equals to tx['input']
-        """
-
-        return json.loads(tx._solders.to_json())  # pylint: disable=protected-access
-
-    @staticmethod
-    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
-        """
-        Retrieve the `contract_addresses` from a transaction receipt.
-
-        **Solana can have many contract addresses in one tx**
-
-        :param tx_receipt: the receipt of the transaction.
-        :return: the contract address, if present
-        """
-        contract_addresses = []
-        keys = tx_receipt["transaction"]["message"]["accountKeys"]  # type: ignore
-        for ix in tx_receipt["transaction"]["message"]["instructions"]:  # type: ignore
-            program_index = ix["programIdIndex"]  # type: ignore
-            contract_addresses.append(cast(str, keys[program_index]))  # type: ignore
-        return contract_addresses[0] if contract_addresses else None
-
-    @classmethod
-    def get_address_from_public_key(cls, public_key: PublicKey) -> str:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-
-        return public_key.to_base58().decode()
-
-    @classmethod
-    def is_valid_address(cls, address: str) -> bool:
-        """
-        Check if the address is valid.
-
-        :param address: the address to validate
-        :return: whether the address is valid
-        """
-        try:
-            PublicKey(address)
-            return True
-        except Exception:  # pylint: disable=broad-except
-            return False
+from solders.pubkey import Pubkey as PublicKey  # type: ignore
+
+from .transaction_instruction import TransactionInstruction
+from .utils import default_logger, pako_inflate
+from .solana_api import SolanaApiClient as BaseApi
+from .crypto import SolanaCrypto
+
+from .constants import (
+    _SOLANA,
+    _VERSION,
+    DEFAULT_ADDRESS,
+    DEFAULT_CHAIN_ID,
+)
+
+
+from solders.instruction import Instruction
+
+from solders import instruction
+from typing import NamedTuple
+from .helper import SolanaHelper
+from .transaction import SolanaTransaction
+from .solana_api import SolanaApiClient
 
 
 class SolanaApi(LedgerApi, SolanaHelper):
@@ -546,27 +97,76 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :param kwargs: keyword arguments
         """
 
-        Commitment = NewType("Commitment", str)
         """Type for commitment."""
 
-        Confirmed = Commitment("confirmed")
-
-        self._api = Client(
-            endpoint=kwargs.pop("address", DEFAULT_ADDRESS), commitment=Confirmed
+        self._api = SolanaApiClient(
+            endpoint=kwargs.pop("address", DEFAULT_ADDRESS),
         )
-
-        self.BlockhashCache = BlockhashCache(ttl=10)
-        result = self._api.get_latest_blockhash()
-        blockhash_json = result.value.to_json()
-        blockhash = json.loads(blockhash_json)
-        hash_ = blockhash["blockhash"]
-        self.BlockhashCache.set(blockhash=hash_, slot=result.context.slot)
 
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self._version = _VERSION
+        self.BlockhashCache = BlockhashCache(ttl=10)
+        self._get_latest_hash()
+
+    def _get_latest_hash(self):
+        """Get the latest block hash."""
+        result = self._api.get_latest_blockhash()
+        blockhash_json = result.value.to_json()
+        blockhash = json.loads(blockhash_json)
+        self._hash = blockhash["blockhash"]
+        self.BlockhashCache.set(blockhash=self._hash, slot=result.context.slot)
 
     @property
-    def api(self) -> Client:
+    def latest_hash(self):
+        """Get the latest hash."""
+        self._get_latest_hash()
+        return self._hash
+
+    def wait_get_receipt(
+            self, transaction_digest: str
+    ) -> Tuple[Optional[JSONLike], bool]:
+        transaction_receipt = None
+        not_settled = True
+        elapsed_time = 0
+        time_to_wait = 40
+        sleep_time = 0.25
+        while not_settled and elapsed_time < time_to_wait:
+            elapsed_time += sleep_time
+            time.sleep(sleep_time)
+            transaction_receipt = self.get_transaction_receipt(transaction_digest)
+            if transaction_receipt is None:
+                continue
+            is_settled = self.is_transaction_settled(transaction_receipt)
+            not_settled = not is_settled
+
+        return transaction_receipt, not not_settled
+
+    def construct_and_settle_tx(
+            self,
+            account1: SolanaCrypto,
+            account2: SolanaCrypto,
+            tx_params: dict,
+    ) -> Tuple[str, JSONLike, bool]:
+        """Construct and settle a transaction."""
+        transfer_transaction = self.get_transfer_transaction(
+            **tx_params, tx_fee=0, tx_nonce=""
+        )
+        # add nonce
+        transfer_transaction = self.add_nonce(transfer_transaction)
+
+        signed_transaction = account1.sign_transaction(transfer_transaction)
+
+        transaction_digest = self.send_signed_transaction(signed_transaction)
+        assert transaction_digest is not None, "Failed to submit transfer transaction!"
+
+        transaction_receipt, is_settled = self.wait_get_receipt(transaction_digest)
+
+        assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
+
+        return transaction_digest, transaction_receipt, is_settled
+
+    @property
+    def api(self) -> BaseApi:
         """Get the underlying API object."""
         return self._api
 
@@ -592,7 +192,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
     def _try_get_balance(self, address: Address, **_kwargs: Any) -> Optional[int]:
         """Get the balance of a given account."""
         response = self._api.get_balance(
-            PublicKey(address), commitment="processed"
+            PublicKey.from_string(address), commitment="processed"
         )  # pylint: disable=no-member
         return response.value
 
@@ -626,8 +226,9 @@ class SolanaApi(LedgerApi, SolanaHelper):
             )
             kwargs.pop("raise_on_try")
 
-        account_object = self._api.get_account_info_json_parsed(PublicKey(address))
+        account_object = self._api.get_account_info_json_parsed(PublicKey.from_string(address))
         account_info_val = account_object.value
+        breakpoint()
         return account_info_val
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
@@ -654,56 +255,63 @@ class SolanaApi(LedgerApi, SolanaHelper):
         chain_id = chain_id if chain_id is not None else self._chain_id
 
         state = self.get_state(destination_address)
+        # this is if there is no account yet at the destination address
+
         if state is None:
-            seed = "seed"
-            acc = PublicKey.create_with_seed(
-                PublicKey(sender_address),
-                seed,
-                PublicKey("11111111111111111111111111111111"),
-            )
-            params = CreateAccountWithSeedParams(
-                PublicKey(sender_address),
-                acc,
-                PublicKey(sender_address),
-                seed,
-                amount,
-                0,
-                PublicKey("11111111111111111111111111111111"),
-            )
-            ix_create_pda = TransactionInstruction.from_solders(
-                ssp.create_account_with_seed(params.to_solders())
+            # we need to create the account we first get the tx
+            # to create the account
+            # then we get the tx to transfer the funds
+            # then we combine the two txs
+            # then we sign the combined tx
+            # then we return the combined tx
+
+            create_account_ixn = self._api.get_create_account_instructions(
+                sender_address, destination_address
             )
 
-            params = ssp.TransferWithSeedParams(
-                from_pubkey=acc.to_solders(),
-                from_base=PublicKey(sender_address).to_solders(),
-                from_seed=seed,
-                from_owner=PublicKey("11111111111111111111111111111111").to_solders(),
-                to_pubkey=PublicKey(destination_address).to_solders(),
-                lamports=amount,
-            )
-            ix_transfer = TransactionInstruction.from_solders(
-                ssp.transfer_with_seed(params)
+            transfer_ixn = self._api.get_transfer_tx(
+                sender_address, destination_address, amount
             )
 
-            txn = (
-                Transaction(fee_payer=PublicKey(sender_address))
-                .add(ix_create_pda)
-                .add(ix_transfer)
+            txn = Transaction(
+                fee_payer=PublicKey.from_string(sender_address),
             )
+
+            ixn_1 = Instruction.from_json(json.dumps(create_account_ixn))
+            ixn_2 = Instruction.from_json(transfer_ixn.to_json())
+
+            # in solana we first create the account then we transfer the funds
+            txn.add(ixn_1).add(ixn_2)
+
+
+
+
+            # params = ssp.TransferWithSeedParams(
+            #     from_pubkey=acc,
+            #     from_base=PublicKey(sender_address),
+            #     from_seed=seed,
+            #     from_owner=PublicKey.from_bytes(bytes([1] * 32)),
+            #     to_pubkey=PublicKey(destination_address),
+            #     lamports=amount,
+            # )
+            # ix_transfer = TransactionInstruction.from_solders(
+            #     ssp.transfer_with_seed(params)
+            # )
+            #
+            #
+
         else:
-            txn = Transaction(fee_payer=sender_address).add(
+            txn = Transaction(fee_payer=PublicKey.from_string(sender_address)).add(
                 transfer(
                     TransferParams(
-                        from_pubkey=PublicKey(sender_address),
-                        to_pubkey=PublicKey(destination_address),
+                        from_pubkey=PublicKey.from_string(sender_address),
+                        to_pubkey=PublicKey.from_string(destination_address),
                         lamports=amount,
                     )
                 )
             )
 
-        tx = txn._solders.to_json()  # pylint: disable=protected-access
-
+        tx = txn.to_solders().to_json()  # pylint: disable=protected-access
         return json.loads(tx)
 
     def send_signed_transaction(
@@ -733,12 +341,17 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :return: tx_digest, if present
         """
 
-        jsonTx = json.dumps(tx_signed)
-        stxn = sTransaction.from_json(jsonTx)
-        txn = Transaction.from_solders(stxn)
-
-        txn_resp = self._api.send_raw_transaction(txn.serialize())
-
+        stxn = SolanaTransaction.from_json(tx_signed)
+        txn_resp = self._api.send_raw_transaction(bytes(stxn.serialize()))
+        retries = 2
+        while True and retries > 0:
+            try:
+                tx_digest = str(txn_resp.value)
+                self.get_transaction_receipt(tx_digest)
+                break
+            except ValueError:
+                time.sleep(1)
+            retries -= 1
         return txn_resp.to_json()
 
     def send_signed_transactions(
@@ -906,7 +519,8 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :return: the contract instance
         """
         bytecode_path = None  # bytecode is not provided for the moment
-        program_id = PublicKey(contract_address)
+        # breakpoint()
+        program_id = PublicKey.from_string(contract_address)
         idl = Idl.from_json(json.dumps(contract_interface["idl"]))
         pg = Program(idl, program_id)
 
@@ -1027,6 +641,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
             raise ValueError("Accounts are required")
         if "remaining_accounts" not in method_args:
             method_args["remaining_accounts"] = None
+        breakpoint()
 
         data = method_args["data"]
         accounts = method_args["accounts"]
@@ -1035,8 +650,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
         txn = contract_instance.transaction[method_name](
             *data, ctx=Context(accounts=accounts, remaining_accounts=remaining_accounts)
         )
-        tx = txn._solders.to_json()  # pylint: disable=protected-access
-        return json.loads(tx)
+        return json.loads(txn.to_solders().to_json())
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
         self,
@@ -1092,63 +706,29 @@ class SolanaApi(LedgerApi, SolanaHelper):
         return transfers  # type: ignore  # actually ok
 
 
-class SolanaFaucetApi(FaucetApi):
-    """Solana testnet faucet API."""
+        chain_id = kwargs.get("kwargs", None)
+        chain_id = chain_id if chain_id is not None else self._chain_id
 
-    identifier = _SOLANA
-    testnet_name = TESTNET_NAME
-    DEFAULT_AMOUNT = 1000000000
-
-    def get_wealth(self, address: Address, url: Optional[str] = None) -> None:
-        """
-        Get wealth from the faucet for the provided address.
-
-        :param address: the address.
-        :param url: the url
-
-        """
-        amount = self.DEFAULT_AMOUNT
-        self._try_get_wealth(address, amount, url)
-
-    @staticmethod
-    @try_decorator(
-        "An error occured while attempting to generate wealth:\n{}",
-        logger_method="error",
-    )
-    def _try_get_wealth(
-        address: Address, amount: Optional[int] = None, url: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Get wealth from the faucet for the provided address.
-
-        :param address: the address.
-        :param amount: optional int
-        :param url: the url
-
-        :return: optional string
-        """
-        if url is None:
-            url = DEFAULT_ADDRESS
-
-        if amount is None:
-            amount = int(LAMPORTS_PER_SOL * 0.5)
-        else:
-            amount = LAMPORTS_PER_SOL * amount
-
-        solana_client = Client(url, commitment="confirmed")
-        resp = solana_client.request_airdrop(PublicKey(address), amount)
-
-        response = json.loads(resp.to_json())
-        if "message" in response:
-            _default_logger.error("Response: {}".format(response["message"]))
-            raise Exception(response.get("message"))
-        if response["result"] is None:
-            _default_logger.error("Response: {}".format("airdrop failed"))
-        elif "error" in response:  # pragma: no cover
-            _default_logger.error("Response: {}".format("airdrop failed"))
-        elif "result" in response:  # pragma: nocover
-            _default_logger.warning(
-                "Response: {}\nMessage: {}".format("success", response["result"])
+        state = self.get_state(destination_address)
+        if state is None:
+            seed = "seed"
+            acc = PublicKey.create_with_seed(
+                PublicKey(sender_address),
+                seed,
+                PublicKey.from_bytes(bytes([1] * 32)),
             )
-            return response["result"]
-        raise Exception("airdrop failed")
+            params = CreateAccountWithSeedParams(
+                from_pubkey=PublicKey(sender_address),
+                to_pubkey=acc,
+                owner=PublicKey(sender_address),
+                base=acc,
+                seed=seed,
+                lamports=0,
+                space=0,
+            )
+            ix_create_pda = TransactionInstruction.from_solders(
+                ssp.create_account_with_seed(params)
+            )
+            transaction = Transaction(fee_payer=PublicKey(sender_address))
+            transaction = transaction.add(ix_create_pda)
+            breakpoint()

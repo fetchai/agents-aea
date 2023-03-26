@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023 Valory AG
+#   Copyright 2023 open_aea
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,8 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Python package wrapping the public and private key cryptography and ledger api of Solana."""
+"""
+This module contains the support resources for the signing protocol.
 
-from .solana import *  # noqa isort:skip
-from .facucet import SolanaFaucetApi
-from .constants import _IDL, _BYTECODE, _SOLANA , LAMPORTS_PER_SOL # noqa isort:skip
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea protocol generator version `1.0.0`.
+"""
+
+from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.serialization import SigningSerializer
+
+
+SigningMessage.serializer = SigningSerializer

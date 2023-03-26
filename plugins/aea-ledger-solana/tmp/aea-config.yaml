@@ -1,0 +1,40 @@
+agent_name: tmp
+author: valory
+version: 0.1.0
+license: Apache-2.0
+description: ''
+aea_version: '>=1.31.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- valory/ledger:0.19.0:bafybeighon6i2qfl2xrg7t3lbdzlkyo4v2a7ayvwso7m5w7pf2hvjfs2ma
+contracts:
+- valory/tic_tac_toe:0.1.0:bafybeiavaoyn7t2eq3vtbstjmizjgzbkpuenf242jot5hg3ztofi2crd6y
+protocols:
+- fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4
+- fetchai/fipa:1.0.0:bafybeiaoblqdglj4ln4otpmmsrimtxpdxqkzuhttsyabn7gi2rvzcx4pbm
+- open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4
+- valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
+- valory/ledger_api:1.0.0:bafybeidluywxchkacc7cz65nktqjg3y2vzzp43sw5hdhnvvonozogrmfie
+skills:
+- eightballer/solana_demo:0.1.0:bafybeidakxt6upv2x3fuhqsrkbk3mwbittg4a4tmyxabt5zcqcwbv6ncee
+default_ledger: solana
+required_ledgers:
+- solana
+default_routing: {}
+connection_private_key_paths: {}
+private_key_paths:
+  solana: solana_private_key.txt
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+dependencies:
+  open-aea-ledger-ethereum: {}
+default_connection: null
+---
+public_id: valory/ledger:0.19.0
+type: connection
+config:
+  ledger_apis:
+    solana:
+      address: https://rpc.ankr.com/solana_devnet

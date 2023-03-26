@@ -1,0 +1,24 @@
+name: signing
+author: open_aea
+version: 1.0.0
+protocol_specification_id: open_aea/signing:1.0.0
+type: protocol
+description: A protocol for communication between skills and decision maker.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeictzqfrs3zlpmirbelejsenkupesqh7nkjncbopkmamk7dkersmrm
+  __init__.py: bafybeib3ngpxzzdtepuvtx56nu7fsygh6vdqo5wwartke26pl6g3u6w2yq
+  custom_types.py: bafybeicbmroddjj6xvtoi6k6d2mt7iqr3uwxvhwt3ecpy5ze52ffc6i7bq
+  dialogues.py: bafybeihoh3bikzlt6trsgjykmi2apvi7heqiws4ilhqeobkabs4pzh6g3y
+  message.py: bafybeib3gcdkly2o2esud22ejpkklecba5gxnmdbaevqkv3g5j3dtwm6i4
+  serialization.py: bafybeiehcx5zw52q7jvhfkflt3umdw2mism6y5444gw3fffc56ttqpzzja
+  signing.proto: bafybeigbzr6x5wdmqzc7eanlz5xmvaoiwb4kwozgg3cugq63b7esicusra
+  signing_pb2.py: bafybeihph4sio6j7s773dbzc46qrt7hyepxo6banh3c3arwuafoekuaddy
+  tests/__init__.py: bafybeiaraxpv2z6r4e5rgmvnvdfv5rlrjdwbhqyjocxm2z2wkzpluezdey
+  tests/test_signing.py: bafybeifaiu6jzymbxhglisc57taub3igt5ftvs6c37s3ddonk7hxr2ni7i
+  tests/test_signing_dialogues.py: bafybeiewiya7lfnq4uiw3g2apa5mrxnzsy6lsu2xrbd5ljrm43rszrue7m
+  tests/test_signing_messages.py: bafybeiaiq6nx5v3tihclumgqpl32aqq7lr6vecqhifdefqze7inba67x6m
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

@@ -1,0 +1,60 @@
+name: solana_demo
+author: eightballer
+version: 0.1.0
+type: skill
+description: The scaffold skill is a scaffold for your own skill implementation.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeicvhz4r77ysvokn4ptt3tm3vnvka7v3mv7xcdzncrvjllmb3opoka
+  behaviours.py: bafybeiaqsu3ycvxkimzdkllkrwc3zi3easfuyo4ampbayszs2spjrdgu7y
+  handlers.py: bafybeidutbuyimhpfgmilkmx63yhuo7onezfslq2dfvbllx36tszrfizzy
+  my_model.py: bafybeibeb2nvouhajw3ubmqkhrsbb6zxqfvtxsk55rczgqtfle2vrlau4a
+fingerprint_ignore_patterns: []
+connections:
+- valory/ledger:0.19.0:bafybeighon6i2qfl2xrg7t3lbdzlkyo4v2a7ayvwso7m5w7pf2hvjfs2ma
+contracts: []
+protocols:
+- fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4
+- fetchai/fipa:1.0.0:bafybeiaoblqdglj4ln4otpmmsrimtxpdxqkzuhttsyabn7gi2rvzcx4pbm
+- open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4
+- valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
+- valory/ledger_api:1.0.0:bafybeidluywxchkacc7cz65nktqjg3y2vzzp43sw5hdhnvvonozogrmfie
+skills: []
+behaviours:
+  scaffold:
+    args:
+      foo: bar
+    class_name: SolanaDemoBehaviour
+handlers:
+  contract_handler:
+    args: {}
+    class_name: ContractApiHandler
+  ledger_handler:
+    args: {}
+    class_name: FarmingHandler
+  signing_handler:
+    args: {}
+    class_name: SigningHandler
+
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args: {}
+    class_name: SolanaDemoStrategy
+dependencies: {}
+is_abstract: false

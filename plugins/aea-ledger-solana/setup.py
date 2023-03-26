@@ -22,7 +22,6 @@
 
 from setuptools import find_packages, setup
 
-
 setup(
     name="open-aea-ledger-solana",
     version="1.31.0",
@@ -39,6 +38,7 @@ setup(
         "cryptography",
         "PyNaCl==1.5.0",
         "anchorpy @ git+https://github.com/8ball030/anchorpy.git",
+        "solana==0.29.2"
     ],
     tests_require=["pytest"],
     entry_points={
@@ -63,3 +63,9 @@ setup(
         "Topic :: Software Development",
     ],
 )
+
+def main():
+    """pass"""
+
+if __name__ == "__main__":
+    main()

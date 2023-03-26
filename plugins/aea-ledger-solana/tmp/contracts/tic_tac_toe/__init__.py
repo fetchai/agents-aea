@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023 Valory AG
+#   Copyright 2023 valory
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,8 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Python package wrapping the public and private key cryptography and ledger api of Solana."""
-
-from .solana import *  # noqa isort:skip
-from .facucet import SolanaFaucetApi
-from .constants import _IDL, _BYTECODE, _SOLANA , LAMPORTS_PER_SOL # noqa isort:skip
+"""This module contains the support resources for the scaffold contract."""

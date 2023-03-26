@@ -1,0 +1,24 @@
+name: default
+author: fetchai
+version: 1.0.0
+protocol_specification_id: fetchai/default:1.0.0
+type: protocol
+description: A protocol for exchanging any bytes message.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeiaalfafx7ky4iejqpyvm6pm44shf42v2r4ho7xqwm2cr4pym2ujqy
+  __init__.py: bafybeiasjzw7bluetdh2bpq7774w3j5pc5uwnxeinqtcvwn47k2yi3mc7u
+  custom_types.py: bafybeidl4g4c5dcouqmhiiv7vcrftx3d6at7ljkhcp5a7rgruphz4gkrxq
+  default.proto: bafybeid2a3fq62vzd7no6bfcq6adpt55kcqpzhktw3fag6s2mp2qajx6te
+  default_pb2.py: bafybeiarrr7dxi2k6lj4ojkcbm22qlnp6ci5or3nhaet3zqm3dreh4jcui
+  dialogues.py: bafybeid34oxweqdn54k5adele47gteynqhdfzespvw7txqn3m4oe35qwpq
+  message.py: bafybeiftnklfbfqrwiowd7s45xr4bpjwvolxg3hpkzjrxwqb2z4ldbnhv4
+  serialization.py: bafybeiblyhzoxojggf4shhedlbw76ecazagnhvzdcdsvk4bon6ykcyojte
+  tests/__init__.py: bafybeibkpidjsf6nzsd7fgkjzj2mf63xcwb5kua5esbo35x3ojef7dyhm4
+  tests/test_default.py: bafybeiedwbugubenec4cebkqsbdmwqiggljzj27z4uydhwvekhrf7fuw4e
+  tests/test_default_dialogues.py: bafybeidbeizy46jbnh5imujtscbuhoaafr52lipwpll6jogqb3qckgnlpu
+  tests/test_default_messages.py: bafybeiaccaruvxutr73mwozc57caquooocjm7gxp7ugdyxzqbbvx2syi4e
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

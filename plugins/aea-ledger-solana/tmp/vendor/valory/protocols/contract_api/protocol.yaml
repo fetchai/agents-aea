@@ -1,0 +1,24 @@
+name: contract_api
+author: valory
+version: 1.0.0
+protocol_specification_id: valory/contract_api:1.0.0
+type: protocol
+description: A protocol for contract APIs requests and responses.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeigaihpzixjv56vbuch6yqk5shzevt3rlpvchgqudmztid5mgchlqy
+  __init__.py: bafybeieo5jvwe7um4xw7ecxzxdi5o6rf3ld2yhupypuvrgryfqsdcurwse
+  contract_api.proto: bafybeiafpnyivdogs7omw2bxxxkmnbqcl3n32oqbzug65p7jimbeubgljy
+  contract_api_pb2.py: bafybeibienodnmdizkccinyi6ckbzbxsfnawnf7ejug2dd33c2bjvspyja
+  custom_types.py: bafybeiawof5bblaefwui5wgsou2ohvrxi2zrkdthehiet57qguplzsgrhu
+  dialogues.py: bafybeidsba6cyymlwva3cmghworge5gy7rawdhnivugzfzkvwy6unbjqea
+  message.py: bafybeigl7tyd2xmemv367qp55b63ck4z7giqg7g3tar6ulne3s55kdat4i
+  serialization.py: bafybeibawi6a4kp2ty2wcahexfkamrn6qwxhdbo7nkiatwbqm4wb2w3ae4
+  tests/__init__.py: bafybeicc5zmsziu4r5dwjnhckfbgnwbgydn7ekeyqsestutq2tusajqzmu
+  tests/test_contract_api.py: bafybeigszksq7bxi3skvw3zvpatkltgbnvnfatofjn63xnd5xds33iyni4
+  tests/test_contract_api_dialogues.py: bafybeifalicqk4g44sl5dpeuvls5dqtyfdgc6nwyuf5cl4fofis7fr3mnq
+  tests/test_contract_api_messages.py: bafybeigjdnyyxpzfje4ok7sxi6a3gstbgaryzjm2izoxmn4x5twsec35fa
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package aea.fetchai.fipa.v1_0_0;
+
+message FipaMessage{
+
+  // Custom Types
+  message Description{
+    bytes description_bytes = 1;
+  }
+
+  message Query{
+    bytes query_bytes = 1;
+  }
+
+
+  // Performatives and contents
+  message Cfp_Performative{
+    Query query = 1;
+  }
+
+  message Propose_Performative{
+    Description proposal = 1;
+  }
+
+  message Accept_W_Inform_Performative{
+    map<string, string> info = 1;
+  }
+
+  message Match_Accept_W_Inform_Performative{
+    map<string, string> info = 1;
+  }
+
+  message Inform_Performative{
+    map<string, string> info = 1;
+  }
+
+  message Accept_Performative{
+  }
+
+  message Decline_Performative{
+  }
+
+  message Match_Accept_Performative{
+  }
+
+  message End_Performative{
+  }
+
+
+  oneof performative{
+    Accept_Performative accept = 5;
+    Accept_W_Inform_Performative accept_w_inform = 6;
+    Cfp_Performative cfp = 7;
+    Decline_Performative decline = 8;
+    End_Performative end = 9;
+    Inform_Performative inform = 10;
+    Match_Accept_Performative match_accept = 11;
+    Match_Accept_W_Inform_Performative match_accept_w_inform = 12;
+    Propose_Performative propose = 13;
+  }
+}

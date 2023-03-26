@@ -23,6 +23,9 @@ import platform
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
+from solders.signature import Signature
+
+from tmp.contracts.tic_tac_toe.contract import MyScaffoldContract
 
 import pytest
 
@@ -41,6 +44,7 @@ from nacl.signing import VerifyKey
 
 from aea.common import JSONLike
 
+from solders.system_program import ID as SYS_PROGRAM_ID
 from tests.conftest import AIRDROP_AMOUNT, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
@@ -202,23 +206,22 @@ def test_sign_message():
 
     sig = wallet.sign_message(msg)
 
+    signature = Signature.from_string(sig)
+
     try:
-        result = VerifyKey(bytes(wallet.public_key)).verify(
-            smessage=msg2, signature=bytes(sig.to_bytes_array())
-        )
+        verification_key = VerifyKey(bytes(wallet.entity.pubkey()))
+        verification_key.verify(smessage=msg2, signature=bytes(signature))
     except Exception as e:
         assert e.args[0] == "Signature was forged or corrupt"
 
     try:
-        result = VerifyKey(bytes(wallet2.public_key)).verify(
-            smessage=msg, signature=bytes(sig.to_bytes_array())
-        )
+        verification_key = VerifyKey(bytes(wallet2.entity.pubkey()))
+        verification_key.verify(smessage=msg, signature=bytes(signature))
     except Exception as e:
         assert e.args[0] == "Signature was forged or corrupt"
 
-    result = VerifyKey(bytes(wallet.public_key)).verify(
-        smessage=msg, signature=bytes(sig.to_bytes_array())
-    )
+    verification_key = VerifyKey(bytes(wallet.entity.pubkey()))
+    result = verification_key.verify(smessage=msg, signature=bytes(signature))
 
     assert result == msg, "Failed to sign message"
 
@@ -279,7 +282,7 @@ def test_unfunded_transfer_transaction(solana_private_key_file):
     assert AMOUNT == balance3, "Should be the same balance"
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS, reruns_delay=5)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_funded_transfer_transaction(solana_private_key_file):
@@ -292,16 +295,16 @@ def test_funded_transfer_transaction(solana_private_key_file):
     solana_faucet_api.get_wealth(account1.address)
     solana_faucet_api.get_wealth(account2.address)
 
-    balance1 = solana_api.get_balance(account1.public_key)
-    balance2 = solana_api.get_balance(account2.public_key)
+    balance1 = solana_api.get_balance(account1.address)
+    balance2 = solana_api.get_balance(account2.address)
     assert balance1 >= solana_faucet_api.DEFAULT_AMOUNT
     assert balance2 >= solana_faucet_api.DEFAULT_AMOUNT
 
     AMOUNT = 2222
 
     tx_params = {
-        "sender_address": account1.public_key,
-        "destination_address": account2.public_key,
+        "sender_address": account1.address,
+        "destination_address": account2.address,
         "amount": AMOUNT,
     }
 
@@ -316,10 +319,10 @@ def test_funded_transfer_transaction(solana_private_key_file):
     tx = solana_api.get_transaction(transaction_digest)
 
     assert tx["blockTime"] == transaction_receipt["blockTime"], "Should be same"
-    assert balance2 + AMOUNT == solana_api.get_balance(account2.public_key)
+    assert balance2 + AMOUNT == solana_api.get_balance(account2.address)
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS, reruns_delay=5)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_sol_balance(caplog, solana_private_key_file):
@@ -344,9 +347,9 @@ def test_get_tx(caplog, solana_private_key_file):
 
         retries = 0
         tx_signature = None
-        while retries < MAX_FLAKY_RERUNS:
+        while retries <= MAX_FLAKY_RERUNS:
             tx_signature = solana_faucet_api._try_get_wealth(
-                sc.public_key, AIRDROP_AMOUNT
+                sc.address, AIRDROP_AMOUNT
             )
             if tx_signature is None:
                 retries += 1
@@ -416,6 +419,9 @@ def test_load_contract_instance():
     assert hasattr(instance["program"], "coder")
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS, reruns_delay=5)
 def test_get_transaction_transfer_logs(solana_private_key_file):
     """Test SolanaApi.get_transaction_transfer_logs."""
     solana_api = SolanaApi()
@@ -427,15 +433,15 @@ def test_get_transaction_transfer_logs(solana_private_key_file):
 
     account2 = SolanaCrypto()
 
-    balance1 = solana_api.get_balance(account1.public_key)
-    balance2 = solana_api.get_balance(account2.public_key)
+    balance1 = solana_api.get_balance(account1.address)
+    balance2 = solana_api.get_balance(account2.address)
     assert balance1 > 0
     assert balance2 >= 0
 
     AMOUNT = 1232323
     tx_params = {
-        "sender_address": account1.public_key,
-        "destination_address": account2.public_key,
+        "sender_address": account1.address,
+        "destination_address": account2.address,
         "amount": AMOUNT,
         "unfunded_account": True,
     }
@@ -505,7 +511,7 @@ def test_deploy_program():
     assert result is not None, "Should not be none"
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_contract_method_call():
@@ -526,16 +532,18 @@ def test_contract_method_call():
     payer = SolanaCrypto(str(payer_keypair_path))
     program_kp = SolanaCrypto(str(program_keypair_path))
 
+
     interface = sa.load_contract_interface(
         idl_file_path=idl_path, bytecode_path=bytecode_path, program_keypair=program_kp
     )
 
     instance = sa.get_contract_instance(
-        contract_interface=interface, contract_address=program_kp.address
+        contract_interface=interface,
+        contract_address=program_kp.address
     )
 
-    player1 = payer
     player2 = SolanaCrypto("./tests/data/solana_private_key2.txt")
+
     game = SolanaCrypto()
 
     resp = _generate_wealth_if_needed(sa, payer.address)
@@ -549,16 +557,16 @@ def test_contract_method_call():
     program.provider.wallet = payer.entity
 
     accounts = {
-        "game": game.public_key,
-        "player_one": payer.public_key,
-        "system_program": PublicKey("11111111111111111111111111111111"),
+        "game": game.entity.pubkey(),
+        "player_one": payer.entity.pubkey(),
+        "system_program": SYS_PROGRAM_ID,
     }
 
     tx = sa.build_transaction(
         program,
         "setup_game",
         method_args={
-            "data": (player2.public_key,),
+            "data": (player2.entity.pubkey(),),
             "accounts": accounts,
         },
         tx_args=None,
@@ -573,9 +581,9 @@ def test_contract_method_call():
 
     _, is_settled = _wait_get_receipt(sa, transaction_digest)
     assert is_settled is True
-    state = sa.get_state(game.public_key)
+    state = sa.get_state(game.address)
     decoded_state = program.coder.accounts.decode(state.data)
-
+    breakpoint()
     player1 = payer
     player2 = player2
     column = 0
@@ -583,9 +591,14 @@ def test_contract_method_call():
     # game loop
     while decoded_state.state.index == 0:
 
+
         active_player = player2 if decoded_state.turn % 2 == 0 else player1
         row = 0 if decoded_state.turn % 2 == 0 else 1
-        accounts = {"game": game.public_key, "player": active_player.public_key}
+        accounts = {
+            "game": game.entity.pubkey(),
+            "player": active_player.entity.pubkey(),
+            "system_program": game.entity.pubkey()
+        }
 
         tile = program.type["Tile"](row=row, column=column)
 
@@ -604,6 +617,7 @@ def test_contract_method_call():
         signed_transaction = active_player.sign_transaction(
             tx1,
         )
+        breakpoint()
 
         transaction_digest = sa.send_signed_transaction(signed_transaction)
         assert transaction_digest is not None
@@ -616,3 +630,27 @@ def test_contract_method_call():
             column += 1
 
     assert decoded_state.state.winner == player1.public_key
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+def test_get_create_account_tx():
+    """Test whether the create account function necessary for the sending of a transaction to new account works."""
+    solana_api = SolanaApi()
+    account_1 = SolanaCrypto()
+    account_2 = SolanaCrypto()
+    tx = solana_api._api.get_create_account_instructions(sender_address=account_1.address, destination_address=account_2.address,
+                                                        lamports=1)
+
+def test_can_sign_create_account_transaction():
+    """Test whether the create account function necessary for the sending of a transaction to new account works."""
+    solana_api = SolanaApi()
+    account_1 = SolanaCrypto()
+    account_2 = SolanaCrypto()
+    # tx = solana_api._api.get_create_account_tx(
+    #     sender_address=account_1.address, destination_address=account_2.address)
+    # # we use a known recent block hash
+    # tx['recentBlockhash'] = solana_api.latest_hash
+    # tx["signatures"] = [[0]]
+    # signed_tx = account_1.sign_transaction(tx)
+    # assert signed_tx is not None
