@@ -53,6 +53,7 @@ player1_keypair_path = Path(ROOT_DIR, "tests", "data", "solana_private_key1.txt"
 player2_keypair_path = Path(ROOT_DIR, "tests", "data", "solana_private_key2.txt")
 
 # helper functions #
+EXAMPLE_PUBLIC_ADDRESS = "A8eco8kzjUk5CdefzuM1nZMUDmuZ7Eg4UfAstfCqFNTi"
 
 
 def retry_airdrop_if_result_none(faucet, address, amount=None):

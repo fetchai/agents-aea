@@ -25,7 +25,7 @@ def test_get_wealth_increments_native_balance(caplog, solana_private_key_file):
     """Test the balance increases after faucet request."""
     solana_api = SolanaApi()
     solana_faucet = SolanaFaucetApi()
-    sc = SolanaCrypto(solana_private_key_file)
+    sc = SolanaCrypto()
     pre_balance = solana_api.get_balance(sc.address)
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.solana._default_logger"):
         resp = solana_faucet.generate_wealth_if_needed(
