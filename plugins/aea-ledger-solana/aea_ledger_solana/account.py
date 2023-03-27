@@ -18,7 +18,9 @@ class AccountMeta:
 
     @classmethod
     def from_solders(cls, meta: instruction.AccountMeta):
-        """Convert from a `solders` AccountMeta.
+        """
+        Convert from a `solders` AccountMeta.
+
         Args:
             meta: The `solders` AccountMeta.
         Returns:
@@ -31,7 +33,9 @@ class AccountMeta:
         )
 
     def to_solders(self) -> instruction.AccountMeta:
-        """Convert to a `solders` AccountMeta.
+        """
+        Convert to a `solders` AccountMeta.
+
         Returns:
             The `solders` AccountMeta.
         """

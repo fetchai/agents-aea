@@ -2,6 +2,8 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.helper
 
+This module contains the tests of the solana module.
+
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.helper.SolanaHelper"></a>
 
 ## SolanaHelper Objects

@@ -242,7 +242,6 @@ class SolanaHelper(Helper):
         stxn = SolanaTransaction.from_json(tx)
         nonce = self._generate_tx_nonce()
         txn = stxn.to_json()
-        # txn["message"]["header"]["numReadonlySignedAccounts"] = 0
         txn["recentBlockhash"] = nonce
         return txn
 

@@ -2,7 +2,7 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.transaction
 
-Solana transaction.
+This module contains the tests of the solana module.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.transaction.SolanaTransaction"></a>
 

@@ -2,7 +2,7 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.transaction`_`instruction
 
-Transaction Instruction class.
+This module contains the tests of the solana module.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.transaction_instruction.TransactionInstruction"></a>
 

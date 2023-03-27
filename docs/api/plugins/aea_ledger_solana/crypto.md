@@ -2,6 +2,8 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.crypto
 
+This module contains the tests of the solana module.
+
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.crypto.SolanaCrypto"></a>
 
 ## SolanaCrypto Objects
@@ -28,7 +30,7 @@ Instantiate a solana crypto object.
 
 - `private_key_path`: the private key path of the agent
 - `password`: the password to encrypt/decrypt the private key.
-- `extra_entropy`: add extra randomness to whatever randomness your OS can provide
+- `extra_entropy`: add extra randomness to whatever randomness from OS.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.crypto.SolanaCrypto.private_key"></a>
 

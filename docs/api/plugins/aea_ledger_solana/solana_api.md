@@ -2,15 +2,7 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.solana`_`api
 
-<a id="plugins.aea-ledger-solana.aea_ledger_solana.solana_api.HashNotProvided"></a>
-
-## HashNotProvided Objects
-
-```python
-class HashNotProvided()
-```
-
-
+This module contains the tests of the solana module.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana_api.SolanaApiClient"></a>
 

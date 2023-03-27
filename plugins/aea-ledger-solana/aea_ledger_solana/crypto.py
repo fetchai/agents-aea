@@ -17,11 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the solana module."""
+
 import base64
 import hashlib
 import json
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
+from typing import Optional, Union
 
 import base58
 from cryptography.fernet import Fernet  # type: ignore
@@ -29,9 +30,9 @@ from solders.hash import Hash
 from solders.keypair import Keypair
 from solders.transaction import Transaction
 
-from aea.common import Address, JSONLike
-from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
-from aea.crypto.helpers import DecryptError
+from aea.common import JSONLike
+from aea.crypto.base import Crypto
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
 from .constants import _SOLANA
 
@@ -69,7 +70,6 @@ class SolanaCrypto(Crypto[Keypair]):
 
         :return: a private key string in hex format
         """
-        key = cast(Keypair, self.entity)
         seed = bytes(self.entity.secret())
         private_key = seed + bytes.fromhex(self.public_key)
         return base58.b58encode(private_key).decode()

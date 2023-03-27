@@ -39,6 +39,17 @@ def latest_hash()
 
 Get the latest hash.
 
+<a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.wait_get_receipt"></a>
+
+#### wait`_`get`_`receipt
+
+```python
+def wait_get_receipt(
+        transaction_digest: str) -> Tuple[Optional[JSONLike], bool]
+```
+
+Wait for the transaction to be settled and return the receipt.
+
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.solana.SolanaApi.construct_and_settle_tx"></a>
 
 #### construct`_`and`_`settle`_`tx
@@ -56,7 +67,7 @@ Construct and settle a transaction.
 
 ```python
 @property
-def api() -> BaseApi
+def api() -> SolanaApiClient
 ```
 
 Get the underlying API object.

@@ -41,18 +41,16 @@ from solders.system_program import (  # type: ignore; SYS_PROGRAM_ID,
 )
 
 from aea.common import Address, JSONLike
-from aea.crypto.base import FaucetApi, Helper, LedgerApi
-from aea.crypto.helpers import DecryptError, KeyIsIncorrect
+from aea.crypto.base import LedgerApi
 from aea.helpers.base import try_decorator
-from aea.helpers.io import open_file
 
 from .constants import DEFAULT_ADDRESS, DEFAULT_CHAIN_ID, _SOLANA, _VERSION
 from .crypto import SolanaCrypto
+from .faucet import SolanaFaucetApi  # noqa: F401
 from .helper import SolanaHelper
 from .solana_api import SolanaApiClient
 from .transaction import SolanaTransaction
 from .transaction_instruction import TransactionInstruction
-from .utils import pako_inflate
 
 
 class SolanaApi(LedgerApi, SolanaHelper):
@@ -95,6 +93,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
     def wait_get_receipt(
         self, transaction_digest: str
     ) -> Tuple[Optional[JSONLike], bool]:
+        """Wait for the transaction to be settled and return the receipt."""
         transaction_receipt = None
         not_settled = True
         elapsed_time = 0
@@ -472,7 +471,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :return: the contract instance
         """
         bytecode_path = None  # bytecode is not provided for the moment
-        # breakpoint()
         program_id = PublicKey.from_string(contract_address)
         idl = Idl.from_json(json.dumps(contract_interface["idl"]))
         pg = Program(idl, program_id)
@@ -656,30 +654,3 @@ class SolanaApi(LedgerApi, SolanaHelper):
             }
 
         return transfers  # type: ignore  # actually ok
-
-        chain_id = kwargs.get("kwargs", None)
-        chain_id = chain_id if chain_id is not None else self._chain_id
-
-        state = self.get_state(destination_address)
-        if state is None:
-            seed = "seed"
-            acc = PublicKey.create_with_seed(
-                PublicKey(sender_address),
-                seed,
-                PublicKey.from_bytes(bytes([1] * 32)),
-            )
-            params = CreateAccountWithSeedParams(
-                from_pubkey=PublicKey(sender_address),
-                to_pubkey=acc,
-                owner=PublicKey(sender_address),
-                base=acc,
-                seed=seed,
-                lamports=0,
-                space=0,
-            )
-            ix_create_pda = TransactionInstruction.from_solders(
-                ssp.create_account_with_seed(params)
-            )
-            transaction = Transaction(fee_payer=PublicKey(sender_address))
-            transaction = transaction.add(ix_create_pda)
-            breakpoint()

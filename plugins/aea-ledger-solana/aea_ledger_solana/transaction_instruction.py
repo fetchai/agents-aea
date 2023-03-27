@@ -40,7 +40,9 @@ class TransactionInstruction(NamedTuple):
 
     @classmethod
     def from_solders(cls, ixn: instruction.Instruction):
-        """Convert from a `solders` instruction.
+        """
+        Convert from a `solders` instruction.
+
         Args:
             ixn: The `solders` instruction.
         Returns:
@@ -51,7 +53,9 @@ class TransactionInstruction(NamedTuple):
         return cls(keys=keys, program_id=program_id, data=ixn.data)
 
     def to_solders(self) -> instruction.Instruction:
-        """Convert to a `solders` instruction.
+        """
+        Convert to a `solders` instruction.
+
         Returns:
             The `solders` instruction.
         """
