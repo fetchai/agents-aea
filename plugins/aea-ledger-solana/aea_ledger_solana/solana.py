@@ -126,13 +126,14 @@ class SolanaApi(LedgerApi, SolanaHelper):
         signed_transaction = account1.sign_transaction(transfer_transaction)
 
         transaction_digest = self.send_signed_transaction(signed_transaction)
-        assert transaction_digest is not None, "Failed to submit transfer transaction!"
+        if transaction_digest is None:
+            raise  Exception("Failed to submit transfer transaction!")
 
         transaction_receipt, is_settled = self.wait_get_receipt(transaction_digest)
 
-        assert (
-            transaction_receipt is not None
-        ), "Failed to retrieve transaction receipt."
+        if transaction_receipt is None:
+            raise  Exception("Failed to settle transfer transaction!")
+
 
         return transaction_digest, transaction_receipt, is_settled
 
