@@ -26,6 +26,7 @@ from aea.skills.base import Model
 
 class SolanaDemoStrategy(Model):
     """This class scaffolds a model."""
+
     _ledger_id: str
     _in_flight: bool
     _balance: 0
@@ -66,16 +67,15 @@ class SolanaDemoStrategy(Model):
         """Set the has_transferred_lamports."""
         self._has_transferred = value
 
-
-
-
     def __init__(self, **kwargs):
         """Initialize the strategy of the agent."""
         super().__init__(**kwargs)
         self._ledger_id = self.context.default_ledger_id
         self._in_flight = False
         self._balance = None
-        self.context.logger.info(f"SolanaDemoStrategy: Running on ledger {self.ledger_id}")
+        self.context.logger.info(
+            f"SolanaDemoStrategy: Running on ledger {self.ledger_id}"
+        )
         self.failed_txs = 0
 
     def get_transfer_terms(self) -> Terms:
@@ -93,7 +93,6 @@ class SolanaDemoStrategy(Model):
             quantities_by_good_id={
                 "lamports": 1000000000,
             },
-
             fee_by_currency_id={
                 "lamports": 1000000000,
             },

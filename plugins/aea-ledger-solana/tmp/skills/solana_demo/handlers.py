@@ -44,7 +44,7 @@ from packages.eightballer.skills.solana_demo.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
     SigningDialogues,
-    SigningDialogue
+    SigningDialogue,
 )
 from packages.open_aea.protocols.signing.message import SigningMessage
 from packages.valory.protocols.contract_api.message import ContractApiMessage
@@ -83,28 +83,72 @@ class FarmingHandler(Handler):
             if ledger_api_msg.balance != strategy.balance:
                 strategy.balance = ledger_api_msg.balance
                 self.context.logger.info(f"Balance is {strategy.balance}")
-        elif ledger_api_msg.performative is LedgerApiMessage.Performative.TRANSACTION_DIGEST:
+        elif (
+            ledger_api_msg.performative
+            is LedgerApiMessage.Performative.TRANSACTION_DIGEST
+        ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
         elif (
-                ledger_api_msg.performative
-                is LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+            ledger_api_msg.performative
+            is LedgerApiMessage.Performative.TRANSACTION_RECEIPT
         ):
             self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         else:
             if ledger_api_msg.performative is LedgerApiMessage.Performative.ERROR:
-                self.context.logger.error(f"Error with the ledger message.\n{ledger_api_msg}")
+                self.context.logger.error(
+                    f"Error with the ledger message.\n{ledger_api_msg}"
+                )
                 strategy.failed_txs += 1
                 strategy.transacting = False
             else:
-                breakpoint()
-                raise NotImplementedError
+                if (
+                    ledger_api_msg.performative
+                    == LedgerApiMessage.Performative.RAW_TRANSACTION
+                ):
+                    # we need to sign the transaction
+                    self._handle_raw_transaction(ledger_api_msg, ledger_api_dialogue)
+                else:
+                    raise NotImplementedError
+
+    def _handle_raw_transaction(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of raw_transaction performative.
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        strategy = cast(SolanaDemoStrategy, self.context.strategy)
+        ledger_api = LedgerApis.get_api(strategy.ledger_id)
+        # note, we need to get the nonce using a ledger api call not yet implemented.
+
+        contract_api_msg.raw_transaction._body = ledger_api.add_nonce(
+            contract_api_msg.raw_transaction.body
+        )
+
+        self.context.logger.info("received raw transaction={}".format(contract_api_msg))
+        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty=self.context.decision_maker_address,
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            raw_transaction=contract_api_msg.raw_transaction,
+            terms=strategy.get_transfer_terms(),
+        )
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
+        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
+        self.context.decision_maker_message_queue.put_nowait(signing_msg)
+        self.context.logger.info(
+            "proposing the transaction to the decision maker. Waiting for confirmation ..."
+        )
 
     def teardown(self) -> None:
         """Implement the handler teardown."""
         return
 
     def _handle_transaction_receipt(
-            self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
         """
         Handle a message of transaction_receipt performative.
@@ -122,7 +166,7 @@ class FarmingHandler(Handler):
         strategy.transacting = False
 
     def _handle_transaction_digest(
-            self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
         """
         Handle a message of transaction_digest performative.
@@ -134,13 +178,17 @@ class FarmingHandler(Handler):
                 ledger_api_msg.transaction_digest.body
             )
         )
-        msg = ledger_api_dialogue.reply(
-            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-            target_message=ledger_api_msg,
-            transaction_digest=ledger_api_msg.transaction_digest,
-        )
-        self.context.outbox.put_message(message=msg)
-        self.context.logger.info("requesting transaction receipt.")
+        strategy = cast(SolanaDemoStrategy, self.context.strategy)
+        strategy.in_flight = False
+        strategy.has_transferred_lamports = True
+        # this works for the ethereum ledger api not for the solana ledger api
+        # msg = ledger_api_dialogue.reply(
+        #     performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+        #     target_message=ledger_api_msg,
+        #     transaction_digest=ledger_api_msg.transaction_digest,
+        # )
+        # self.context.outbox.put_message(message=msg)
+        # self.context.logger.info("requesting transaction receipt.")
 
 
 class SigningHandler(Handler):
@@ -196,7 +244,7 @@ class SigningHandler(Handler):
         )
 
     def _handle_signed_transaction(
-            self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
     ) -> None:
         """
         Handle an oef search message.
@@ -219,7 +267,7 @@ class SigningHandler(Handler):
         self.context.logger.info("sending transaction to ledger.")
 
     def _handle_error(
-            self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
     ) -> None:
         """
         Handle an oef search message.
@@ -235,7 +283,7 @@ class SigningHandler(Handler):
         raise ValueError("Error in siging message")
 
     def _handle_invalid(
-            self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
     ) -> None:
         """
         Handle an oef search message.
@@ -280,8 +328,8 @@ class ContractApiHandler(Handler):
 
         # handle message
         if (
-                contract_api_msg.performative
-                is ContractApiMessage.Performative.RAW_TRANSACTION
+            contract_api_msg.performative
+            is ContractApiMessage.Performative.RAW_TRANSACTION
         ):
             self._handle_raw_transaction(contract_api_msg, contract_api_dialogue)
         elif contract_api_msg.performative == ContractApiMessage.Performative.ERROR:
@@ -295,10 +343,12 @@ class ContractApiHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         if contract_api_dialogue.last_outgoing_message.callable == "poolLength":
             strategy.total_pids = contract_api_msg.state.body["result"]
-            self.context.logger.info(f"Total pools paying sushi rewards {strategy.total_pids}")
+            self.context.logger.info(
+                f"Total pools paying sushi rewards {strategy.total_pids}"
+            )
         elif contract_api_dialogue.last_outgoing_message.callable == "pendingSushi":
-            pid = contract_api_dialogue.last_outgoing_message.kwargs.body.get('pid')
-            amt = contract_api_msg.state.body.get('amt')
+            pid = contract_api_dialogue.last_outgoing_message.kwargs.body.get("pid")
+            amt = contract_api_msg.state.body.get("amt")
             if amt > 0:
                 strategy.pending_sushi_pools[pid] = amt
                 self.context.logger.info(f"Sushi Pending harvest {pid} - {amt}")
@@ -310,7 +360,7 @@ class ContractApiHandler(Handler):
         """
 
     def _handle_unidentified_dialogue(
-            self, contract_api_msg: ContractApiMessage
+        self, contract_api_msg: ContractApiMessage
     ) -> None:
         """
         Handle an unidentified dialogue.
@@ -323,9 +373,9 @@ class ContractApiHandler(Handler):
         )
 
     def _handle_raw_transaction(
-            self,
-            contract_api_msg: ContractApiMessage,
-            contract_api_dialogue: ContractApiDialogue,
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
     ) -> None:
         """
         Handle a message of raw_transaction performative.
@@ -348,9 +398,9 @@ class ContractApiHandler(Handler):
         )
 
     def _handle_error(
-            self,
-            contract_api_msg: ContractApiMessage,
-            contract_api_dialogue: ContractApiDialogue,
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
     ) -> None:
         """
         Handle a message of error performative.
@@ -367,9 +417,9 @@ class ContractApiHandler(Handler):
         strategy.transacting = False
 
     def _handle_invalid(
-            self,
-            contract_api_msg: ContractApiMessage,
-            contract_api_dialogue: ContractApiDialogue,
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
     ) -> None:
         """
         Handle a message of invalid performative.
@@ -378,6 +428,7 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
+                contract_api_msg.performative,
+                contract_api_dialogue,
             )
         )

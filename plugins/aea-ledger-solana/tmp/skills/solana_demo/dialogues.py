@@ -253,7 +253,6 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         )
 
 
-
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 

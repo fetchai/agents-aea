@@ -167,7 +167,6 @@ _sym_db.RegisterMessage(SigningMessage.Signed_Message_Performative)
 _sym_db.RegisterMessage(SigningMessage.Error_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _SIGNINGMESSAGE._serialized_start = 47
     _SIGNINGMESSAGE._serialized_end = 1643

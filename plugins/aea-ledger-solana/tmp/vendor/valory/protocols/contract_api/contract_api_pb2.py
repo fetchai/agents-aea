@@ -181,7 +181,6 @@ _sym_db.RegisterMessage(ContractApiMessage.Raw_Message_Performative)
 _sym_db.RegisterMessage(ContractApiMessage.Error_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _CONTRACTAPIMESSAGE._serialized_start = 55
     _CONTRACTAPIMESSAGE._serialized_end = 2235

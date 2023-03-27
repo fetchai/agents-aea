@@ -311,7 +311,6 @@ _sym_db.RegisterMessage(LedgerApiMessage.State_Performative)
 _sym_db.RegisterMessage(LedgerApiMessage.Error_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _LEDGERAPIMESSAGE._serialized_start = 51
     _LEDGERAPIMESSAGE._serialized_end = 3549

@@ -32,6 +32,7 @@ from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 from packages.eightballer.skills.solana_demo.strategy import SolanaDemoStrategy
 
 from aea_ledger_solana import SolanaApi, SolanaFaucetApi
+
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
@@ -75,8 +76,7 @@ class SolanaDemoBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             ledger_id=strategy.ledger_id,
-            address=cast(str, self.context.agent_addresses.get(
-                strategy.ledger_id)),
+            address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
         )
         self.context.outbox.put_message(message=ledger_api_msg)
 
@@ -84,7 +84,9 @@ class SolanaDemoBehaviour(TickerBehaviour):
         """Use the faucet to request wealth. Note this is not a good way to do this and is only for devnet."""
         solana_api = SolanaApi()
         solana_faucet = SolanaFaucetApi()
-        solana_faucet.generate_wealth_if_needed(solana_api, self.context.agent_address, 1000000000000000000)
+        solana_faucet.generate_wealth_if_needed(
+            solana_api, self.context.agent_address, 1000000000000000000
+        )
 
     def _send_transfer(self):
         """We send a transfer request to a known address"""

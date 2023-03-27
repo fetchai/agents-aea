@@ -37,8 +37,8 @@ setup(
         "solders==0.14.0",
         "cryptography",
         "PyNaCl==1.5.0",
-        "anchorpy @ git+https://github.com/8ball030/anchorpy.git",
-        "solana==0.29.2"
+        "anchorpy==0.16.0",
+        "solana==0.29.2",
     ],
     tests_require=["pytest"],
     entry_points={
@@ -64,8 +64,10 @@ setup(
     ],
 )
 
+
 def main():
     """pass"""
+
 
 if __name__ == "__main__":
     main()
