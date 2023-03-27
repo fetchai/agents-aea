@@ -195,7 +195,6 @@ def test_sign_message():
     wallet2 = SolanaCrypto()
     msg = bytes("hello", "utf8")
     msg2 = bytes("hellooo", "utf8")
-
     sig = wallet.sign_message(msg)
 
     signature = Signature.from_string(sig)
