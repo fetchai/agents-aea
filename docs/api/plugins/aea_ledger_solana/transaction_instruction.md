@@ -51,6 +51,8 @@ Convert from a `solders` instruction.
 **Returns**:
 
   The `solana-py` instruction.
+  # noqa: DAR201
+  # noqa: DAR101
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.transaction_instruction.TransactionInstruction.to_solders"></a>
 
@@ -65,4 +67,6 @@ Convert to a `solders` instruction.
 **Returns**:
 
   The `solders` instruction.
+  # noqa: DAR201
+  # noqa: DAR101
 

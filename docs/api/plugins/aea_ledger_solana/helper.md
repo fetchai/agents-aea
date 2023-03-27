@@ -210,14 +210,6 @@ def to_transaction_format(tx: dict) -> Any
 
 Check whether a transaction is valid or not.
 
-**Arguments**:
-
-- `tx`: the transaction.
-
-**Returns**:
-
-True if the random_message is equals to tx['input']
-
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.helper.SolanaHelper.to_dict_format"></a>
 
 #### to`_`dict`_`format
