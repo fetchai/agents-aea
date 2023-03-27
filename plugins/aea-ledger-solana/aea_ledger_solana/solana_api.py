@@ -21,18 +21,13 @@
 import json
 from dataclasses import dataclass
 from random import randint
-from typing import NewType
 
 import solders.system_program as sp
-from anchorpy import Program
-from solana.blockhash import BlockhashCache  # type: ignore
 from solana.rpc.api import Client as ApiClient
-from solders.instruction import AccountMeta
 from solders.pubkey import Pubkey as PublicKey
 from solders.system_program import ID as SYS_PROGRAM_ID
 from solders.system_program import TransferParams, transfer
 from spl.token.client import Token as SplClient
-from spl.token.core import AccountInfo
 
 
 @dataclass
@@ -57,15 +52,15 @@ class SolanaApiClient(ApiClient):
         required_balance = SplClient.get_min_balance_rent_for_exempt_for_account(self)
 
         seed = str(randint(0, 1000000000))
-        acc = Pubkey.create_with_seed(
-            Pubkey.from_string(sender_address),
+        acc = PublicKey.create_with_seed(
+            PublicKey.from_string(sender_address),
             seed,
             SYS_PROGRAM_ID,
         )
         params = sp.CreateAccountWithSeedParams(
-            from_pubkey=Pubkey.from_string(sender_address),
+            from_pubkey=PublicKey.from_string(sender_address),
             to_pubkey=acc,
-            base=Pubkey.from_string(sender_address),
+            base=PublicKey.from_string(sender_address),
             seed=seed,
             lamports=max([lamports, required_balance]),
             space=space,

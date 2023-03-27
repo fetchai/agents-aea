@@ -19,6 +19,7 @@
 """This module contains the tests of the solana module."""
 import hashlib
 import json
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, cast
 
@@ -33,7 +34,6 @@ from aea.crypto.base import Crypto, Helper
 from aea.helpers.base import try_decorator
 
 from .transaction import SolanaTransaction
-from .transaction_instruction import TransactionInstruction
 from .utils import pako_inflate
 
 
@@ -255,8 +255,8 @@ class SolanaHelper(Helper):
         :return: True if the random_message is equals to tx['input']
         """
         jsonTx = json.dumps(tx)
-        stxn = sTransaction.from_json(jsonTx)
-        return Transaction.from_solders(stxn)
+        stxn = SolanaTransaction.from_json(jsonTx)  # mypy: ignore
+        return SolanaTransaction.from_solders(stxn)
 
     @staticmethod
     def to_dict_format(tx) -> JSONLike:

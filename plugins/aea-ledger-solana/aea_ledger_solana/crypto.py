@@ -21,17 +21,17 @@ import base64
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import List, Optional, Tuple, Union, cast
 
 import base58
 from cryptography.fernet import Fernet  # type: ignore
 from solders.hash import Hash
 from solders.keypair import Keypair
-from solders.pubkey import Pubkey as PublicKey
 from solders.transaction import Transaction
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.crypto.helpers import DecryptError
 
 from .constants import _SOLANA
 
@@ -52,7 +52,7 @@ class SolanaCrypto(Crypto[Keypair]):
 
         :param private_key_path: the private key path of the agent
         :param password: the password to encrypt/decrypt the private key.
-        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :param extra_entropy: add extra randomness to whatever randomness from OS.
         """
         super().__init__(
             private_key_path=private_key_path,

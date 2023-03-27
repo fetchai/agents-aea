@@ -74,7 +74,7 @@ def _generate_wealth_if_needed(
         cnt = 0
         transaction_digest = None
         while transaction_digest is None and cnt < 10:
-            transaction_digest = faucet._try_get_wealth(address)
+            transaction_digest = faucet.try_get_wealth(address)
             cnt += 1
             time.sleep(10)
 
@@ -340,7 +340,7 @@ def test_get_tx(caplog, solana_private_key_file):
         retries = 0
         tx_signature = None
         while retries <= MAX_FLAKY_RERUNS:
-            tx_signature = solana_faucet_api._try_get_wealth(sc.address, AIRDROP_AMOUNT)
+            tx_signature = solana_faucet_api.try_get_wealth(sc.address, AIRDROP_AMOUNT)
             if tx_signature is None:
                 retries += 1
                 time.sleep(2)

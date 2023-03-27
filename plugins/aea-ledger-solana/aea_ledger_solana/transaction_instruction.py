@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the solana module."""
 
-"""Transaction Instruction class."""
-
 from typing import List, NamedTuple
 
 from solders import instruction

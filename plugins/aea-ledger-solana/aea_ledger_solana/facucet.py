@@ -28,14 +28,7 @@ from aea.common import Address
 from aea.crypto.base import FaucetApi
 from aea.helpers.base import try_decorator
 
-from .constants import (
-    DEFAULT_ADDRESS,
-    DEFAULT_CHAIN_ID,
-    DEFAULT_CURRENCY_DENOM,
-    LAMPORTS_PER_SOL,
-    TESTNET_NAME,
-    _SOLANA,
-)
+from .constants import DEFAULT_ADDRESS, LAMPORTS_PER_SOL, TESTNET_NAME, _SOLANA
 from .utils import default_logger
 
 
@@ -55,14 +48,14 @@ class SolanaFaucetApi(FaucetApi):
 
         """
         amount = self.DEFAULT_AMOUNT
-        self._try_get_wealth(address, amount, url)
+        self.try_get_wealth(address, amount, url)
 
     @staticmethod
     @try_decorator(
         "An error occurred while attempting to generate wealth:\n{}",
         logger_method="error",
     )
-    def _try_get_wealth(
+    def try_get_wealth(
         address: Address, amount: Optional[int] = None, url: Optional[str] = None
     ) -> Optional[str]:
         """
@@ -88,7 +81,7 @@ class SolanaFaucetApi(FaucetApi):
         response = json.loads(resp.to_json())
         if "message" in response:
             default_logger.error("Response: {}".format(response["message"]))
-            raise Exception(response.get("message"))
+            raise Exception(response.get("message"))  # pylint
         if response["result"] is None:
             default_logger.error("Response: {}".format("airdrop failed"))
         elif "error" in response:  # pragma: no cover
@@ -106,25 +99,23 @@ class SolanaFaucetApi(FaucetApi):
         address,
         min_amount=None,
     ) -> Union[str, None]:
+        """Check the balance prior to generating wealth."""
         balance = api.get_balance(address)
 
         min_balance = min_amount if min_amount is not None else 1000000000
         if balance >= min_balance:
             return "not required"
-        else:
-            faucet = SolanaFaucetApi()
-            cnt = 0
-            transaction_digest = None
-            while transaction_digest is None and cnt < 10:
-                transaction_digest = faucet._try_get_wealth(address)
-                cnt += 1
-                time.sleep(5)
+        faucet = SolanaFaucetApi()
+        cnt = 0
+        transaction_digest = None
+        while transaction_digest is None and cnt < 10:
+            transaction_digest = faucet.try_get_wealth(address)
+            cnt += 1
+            time.sleep(5)
 
-            if transaction_digest is None:
-                return "failed"
-            else:
-                _, is_settled = api.wait_get_receipt(transaction_digest)
-                if is_settled is True:
-                    return "success"
-                else:
-                    return "failed"
+        if transaction_digest is None:
+            return "failed"
+        _, is_settled = api.wait_get_receipt(transaction_digest)
+        if is_settled is True:
+            return "success"
+        return "failed"

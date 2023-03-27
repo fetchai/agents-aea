@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the solana module."""
-"""Solana transaction."""
 import json
 
 from solana.transaction import Transaction
