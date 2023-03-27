@@ -27,11 +27,7 @@ default_logger = logging.getLogger(__name__)
 
 
 def pako_inflate(data: Any) -> bytes:
-    """
-    https://stackoverflow.com/questions/46351275/using-pako-deflate-with-python
-    Decompress data using pako inflate.
-    :param data: the data to decompress.
-    """
+    """Decompress data using pako inflate. https://stackoverflow.com/questions/46351275/using-pako-deflate-with-python."""
 
     decompress = zlib.decompressobj(15)
     decompressed_data = decompress.decompress(data)
