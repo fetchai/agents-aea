@@ -55,3 +55,6 @@ hexbytes = "==0.3.0"
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
 # aea and plugin dependencies are specified in setup.py
+solana = "==0.29.2"
+anchorpy = {git = "https://github.com/kevinheavey/anchorpy.git"}
+apduboy = {git = "https://github.com/LedgerHQ/apduboy.git"}
