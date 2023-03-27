@@ -56,6 +56,6 @@ hexbytes = "==0.3.0"
 # aea and plugin dependencies are specified in setup.py
 
 # pending upstream releases.
-solana = "==0.29.2"
-anchorpy = {git = "https://github.com/kevinheavey/anchorpy.git"}
-apduboy = {git = "https://github.com/LedgerHQ/apduboy.git"}
+# solana = "==0.29.2"
+# anchorpy = {git = "https://github.com/kevinheavey/anchorpy.git"}
+# apduboy = {git = "https://github.com/LedgerHQ/apduboy.git"}
