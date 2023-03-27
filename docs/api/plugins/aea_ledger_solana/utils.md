@@ -9,10 +9,14 @@ Utility functions for the Solana ledger.
 #### pako`_`inflate
 
 ```python
-def pako_inflate(data)
+def pako_inflate(data: Any) -> bytes
 ```
+
+https://stackoverflow.com/questions/46351275/using-pako-deflate-with-python
 
 Decompress data using pako inflate.
 
-https://stackoverflow.com/questions/46351275/using-pako-deflate-with-python
+**Arguments**:
+
+- `data`: the data to decompress.
 

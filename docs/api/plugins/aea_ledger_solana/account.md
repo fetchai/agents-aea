@@ -44,14 +44,6 @@ def from_solders(cls, meta: instruction.AccountMeta)
 
 Convert from a `solders` AccountMeta.
 
-**Arguments**:
-
-- `meta` - The `solders` AccountMeta.
-
-**Returns**:
-
-  The `solana-py` AccountMeta.
-
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.account.AccountMeta.to_solders"></a>
 
 #### to`_`solders
@@ -61,8 +53,4 @@ def to_solders() -> instruction.AccountMeta
 ```
 
 Convert to a `solders` AccountMeta.
-
-**Returns**:
-
-  The `solders` AccountMeta.
 

@@ -47,6 +47,8 @@ class TransactionInstruction(NamedTuple):
             ixn: The `solders` instruction.
         Returns:
             The `solana-py` instruction.
+        # noqa: DAR201
+        # noqa: DAR101
         """
         keys = [AccountMeta.from_solders(am) for am in ixn.accounts]
         program_id = PublicKey.from_bytes(bytes(ixn.program_id))
@@ -58,6 +60,8 @@ class TransactionInstruction(NamedTuple):
 
         Returns:
             The `solders` instruction.
+        # noqa: DAR201
+        # noqa: DAR101
         """
         accounts = [key for key in self.keys]
         return instruction.Instruction(

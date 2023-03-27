@@ -36,14 +36,7 @@ class AccountMeta:
 
     @classmethod
     def from_solders(cls, meta: instruction.AccountMeta):
-        """
-        Convert from a `solders` AccountMeta.
-
-        Args:
-            meta: The `solders` AccountMeta.
-        Returns:
-            The `solana-py` AccountMeta.
-        """
+        """Convert from a `solders` AccountMeta."""
         return cls(
             pubkey=PublicKey.from_bytes(bytes(meta.pubkey)),
             is_signer=meta.is_signer,
@@ -51,12 +44,7 @@ class AccountMeta:
         )
 
     def to_solders(self) -> instruction.AccountMeta:
-        """
-        Convert to a `solders` AccountMeta.
-
-        Returns:
-            The `solders` AccountMeta.
-        """
+        """Convert to a `solders` AccountMeta."""
         return instruction.AccountMeta(
             pubkey=self.pubkey, is_signer=self.is_signer, is_writable=self.is_writable
         )
