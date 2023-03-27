@@ -18,31 +18,15 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the solana module."""
 
-"""Unit tests for SPL-token instructions."""
-import asyncio
-import time
-from typing import NamedTuple
-
 import pytest
-import spl.token.instructions as spl_token
 from aea_ledger_solana import SolanaApi, SolanaCrypto, SolanaFaucetApi
-from solana.rpc.api import Client
-from solana.rpc.async_api import AsyncClient
-from solana.rpc.commitment import Processed
 from solana.transaction import Transaction
 from solders import system_program as sp
-from solders.hash import Hash as Blockhash
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
-from solders.system_program import CreateAccountParams, CreateAccountWithSeedParams
+from solders.system_program import CreateAccountWithSeedParams
 from solders.system_program import ID as SYS_PROGRAM_ID
-from solders.system_program import (
-    TransferParams,
-    create_account,
-    create_account_with_seed,
-    transfer,
-)
-from spl.token.constants import TOKEN_PROGRAM_ID
+from solders.system_program import TransferParams, transfer
 
 
 @pytest.fixture
@@ -52,13 +36,13 @@ def test_client():
 
 
 #
-#
+
+
 @pytest.mark.integration
 def test_send_transaction_and_get_balance(
     test_client,
 ):
     """Test sending a transaction to localnet."""
-    # Create transfer tx to transfer 1m lamports from sender to receiver
 
     sender = SolanaCrypto()
     receiver = SolanaCrypto()

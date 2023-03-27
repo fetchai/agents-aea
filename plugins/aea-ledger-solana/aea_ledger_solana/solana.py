@@ -29,7 +29,8 @@ import base58
 from anchorpy import Context, Idl, Program  # type: ignore
 from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE  # type: ignore
 from anchorpy.idl import _decode_idl_account  # type: ignore
-from cryptography.fernet import Fernet  # type: ignore
+
+# from cryptography.fernet import Fernet  # type: ignore
 from solana.blockhash import BlockhashCache
 from solana.transaction import Transaction  # type: ignore
 
@@ -42,7 +43,7 @@ from solana.transaction import Transaction  # type: ignore
 #     transfer,
 # )
 # from solana.transaction import Transaction, TransactionInstruction  # type: ignore
-from solders import instruction
+# from solders import instruction
 from solders import system_program as ssp  # type: ignore
 from solders.instruction import Instruction
 from solders.null_signer import NullSigner
