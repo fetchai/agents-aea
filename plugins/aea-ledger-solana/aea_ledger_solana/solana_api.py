@@ -51,9 +51,9 @@ class SolanaApiClient(ApiClient):
         """Create a new account."""
         required_balance = SplClient.get_min_balance_rent_for_exempt_for_account(self)
 
-        seed = str(
+        seed = str(  # nosec - we should retrive this from on chian somewhere.
             randint(0, 1000000000)
-        )  # nosec - we should retrive this from on chian somewhere.
+        )
         acc = PublicKey.create_with_seed(
             PublicKey.from_string(sender_address),
             seed,
