@@ -426,6 +426,8 @@ jobs:
       - common_checks_4
       - dependencies_checks
       - plugins_install_check
+    env:
+      PYTHONUTF8: 1  # mostly for windows to work properly with utf8 files
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

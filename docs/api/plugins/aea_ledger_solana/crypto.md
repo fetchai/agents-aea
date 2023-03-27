@@ -2,7 +2,7 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.crypto
 
-This module contains the tests of the solana module.
+This module contains the Crypto implementation for the solana ledger.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.crypto.SolanaCrypto"></a>
 
