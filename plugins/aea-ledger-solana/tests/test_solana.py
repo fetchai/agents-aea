@@ -23,26 +23,20 @@ import platform
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
-from solders.signature import Signature
 
 import pytest
+from solders.signature import Signature
 
 
 if platform.system() != "Linux":
     pytest.skip("Runs only on linux", allow_module_level=True)
 
-from aea_ledger_solana import (
-    LAMPORTS_PER_SOL,
-    PublicKey,
-    SolanaApi,
-    SolanaCrypto,
-    SolanaFaucetApi,
-)
+from aea_ledger_solana import LAMPORTS_PER_SOL, SolanaApi, SolanaCrypto, SolanaFaucetApi
 from nacl.signing import VerifyKey
+from solders.system_program import ID as SYS_PROGRAM_ID
 
 from aea.common import JSONLike
 
-from solders.system_program import ID as SYS_PROGRAM_ID
 from tests.conftest import AIRDROP_AMOUNT, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
@@ -80,7 +74,7 @@ def _generate_wealth_if_needed(
         cnt = 0
         transaction_digest = None
         while transaction_digest is None and cnt < 10:
-            transaction_digest = faucet._try_get_wealth(address)
+            transaction_digest = faucet.try_get_wealth(address)
             cnt += 1
             time.sleep(10)
 
@@ -201,7 +195,6 @@ def test_sign_message():
     wallet2 = SolanaCrypto()
     msg = bytes("hello", "utf8")
     msg2 = bytes("hellooo", "utf8")
-
     sig = wallet.sign_message(msg)
 
     signature = Signature.from_string(sig)
@@ -346,7 +339,7 @@ def test_get_tx(caplog, solana_private_key_file):
         retries = 0
         tx_signature = None
         while retries <= MAX_FLAKY_RERUNS:
-            tx_signature = solana_faucet_api._try_get_wealth(sc.address, AIRDROP_AMOUNT)
+            tx_signature = solana_faucet_api.try_get_wealth(sc.address, AIRDROP_AMOUNT)
             if tx_signature is None:
                 retries += 1
                 time.sleep(2)
@@ -634,17 +627,4 @@ def test_get_create_account_tx():
         destination_address=account_2.address,
         lamports=1,
     )
-
-
-def test_can_sign_create_account_transaction():
-    """Test whether the create account function necessary for the sending of a transaction to new account works."""
-    solana_api = SolanaApi()
-    account_1 = SolanaCrypto()
-    account_2 = SolanaCrypto()
-    # tx = solana_api._api.get_create_account_tx(
-    #     sender_address=account_1.address, destination_address=account_2.address)
-    # # we use a known recent block hash
-    # tx['recentBlockhash'] = solana_api.latest_hash
-    # tx["signatures"] = [[0]]
-    # signed_tx = account_1.sign_transaction(tx)
-    # assert signed_tx is not None
+    assert tx is not None, "Create account transaction is None"

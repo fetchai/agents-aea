@@ -17,74 +17,40 @@
 #
 # ------------------------------------------------------------------------------
 """Solana module wrapping the public and private key cryptography and ledger api."""
-import base64
-import hashlib
 import json
 import logging
 import time
-from pathlib import Path
-from typing import Any, Dict, List, NewType, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple
 
-import base58
 from anchorpy import Context, Idl, Program  # type: ignore
-from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE  # type: ignore
-from anchorpy.idl import _decode_idl_account  # type: ignore
-from cryptography.fernet import Fernet  # type: ignore
 from solana.blockhash import BlockhashCache
-
-# from solana.system_program import (  # type: ignore
-#     CreateAccountParams,
-#     CreateAccountWithSeedParams,
-#     SYS_PROGRAM_ID,
-#     TransferParams,
-#     create_account,
-#     transfer,
-# )
-# from solana.transaction import Transaction, TransactionInstruction  # type: ignore
-from solders import system_program as ssp  # type: ignore
-from solders.null_signer import NullSigner
-from solders.signature import Signature  # type: ignore
 from solana.transaction import Transaction  # type: ignore
-
-
-from solders.system_program import (  # type: ignore
+from solders import system_program as ssp  # type: ignore
+from solders.instruction import Instruction
+from solders.pubkey import Pubkey as PublicKey  # type: ignore
+from solders.signature import Signature  # type: ignore
+from solders.system_program import (  # type: ignore; SYS_PROGRAM_ID,
     CreateAccountParams,
     CreateAccountWithSeedParams,
-    # SYS_PROGRAM_ID,
+)
+from solders.system_program import ID as SYS_PROGRAM_ID  # type: ignore
+from solders.system_program import (  # type: ignore; SYS_PROGRAM_ID,
     TransferParams,
     create_account,
     transfer,
 )
 
-from solders.system_program import ID as SYS_PROGRAM_ID  # type: ignore
 from aea.common import Address, JSONLike
-from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
-from aea.crypto.helpers import DecryptError, KeyIsIncorrect
+from aea.crypto.base import LedgerApi
 from aea.helpers.base import try_decorator
-from aea.helpers.io import open_file
 
-from solders.pubkey import Pubkey as PublicKey  # type: ignore
-
-from .transaction_instruction import TransactionInstruction
-from .utils import default_logger, pako_inflate
-from .solana_api import SolanaApiClient as BaseApi
+from .constants import DEFAULT_ADDRESS, DEFAULT_CHAIN_ID, _SOLANA, _VERSION
 from .crypto import SolanaCrypto
-
-from .constants import (
-    _SOLANA,
-    _VERSION,
-    DEFAULT_ADDRESS,
-    DEFAULT_CHAIN_ID,
-)
-
-
-from solders.instruction import Instruction
-
-from solders import instruction
-from typing import NamedTuple
+from .faucet import SolanaFaucetApi  # noqa: F401
 from .helper import SolanaHelper
-from .transaction import SolanaTransaction
 from .solana_api import SolanaApiClient
+from .transaction import SolanaTransaction
+from .transaction_instruction import TransactionInstruction
 
 
 class SolanaApi(LedgerApi, SolanaHelper):
@@ -127,6 +93,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
     def wait_get_receipt(
         self, transaction_digest: str
     ) -> Tuple[Optional[JSONLike], bool]:
+        """Wait for the transaction to be settled and return the receipt."""
         transaction_receipt = None
         not_settled = True
         elapsed_time = 0
@@ -159,18 +126,19 @@ class SolanaApi(LedgerApi, SolanaHelper):
         signed_transaction = account1.sign_transaction(transfer_transaction)
 
         transaction_digest = self.send_signed_transaction(signed_transaction)
-        assert transaction_digest is not None, "Failed to submit transfer transaction!"
+        if transaction_digest is None:
+            raise  Exception("Failed to submit transfer transaction!")
 
         transaction_receipt, is_settled = self.wait_get_receipt(transaction_digest)
 
-        assert (
-            transaction_receipt is not None
-        ), "Failed to retrieve transaction receipt."
+        if transaction_receipt is None:
+            raise  Exception("Failed to settle transfer transaction!")
+
 
         return transaction_digest, transaction_receipt, is_settled
 
     @property
-    def api(self) -> BaseApi:
+    def api(self) -> SolanaApiClient:
         """Get the underlying API object."""
         return self._api
 
@@ -504,7 +472,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
         :return: the contract instance
         """
         bytecode_path = None  # bytecode is not provided for the moment
-        # breakpoint()
         program_id = PublicKey.from_string(contract_address)
         idl = Idl.from_json(json.dumps(contract_interface["idl"]))
         pg = Program(idl, program_id)
@@ -688,30 +655,3 @@ class SolanaApi(LedgerApi, SolanaHelper):
             }
 
         return transfers  # type: ignore  # actually ok
-
-        chain_id = kwargs.get("kwargs", None)
-        chain_id = chain_id if chain_id is not None else self._chain_id
-
-        state = self.get_state(destination_address)
-        if state is None:
-            seed = "seed"
-            acc = PublicKey.create_with_seed(
-                PublicKey(sender_address),
-                seed,
-                PublicKey.from_bytes(bytes([1] * 32)),
-            )
-            params = CreateAccountWithSeedParams(
-                from_pubkey=PublicKey(sender_address),
-                to_pubkey=acc,
-                owner=PublicKey(sender_address),
-                base=acc,
-                seed=seed,
-                lamports=0,
-                space=0,
-            )
-            ix_create_pda = TransactionInstruction.from_solders(
-                ssp.create_account_with_seed(params)
-            )
-            transaction = Transaction(fee_payer=PublicKey(sender_address))
-            transaction = transaction.add(ix_create_pda)
-            breakpoint()

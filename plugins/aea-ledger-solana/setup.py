@@ -22,6 +22,7 @@
 
 from setuptools import find_packages, setup
 
+
 setup(
     name="open-aea-ledger-solana",
     version="1.31.0",
@@ -63,11 +64,3 @@ setup(
         "Topic :: Software Development",
     ],
 )
-
-
-def main():
-    """pass"""
-
-
-if __name__ == "__main__":
-    main()

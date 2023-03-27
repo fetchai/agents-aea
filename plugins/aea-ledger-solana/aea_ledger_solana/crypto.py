@@ -1,19 +1,40 @@
-import base64
-from solders.hash import Hash
-import json
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2023 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""This module contains the tests of the solana module."""
 
-from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+import base64
+import hashlib
+import json
+from pathlib import Path
+from typing import Optional, Union
+
+import base58
+from cryptography.fernet import Fernet  # type: ignore
+from solders.hash import Hash
+from solders.keypair import Keypair
 from solders.transaction import Transaction
 
+from aea.common import JSONLike
+from aea.crypto.base import Crypto
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect
+
 from .constants import _SOLANA
-from typing import Any, Dict, Optional, Tuple, cast, Union
-from cryptography.fernet import Fernet  # type: ignore
-from solders.keypair import Keypair
-from aea.common import Address, JSONLike
-from pathlib import Path
-import base58
-import hashlib
-from solders.pubkey import Pubkey as PublicKey
 
 
 class SolanaCrypto(Crypto[Keypair]):
@@ -32,7 +53,7 @@ class SolanaCrypto(Crypto[Keypair]):
 
         :param private_key_path: the private key path of the agent
         :param password: the password to encrypt/decrypt the private key.
-        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :param extra_entropy: add extra randomness to whatever randomness from OS.
         """
         super().__init__(
             private_key_path=private_key_path,
@@ -49,7 +70,6 @@ class SolanaCrypto(Crypto[Keypair]):
 
         :return: a private key string in hex format
         """
-        key = cast(Keypair, self.entity)
         seed = bytes(self.entity.secret())
         private_key = seed + bytes.fromhex(self.public_key)
         return base58.b58encode(private_key).decode()

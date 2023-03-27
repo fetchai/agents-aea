@@ -1,27 +1,33 @@
-from random import randint
-from typing import NewType
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2023 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""This module contains the tests of the solana module."""
+
 import json
-
-from solana.rpc.api import Client as ApiClient
-from solders.null_signer import NullSigner
-from solders.system_program import CreateAccountParams, TransferParams
-from spl.token.client import Token as SplClient
 from dataclasses import dataclass
-from solana.blockhash import BlockhashCache  # type: ignore
-from solders.pubkey import Pubkey as PublicKey
-from solders.system_program import create_account, transfer
-from spl.token.core import AccountInfo
-from spl.token.constants import ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID
+from random import randint
+
 import solders.system_program as sp
-from solders.pubkey import Pubkey
+from solana.rpc.api import Client as ApiClient
+from solders.pubkey import Pubkey as PublicKey
 from solders.system_program import ID as SYS_PROGRAM_ID
-
-from solders.instruction import AccountMeta
-from anchorpy import Program
-
-
-class HashNotProvided:
-    """"""
+from solders.system_program import TransferParams, transfer
+from spl.token.client import Token as SplClient
 
 
 @dataclass
@@ -45,16 +51,16 @@ class SolanaApiClient(ApiClient):
         """Create a new account."""
         required_balance = SplClient.get_min_balance_rent_for_exempt_for_account(self)
 
-        seed = str(randint(0, 1000000000))
-        acc = Pubkey.create_with_seed(
-            Pubkey.from_string(sender_address),
+        seed = str(randint(0, 1000000000))  # nosec - we should retrive this from on chian somewhere.
+        acc = PublicKey.create_with_seed(
+            PublicKey.from_string(sender_address),
             seed,
             SYS_PROGRAM_ID,
         )
         params = sp.CreateAccountWithSeedParams(
-            from_pubkey=Pubkey.from_string(sender_address),
+            from_pubkey=PublicKey.from_string(sender_address),
             to_pubkey=acc,
-            base=Pubkey.from_string(sender_address),
+            base=PublicKey.from_string(sender_address),
             seed=seed,
             lamports=max([lamports, required_balance]),
             space=space,

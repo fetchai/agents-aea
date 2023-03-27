@@ -1,21 +1,40 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2023 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""This module contains the tests of the solana module."""
 import hashlib
+import json
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple, cast
 
-from aea.common import JSONLike, Address
 from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE
 from anchorpy.idl import _decode_idl_account
 from solana.blockhash import BlockhashCache  # type: ignore
-from aea.crypto.base import Helper, Crypto
 from solana.rpc.api import Client  # type: ignore
-from pathlib import Path
 from solders.pubkey import Pubkey as PublicKey
+
+from aea.common import Address, JSONLike
+from aea.crypto.base import Crypto, Helper
 from aea.helpers.base import try_decorator
 
-import json
-from typing import Any, Dict, Optional, Tuple, cast
-
-from .utils import pako_inflate
-from .transaction_instruction import TransactionInstruction
 from .transaction import SolanaTransaction
+from .utils import pako_inflate
 
 
 class SolanaHelper(Helper):
@@ -223,7 +242,6 @@ class SolanaHelper(Helper):
         stxn = SolanaTransaction.from_json(tx)
         nonce = self._generate_tx_nonce()
         txn = stxn.to_json()
-        # txn["message"]["header"]["numReadonlySignedAccounts"] = 0
         txn["recentBlockhash"] = nonce
         return txn
 
@@ -236,8 +254,8 @@ class SolanaHelper(Helper):
         :return: True if the random_message is equals to tx['input']
         """
         jsonTx = json.dumps(tx)
-        stxn = sTransaction.from_json(jsonTx)
-        return Transaction.from_solders(stxn)
+        stxn = SolanaTransaction.from_json(jsonTx)  # mypy: ignore
+        return SolanaTransaction.from_solders(stxn)
 
     @staticmethod
     def to_dict_format(tx) -> JSONLike:
