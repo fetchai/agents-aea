@@ -262,6 +262,8 @@ jobs:
   plugins_install_check:
     continue-on-error: False
     runs-on: ${{ matrix.sys.os }}
+    env:
+      PYTHONUTF8: 1 
     strategy:
       matrix:
         sys:
