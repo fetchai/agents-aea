@@ -22,12 +22,7 @@ import logging
 import pytest
 from aea_ledger_solana import SolanaApi, SolanaCrypto
 
-from tests.conftest import (
-    AIRDROP_AMOUNT,
-    MAX_FLAKY_RERUNS,
-    ROOT_DIR,
-    SOLANA_PRIVATE_KEY_FILE,
-)
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 def test_creation(solana_private_key_file):

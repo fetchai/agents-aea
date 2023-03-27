@@ -31,13 +31,7 @@ from solders.signature import Signature
 if platform.system() != "Linux":
     pytest.skip("Runs only on linux", allow_module_level=True)
 
-from aea_ledger_solana import (
-    LAMPORTS_PER_SOL,
-    PublicKey,
-    SolanaApi,
-    SolanaCrypto,
-    SolanaFaucetApi,
-)
+from aea_ledger_solana import LAMPORTS_PER_SOL, SolanaApi, SolanaCrypto, SolanaFaucetApi
 from nacl.signing import VerifyKey
 from solders.system_program import ID as SYS_PROGRAM_ID
 
@@ -634,17 +628,4 @@ def test_get_create_account_tx():
         destination_address=account_2.address,
         lamports=1,
     )
-
-
-def test_can_sign_create_account_transaction():
-    """Test whether the create account function necessary for the sending of a transaction to new account works."""
-    solana_api = SolanaApi()
-    account_1 = SolanaCrypto()
-    account_2 = SolanaCrypto()
-    # tx = solana_api._api.get_create_account_tx(
-    #     sender_address=account_1.address, destination_address=account_2.address)
-    # # we use a known recent block hash
-    # tx['recentBlockhash'] = solana_api.latest_hash
-    # tx["signatures"] = [[0]]
-    # signed_tx = account_1.sign_transaction(tx)
-    # assert signed_tx is not None
+    assert tx is not None, "Create account transaction is None"

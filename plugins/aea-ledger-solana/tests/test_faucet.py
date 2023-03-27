@@ -22,7 +22,7 @@ import logging
 import pytest
 from aea_ledger_solana import SolanaApi, SolanaCrypto, SolanaFaucetApi
 
-from tests.conftest import AIRDROP_AMOUNT, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import AIRDROP_AMOUNT
 
 
 @pytest.mark.ledger
