@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Tests to ensure the contracts work as expected."""
+import platform
 from pathlib import Path
 
 import anchorpy
@@ -92,6 +93,7 @@ def _get_token_contract(solana_api):
     return instance, interface, program_key_pair
 
 
+@pytest.mark.skipif(platform.system() == "Windows", reason="Windows not supported")
 def _get_tic_tac_contract(solana_api):
     """Create a contract."""
     idl_path = Path(
