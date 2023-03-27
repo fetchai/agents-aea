@@ -247,12 +247,7 @@ class SolanaHelper(Helper):
 
     @staticmethod
     def to_transaction_format(tx: dict) -> Any:
-        """
-        Check whether a transaction is valid or not.
-
-        :param tx: the transaction.
-        :return: True if the random_message is equals to tx['input']
-        """
+        """Check whether a transaction is valid or not."""
         jsonTx = json.dumps(tx)
         stxn = SolanaTransaction.from_json(jsonTx)  # mypy: ignore
         return SolanaTransaction.from_solders(stxn)
