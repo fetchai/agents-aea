@@ -10,10 +10,10 @@ packages = [{include = "new_env"}]
 python = "^3.10"
 open-aea-ledger-solana = {path = "../plugins/aea-ledger-solana"}
 open-aea-ledger-ethereum-hwi = {path = "../plugins/aea-ledger-ethereum-hwi"}
+open-aea= {path = "../"}
 open-aea-ledger-ethereum = "^1.31.0"
 open-aea-ledger-cosmos = "^1.31.0"
 
-open-aea = "^1.31.0"
 open-autonomy = "^0.10.0.post1"
 
 

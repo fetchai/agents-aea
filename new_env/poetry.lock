@@ -2231,14 +2231,8 @@ description = "Open Autonomous Economic Agent framework (without vendor lock-in)
 category = "main"
 optional = false
 python-versions = ">=3.7"
-files = [
-    {file = "open-aea-1.31.0.tar.gz", hash = "sha256:7c9a0d8df41669a7a2a280456200f5a38eb6bd25bd79400d83d90b7d74386cdc"},
-    {file = "open_aea-1.31.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:d9169710ea2f77a447231465be627cfd84db00596d29baf3d4bb7071f42e8fe0"},
-    {file = "open_aea-1.31.0-py3-none-manylinux1_x86_64.whl", hash = "sha256:49ec827af39218fb073a4ae7e328d00cd422f408bdc5177091d53e3197636434"},
-    {file = "open_aea-1.31.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:208d31a085153b1ce942349614edd389c3c3f00501cf55378438b1f2e3e321e0"},
-    {file = "open_aea-1.31.0-py3-none-win32.whl", hash = "sha256:be29bc59bffdc67ff3905c0007acd27826def2129e718f3e55f99edaa63a510f"},
-    {file = "open_aea-1.31.0-py3-none-win_amd64.whl", hash = "sha256:18dd64578219b0a88e526c2dc5955dc21570878d9f9ba52cda51e4628a8a0e9b"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 base58 = ">=1.0.3,<3.0.0"
@@ -2262,6 +2256,10 @@ semver = ">=2.9.1,<3.0.0"
 all = ["click (==8.0.2)", "coverage (>=6.4.4,<8.0.0)", "jsonschema (>=3.0.0,<4.0.0)", "packaging (>=20.3,<22.0)", "pytest (>=7.0.0,<7.3.0)", "pyyaml (>=4.2b1,<6.0)", "semver (>=2.9.1,<3.0.0)"]
 cli = ["click (==8.0.2)", "coverage (>=6.4.4,<8.0.0)", "jsonschema (>=3.0.0,<4.0.0)", "packaging (>=20.3,<22.0)", "pytest (>=7.0.0,<7.3.0)", "pyyaml (>=4.2b1,<6.0)", "semver (>=2.9.1,<3.0.0)"]
 test-tools = ["click (==8.0.2)", "coverage (>=6.4.4,<8.0.0)", "jsonschema (>=3.0.0,<4.0.0)", "packaging (>=20.3,<22.0)", "pytest (>=7.0.0,<7.3.0)", "pyyaml (>=4.2b1,<6.0)", "semver (>=2.9.1,<3.0.0)"]
+
+[package.source]
+type = "directory"
+url = ".."
 
 [[package]]
 name = "open-aea-cli-ipfs"
@@ -3768,4 +3766,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e9a78654186290337ca482ee1f1ca4d559cee8d591ec63c20ba8a5742288c052"
+content-hash = "192ae13ad3d597d625ec8b440beb74a4e69b445a5d7c4d858f443377229771bc"
