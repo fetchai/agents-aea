@@ -182,5 +182,3 @@ def test_load_contract_instance():
     )
 
     assert hasattr(instance["program"], "coder")
-
-

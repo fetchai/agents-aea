@@ -23,7 +23,11 @@ class AccountMeta:
         Returns:
             The `solana-py` AccountMeta.
         """
-        return cls(pubkey=PublicKey.from_bytes(bytes(meta.pubkey)), is_signer=meta.is_signer, is_writable=meta.is_writable)
+        return cls(
+            pubkey=PublicKey.from_bytes(bytes(meta.pubkey)),
+            is_signer=meta.is_signer,
+            is_writable=meta.is_writable,
+        )
 
     def to_solders(self) -> instruction.AccountMeta:
         """Convert to a `solders` AccountMeta.
@@ -33,5 +37,3 @@ class AccountMeta:
         return instruction.AccountMeta(
             pubkey=self.pubkey, is_signer=self.is_signer, is_writable=self.is_writable
         )
-
-

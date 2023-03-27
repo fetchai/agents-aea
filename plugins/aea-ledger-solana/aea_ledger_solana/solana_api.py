@@ -17,9 +17,13 @@ from solders.pubkey import Pubkey
 from solders.system_program import ID as SYS_PROGRAM_ID
 
 from solders.instruction import AccountMeta
+from anchorpy import Program
+
 
 class HashNotProvided:
     """"""
+
+
 @dataclass
 class SolanaApiClient(ApiClient):
     """Class to interact with the Solana ledger APIs."""
@@ -31,12 +35,13 @@ class SolanaApiClient(ApiClient):
     def transfer(self, *args, **kwargs):
         """Transfer tokens."""
 
-    def get_create_account_instructions(self,
-                              sender_address,
-                              destination_address,
-                              lamports: int = 100000,
-                              space: int = 1,
-                              ):
+    def get_create_account_instructions(
+        self,
+        sender_address,
+        destination_address,
+        lamports: int = 100000,
+        space: int = 1,
+    ):
         """Create a new account."""
         required_balance = SplClient.get_min_balance_rent_for_exempt_for_account(self)
 
@@ -64,5 +69,15 @@ class SolanaApiClient(ApiClient):
         params = TransferParams(
             from_pubkey=PublicKey.from_string(from_account),
             to_pubkey=PublicKey.from_string(to_account),
-            lamports=amount)
+            lamports=amount,
+        )
         return transfer(params)
+
+    def get_account_state(self, account_address: str):
+        """Get account state."""
+        account_object = self.get_account_info_json_parsed(
+            PublicKey.from_string(account_address)
+        )
+        account_info_val = account_object.value
+        # note we dont currently parse this back as json.
+        return account_info_val

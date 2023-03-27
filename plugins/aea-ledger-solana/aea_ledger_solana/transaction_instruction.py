@@ -36,5 +36,6 @@ class TransactionInstruction(NamedTuple):
             The `solders` instruction.
         """
         accounts = [key for key in self.keys]
-        return instruction.Instruction(program_id=self.program_id, data=self.data, accounts=accounts)
-
+        return instruction.Instruction(
+            program_id=self.program_id, data=self.data, accounts=accounts
+        )

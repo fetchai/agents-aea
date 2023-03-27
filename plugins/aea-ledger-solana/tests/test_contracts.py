@@ -15,9 +15,7 @@ from anchorpy import Context, Program, workspace_fixture, WorkspaceType
 
 PAYER_KEYPAIR_PATH_0 = Path(ROOT_DIR, "tests", "data", "solana_private_key0.txt")
 PAYER_KEYPAIR_PATH_1 = Path(ROOT_DIR, "tests", "data", "solana_private_key1.txt")
-PROGRAM_KEYPAIR_PATH = Path(
-    ROOT_DIR, "tests", "data", "solana_private_key_program.txt"
-)
+PROGRAM_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key_program.txt")
 
 
 @pytest.fixture
@@ -25,6 +23,7 @@ def solana_faucet():
     """Create a solana faucet."""
     sf = SolanaFaucetApi()
     return sf
+
 
 @pytest.fixture
 def payer_1():
@@ -50,10 +49,22 @@ def solana_api():
 def _get_token_contract(solana_api):
     """Create a contract."""
     idl_path = Path(
-        ROOT_DIR, "tests", "data", "spl-token-faucet", "target", "idl", "spl_token_faucet.json"
+        ROOT_DIR,
+        "tests",
+        "data",
+        "spl-token-faucet",
+        "target",
+        "idl",
+        "spl_token_faucet.json",
     )
     bytecode_path = Path(
-        ROOT_DIR, "tests", "data", "spl-token-faucet", "target", "deploy", "spl_token_faucet.so"
+        ROOT_DIR,
+        "tests",
+        "data",
+        "spl-token-faucet",
+        "target",
+        "deploy",
+        "spl_token_faucet.so",
     )
     program_key_pair = SolanaCrypto(str(PROGRAM_KEYPAIR_PATH))
 
@@ -61,7 +72,8 @@ def _get_token_contract(solana_api):
         idl_file_path=idl_path, bytecode_path=bytecode_path
     )
     instance = solana_api.get_contract_instance(
-        contract_interface=interface, contract_address="11111111111111111111111111111110"
+        contract_interface=interface,
+        contract_address="11111111111111111111111111111110",
     )
 
     return instance, interface, program_key_pair
@@ -78,11 +90,13 @@ def _get_tic_tac_contract(solana_api):
     program_key_pair = SolanaCrypto(str(PROGRAM_KEYPAIR_PATH))
 
     interface = solana_api.load_contract_interface(
-        idl_file_path=idl_path, bytecode_path=bytecode_path, program_keypair=program_key_pair
+        idl_file_path=idl_path,
+        bytecode_path=bytecode_path,
+        program_keypair=program_key_pair,
     )
     instance = solana_api.get_contract_instance(
         contract_interface=interface,
-        contract_address=str(PublicKey.from_bytes(program_key_pair.public_key))
+        contract_address=str(PublicKey.from_bytes(program_key_pair.public_key)),
     )
 
     return instance, interface, program_key_pair
@@ -96,17 +110,18 @@ def test_tic_tac_contract(solana_api):
     assert isinstance(interface, dict)
 
 
-
-
 @pytest.fixture
 def tic_tac_contract(solana_api):
     """Create a contract."""
     return _get_tic_tac_contract(solana_api)
 
+
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_contract_method_setup(tic_tac_contract, payer_0, payer_2, solana_api, solana_faucet):
+def test_contract_method_setup(
+    tic_tac_contract, payer_0, payer_2, solana_api, solana_faucet
+):
     """Test the deployment contract method."""
 
     instance, contract_address, program_kp = tic_tac_contract
@@ -147,6 +162,7 @@ def test_contract_method_setup(tic_tac_contract, payer_0, payer_2, solana_api, s
 
     _, is_settled = player_1.wait_get_receipt(transaction_digest)
     assert is_settled is True
+
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
@@ -196,7 +212,9 @@ def test_contract_method_call(solana_faucet):
     accounts = {
         "game": PublicKey.from_bytes(game.public_key),
         "player_one": PublicKey.from_bytes(payer.public_key),
-        "system_program": PublicKey.from_bytes(payer.entity.public_key,)
+        "system_program": PublicKey.from_bytes(
+            payer.entity.public_key,
+        ),
     }
 
     tx = sa.build_transaction(
@@ -227,7 +245,6 @@ def test_contract_method_call(solana_faucet):
 
     # game loop
     while decoded_state.state.index == 0:
-
         active_player = player2 if decoded_state.turn % 2 == 0 else player1
         row = 0 if decoded_state.turn % 2 == 0 else 1
         accounts = {"game": game.public_key, "player": active_player.public_key}
@@ -263,6 +280,8 @@ def test_contract_method_call(solana_faucet):
     assert decoded_state.state.winner == player1.public_key
 
     # game loop
+
+
 #     while decoded_state.state.index == 0:
 #         active_player = player2 if decoded_state.turn % 2 == 0 else player1
 #         row = 0 if decoded_state.turn % 2 == 0 else 1

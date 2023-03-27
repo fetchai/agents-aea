@@ -17,4 +17,3 @@ class SolanaTransaction(Transaction):
     def to_json(self) -> dict:
         """Convert to json."""
         return json.loads(self._solders.to_json())
-

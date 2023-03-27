@@ -31,6 +31,7 @@ from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE  # type: ignore
 from anchorpy.idl import _decode_idl_account  # type: ignore
 from cryptography.fernet import Fernet  # type: ignore
 from solana.blockhash import BlockhashCache
+
 # from solana.system_program import (  # type: ignore
 #     CreateAccountParams,
 #     CreateAccountWithSeedParams,
@@ -43,7 +44,7 @@ from solana.blockhash import BlockhashCache
 from solders import system_program as ssp  # type: ignore
 from solders.null_signer import NullSigner
 from solders.signature import Signature  # type: ignore
-from solana.transaction import Transaction # type: ignore
+from solana.transaction import Transaction  # type: ignore
 
 
 from solders.system_program import (  # type: ignore
@@ -51,7 +52,8 @@ from solders.system_program import (  # type: ignore
     CreateAccountWithSeedParams,
     # SYS_PROGRAM_ID,
     TransferParams,
-    create_account, transfer,
+    create_account,
+    transfer,
 )
 
 from solders.system_program import ID as SYS_PROGRAM_ID  # type: ignore
@@ -123,7 +125,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
         return self._hash
 
     def wait_get_receipt(
-            self, transaction_digest: str
+        self, transaction_digest: str
     ) -> Tuple[Optional[JSONLike], bool]:
         transaction_receipt = None
         not_settled = True
@@ -142,10 +144,10 @@ class SolanaApi(LedgerApi, SolanaHelper):
         return transaction_receipt, not not_settled
 
     def construct_and_settle_tx(
-            self,
-            account1: SolanaCrypto,
-            account2: SolanaCrypto,
-            tx_params: dict,
+        self,
+        account1: SolanaCrypto,
+        account2: SolanaCrypto,
+        tx_params: dict,
     ) -> Tuple[str, JSONLike, bool]:
         """Construct and settle a transaction."""
         transfer_transaction = self.get_transfer_transaction(
@@ -161,7 +163,9 @@ class SolanaApi(LedgerApi, SolanaHelper):
 
         transaction_receipt, is_settled = self.wait_get_receipt(transaction_digest)
 
-        assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
+        assert (
+            transaction_receipt is not None
+        ), "Failed to retrieve transaction receipt."
 
         return transaction_digest, transaction_receipt, is_settled
 
@@ -226,10 +230,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
             )
             kwargs.pop("raise_on_try")
 
-        account_object = self._api.get_account_info_json_parsed(PublicKey.from_string(address))
-        account_info_val = account_object.value
-        breakpoint()
-        return account_info_val
+        return self._api.get_account_state(address)
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -283,23 +284,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
             # in solana we first create the account then we transfer the funds
             txn.add(ixn_1).add(ixn_2)
 
-
-
-
-            # params = ssp.TransferWithSeedParams(
-            #     from_pubkey=acc,
-            #     from_base=PublicKey(sender_address),
-            #     from_seed=seed,
-            #     from_owner=PublicKey.from_bytes(bytes([1] * 32)),
-            #     to_pubkey=PublicKey(destination_address),
-            #     lamports=amount,
-            # )
-            # ix_transfer = TransactionInstruction.from_solders(
-            #     ssp.transfer_with_seed(params)
-            # )
-            #
-            #
-
         else:
             txn = Transaction(fee_payer=PublicKey.from_string(sender_address)).add(
                 transfer(
@@ -352,6 +336,7 @@ class SolanaApi(LedgerApi, SolanaHelper):
             except ValueError:
                 time.sleep(1)
             retries -= 1
+
         return txn_resp.to_json()
 
     def send_signed_transactions(
@@ -641,7 +626,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
             raise ValueError("Accounts are required")
         if "remaining_accounts" not in method_args:
             method_args["remaining_accounts"] = None
-        breakpoint()
 
         data = method_args["data"]
         accounts = method_args["accounts"]
@@ -704,7 +688,6 @@ class SolanaApi(LedgerApi, SolanaHelper):
             }
 
         return transfers  # type: ignore  # actually ok
-
 
         chain_id = kwargs.get("kwargs", None)
         chain_id = chain_id if chain_id is not None else self._chain_id

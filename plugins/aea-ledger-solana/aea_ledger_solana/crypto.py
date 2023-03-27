@@ -22,10 +22,10 @@ class SolanaCrypto(Crypto[Keypair]):
     identifier = _SOLANA
 
     def __init__(
-            self,
-            private_key_path: Optional[str] = None,
-            password: Optional[str] = None,
-            extra_entropy: Union[str, bytes, int] = "",
+        self,
+        private_key_path: Optional[str] = None,
+        password: Optional[str] = None,
+        extra_entropy: Union[str, bytes, int] = "",
     ) -> None:
         """
         Instantiate a solana crypto object.
@@ -74,7 +74,7 @@ class SolanaCrypto(Crypto[Keypair]):
 
     @classmethod
     def load_private_key_from_path(
-            cls, file_name: str, password: Optional[str] = None
+        cls, file_name: str, password: Optional[str] = None
     ) -> Keypair:
         """
         Load a private key in base58 or bytes format from a file.
@@ -88,7 +88,6 @@ class SolanaCrypto(Crypto[Keypair]):
         try:
             key = Keypair.from_base58_string(private_key)
         except Exception as e:
-
             raise KeyIsIncorrect(
                 f"Error on key `{key_path}` load! : Error: {repr(e)}.{'try password?' if password is None else ''}"
             ) from e
@@ -110,7 +109,7 @@ class SolanaCrypto(Crypto[Keypair]):
         return str(signed_msg)
 
     def sign_transaction(
-            self, transaction: JSONLike, signers: Optional[list] = None
+        self, transaction: JSONLike, signers: Optional[list] = None
     ) -> JSONLike:
         """
         Sign a transaction in bytes string form.
@@ -123,19 +122,16 @@ class SolanaCrypto(Crypto[Keypair]):
         jsonTx = json.dumps(transaction)
 
         keypair = Keypair.from_base58_string(self.private_key)
-        signers = [
-            Keypair.from_base58_string(signer.private_key)
-            for signer in signers
-        ]
+        signers = [Keypair.from_base58_string(signer.private_key) for signer in signers]
         signers.append(keypair)
-        recent_hash = Hash.from_string(transaction['recentBlockhash'])
+        recent_hash = Hash.from_string(transaction["recentBlockhash"])
         stxn = Transaction.from_json(jsonTx)
         stxn.sign(keypairs=signers, recent_blockhash=recent_hash)
         return json.loads(stxn.to_json())
 
     @classmethod
     def generate_private_key(
-            cls, extra_entropy: Union[str, bytes, int] = ""
+        cls, extra_entropy: Union[str, bytes, int] = ""
     ) -> Keypair:
         """
         Generate a key pair for Solana network.
@@ -189,4 +185,3 @@ class SolanaCrypto(Crypto[Keypair]):
         except ValueError as e:
             raise DecryptError() from e
         return dec_mac
-

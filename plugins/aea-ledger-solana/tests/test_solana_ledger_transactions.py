@@ -55,7 +55,11 @@ def test_funded_transfer_transaction(solana_private_key_file):
         "amount": AMOUNT,
     }
 
-    transaction_digest, transaction_receipt, is_settled = solana_api.construct_and_settle_tx(
+    (
+        transaction_digest,
+        transaction_receipt,
+        is_settled,
+    ) = solana_api.construct_and_settle_tx(
         account1,
         account2,
         tx_params,
@@ -96,14 +100,18 @@ def test_get_ledger_state(solana_private_key_file):
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_unfunded_transfer_transaction(solana_private_key_file, ):
+def test_unfunded_transfer_transaction(
+    solana_private_key_file,
+):
     """Test the construction, signing and submitting of a transfer transaction."""
     account1 = SolanaCrypto(solana_private_key_file)
     account2 = SolanaCrypto()
     solana_api = SolanaApi()
     faucet = SolanaFaucetApi()
 
-    faucet.generate_wealth_if_needed(solana_api, account1.address, faucet.DEFAULT_AMOUNT)
+    faucet.generate_wealth_if_needed(
+        solana_api, account1.address, faucet.DEFAULT_AMOUNT
+    )
 
     assert solana_api.get_balance(account1.address) >= SolanaFaucetApi.DEFAULT_AMOUNT
 
@@ -117,7 +125,11 @@ def test_unfunded_transfer_transaction(solana_private_key_file, ):
         "amount": AMOUNT,
     }
 
-    transaction_digest, transaction_receipt, is_settled = solana_api.construct_and_settle_tx(
+    (
+        transaction_digest,
+        transaction_receipt,
+        is_settled,
+    ) = solana_api.construct_and_settle_tx(
         account1,
         account2,
         tx_params,
@@ -156,13 +168,13 @@ def test_get_transaction_transfer_logs(solana_private_key_file):
         "unfunded_account": True,
     }
     import spl
+
     transaction = solana_api.get_transfer_transaction(
         account1.public_key,
         account2.public_key,
         tx_params,
         tx_fee=1,
         tx_nonce="asdas",
-
     )
 
     token = spl.token.client.Token(
@@ -172,8 +184,6 @@ def test_get_transaction_transfer_logs(solana_private_key_file):
         payer=PublicKey.from_bytes(account1.public_key),
     )
 
-
-
     token.transfer(
         source=PublicKey.from_bytes(account1.public_key),
         dest=PublicKey.from_bytes(account2.public_key),
@@ -181,7 +191,11 @@ def test_get_transaction_transfer_logs(solana_private_key_file):
         owner=PublicKey.from_bytes(bytes(account1.public_key)),
     )
 
-    transaction_digest, transaction_receipt, is_settled = solana_api.construct_and_settle_tx(
+    (
+        transaction_digest,
+        transaction_receipt,
+        is_settled,
+    ) = solana_api.construct_and_settle_tx(
         account1,
         account2,
         tx_params,
@@ -197,5 +211,3 @@ def test_get_transaction_transfer_logs(solana_private_key_file):
     )
     assert "preBalances" in logs
     assert "postBalances" in logs
-
-

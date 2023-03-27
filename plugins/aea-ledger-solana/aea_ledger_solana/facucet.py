@@ -9,7 +9,14 @@ from typing import Optional, Union
 from solders.pubkey import Pubkey as PublicKey
 from solana.rpc.api import Client  # type: ignore
 
-from .constants import _SOLANA, TESTNET_NAME, DEFAULT_ADDRESS, LAMPORTS_PER_SOL, DEFAULT_CHAIN_ID, DEFAULT_CURRENCY_DENOM
+from .constants import (
+    _SOLANA,
+    TESTNET_NAME,
+    DEFAULT_ADDRESS,
+    LAMPORTS_PER_SOL,
+    DEFAULT_CHAIN_ID,
+    DEFAULT_CURRENCY_DENOM,
+)
 from .utils import default_logger
 
 
@@ -37,7 +44,7 @@ class SolanaFaucetApi(FaucetApi):
         logger_method="error",
     )
     def _try_get_wealth(
-            address: Address, amount: Optional[int] = None, url: Optional[str] = None
+        address: Address, amount: Optional[int] = None, url: Optional[str] = None
     ) -> Optional[str]:
         """
         Get wealth from the faucet for the provided address.
@@ -76,9 +83,10 @@ class SolanaFaucetApi(FaucetApi):
 
     @staticmethod
     def generate_wealth_if_needed(
-            api, address, min_amount=None,
+        api,
+        address,
+        min_amount=None,
     ) -> Union[str, None]:
-
         balance = api.get_balance(address)
 
         min_balance = min_amount if min_amount is not None else 1000000000

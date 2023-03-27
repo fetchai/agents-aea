@@ -26,12 +26,12 @@ class SolanaHelper(Helper):
 
     @classmethod
     def load_contract_interface(
-            cls,
-            idl_file_path: Optional[Path] = None,
-            program_keypair: Optional[Crypto] = None,
-            program_address: Optional[str] = None,
-            rpc_api: Optional[str] = None,
-            bytecode_path: Optional[Path] = None,
+        cls,
+        idl_file_path: Optional[Path] = None,
+        program_keypair: Optional[Crypto] = None,
+        program_address: Optional[str] = None,
+        rpc_api: Optional[str] = None,
+        bytecode_path: Optional[Path] = None,
     ) -> Dict[str, Any]:  # type: ignore
         """
         Load contract interface.
@@ -51,7 +51,7 @@ class SolanaHelper(Helper):
             bytecode = None
 
         if (
-                program_keypair is not None or program_address is not None
+            program_keypair is not None or program_address is not None
         ) and rpc_api is not None:
             try:
                 pid = program_address or program_keypair.address  # type: ignore # mypy doesnt recognize `if` condition above
@@ -93,11 +93,11 @@ class SolanaHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-            tx: JSONLike,
-            seller: Address,
-            client: Address,
-            tx_nonce: str,
-            amount: int,
+        tx: JSONLike,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -141,7 +141,7 @@ class SolanaHelper(Helper):
 
     @classmethod
     def recover_message(
-            cls, message: bytes, signature: str, is_deprecated_mode: bool = False
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
         """
         Recover the addresses from the hash.
@@ -160,7 +160,7 @@ class SolanaHelper(Helper):
 
     @classmethod
     def recover_public_keys_from_message(
-            cls, message: bytes, signature: str, is_deprecated_mode: bool = False
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[str, ...]:
         """
         Get the public key used to produce the `signature` of the `message`
@@ -223,9 +223,9 @@ class SolanaHelper(Helper):
         stxn = SolanaTransaction.from_json(tx)
         nonce = self._generate_tx_nonce()
         txn = stxn.to_json()
-        txn['recentBlockhash'] = nonce
+        # txn["message"]["header"]["numReadonlySignedAccounts"] = 0
+        txn["recentBlockhash"] = nonce
         return txn
-
 
     @staticmethod
     def to_transaction_format(tx: dict) -> Any:
@@ -290,5 +290,3 @@ class SolanaHelper(Helper):
             return True
         except Exception:  # pylint: disable=broad-except
             return False
-
-

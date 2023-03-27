@@ -148,10 +148,14 @@ def _sleep_for_first_blocks() -> None:
 
 @pytest.mark.integration
 @pytest.fixture(scope="session")
-def test_http_client(docker_services, _sleep_for_first_blocks) -> Client:  # pylint: disable=redefined-outer-name
+def test_http_client(
+    docker_services, _sleep_for_first_blocks
+) -> Client:  # pylint: disable=redefined-outer-name
     """Test http_client.is_connected."""
     http_client = Client(commitment=Processed)
-    docker_services.wait_until_responsive(timeout=15, pause=1, check=http_client.is_connected)
+    docker_services.wait_until_responsive(
+        timeout=15, pause=1, check=http_client.is_connected
+    )
     return http_client
 
 
@@ -162,14 +166,18 @@ def test_http_client_cached_blockhash(
 ) -> Client:
     """Test http_client.is_connected."""
     http_client = Client(commitment=Processed, blockhash_cache=True)
-    docker_services.wait_until_responsive(timeout=15, pause=1, check=http_client.is_connected)
+    docker_services.wait_until_responsive(
+        timeout=15, pause=1, check=http_client.is_connected
+    )
     return http_client
 
 
 @pytest.mark.integration
 @pytest.fixture(scope="session")
 def test_http_client_async(
-    docker_services, event_loop, _sleep_for_first_blocks  # pylint: disable=redefined-outer-name
+    docker_services,
+    event_loop,
+    _sleep_for_first_blocks,  # pylint: disable=redefined-outer-name
 ) -> AsyncClient:
     """Test http_client.is_connected."""
     http_client = AsyncClient(commitment=Processed)
@@ -185,7 +193,9 @@ def test_http_client_async(
 @pytest.mark.integration
 @pytest.fixture(scope="session")
 def test_http_client_async_cached_blockhash(
-    docker_services, event_loop, _sleep_for_first_blocks  # pylint: disable=redefined-outer-name
+    docker_services,
+    event_loop,
+    _sleep_for_first_blocks,  # pylint: disable=redefined-outer-name
 ) -> AsyncClient:
     """Test http_client.is_connected."""
     http_client = AsyncClient(commitment=Processed, blockhash_cache=True)
@@ -209,6 +219,7 @@ def random_funded_keypair(test_http_client: Client) -> Keypair:
     balance = test_http_client.get_balance(kp.pubkey())
     assert balance.value == AIRDROP_AMOUNT
     return kp
+
 
 def test_initialize_mint(stubbed_sender):
     """Test initialize mint."""
@@ -334,7 +345,11 @@ def test_revoke(stubbed_sender):
 
 def test_set_authority():
     """Test set authority."""
-    account, new_authority, current_authority = Pubkey([0] * 31 + [0]), Pubkey([0] * 31 + [1]), Pubkey([0] * 31 + [2])
+    account, new_authority, current_authority = (
+        Pubkey([0] * 31 + [0]),
+        Pubkey([0] * 31 + [1]),
+        Pubkey([0] * 31 + [2]),
+    )
     params = spl_token.SetAuthorityParams(
         program_id=TOKEN_PROGRAM_ID,
         account=account,
@@ -588,6 +603,7 @@ def test_burn_checked(stubbed_receiver):
     instruction = spl_token.burn_checked(multisig_params)
     assert spl_token.decode_burn_checked(instruction) == multisig_params
 
+
 from base64 import b64decode, b64encode
 
 import pytest
@@ -603,7 +619,9 @@ from solders.signature import Signature
 from solders.transaction import Transaction as SoldersTx
 
 
-def example_tx(stubbed_blockhash, kp0: Keypair, kp1: Keypair, kp2: Keypair) -> txlib.Transaction:
+def example_tx(
+    stubbed_blockhash, kp0: Keypair, kp1: Keypair, kp2: Keypair
+) -> txlib.Transaction:
     """Example tx for testing."""
     ixn = txlib.Instruction(
         program_id=Pubkey.default(),
@@ -614,17 +632,29 @@ def example_tx(stubbed_blockhash, kp0: Keypair, kp1: Keypair, kp2: Keypair) -> t
             AccountMeta(kp2.pubkey(), True, True),
         ],
     )
-    return txlib.Transaction(fee_payer=kp0.pubkey(), instructions=[ixn], recent_blockhash=stubbed_blockhash)
+    return txlib.Transaction(
+        fee_payer=kp0.pubkey(), instructions=[ixn], recent_blockhash=stubbed_blockhash
+    )
 
 
 def test_to_solders(stubbed_blockhash: Blockhash) -> None:
     """Test converting a Transaction to solders."""
     kp1, kp2 = Keypair(), Keypair()
-    transfer = sp.transfer(sp.TransferParams(from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123))
-    solders_transfer = sp.transfer(sp.TransferParams(from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123))
+    transfer = sp.transfer(
+        sp.TransferParams(
+            from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123
+        )
+    )
+    solders_transfer = sp.transfer(
+        sp.TransferParams(
+            from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123
+        )
+    )
     assert transfer.data == solders_transfer.data
     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash).add(transfer)
-    solders_msg = SoldersMessage.new_with_blockhash([solders_transfer], None, stubbed_blockhash)
+    solders_msg = SoldersMessage.new_with_blockhash(
+        [solders_transfer], None, stubbed_blockhash
+    )
     solders_txn = SoldersTx.new_unsigned(solders_msg)
     assert txn.to_solders() == solders_txn
     assert txlib.Transaction.from_solders(solders_txn) == txn
@@ -644,13 +674,21 @@ def test_sign_partial(stubbed_blockhash):
             AccountMeta(keypair2.pubkey(), True, True),
         ],
     )
-    txn = txlib.Transaction(fee_payer=keypair0.pubkey(), instructions=[ixn], recent_blockhash=stubbed_blockhash)
+    txn = txlib.Transaction(
+        fee_payer=keypair0.pubkey(),
+        instructions=[ixn],
+        recent_blockhash=stubbed_blockhash,
+    )
     assert txn.to_solders().message.header.num_required_signatures == 3
     txn.sign_partial(keypair0, keypair2)
     assert not txn.to_solders().is_signed()
     txn.sign_partial(keypair1)
     assert txn.to_solders().is_signed()
-    expected_tx = txlib.Transaction(fee_payer=keypair0.pubkey(), instructions=[ixn], recent_blockhash=stubbed_blockhash)
+    expected_tx = txlib.Transaction(
+        fee_payer=keypair0.pubkey(),
+        instructions=[ixn],
+        recent_blockhash=stubbed_blockhash,
+    )
     expected_tx.sign(keypair0, keypair1, keypair2)
     assert txn == expected_tx
 
@@ -667,8 +705,16 @@ def test_recent_blockhash_setter(stubbed_blockhash):
 def test_transfer_signatures(stubbed_blockhash):
     """Test signing transfer transactions."""
     kp1, kp2 = Keypair(), Keypair()
-    transfer1 = sp.transfer(sp.TransferParams(from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123))
-    transfer2 = sp.transfer(sp.TransferParams(from_pubkey=kp2.pubkey(), to_pubkey=kp1.pubkey(), lamports=123))
+    transfer1 = sp.transfer(
+        sp.TransferParams(
+            from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123
+        )
+    )
+    transfer2 = sp.transfer(
+        sp.TransferParams(
+            from_pubkey=kp2.pubkey(), to_pubkey=kp1.pubkey(), lamports=123
+        )
+    )
     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash)
     txn.add(transfer1, transfer2)
     txn.sign(kp1, kp2)
@@ -680,16 +726,30 @@ def test_transfer_signatures(stubbed_blockhash):
 def test_dedup_signatures(stubbed_blockhash):
     """Test signature deduplication."""
     kp1, kp2 = Keypair(), Keypair()
-    transfer1 = sp.transfer(sp.TransferParams(from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123))
-    transfer2 = sp.transfer(sp.TransferParams(from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123))
-    txn = txlib.Transaction(recent_blockhash=stubbed_blockhash).add(transfer1, transfer2)
+    transfer1 = sp.transfer(
+        sp.TransferParams(
+            from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123
+        )
+    )
+    transfer2 = sp.transfer(
+        sp.TransferParams(
+            from_pubkey=kp1.pubkey(), to_pubkey=kp2.pubkey(), lamports=123
+        )
+    )
+    txn = txlib.Transaction(recent_blockhash=stubbed_blockhash).add(
+        transfer1, transfer2
+    )
     txn.sign(kp1)
 
 
-def test_wire_format_and_desrialize(stubbed_blockhash, stubbed_receiver, stubbed_sender):
+def test_wire_format_and_desrialize(
+    stubbed_blockhash, stubbed_receiver, stubbed_sender
+):
     """Test serialize/derialize transaction to/from wire format."""
     transfer = sp.transfer(
-        sp.TransferParams(from_pubkey=stubbed_sender.pubkey(), to_pubkey=stubbed_receiver, lamports=49)
+        sp.TransferParams(
+            from_pubkey=stubbed_sender.pubkey(), to_pubkey=stubbed_receiver, lamports=49
+        )
     )
     expected_txn = txlib.Transaction(recent_blockhash=stubbed_blockhash).add(transfer)
     expected_txn.sign(stubbed_sender)
@@ -711,20 +771,31 @@ def test_populate():
         num_readonly_signed_accounts=0,
         num_readonly_unsigned_accounts=3,
         account_keys=account_keys,
-        instructions=[CompiledInstruction(accounts=bytes([1, 2, 3]), data=bytes([9] * 5), program_id_index=4)],
+        instructions=[
+            CompiledInstruction(
+                accounts=bytes([1, 2, 3]), data=bytes([9] * 5), program_id_index=4
+            )
+        ],
         recent_blockhash=Blockhash.default(),
     )
-    signatures = [Signature(bytes([1] * Signature.LENGTH)), Signature(bytes([2] * Signature.LENGTH))]
+    signatures = [
+        Signature(bytes([1] * Signature.LENGTH)),
+        Signature(bytes([2] * Signature.LENGTH)),
+    ]
     transaction = txlib.Transaction.populate(msg, signatures)
     assert len(transaction.instructions) == len(msg.instructions)
     assert len(transaction.signatures) == len(signatures)
     assert transaction.recent_blockhash == msg.recent_blockhash
 
 
-def test_serialize_unsigned_transaction(stubbed_blockhash, stubbed_receiver, stubbed_sender):
+def test_serialize_unsigned_transaction(
+    stubbed_blockhash, stubbed_receiver, stubbed_sender
+):
     """Test to serialize an unsigned transaction."""
     transfer = sp.transfer(
-        sp.TransferParams(from_pubkey=stubbed_sender.pubkey(), to_pubkey=stubbed_receiver, lamports=49)
+        sp.TransferParams(
+            from_pubkey=stubbed_sender.pubkey(), to_pubkey=stubbed_receiver, lamports=49
+        )
     )
     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash).add(transfer)
     assert txn.signatures == (Signature.default(),)
@@ -763,7 +834,9 @@ def test_serialize_unsigned_transaction_without_verifying_signatures(
 ):
     """Test to serialize an unsigned transaction without verifying the signatures."""
     transfer = sp.transfer(
-        sp.TransferParams(from_pubkey=stubbed_sender.pubkey(), to_pubkey=stubbed_receiver, lamports=49)
+        sp.TransferParams(
+            from_pubkey=stubbed_sender.pubkey(), to_pubkey=stubbed_receiver, lamports=49
+        )
     )
     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash).add(transfer)
     assert txn.signatures == (Signature.default(),)
@@ -1028,9 +1101,15 @@ def test_sort_account_metas(stubbed_blockhash):
     )
 
     fee_payer = signer_one
-    sorted_signers = sorted([x.pubkey() for x in [signer_one, signer_two, signer_three]], key=str)
-    sorted_signers_excluding_fee_payer = [x for x in sorted_signers if str(x) != str(fee_payer.pubkey())]
-    sorted_receivers = sorted([x.pubkey() for x in [receiver_one, receiver_two, receiver_three]], key=str)
+    sorted_signers = sorted(
+        [x.pubkey() for x in [signer_one, signer_two, signer_three]], key=str
+    )
+    sorted_signers_excluding_fee_payer = [
+        x for x in sorted_signers if str(x) != str(fee_payer.pubkey())
+    ]
+    sorted_receivers = sorted(
+        [x.pubkey() for x in [receiver_one, receiver_two, receiver_three]], key=str
+    )
 
     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash)
     txn.fee_payer = fee_payer.pubkey()
@@ -1101,8 +1180,7 @@ def test_client():
 
 @pytest.mark.integration
 def test_send_transaction_and_get_balance(
-        test_client,
-
+    test_client,
 ):
     """Test sending a transaction to localnet."""
     # Create transfer tx to transfer 1m lamports from sender to receiver
@@ -1113,22 +1191,31 @@ def test_send_transaction_and_get_balance(
     faucet = SolanaFaucetApi()
     faucet.generate_wealth_if_needed(test_client, sender.address)
     # we need to interact with the SPL token program so that we can transfer lamports
-    transfer_ix = transfer(TransferParams(from_pubkey=sender.entity.pubkey(), to_pubkey=receiver.entity.pubkey(), lamports=1_000_000))
+    transfer_ix = transfer(
+        TransferParams(
+            from_pubkey=sender.entity.pubkey(),
+            to_pubkey=receiver.entity.pubkey(),
+            lamports=1_000_000,
+        )
+    )
     txn = Transaction().add(transfer_ix)
-    resp = test_client.api.send_transaction(txn, Keypair.from_base58_string(sender.private_key))
+    resp = test_client.api.send_transaction(
+        txn, Keypair.from_base58_string(sender.private_key)
+    )
     tx_digest = str(resp.value)
     test_client.wait_get_receipt(tx_digest)
     # check balance
     balance = test_client.api.get_balance(receiver.entity.pubkey()).value
     assert balance == 1_000_000
 
+
 from solders.pubkey import Pubkey
 from solders import system_program as sp
 
+
 @pytest.mark.integration
 def test_create_program_account(
-        test_client,
-
+    test_client,
 ):
     """Test sending a transaction to localnet."""
     # Create transfer tx to transfer 1m lamports from sender to receiver
@@ -1139,9 +1226,17 @@ def test_create_program_account(
     faucet = SolanaFaucetApi()
     faucet.generate_wealth_if_needed(test_client, sender.address)
     # we need to interact with the SPL token program so that we can transfer lamports
-    transfer_ix = transfer(TransferParams(from_pubkey=sender.entity.pubkey(), to_pubkey=receiver.entity.pubkey(), lamports=1_000_000))
+    transfer_ix = transfer(
+        TransferParams(
+            from_pubkey=sender.entity.pubkey(),
+            to_pubkey=receiver.entity.pubkey(),
+            lamports=1_000_000,
+        )
+    )
     txn = Transaction().add(transfer_ix)
-    resp = test_client.api.send_transaction(txn, Keypair.from_base58_string(sender.private_key))
+    resp = test_client.api.send_transaction(
+        txn, Keypair.from_base58_string(sender.private_key)
+    )
     tx_digest = str(resp.value)
     test_client.wait_get_receipt(tx_digest)
     # check balance
@@ -1193,4 +1288,3 @@ def test_submit_create_account(test_client):
     tx_digest = str(resp.value)
     result = test_client.wait_get_receipt(tx_digest)
     assert result[1]
-

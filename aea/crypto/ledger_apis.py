@@ -27,6 +27,7 @@ from aea.configurations.constants import (
     _COSMOS_IDENTIFIER,
     _ETHEREUM_IDENTIFIER,
     _FETCHAI_IDENTIFIER,
+    _SOLANA_IDENTIFIER,
 )
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import (
@@ -47,6 +48,9 @@ FETCHAI_DEFAULT_ADDRESS = "https://rest-dorado.fetch.ai:443"
 FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
 FETCHAI_DEFAULT_CHAIN_ID = "dorado-1"
 
+SOLANA_DEFAULT_ADDRESS = "https://api.devnet.solana.com"
+SOLANA_DEFAULT_CHAIN_ID = 8888
+SOLANA_DEFAULT_CURRENCY_DENOM = "lamports"
 
 DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {
     _COSMOS_IDENTIFIER: {
@@ -63,6 +67,11 @@ DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {
         "address": FETCHAI_DEFAULT_ADDRESS,
         "chain_id": FETCHAI_DEFAULT_CHAIN_ID,
         "denom": FETCHAI_DEFAULT_CURRENCY_DENOM,
+    },
+    _SOLANA_IDENTIFIER: {
+        "address": SOLANA_DEFAULT_ADDRESS,
+        "chain_id": SOLANA_DEFAULT_CHAIN_ID,
+        "denom": SOLANA_DEFAULT_CURRENCY_DENOM,
     },
 }
 DEFAULT_CURRENCY_DENOMINATIONS = {

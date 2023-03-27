@@ -65,6 +65,7 @@ PAYER_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key1.txt")
 PLAYER1_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key1.txt")
 PLAYER2_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key2.txt")
 
+
 def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     """
     Decorate a pytest class or method to skip on certain platform.
