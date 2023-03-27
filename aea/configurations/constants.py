@@ -27,6 +27,7 @@ AEA_DIR = Path(__file__).parent.parent
 _FETCHAI_IDENTIFIER = "fetchai"
 _ETHEREUM_IDENTIFIER = "ethereum"
 _COSMOS_IDENTIFIER = "cosmos"
+_SOLANA_IDENTIFIER = "solana"
 SIGNING_PROTOCOL = "open_aea/signing:latest"
 SIGNING_PROTOCOL_WITH_HASH = (
     "open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4"
