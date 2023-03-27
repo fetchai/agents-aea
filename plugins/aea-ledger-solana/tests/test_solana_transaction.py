@@ -1,9 +1,9 @@
 """Class to test the solana transaction."""
+from copy import deepcopy
 from typing import Tuple
 
-from aea_ledger_solana import SolanaTransaction
-from copy import deepcopy
-from aea_ledger_solana import SolanaApi
+from aea_ledger_solana import SolanaApi, SolanaTransaction
+
 
 BLANK_TRANSACTION = {
     "signatures": [[0]],

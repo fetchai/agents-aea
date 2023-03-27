@@ -23,9 +23,9 @@ import platform
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
-from solders.signature import Signature
 
 import pytest
+from solders.signature import Signature
 
 
 if platform.system() != "Linux":
@@ -39,10 +39,10 @@ from aea_ledger_solana import (
     SolanaFaucetApi,
 )
 from nacl.signing import VerifyKey
+from solders.system_program import ID as SYS_PROGRAM_ID
 
 from aea.common import JSONLike
 
-from solders.system_program import ID as SYS_PROGRAM_ID
 from tests.conftest import AIRDROP_AMOUNT, MAX_FLAKY_RERUNS, ROOT_DIR
 
 

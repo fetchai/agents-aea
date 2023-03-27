@@ -1,7 +1,9 @@
 """Tests for the crypto functionalities."""
-from aea_ledger_solana import SolanaApi, SolanaCrypto
-import pytest
 import logging
+
+import pytest
+from aea_ledger_solana import SolanaApi, SolanaCrypto
+
 from tests.conftest import (
     AIRDROP_AMOUNT,
     MAX_FLAKY_RERUNS,

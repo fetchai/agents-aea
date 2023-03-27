@@ -22,6 +22,7 @@
 
 from setuptools import find_packages, setup
 
+
 setup(
     name="open-aea-ledger-solana",
     version="1.31.0",

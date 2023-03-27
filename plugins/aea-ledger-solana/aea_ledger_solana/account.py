@@ -1,5 +1,6 @@
 """Solana account implementation."""
 from dataclasses import dataclass
+
 from solders import instruction
 from solders.pubkey import Pubkey as PublicKey
 

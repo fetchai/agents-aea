@@ -3,19 +3,331 @@ import spl.token.instructions as spl_token
 from solders.pubkey import Pubkey
 from spl.token.constants import TOKEN_PROGRAM_ID
 
+
 """Fixtures for pytest."""
 import asyncio
 import time
 from typing import NamedTuple
 
 import pytest
+from aea_ledger_solana import SolanaApi, SolanaCrypto, SolanaFaucetApi
 from solana.rpc.api import Client
 from solana.rpc.async_api import AsyncClient
 from solana.rpc.commitment import Processed
+from solana.transaction import Transaction
+from solders import system_program as sp
 from solders.hash import Hash as Blockhash
+
+#     # S6EA7XsNyxg4yx4DJRMm7fP21jgZb1fuzBAUGhgVtkP
+#     signer_one = Keypair.from_seed(
+#         bytes(
+#             [
+#                 216,
+#                 214,
+#                 184,
+#                 213,
+#                 199,
+#                 75,
+#                 129,
+#                 160,
+#                 237,
+#                 96,
+#                 96,
+#                 228,
+#                 46,
+#                 251,
+#                 146,
+#                 3,
+#                 71,
+#                 162,
+#                 37,
+#                 117,
+#                 121,
+#                 70,
+#                 143,
+#                 16,
+#                 128,
+#                 78,
+#                 53,
+#                 189,
+#                 222,
+#                 230,
+#                 165,
+#                 249,
+#             ]
+#         )
+#     )
+#
+#     # BKdt9U6V922P17ui81dzLoqgSY2B5ds1UD13rpwFB2zi
+#     receiver_one = Keypair.from_seed(
+#         bytes(
+#             [
+#                 3,
+#                 140,
+#                 94,
+#                 243,
+#                 0,
+#                 38,
+#                 92,
+#                 138,
+#                 52,
+#                 79,
+#                 153,
+#                 83,
+#                 42,
+#                 236,
+#                 220,
+#                 82,
+#                 227,
+#                 187,
+#                 101,
+#                 104,
+#                 126,
+#                 159,
+#                 103,
+#                 100,
+#                 29,
+#                 183,
+#                 242,
+#                 68,
+#                 144,
+#                 184,
+#                 114,
+#                 211,
+#             ]
+#         )
+#     )
+#
+#     # DtDZCnXEN69n5W6rN5SdJFgedrWdK8NV9bsMiJekNRyu
+#     signer_two = Keypair.from_seed(
+#         bytes(
+#             [
+#                 177,
+#                 182,
+#                 154,
+#                 154,
+#                 5,
+#                 145,
+#                 253,
+#                 138,
+#                 211,
+#                 126,
+#                 222,
+#                 195,
+#                 21,
+#                 64,
+#                 117,
+#                 211,
+#                 225,
+#                 47,
+#                 115,
+#                 31,
+#                 247,
+#                 242,
+#                 80,
+#                 195,
+#                 38,
+#                 8,
+#                 236,
+#                 155,
+#                 255,
+#                 27,
+#                 20,
+#                 142,
+#             ]
+#         )
+#     )
+#
+#     # FXgds3n6SNCoVVV4oELSumv8nKzAfqSgmeu7cNPikKFT
+#     receiver_two = Keypair.from_seed(
+#         bytes(
+#             [
+#                 180,
+#                 204,
+#                 139,
+#                 131,
+#                 244,
+#                 6,
+#                 180,
+#                 121,
+#                 191,
+#                 193,
+#                 45,
+#                 109,
+#                 198,
+#                 50,
+#                 163,
+#                 140,
+#                 34,
+#                 4,
+#                 172,
+#                 76,
+#                 129,
+#                 45,
+#                 194,
+#                 83,
+#                 192,
+#                 112,
+#                 76,
+#                 58,
+#                 32,
+#                 174,
+#                 49,
+#                 248,
+#             ]
+#         )
+#     )
+#
+#     # C2UwQHqJ3BmEJHSMVmrtZDQGS2fGv8fZrWYGi18nHF5k
+#     signer_three = Keypair.from_seed(
+#         bytes(
+#             [
+#                 29,
+#                 79,
+#                 73,
+#                 16,
+#                 137,
+#                 117,
+#                 183,
+#                 2,
+#                 131,
+#                 0,
+#                 209,
+#                 142,
+#                 134,
+#                 100,
+#                 190,
+#                 35,
+#                 95,
+#                 220,
+#                 200,
+#                 163,
+#                 247,
+#                 237,
+#                 161,
+#                 70,
+#                 226,
+#                 223,
+#                 100,
+#                 148,
+#                 49,
+#                 202,
+#                 154,
+#                 180,
+#             ]
+#         )
+#     )
+#
+#     # 8YPqwYXZtWPd31puVLEUPamS4wTv6F89n8nXDA5Ce2Bg
+#     receiver_three = Keypair.from_seed(
+#         bytes(
+#             [
+#                 167,
+#                 102,
+#                 49,
+#                 166,
+#                 202,
+#                 0,
+#                 132,
+#                 182,
+#                 239,
+#                 182,
+#                 252,
+#                 59,
+#                 25,
+#                 103,
+#                 76,
+#                 217,
+#                 65,
+#                 215,
+#                 210,
+#                 159,
+#                 168,
+#                 50,
+#                 10,
+#                 229,
+#                 144,
+#                 231,
+#                 221,
+#                 74,
+#                 182,
+#                 161,
+#                 52,
+#                 193,
+#             ]
+#         )
+#     )
+#
+#     fee_payer = signer_one
+#     sorted_signers = sorted(
+#         [x.pubkey() for x in [signer_one, signer_two, signer_three]], key=str
+#     )
+#     sorted_signers_excluding_fee_payer = [
+#         x for x in sorted_signers if str(x) != str(fee_payer.pubkey())
+#     ]
+#     sorted_receivers = sorted(
+#         [x.pubkey() for x in [receiver_one, receiver_two, receiver_three]], key=str
+#     )
+#
+#     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash)
+#     txn.fee_payer = fee_payer.pubkey()
+#
+#     # Add three transfer transactions
+#     txn.add(
+#         sp.transfer(
+#             sp.TransferParams(
+#                 from_pubkey=signer_one.pubkey(),
+#                 to_pubkey=receiver_one.pubkey(),
+#                 lamports=2_000_000,
+#             )
+#         )
+#     )
+#     txn.add(
+#         sp.transfer(
+#             sp.TransferParams(
+#                 from_pubkey=signer_two.pubkey(),
+#                 to_pubkey=receiver_two.pubkey(),
+#                 lamports=2_000_000,
+#             )
+#         )
+#     )
+#     txn.add(
+#         sp.transfer(
+#             sp.TransferParams(
+#                 from_pubkey=signer_three.pubkey(),
+#                 to_pubkey=receiver_three.pubkey(),
+#                 lamports=2_000_000,
+#             )
+#         )
+#     )
+#
+#     tx_msg = txn.compile_message()
+#
+#     js_msg_b64_check = b"AwABBwZtbiRMvgQjcE2kVx9yon8XqPSO5hwc2ApflnOZMu0Qo9G5/xbhB0sp8/03Rv9x4MKSkQ+k4LB6lNLvCgKZ/ju/aw+EyQpTObVa3Xm+NA1gSTzutgFCTfkDto/0KtuIHHAMpKRb92NImxKeWQJ2/291j6nTzFj1D6nW25p7TofHmVsGt8uFnTv7+8vsWZ0uN7azdxa+jCIIm4WzKK+4uKfX39t5UA7S1soBQaJkTGOQkSbBo39gIjDkbW0TrevslgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxJrndgN4IFTxep3s6kO0ROug7bEsbx0xxuDkqEvwUusDBgIABAwCAAAAgIQeAAAAAAAGAgIFDAIAAACAhB4AAAAAAAYCAQMMAgAAAICEHgAAAAAA"  # noqa: E501 pylint: disable=line-too-long
+#
+#     assert b64encode(bytes(tx_msg)) == js_msg_b64_check
+#
+#     # Transaction should organize AccountMetas by pubkey
+#     assert tx_msg.account_keys[0] == fee_payer.pubkey()
+#     assert tx_msg.account_keys[1] == sorted_signers_excluding_fee_payer[0]
+#     assert tx_msg.account_keys[2] == sorted_signers_excluding_fee_payer[1]
+#     assert tx_msg.account_keys[3] == sorted_receivers[0]
+#     assert tx_msg.account_keys[4] == sorted_receivers[1]
+#     assert tx_msg.account_keys[5] == sorted_receivers[2]
+#
+#
+# from aea_ledger_solana import SolanaApi, TransactionInstruction, SolanaCrypto
+# from aea_ledger_solana import SolanaFaucetApi
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
-from aea_ledger_solana import SolanaApi, SolanaCrypto, SolanaFaucetApi
+from solders.system_program import CreateAccountParams, CreateAccountWithSeedParams
+from solders.system_program import ID as SYS_PROGRAM_ID
+from solders.system_program import (
+    TransferParams,
+    create_account,
+    create_account_with_seed,
+    transfer,
+)
 
 
 # class Clients(NamedTuple):
@@ -861,320 +1173,6 @@ from aea_ledger_solana import SolanaApi, SolanaCrypto, SolanaFaucetApi
 #
 # def test_sort_account_metas(stubbed_blockhash):
 #     """Test AccountMeta sorting after calling Transaction.compile_message()."""
-#     # S6EA7XsNyxg4yx4DJRMm7fP21jgZb1fuzBAUGhgVtkP
-#     signer_one = Keypair.from_seed(
-#         bytes(
-#             [
-#                 216,
-#                 214,
-#                 184,
-#                 213,
-#                 199,
-#                 75,
-#                 129,
-#                 160,
-#                 237,
-#                 96,
-#                 96,
-#                 228,
-#                 46,
-#                 251,
-#                 146,
-#                 3,
-#                 71,
-#                 162,
-#                 37,
-#                 117,
-#                 121,
-#                 70,
-#                 143,
-#                 16,
-#                 128,
-#                 78,
-#                 53,
-#                 189,
-#                 222,
-#                 230,
-#                 165,
-#                 249,
-#             ]
-#         )
-#     )
-#
-#     # BKdt9U6V922P17ui81dzLoqgSY2B5ds1UD13rpwFB2zi
-#     receiver_one = Keypair.from_seed(
-#         bytes(
-#             [
-#                 3,
-#                 140,
-#                 94,
-#                 243,
-#                 0,
-#                 38,
-#                 92,
-#                 138,
-#                 52,
-#                 79,
-#                 153,
-#                 83,
-#                 42,
-#                 236,
-#                 220,
-#                 82,
-#                 227,
-#                 187,
-#                 101,
-#                 104,
-#                 126,
-#                 159,
-#                 103,
-#                 100,
-#                 29,
-#                 183,
-#                 242,
-#                 68,
-#                 144,
-#                 184,
-#                 114,
-#                 211,
-#             ]
-#         )
-#     )
-#
-#     # DtDZCnXEN69n5W6rN5SdJFgedrWdK8NV9bsMiJekNRyu
-#     signer_two = Keypair.from_seed(
-#         bytes(
-#             [
-#                 177,
-#                 182,
-#                 154,
-#                 154,
-#                 5,
-#                 145,
-#                 253,
-#                 138,
-#                 211,
-#                 126,
-#                 222,
-#                 195,
-#                 21,
-#                 64,
-#                 117,
-#                 211,
-#                 225,
-#                 47,
-#                 115,
-#                 31,
-#                 247,
-#                 242,
-#                 80,
-#                 195,
-#                 38,
-#                 8,
-#                 236,
-#                 155,
-#                 255,
-#                 27,
-#                 20,
-#                 142,
-#             ]
-#         )
-#     )
-#
-#     # FXgds3n6SNCoVVV4oELSumv8nKzAfqSgmeu7cNPikKFT
-#     receiver_two = Keypair.from_seed(
-#         bytes(
-#             [
-#                 180,
-#                 204,
-#                 139,
-#                 131,
-#                 244,
-#                 6,
-#                 180,
-#                 121,
-#                 191,
-#                 193,
-#                 45,
-#                 109,
-#                 198,
-#                 50,
-#                 163,
-#                 140,
-#                 34,
-#                 4,
-#                 172,
-#                 76,
-#                 129,
-#                 45,
-#                 194,
-#                 83,
-#                 192,
-#                 112,
-#                 76,
-#                 58,
-#                 32,
-#                 174,
-#                 49,
-#                 248,
-#             ]
-#         )
-#     )
-#
-#     # C2UwQHqJ3BmEJHSMVmrtZDQGS2fGv8fZrWYGi18nHF5k
-#     signer_three = Keypair.from_seed(
-#         bytes(
-#             [
-#                 29,
-#                 79,
-#                 73,
-#                 16,
-#                 137,
-#                 117,
-#                 183,
-#                 2,
-#                 131,
-#                 0,
-#                 209,
-#                 142,
-#                 134,
-#                 100,
-#                 190,
-#                 35,
-#                 95,
-#                 220,
-#                 200,
-#                 163,
-#                 247,
-#                 237,
-#                 161,
-#                 70,
-#                 226,
-#                 223,
-#                 100,
-#                 148,
-#                 49,
-#                 202,
-#                 154,
-#                 180,
-#             ]
-#         )
-#     )
-#
-#     # 8YPqwYXZtWPd31puVLEUPamS4wTv6F89n8nXDA5Ce2Bg
-#     receiver_three = Keypair.from_seed(
-#         bytes(
-#             [
-#                 167,
-#                 102,
-#                 49,
-#                 166,
-#                 202,
-#                 0,
-#                 132,
-#                 182,
-#                 239,
-#                 182,
-#                 252,
-#                 59,
-#                 25,
-#                 103,
-#                 76,
-#                 217,
-#                 65,
-#                 215,
-#                 210,
-#                 159,
-#                 168,
-#                 50,
-#                 10,
-#                 229,
-#                 144,
-#                 231,
-#                 221,
-#                 74,
-#                 182,
-#                 161,
-#                 52,
-#                 193,
-#             ]
-#         )
-#     )
-#
-#     fee_payer = signer_one
-#     sorted_signers = sorted(
-#         [x.pubkey() for x in [signer_one, signer_two, signer_three]], key=str
-#     )
-#     sorted_signers_excluding_fee_payer = [
-#         x for x in sorted_signers if str(x) != str(fee_payer.pubkey())
-#     ]
-#     sorted_receivers = sorted(
-#         [x.pubkey() for x in [receiver_one, receiver_two, receiver_three]], key=str
-#     )
-#
-#     txn = txlib.Transaction(recent_blockhash=stubbed_blockhash)
-#     txn.fee_payer = fee_payer.pubkey()
-#
-#     # Add three transfer transactions
-#     txn.add(
-#         sp.transfer(
-#             sp.TransferParams(
-#                 from_pubkey=signer_one.pubkey(),
-#                 to_pubkey=receiver_one.pubkey(),
-#                 lamports=2_000_000,
-#             )
-#         )
-#     )
-#     txn.add(
-#         sp.transfer(
-#             sp.TransferParams(
-#                 from_pubkey=signer_two.pubkey(),
-#                 to_pubkey=receiver_two.pubkey(),
-#                 lamports=2_000_000,
-#             )
-#         )
-#     )
-#     txn.add(
-#         sp.transfer(
-#             sp.TransferParams(
-#                 from_pubkey=signer_three.pubkey(),
-#                 to_pubkey=receiver_three.pubkey(),
-#                 lamports=2_000_000,
-#             )
-#         )
-#     )
-#
-#     tx_msg = txn.compile_message()
-#
-#     js_msg_b64_check = b"AwABBwZtbiRMvgQjcE2kVx9yon8XqPSO5hwc2ApflnOZMu0Qo9G5/xbhB0sp8/03Rv9x4MKSkQ+k4LB6lNLvCgKZ/ju/aw+EyQpTObVa3Xm+NA1gSTzutgFCTfkDto/0KtuIHHAMpKRb92NImxKeWQJ2/291j6nTzFj1D6nW25p7TofHmVsGt8uFnTv7+8vsWZ0uN7azdxa+jCIIm4WzKK+4uKfX39t5UA7S1soBQaJkTGOQkSbBo39gIjDkbW0TrevslgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxJrndgN4IFTxep3s6kO0ROug7bEsbx0xxuDkqEvwUusDBgIABAwCAAAAgIQeAAAAAAAGAgIFDAIAAACAhB4AAAAAAAYCAQMMAgAAAICEHgAAAAAA"  # noqa: E501 pylint: disable=line-too-long
-#
-#     assert b64encode(bytes(tx_msg)) == js_msg_b64_check
-#
-#     # Transaction should organize AccountMetas by pubkey
-#     assert tx_msg.account_keys[0] == fee_payer.pubkey()
-#     assert tx_msg.account_keys[1] == sorted_signers_excluding_fee_payer[0]
-#     assert tx_msg.account_keys[2] == sorted_signers_excluding_fee_payer[1]
-#     assert tx_msg.account_keys[3] == sorted_receivers[0]
-#     assert tx_msg.account_keys[4] == sorted_receivers[1]
-#     assert tx_msg.account_keys[5] == sorted_receivers[2]
-#
-#
-# from aea_ledger_solana import SolanaApi, TransactionInstruction, SolanaCrypto
-# from aea_ledger_solana import SolanaFaucetApi
-from solders.keypair import Keypair
-from solders.system_program import TransferParams, transfer
-from solana.transaction import Transaction
-from solders.system_program import ID as SYS_PROGRAM_ID
-from solders.system_program import (
-    CreateAccountParams,
-    CreateAccountWithSeedParams,
-    create_account,
-    create_account_with_seed,
-)
-
-
-from solders.pubkey import Pubkey
-from solders import system_program as sp
 
 
 #

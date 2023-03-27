@@ -1,21 +1,21 @@
 import json
 import time
-
-from aea.crypto.base import FaucetApi
-from aea.common import Address
-from aea.helpers.base import try_decorator
 from typing import Optional, Union
 
-from solders.pubkey import Pubkey as PublicKey
 from solana.rpc.api import Client  # type: ignore
+from solders.pubkey import Pubkey as PublicKey
+
+from aea.common import Address
+from aea.crypto.base import FaucetApi
+from aea.helpers.base import try_decorator
 
 from .constants import (
-    _SOLANA,
-    TESTNET_NAME,
     DEFAULT_ADDRESS,
-    LAMPORTS_PER_SOL,
     DEFAULT_CHAIN_ID,
     DEFAULT_CURRENCY_DENOM,
+    LAMPORTS_PER_SOL,
+    TESTNET_NAME,
+    _SOLANA,
 )
 from .utils import default_logger
 

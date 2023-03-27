@@ -23,7 +23,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, List, NewType, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, NamedTuple, NewType, Optional, Tuple, Union, cast
 
 import base58
 from anchorpy import Context, Idl, Program  # type: ignore
@@ -31,6 +31,7 @@ from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE  # type: ignore
 from anchorpy.idl import _decode_idl_account  # type: ignore
 from cryptography.fernet import Fernet  # type: ignore
 from solana.blockhash import BlockhashCache
+from solana.transaction import Transaction  # type: ignore
 
 # from solana.system_program import (  # type: ignore
 #     CreateAccountParams,
@@ -41,50 +42,37 @@ from solana.blockhash import BlockhashCache
 #     transfer,
 # )
 # from solana.transaction import Transaction, TransactionInstruction  # type: ignore
+from solders import instruction
 from solders import system_program as ssp  # type: ignore
+from solders.instruction import Instruction
 from solders.null_signer import NullSigner
+from solders.pubkey import Pubkey as PublicKey  # type: ignore
 from solders.signature import Signature  # type: ignore
-from solana.transaction import Transaction  # type: ignore
-
-
-from solders.system_program import (  # type: ignore
+from solders.system_program import (  # type: ignore; SYS_PROGRAM_ID,
     CreateAccountParams,
     CreateAccountWithSeedParams,
-    # SYS_PROGRAM_ID,
+)
+from solders.system_program import ID as SYS_PROGRAM_ID  # type: ignore
+from solders.system_program import (  # type: ignore; SYS_PROGRAM_ID,
     TransferParams,
     create_account,
     transfer,
 )
 
-from solders.system_program import ID as SYS_PROGRAM_ID  # type: ignore
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 from aea.helpers.base import try_decorator
 from aea.helpers.io import open_file
 
-from solders.pubkey import Pubkey as PublicKey  # type: ignore
-
+from .constants import DEFAULT_ADDRESS, DEFAULT_CHAIN_ID, _SOLANA, _VERSION
+from .crypto import SolanaCrypto
+from .helper import SolanaHelper
+from .solana_api import SolanaApiClient
+from .solana_api import SolanaApiClient as BaseApi
+from .transaction import SolanaTransaction
 from .transaction_instruction import TransactionInstruction
 from .utils import default_logger, pako_inflate
-from .solana_api import SolanaApiClient as BaseApi
-from .crypto import SolanaCrypto
-
-from .constants import (
-    _SOLANA,
-    _VERSION,
-    DEFAULT_ADDRESS,
-    DEFAULT_CHAIN_ID,
-)
-
-
-from solders.instruction import Instruction
-
-from solders import instruction
-from typing import NamedTuple
-from .helper import SolanaHelper
-from .transaction import SolanaTransaction
-from .solana_api import SolanaApiClient
 
 
 class SolanaApi(LedgerApi, SolanaHelper):

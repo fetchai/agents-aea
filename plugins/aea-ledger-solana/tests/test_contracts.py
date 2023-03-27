@@ -1,16 +1,16 @@
 """Tests to ensure the contracts work as expected."""
+from pathlib import Path
+
 import anchorpy
 import pytest
-from pathlib import Path
-from tests.conftest import MAX_FLAKY_RERUNS, ROOT_DIR
 from aea_ledger_solana import SolanaApi, SolanaCrypto, SolanaFaucetApi
-from solders.pubkey import Pubkey as PublicKey  # type: ignore
-
+from anchorpy import Context, Program, WorkspaceType, workspace_fixture
 from pytest import fixture, mark
 from solders.keypair import Keypair
+from solders.pubkey import Pubkey as PublicKey  # type: ignore
 from solders.system_program import ID as SYS_PROGRAM_ID
 
-from anchorpy import Context, Program, workspace_fixture, WorkspaceType
+from tests.conftest import MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 PAYER_KEYPAIR_PATH_0 = Path(ROOT_DIR, "tests", "data", "solana_private_key0.txt")

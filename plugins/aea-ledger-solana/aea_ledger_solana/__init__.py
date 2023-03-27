@@ -21,4 +21,6 @@
 
 from .solana import *  # noqa isort:skip
 from .facucet import SolanaFaucetApi
+
+
 from .constants import _IDL, _BYTECODE, _SOLANA, LAMPORTS_PER_SOL  # noqa isort:skip
