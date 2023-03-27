@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the solana module."""
+"""This module contains the helpers for the solana ledger."""
 import hashlib
 import json
 import time

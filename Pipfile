@@ -58,4 +58,4 @@ apduboy = {git = "https://github.com/LedgerHQ/apduboy.git"}
 
 # pending upstream releases.
 # solana = "==0.29.2"
-# anchorpy = {git = "https://github.com/kevinheavey/anchorpy.git"}
+# anchorpy = {git = "https://github.com/kevinheavey/anchorpy.git@a3cc292574679bae1610e01ab69161b6614bca9"}

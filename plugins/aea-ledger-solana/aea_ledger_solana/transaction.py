@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the solana module."""
+"""This module contains the transaction helper for the solana module."""
 import json
 
 from solana.transaction import Transaction

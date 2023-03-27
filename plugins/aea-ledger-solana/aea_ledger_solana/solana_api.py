@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the solana module."""
+"""This module contains the Solana API Client implementation for the solana ledger."""
 
 import json
 from dataclasses import dataclass

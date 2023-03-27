@@ -485,6 +485,7 @@ jobs:
           cd ..
           rm -rf go-ipfs
           ipfs init
+          mkdir ~/.config/solana
           echo "[6,206,143,203,220,22,227,247,237,23,114,181,56,70,53,98,224,64,192,221,134,115,153,146,252,81,8,41,237,224,225,176,195,11,129,62,207,146,39,47,172,98,101,87,102,166,105,202,33,169,134,76,27,149,148,68,4,15,215,47,196,227,216,48]" > ~/.config/solana/id.json
       - if: matrix.os == 'windows-latest'
         name: Install dependencies (windows-latest)
