@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the solana module."""
+"""This module contains the TransactionInstruction of the solana module."""
 
 from typing import List, NamedTuple
 
