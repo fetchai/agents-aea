@@ -93,7 +93,6 @@ def _get_token_contract(solana_api):
     return instance, interface, program_key_pair
 
 
-@pytest.mark.skipif(platform.system() == "Windows", reason="Windows not supported")
 def _get_tic_tac_contract(solana_api):
     """Create a contract."""
     idl_path = Path(
@@ -117,6 +116,7 @@ def _get_tic_tac_contract(solana_api):
     return instance, interface, program_key_pair
 
 
+@pytest.mark.skipif(platform.system() == "Windows", reason="Windows not supported")
 def test_tic_tac_contract(solana_api):
     """Test the tic tac contract."""
     instance, interface, _ = _get_tic_tac_contract(solana_api)
