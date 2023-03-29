@@ -2,7 +2,7 @@
 
 # plugins.aea-ledger-solana.aea`_`ledger`_`solana.faucet
 
-This module contains the tests of the solana module.
+This module contains the Faucet implementation for the solana ledger.
 
 <a id="plugins.aea-ledger-solana.aea_ledger_solana.faucet.SolanaFaucetApi"></a>
 
