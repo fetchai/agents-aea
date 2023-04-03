@@ -20,10 +20,17 @@
 # ------------------------------------------------------------------------------
 
 """This script checks that dependencies in tox.ini and Pipfile match."""
-
+import configparser
+import itertools
 import sys
-from typing import Dict
+from typing import Set, Tuple
 
+import tomli
+from packaging.requirements import Requirement as BaseRequirement
+
+
+TOX_INI = "tox.ini"
+PIPFILE = "Pipfile"
 
 # specified in setup.py
 WHITELIST = {
@@ -39,89 +46,99 @@ WHITELIST = {
     "tomte[safety]": "==0.2.4",
     "tomte[vulture]": "==0.2.4",
     "tomte[darglint]": "==0.2.4",
+    "tomte[tests,tox]": "==0.2.4",
+    "memory-profiler": "==0.57.0",  # used by extra utility
 }
 
 
-def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
-    """
-    Get the dependencies of the Pipfile.
+class Requirement(BaseRequirement):
+    """Requirement with comparasion"""
 
-    :param file: the file to check.
-    :return: dictionary with dependencies and their versions
-    """
-    result: Dict[str, str] = WHITELIST
-    with open(file, "r") as f:
-        is_dev_dependency = False
-        for line in f:
-            if line == "[dev-packages]\n":
-                is_dev_dependency = True
-                continue
-            if line == "[packages]\n":
-                is_dev_dependency = True
-                continue
-            if not is_dev_dependency:
-                continue
-            try:
-                package, version = line.split(" = ")
-                result[package] = version.strip("\n").strip('"')
-            except Exception:  # nosec # pylint: disable=broad-except
-                pass
+    def __eq__(self, __value: object) -> bool:
+        """Compare two objects."""
+        return str(self) == str(__value)
 
-    return result
+    def __hash__(self) -> int:
+        """Get hash for object."""
+        return hash(self.__str__())
 
 
-def check_versions_in_tox_correct(file: str = "tox.ini") -> None:
-    """
-    Check the versions in tox are matching the ones in Pipfile.
+def load_pipfile(filename: str = PIPFILE) -> Set[Requirement]:
+    """Load pipfile requirements."""
+    with open(filename, "rb") as f:
+        pipfile_data = tomli.load(f)
 
-    :param file: the file to check.
-    """
-    dependencies = get_deps_in_pipfile()
-    skip_dependencies = False
-
-    with open(file, "r") as f:
-        for line in f:
-            if line.strip().startswith("[testenv_multi]"):
-                skip_dependencies = True
-
-            if "commands =" in line:
-                skip_dependencies = False
-
-            if skip_dependencies:
-                continue
-
-            for match_type in ["==", ">="]:
-                if match_type in line:
-                    name_part, version_part = line.split(match_type)
-                    check_match(
-                        name_part.strip(" "),
-                        version_part.strip("\n"),
-                        dependencies,
-                        match_type,
-                    )
-
-
-def check_match(
-    name_part: str, version_part: str, dependencies: Dict[str, str], match_type: str
-) -> None:
-    """Check for a match independencies."""
-    result = False
-    for package, version_and_match_type in dependencies.items():
-        if package == name_part:
-            if version_and_match_type == f"{match_type}{version_part}":
-                result = True
-                break
-            print(
-                f"Non-matching versions for package={package}, {name_part}. Expected='{version_and_match_type}', found='{match_type}{version_part}'."
+    packages = []
+    for name, version in itertools.chain(
+        pipfile_data.get("packages", {}).items(),
+        pipfile_data.get("dev-packages", {}).items(),
+    ):
+        if isinstance(version, str):
+            package_spec = f"{name}{version if version !='*' else ''}"
+        else:
+            assert isinstance(version, dict)
+            extras = (
+                ",".join(version.get("extras", [])) if version.get("extras", []) else ""
             )
-            sys.exit(1)
+            extras = f"[{extras}]" if extras else ""
+            version_spec = version.get("version") if version.get("version") else ""
+            package_spec = f"{name}{extras}{version_spec}"
 
-    if not result:
-        print(f"Package not found for: {name_part}")
-        sys.exit(1)
+        packages.append(Requirement(package_spec))
+
+    return set(packages)
+
+
+def load_tox_ini(file_name: str = TOX_INI) -> Set[Requirement]:
+    """Load tox.ini requirements."""
+    config = configparser.ConfigParser()
+    config.read(file_name)
+    packages = []
+    for section in config.values():
+        packages.extend(
+            list(
+                filter(
+                    lambda x: (
+                        x != "" and not x.startswith("{") and not x.startswith(".")
+                    ),
+                    section.get("deps", "").splitlines(),
+                )
+            )
+        )
+    return set(map(Requirement, packages))
+
+
+def get_missing_packages() -> Tuple[Set[Requirement], Set[Requirement]]:
+    """Get difference in tox.ini and pipfile."""
+    EXCLUSIONS = {Requirement(f"{k}{v}") for k, v in WHITELIST.items()}
+    in_pip = load_pipfile()
+    in_tox = load_tox_ini()
+
+    missing_in_tox = in_pip - in_tox - EXCLUSIONS
+
+    missing_in_pip = in_tox - in_pip - EXCLUSIONS
+    return missing_in_tox, missing_in_pip
+
+
+def check_versions_are_correct() -> bool:
+    """Check no missing packages."""
+    missing_in_tox, missing_in_pip = get_missing_packages()
+    if missing_in_tox:
+        print("Packages defined in Pipfile and not found in tox.ini")
+        for i in missing_in_tox:
+            print("\t", str(i))
+
+    if missing_in_pip:
+        print("Packages defined in tox.ini and not found in Pipfile")
+        for i in missing_in_pip:
+            print("\t", str(i))
+
+    return not (missing_in_pip or missing_in_tox)
 
 
 if __name__ == "__main__":
-    check_versions_in_tox_correct()
-    print("OK")
-    sys.exit(0)
+    result = check_versions_are_correct()
+    if not result:
+        sys.exit(1)
+    else:
+        print("OK")
