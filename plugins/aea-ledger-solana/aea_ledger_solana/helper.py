@@ -23,6 +23,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, cast
 
+from aea_ledger_solana.transaction import SolanaTransaction
+from aea_ledger_solana.utils import pako_inflate
 from anchorpy.coder.accounts import ACCOUNT_DISCRIMINATOR_SIZE
 from anchorpy.idl import _decode_idl_account
 from solana.blockhash import BlockhashCache  # type: ignore
@@ -32,9 +34,6 @@ from solders.pubkey import Pubkey as PublicKey
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, Helper
 from aea.helpers.base import try_decorator
-
-from .transaction import SolanaTransaction
-from .utils import pako_inflate
 
 
 class SolanaHelper(Helper):

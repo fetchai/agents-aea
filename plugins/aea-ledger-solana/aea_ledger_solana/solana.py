@@ -22,6 +22,18 @@ import logging
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from aea_ledger_solana.constants import (
+    DEFAULT_ADDRESS,
+    DEFAULT_CHAIN_ID,
+    _SOLANA,
+    _VERSION,
+)
+from aea_ledger_solana.crypto import SolanaCrypto
+from aea_ledger_solana.faucet import SolanaFaucetApi  # noqa: F401
+from aea_ledger_solana.helper import SolanaHelper
+from aea_ledger_solana.solana_api import SolanaApiClient
+from aea_ledger_solana.transaction import SolanaTransaction
+from aea_ledger_solana.transaction_instruction import TransactionInstruction
 from anchorpy import Context, Idl, Program  # type: ignore
 from solana.blockhash import BlockhashCache
 from solana.transaction import Transaction  # type: ignore
@@ -43,14 +55,6 @@ from solders.system_program import (  # type: ignore; SYS_PROGRAM_ID,
 from aea.common import Address, JSONLike
 from aea.crypto.base import LedgerApi
 from aea.helpers.base import try_decorator
-
-from .constants import DEFAULT_ADDRESS, DEFAULT_CHAIN_ID, _SOLANA, _VERSION
-from .crypto import SolanaCrypto
-from .faucet import SolanaFaucetApi  # noqa: F401
-from .helper import SolanaHelper
-from .solana_api import SolanaApiClient
-from .transaction import SolanaTransaction
-from .transaction_instruction import TransactionInstruction
 
 
 class SolanaApi(LedgerApi, SolanaHelper):

@@ -20,10 +20,9 @@
 
 from typing import List, NamedTuple
 
+from aea_ledger_solana.account import AccountMeta
 from solders import instruction
 from solders.pubkey import Pubkey as PublicKey
-
-from .account import AccountMeta
 
 
 class TransactionInstruction(NamedTuple):
@@ -39,16 +38,13 @@ class TransactionInstruction(NamedTuple):
     """Program input."""
 
     @classmethod
-    def from_solders(cls, ixn: instruction.Instruction):
+    def from_solders(cls, ixn: instruction.Instruction) -> "TransactionInstruction":
         """
         Convert from a `solders` instruction.
 
-        Args:
-            ixn: The `solders` instruction.
-        Returns:
-            The `solana-py` instruction.
-        # noqa: DAR201
-        # noqa: DAR101
+        :param ixn: The `solders` instruction.
+        :param The `solana-py` instruction.
+        :return: The `solders` instruction.
         """
         keys = [AccountMeta.from_solders(am) for am in ixn.accounts]
         program_id = PublicKey.from_bytes(bytes(ixn.program_id))
@@ -58,10 +54,7 @@ class TransactionInstruction(NamedTuple):
         """
         Convert to a `solders` instruction.
 
-        Returns:
-            The `solders` instruction.
-        # noqa: DAR201
-        # noqa: DAR101
+        :return: The `solders` instruction.
         """
         accounts = [key for key in self.keys]
         return instruction.Instruction(

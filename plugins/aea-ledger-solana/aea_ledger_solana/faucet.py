@@ -21,15 +21,19 @@ import json
 import time
 from typing import Optional, Union
 
+from aea_ledger_solana.constants import (
+    DEFAULT_ADDRESS,
+    LAMPORTS_PER_SOL,
+    TESTNET_NAME,
+    _SOLANA,
+)
+from aea_ledger_solana.utils import default_logger
 from solana.rpc.api import Client  # type: ignore
 from solders.pubkey import Pubkey as PublicKey
 
 from aea.common import Address
 from aea.crypto.base import FaucetApi
 from aea.helpers.base import try_decorator
-
-from .constants import DEFAULT_ADDRESS, LAMPORTS_PER_SOL, TESTNET_NAME, _SOLANA
-from .utils import default_logger
 
 
 class SolanaFaucetApi(FaucetApi):

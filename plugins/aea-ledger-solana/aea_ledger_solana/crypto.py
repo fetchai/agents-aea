@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import base58
+from aea_ledger_solana.constants import _SOLANA
 from cryptography.fernet import Fernet  # type: ignore
 from solders.hash import Hash
 from solders.keypair import Keypair
@@ -33,8 +34,6 @@ from solders.transaction import Transaction
 from aea.common import JSONLike
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
-
-from .constants import _SOLANA
 
 
 class SolanaCrypto(Crypto[Keypair]):
