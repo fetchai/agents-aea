@@ -34,20 +34,10 @@ PIPFILE = "Pipfile"
 
 # specified in setup.py
 WHITELIST = {
-    "base58": ">=1.0.3",
-    "tomte[tests]": "==0.2.4",
-    "tomte[bandit]": "==0.2.4",
-    "tomte[black]": "==0.2.4",
-    "tomte[isort]": "==0.2.4",
-    "tomte[docs]": "==0.2.4",
-    "tomte[flake8]": "==0.2.4",
-    "tomte[mypy]": "==0.2.4",
-    "tomte[pylint]": "==0.2.4",
-    "tomte[safety]": "==0.2.4",
-    "tomte[vulture]": "==0.2.4",
-    "tomte[darglint]": "==0.2.4",
-    "tomte[tests,tox]": "==0.2.4",
-    "memory-profiler": "==0.57.0",  # used by extra utility
+    "base58",
+    "tomte",
+    "memory-profiler",
+    "apduboy",
 }
 
 
@@ -110,13 +100,11 @@ def load_tox_ini(file_name: str = TOX_INI) -> Set[Requirement]:
 
 def get_missing_packages() -> Tuple[Set[Requirement], Set[Requirement]]:
     """Get difference in tox.ini and pipfile."""
-    EXCLUSIONS = {Requirement(f"{k}{v}") for k, v in WHITELIST.items()}
-    in_pip = load_pipfile()
-    in_tox = load_tox_ini()
+    in_pip = {package for package in load_pipfile() if package.name not in WHITELIST}
+    in_tox = {package for package in load_tox_ini() if package.name not in WHITELIST}
 
-    missing_in_tox = in_pip - in_tox - EXCLUSIONS
-
-    missing_in_pip = in_tox - in_pip - EXCLUSIONS
+    missing_in_tox = in_pip - in_tox
+    missing_in_pip = in_tox - in_pip
     return missing_in_tox, missing_in_pip
 
 
