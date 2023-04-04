@@ -121,6 +121,7 @@ new_env: clean
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum-flashbots;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
+		pipenv run pip install --no-deps file:plugins/aea-ledger-solana;\
 		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\
 		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-solana;\
