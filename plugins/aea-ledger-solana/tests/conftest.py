@@ -60,6 +60,11 @@ SOLANA_TESTNET_CONFIG = {"address": SOLANA_DEFAULT_ADDRESS}
 
 logger = logging.getLogger(__name__)
 
+PROGRAM_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key_program.txt")
+PAYER_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key1.txt")
+PLAYER1_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key1.txt")
+PLAYER2_KEYPAIR_PATH = Path(ROOT_DIR, "tests", "data", "solana_private_key2.txt")
+
 
 def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     """

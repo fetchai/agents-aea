@@ -16,9 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Utility functions for the Solana ledger."""
 
-"""Python package wrapping the public and private key cryptography and ledger api of Solana."""
+import logging
+import zlib
+from typing import Any
 
-from .solana import *  # noqa isort:skip
 
-from .constants import _IDL, _BYTECODE, _SOLANA, LAMPORTS_PER_SOL  # noqa isort:skip
+default_logger = logging.getLogger(__name__)
+
+
+def pako_inflate(data: Any) -> bytes:
+    """Decompress data using pako inflate. https://stackoverflow.com/questions/46351275/using-pako-deflate-with-python."""
+
+    decompress = zlib.decompressobj(15)
+    decompressed_data = decompress.decompress(data)
+    decompressed_data += decompress.flush()
+    return decompressed_data

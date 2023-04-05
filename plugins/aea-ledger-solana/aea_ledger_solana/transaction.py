@@ -16,9 +16,23 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains the transaction helper for the solana module."""
+import json
 
-"""Python package wrapping the public and private key cryptography and ledger api of Solana."""
+from solana.transaction import Transaction
+from solders.transaction import Transaction as SoldersTransaction
 
-from .solana import *  # noqa isort:skip
 
-from .constants import _IDL, _BYTECODE, _SOLANA, LAMPORTS_PER_SOL  # noqa isort:skip
+class SolanaTransaction(Transaction):
+    """Class to represent a solana ledger transaction."""
+
+    @classmethod
+    def from_json(cls, json_data: dict) -> "SolanaTransaction":
+        """Convert from a json."""
+        string_value = json.dumps(json_data)
+        solders_tx = SoldersTransaction.from_json(string_value)
+        return cls.from_solders(solders_tx)
+
+    def to_json(self) -> dict:
+        """Convert to json."""
+        return json.loads(self._solders.to_json())
