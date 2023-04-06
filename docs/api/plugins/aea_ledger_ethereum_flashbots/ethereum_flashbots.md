@@ -79,8 +79,10 @@ True if the simulation went through, False otherwise.
 #### send`_`bundle
 
 ```python
-def send_bundle(bundle: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
-                target_blocks: List[int]) -> Optional[List[str]]
+def send_bundle(
+        bundle: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
+        target_blocks: List[int],
+        raise_on_failed_simulation: bool = False) -> Optional[List[str]]
 ```
 
 Send a bundle.
@@ -95,6 +97,7 @@ Send a bundle.
 
 - `bundle`: the signed transactions to bundle together and send.
 - `target_blocks`: the target blocks for the transactions.
+- `raise_on_failed_simulation`: whether to raise an exception if the simulation fails.
 
 **Returns**:
 
