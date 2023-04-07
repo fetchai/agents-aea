@@ -258,7 +258,13 @@ class IPFSTool:
         response = self.client.add_bytes(data, **kwargs)
         return response
 
-    def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
+    def add(
+        self,
+        dir_path: str,
+        pin: bool = True,
+        recursive: bool = True,
+        wrap_with_directory: bool = True,
+    ) -> Tuple[str, str, List]:
         """
         Add directory to ipfs.
 
@@ -266,16 +272,24 @@ class IPFSTool:
 
         :param dir_path: str, path to dir to publish
         :param pin: bool, pin object or not
+        :param recursive: bool, publish dierctory recursively or not
+        :param wrap_with_directory: bool, wrap object with directory or not
 
         :return: dir name published, hash, list of items processed
         """
         response = self.client.add(
             dir_path,
             pin=pin,
-            recursive=True,
-            wrap_with_directory=True,
+            recursive=recursive,
+            wrap_with_directory=wrap_with_directory,
         )
-        return response[-2]["Name"], response[-1]["Hash"], response[:-1]
+        if wrap_with_directory:
+            return response[-2]["Name"], response[-1]["Hash"], response[:-1]
+
+        if Path(dir_path).is_dir():
+            return response[-1]["Name"], response[-1]["Hash"], response[:-1]
+
+        return response["Name"], response["Hash"], []
 
     def pin(self, hash_id: str) -> Dict:
         """Pin content with hash_id"""
