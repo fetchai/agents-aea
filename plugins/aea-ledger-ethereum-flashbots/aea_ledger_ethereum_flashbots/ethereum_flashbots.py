@@ -44,6 +44,8 @@ _TARGET_BLOCKS = "target_blocks"
 
 _DEFAULT_TARGET_BLOCKS = 25
 
+_RAISE_ON_FAILED_SIMULATION = "raise_on_failed_simulation"
+
 
 class EthereumFlashbotApi(EthereumApi):
     """Class to interact with the Ethereum Web3 APIs."""
@@ -118,6 +120,7 @@ class EthereumFlashbotApi(EthereumApi):
         self,
         bundle: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
         target_blocks: List[int],
+        raise_on_failed_simulation: bool = False,
     ) -> Optional[List[str]]:
         """
         Send a bundle.
@@ -130,13 +133,15 @@ class EthereumFlashbotApi(EthereumApi):
 
         :param bundle: the signed transactions to bundle together and send.
         :param target_blocks: the target blocks for the transactions.
+        :param raise_on_failed_simulation: whether to raise an exception if the simulation fails.
         :return: the transaction digest if the transaction went through, None otherwise.
         """
         for target_block in target_blocks:
             if not self.simulate(bundle, target_block):
-                _default_logger.warning(
-                    f"Simulation failed for bundle {bundle} targeting block {target_block}."
-                )
+                msg = f"Simulation failed for bundle {bundle} targeting block {target_block}."
+                if raise_on_failed_simulation:
+                    raise ValueError(msg)
+                _default_logger.warning(msg)
                 continue
 
             replacement_uuid = str(uuid4())
@@ -199,7 +204,8 @@ class EthereumFlashbotApi(EthereumApi):
         """
         bundle = self.bundle_transactions(signed_transactions)
         target_blocks = _kwargs.get(_TARGET_BLOCKS, self._get_next_blocks())
-        tx_hashes = self.send_bundle(bundle, target_blocks)
+        raise_on_failed_simulation = _kwargs.get(_RAISE_ON_FAILED_SIMULATION, False)
+        tx_hashes = self.send_bundle(bundle, target_blocks, raise_on_failed_simulation)
         return tx_hashes
 
     def send_signed_transactions(

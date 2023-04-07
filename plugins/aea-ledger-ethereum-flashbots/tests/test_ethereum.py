@@ -220,9 +220,28 @@ def test_send_bundle_with_failed_simulation(ethereum_flashbot_api) -> None:
     response_mock.bundle_hash = MagicMock()
     response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
     ethereum_flashbot_api.simulate = MagicMock(return_value=False)
+    target_blocks = [0]
 
     # run
-    tx_hashes = ethereum_flashbot_api.send_bundle(MagicMock(), MagicMock())
+    tx_hashes = ethereum_flashbot_api.send_bundle(MagicMock(), target_blocks)
 
     # check
     assert tx_hashes is None
+
+
+def test_send_bundle_with_failed_simulation_and_raise(ethereum_flashbot_api) -> None:
+    """Test send bundle with failed simulation and should raise."""
+    # mock
+    response_mock = MagicMock()
+    response_mock.wait = MagicMock()
+    response_mock.bundle_hash = MagicMock()
+    response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
+    ethereum_flashbot_api.simulate = MagicMock(return_value=False)
+    raise_on_failed_simulation = True
+    target_blocks = [0]
+
+    # run
+    with pytest.raises(ValueError):
+        ethereum_flashbot_api.send_bundle(
+            MagicMock(), target_blocks, raise_on_failed_simulation
+        )
