@@ -26,7 +26,7 @@ from setuptools import setup  # type: ignore
 
 setup(
     name="open-aea-cli-benchmark",
-    version="1.31.0",
+    version="1.32.0",
     author="Valory AG",
     license="Apache-2.0",
     description="CLI extension for AEA framework benchmarking.",
