@@ -194,6 +194,7 @@ class IPFSDaemon:
         if poll is None:
             self.process.terminate()
             self.process.wait(2)
+        self.process = None
 
     def __enter__(self) -> None:
         """Run the ipfs daemon."""
