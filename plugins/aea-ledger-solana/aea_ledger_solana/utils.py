@@ -23,7 +23,7 @@ import zlib
 from typing import Any
 
 
-default_logger = logging.getLogger(__name__)
+default_logger = logging.getLogger('aea.ledger_apis.solana')
 
 
 def pako_inflate(data: Any) -> bytes:
