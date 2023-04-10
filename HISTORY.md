@@ -1,6 +1,28 @@
 # Release History - open AEA
 
 
+## 1.32.0 (2023-04-10)
+
+AEA:
+- Updates the protocol generator to use `protobuf` double type to represent float values
+
+Packages:
+- Adds `SEND_SIGNED_TRANSACTIONS` to the initial states on the ledger connection
+  
+Plugins:
+- Removes unused dependencies from `solana` plugin
+- Adds the new plugin the the `new_env` target on the `Makefile`
+- Fixes dependency conflicts on the `solana` and the `hwi` plugins
+- Adds support for raising on a simulation failure on the `flashbots` plugin
+- Makes `recursive` and `wrap_with_directory` parameters configurable on the IPFS client
+
+Chores:
+- Bumps `tomte` to `v0.2.4`
+- Fixes `pyproject.toml` syntax
+- Fixes parsing issues on `check_pipfile_and_toxini.py` script
+
+
+
 ## 1.31.0 (2023-03-21)
 
 AEA:
