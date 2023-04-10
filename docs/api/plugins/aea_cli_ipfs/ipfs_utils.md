@@ -215,7 +215,10 @@ hash
 #### add
 
 ```python
-def add(dir_path: str, pin: bool = True) -> Tuple[str, str, List]
+def add(dir_path: str,
+        pin: bool = True,
+        recursive: bool = True,
+        wrap_with_directory: bool = True) -> Tuple[str, str, List]
 ```
 
 Add directory to ipfs.
@@ -226,6 +229,8 @@ It wraps into directory.
 
 - `dir_path`: str, path to dir to publish
 - `pin`: bool, pin object or not
+- `recursive`: bool, publish dierctory recursively or not
+- `wrap_with_directory`: bool, wrap object with directory or not
 
 **Returns**:
 

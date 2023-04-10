@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ from aea_cli_ipfs.ipfs_utils import (
     RemoveError,
     resolve_addr,
 )
+from aea_cli_ipfs.test_tools.fixture_helpers import ipfs_daemon  # noqa: F401
 
 from aea.cli.registry.settings import DEFAULT_IPFS_URL, DEFAULT_IPFS_URL_LOCAL
 
@@ -53,7 +54,6 @@ def test_init_tool() -> None:
 def test_hash_bytes() -> None:
     """Test hash bytes."""
     tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
-
     tool.daemon.start()
     try:
         assert tool.is_remote is False
@@ -269,3 +269,47 @@ def test_tool_download_fix_path_works() -> None:
                 Path(target_tmp_dir) / hash_id
             )
             assert [i.name for i in Path(target_tmp_dir).glob("*")] == [hash_id]
+
+
+def test_wrap_directory_flag_file() -> None:
+    """Test `wrap_directory` flag"""
+
+    tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
+    tool.daemon.start()
+    try:
+        with TemporaryDirectory() as temp_dir:
+            temp_file = Path(temp_dir, "txt")
+            temp_file.write_text("Hello, World")
+
+            _, file_hash, _ = tool.add(dir_path=str(temp_file))
+            assert file_hash == "QmWVQQhQ5Qxzb1jLk1SW4Etsn6rMWHtjdELTNEmA1J1gRx"
+
+            _, file_hash, _ = tool.add(
+                dir_path=str(temp_file), wrap_with_directory=False
+            )
+            assert file_hash == "QmTev1ZgJkHgFYiCX7MgELEDJuMygPNGcinqBa2RmfnGFu"
+    finally:
+        tool.daemon.stop()
+
+
+def test_wrap_directory_flag_dir() -> None:
+    """Test `wrap_directory` flag"""
+    tool = IPFSTool(DEFAULT_IPFS_URL_LOCAL)
+    tool.daemon.start()
+    try:
+        with TemporaryDirectory() as _temp_dir:
+            temp_dir = Path(_temp_dir, "some_dir")
+            temp_dir.mkdir()
+
+            temp_file = temp_dir / "txt"
+            temp_file.write_text("Hello, World")
+
+            _, file_hash, _ = tool.add(dir_path=str(temp_dir))
+            assert file_hash == "Qmb7LSaArLheRjnvVZ2vhhnBun8EWsF9Z5TdL8NgLgyhJL"
+
+            _, file_hash, _ = tool.add(
+                dir_path=str(temp_dir), wrap_with_directory=False
+            )
+            assert file_hash == "QmWVQQhQ5Qxzb1jLk1SW4Etsn6rMWHtjdELTNEmA1J1gRx"
+    finally:
+        tool.daemon.stop()
