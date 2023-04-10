@@ -77,7 +77,7 @@ ct:TransactionReceipt: |
   bytes transaction_receipt = 1;
 ...
 ---
-initiation: [get_balance, get_state, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
+initiation: [get_balance, get_state, get_raw_transaction, send_signed_transaction, send_signed_transactions, get_transaction_receipt]
 reply:
   get_balance: [balance, error]
   balance: []

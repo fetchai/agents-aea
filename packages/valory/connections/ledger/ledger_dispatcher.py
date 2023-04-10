@@ -375,14 +375,13 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 ValueError("No transaction_digest returned"), api, message, dialogue
             )
 
+        ledger_id = self.get_ledger_id(message)
         return cast(
             LedgerApiMessage,
             dialogue.reply(
                 performative=LedgerApiMessage.Performative.TRANSACTION_DIGESTS,
                 target_message=message,
-                transaction_digests=TransactionDigests(
-                    message.signed_transaction.ledger_id, transaction_digests
-                ),
+                transaction_digests=TransactionDigests(ledger_id, transaction_digests),
             ),
         )
 
