@@ -43,7 +43,7 @@ setup(
         "ipfshttpclient==0.8.0a2",
         "eth-account==0.5.6",
         "open-aea-ledger-ethereum~=1.32.0",
-        "apduboy @ git+https://github.com/LedgerHQ/apduboy.git@d167f620430afeed313edc9fc1315d6d9c50234e",
+        "apduboy>=0.5.0",
         "protobuf>=3.20,<4",
     ],
     tests_require=["pytest"],
