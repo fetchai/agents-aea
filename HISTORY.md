@@ -15,6 +15,7 @@ Plugins:
 - Fixes dependency conflicts on the `solana` and the `hwi` plugins
 - Adds support for raising on a simulation failure on the `flashbots` plugin
 - Makes `recursive` and `wrap_with_directory` parameters configurable on the IPFS client
+- Attaches the plugin loggers to the correct namespace
 
 Chores:
 - Bumps `tomte` to `v0.2.4`
