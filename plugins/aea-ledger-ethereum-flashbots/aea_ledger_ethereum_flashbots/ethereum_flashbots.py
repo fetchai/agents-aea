@@ -36,7 +36,7 @@ from aea.common import JSONLike
 from aea.helpers.base import try_decorator
 
 
-_default_logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger("aea.ledger_apis.ethereum_flashbots")
 
 _ETHEREUM_FLASHBOTS = "ethereum_flashbots"
 
@@ -158,7 +158,7 @@ class EthereumFlashbotApi(EthereumApi):
             try:
                 receipts = response.receipts()
                 tx_hashes = [tx["hash"].hex() for tx in response.bundle]
-                logging.debug(
+                _default_logger.debug(
                     f"Bundle with replacement uuid {replacement_uuid} was mined in block {receipts[0]['blockNumber']}"
                     f"Tx hashes: {tx_hashes}"
                 )
@@ -168,13 +168,13 @@ class EthereumFlashbotApi(EthereumApi):
                 stats = self.flashbots.get_bundle_stats_v2(
                     self.api.toHex(response.bundle_hash()), target_block
                 )
-                logging.debug(
+                _default_logger.info(
                     f"Bundle with replacement uuid {replacement_uuid} not found in block {target_block}. "
                     f"bundle stats: {stats}"
                 )
                 # essentially a no-op but it shows that the function works
                 cancel_res = self.flashbots.cancel_bundles(replacement_uuid)
-                logging.debug(
+                _default_logger.debug(
                     f"Response from canceling bundle with replacement uuid {replacement_uuid}: {cancel_res}"
                 )
         return None

@@ -100,7 +100,7 @@ def lazy_load():  # Python caches all imported modules
     return locals()
 
 
-_default_logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger("aea.ledger_apis.cosmos")
 
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
