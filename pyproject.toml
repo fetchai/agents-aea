@@ -55,7 +55,7 @@ python-dotenv = ">=0.14.0,<0.18.0"
 ecdsa = ">=0.15,<0.17.0"
 importlib-metadata = ">4,<5"
 
-pywin32 = { version = "==303", markers = "sys_platform == 'win32' or platform_system == 'Windows'" }
+pywin32 = { version = "==305", markers = "sys_platform == 'win32' or platform_system == 'Windows'" }
 
 # cli, test_tools extras
 click = { version = "^8.0.0", optional = true }
