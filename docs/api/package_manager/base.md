@@ -318,16 +318,6 @@ class PackageUpdateError(Exception)
 
 Package update error.
 
-<a id="aea.package_manager.base.PackageNotValid"></a>
-
-## PackageNotValid Objects
-
-```python
-class PackageNotValid(Exception)
-```
-
-Package not valid.
-
 <a id="aea.package_manager.base.PackageFileNotValid"></a>
 
 ## PackageFileNotValid Objects
