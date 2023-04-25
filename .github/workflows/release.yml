@@ -76,72 +76,72 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: dist/
+          skip-existing: true
+          packages-dir: dist/
 
       - name: Publish open-aea-cli-benchmark Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-cli-benchmark/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-cli-benchmark/dist/
 
       - name: Publish open-aea-cli-ipfs Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-cli-ipfs/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-cli-ipfs/dist/
 
       - name: Publish open-aea-ledger-cosmos Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-ledger-cosmos/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-ledger-cosmos/dist/
 
       - name: Publish open-aea-ledger-ethereum Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-ledger-ethereum/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-ledger-ethereum/dist/
 
       - name: Publish open-aea-ledger-ethereum-hwi Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-ledger-ethereum-hwi/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-ledger-ethereum-hwi/dist/
 
       - name: Publish open-aea-ledger-ethereum-flashbots Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-ledger-ethereum-flashbots/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-ledger-ethereum-flashbots/dist/
 
       - name: Publish open-aea-ledger-solana Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-ledger-solana/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-ledger-solana/dist/
 
       - name: Publish open-aea-ledger-fetchai Plugin to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-          packages_dir: plugins/aea-ledger-fetchai/dist/
+          skip-existing: true
+          packages-dir: plugins/aea-ledger-fetchai/dist/
 
   publish-aea-packages:
     name: Push Open AEA Packages
