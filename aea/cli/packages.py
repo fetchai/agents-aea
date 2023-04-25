@@ -28,6 +28,7 @@ from warnings import warn
 import click
 
 from aea.cli.utils.click_utils import PackagesSource
+from aea.cli.utils.config import get_default_author_from_cli_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.configurations.constants import PACKAGES
@@ -191,7 +192,10 @@ def get_package_manager(package_dir: Path) -> BasePackageManager:
     """Get package manager."""
 
     try:
-        return PackageManagerV1.from_dir(package_dir)
+        return PackageManagerV1.from_dir(
+            package_dir,
+            author=get_default_author_from_cli_config(),
+        )
     except PackageFileNotValid:
         warn(
             "The provided `packages.json` still follows an older format which will be deprecated on v2.0.0",

@@ -469,10 +469,6 @@ class PackageUpdateError(Exception):
     """Package update error."""
 
 
-class PackageNotValid(Exception):
-    """Package not valid."""
-
-
 class PackageFileNotValid(Exception):
     """Package file not valid."""
 

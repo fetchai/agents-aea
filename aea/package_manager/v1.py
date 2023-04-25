@@ -42,7 +42,6 @@ from aea.package_manager.base import (
     PACKAGE_SOURCE_RE,
     PackageFileNotValid,
     PackageIdToHashMapping,
-    PackageNotValid,
     PackagesSourceNotValid,
     load_configuration,
 )
@@ -63,6 +62,7 @@ class PackageManagerV1(BasePackageManager):
     def __init__(
         self,
         path: Path,
+        author: Optional[str] = None,
         dev_packages: Optional[PackageIdToHashMapping] = None,
         third_party_packages: Optional[PackageIdToHashMapping] = None,
         config_loader: ConfigLoaderCallableType = load_configuration,
@@ -72,6 +72,12 @@ class PackageManagerV1(BasePackageManager):
 
         self._dev_packages = dev_packages or OrderedDict()
         self._third_party_packages = third_party_packages or OrderedDict()
+
+        if author is None:
+            package, *_ = self._dev_packages.keys()
+            author = package.author
+
+        self.author = author
 
     @property
     def dev_packages(
@@ -269,17 +275,13 @@ class PackageManagerV1(BasePackageManager):
         """Update package.json file."""
 
         for package_id in self.iter_dependency_tree():
-            is_dev_package = self.is_dev_package(package_id=package_id)
-            is_third_party_package = self.is_third_party_package(package_id=package_id)
-            if not is_dev_package and not is_third_party_package:
-                raise PackageNotValid(
-                    f"Found a package which is not listed in the `packages.json` with package id {package_id}"
-                )
-
             self.update_fingerprints(package_id=package_id)
             self.update_dependencies(package_id=package_id)
 
             package_hash = self.calculate_hash_from_package_id(package_id=package_id)
+            is_dev_package = self.is_dev_package(package_id=package_id)
+            is_third_party_package = self.is_third_party_package(package_id=package_id)
+
             if is_dev_package:
                 if self._dev_packages[package_id] == package_hash:
                     continue
@@ -298,6 +300,17 @@ class PackageManagerV1(BasePackageManager):
                     f"\n\tCalculated hash: {package_hash}"
                     f"\n\tExpected hash: {self._third_party_packages[package_id]}"
                 )
+
+            self._logger.info(f"A new package found with package ID {package_id}")
+            if package_id.author == self.author:
+                self._logger.info("Adding package to dev packages")
+                self._dev_packages[package_id] = package_hash
+            else:
+                self._logger.info(
+                    "Adding package to third party packages "
+                    "since the author name of the package is different from default author"
+                )
+                self._third_party_packages[package_id] = package_hash
 
         return self
 
@@ -390,6 +403,7 @@ class PackageManagerV1(BasePackageManager):
         packages: Dict[str, Dict[str, str]],
         packages_dir: Optional[Path] = None,
         config_loader: ConfigLoaderCallableType = load_configuration,
+        author: Optional[str] = None,
     ) -> "PackageManagerV1":
         """Initialize from json object"""
 
@@ -416,6 +430,7 @@ class PackageManagerV1(BasePackageManager):
             dev_packages=dev_packages,
             third_party_packages=third_party_packages,
             config_loader=config_loader,
+            author=author,
         )
 
     @classmethod
@@ -423,10 +438,14 @@ class PackageManagerV1(BasePackageManager):
         cls,
         packages_dir: Path,
         config_loader: ConfigLoaderCallableType = load_configuration,
+        author: Optional[str] = None,
     ) -> "PackageManagerV1":
         """Initialize from packages directory."""
         packages_file = packages_dir / PACKAGES_FILE
         packages = cls._load_packages(packages_file)
         return cls.from_json(
-            packages=packages, packages_dir=packages_dir, config_loader=config_loader
+            packages=packages,
+            packages_dir=packages_dir,
+            config_loader=config_loader,
+            author=author,
         )
