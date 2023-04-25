@@ -184,7 +184,10 @@ def _init_packages_repo() -> None:
         )
 
     packages_dir.mkdir()
-    PackageManagerV1(path=packages_dir).dump()
+    PackageManagerV1(
+        path=packages_dir,
+        author=get_default_author_from_cli_config(),
+    ).dump()
     click.echo(f"Initialized packages repository @ {packages_dir}")
 
 

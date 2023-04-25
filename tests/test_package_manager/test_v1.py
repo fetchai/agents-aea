@@ -198,6 +198,7 @@ class TestPackageManagerV1Sync(TestPackageManagerV1):
         pm = PackageManagerV1(
             path=self.packages_dir_path,
             third_party_packages=OrderedDict({DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}),
+            author=TEST_SKILL_ID.author,
         )
 
         with mock.patch.object(pm, "add_package") as update_patch:
@@ -208,6 +209,7 @@ class TestPackageManagerV1Sync(TestPackageManagerV1):
         pm = PackageManagerV1(
             path=self.packages_dir_path,
             third_party_packages=OrderedDict({DUMMY_PACKAGE_ID: DUMMY_PACKAGE_HASH}),
+            author=TEST_SKILL_ID.author,
         )
 
         with mock.patch.object(pm, "add_package") as update_patch:
@@ -596,7 +598,7 @@ class TestVerifyFailure(BaseAEATestCase):
     def test_missing_hash(self, caplog) -> None:
         """Test update package hash method."""
 
-        pm = PackageManagerV1(path=self.packages_dir_path)
+        pm = PackageManagerV1(path=self.packages_dir_path, author=TEST_SKILL_ID.author)
 
         with caplog.at_level(logging.ERROR), mock.patch(
             "aea.package_manager.v1.check_fingerprint",
@@ -617,13 +619,13 @@ class TestVerifyFailure(BaseAEATestCase):
 def test_package_manager_add_item_dependency_support():
     """Check PackageManager.add_packages works with dependencies on real packages."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager = PackageManagerV1(Path(tmpdir), author=TEST_SKILL_ID.author)
         package_manager.add_package(TEST_SKILL_ID)
         assert len(package_manager.dev_packages) == 1
         package_manager.dump()
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager = PackageManagerV1(Path(tmpdir), author=TEST_SKILL_ID.author)
         package_manager.add_package(
             TEST_SKILL_ID,
             with_dependencies=True,
@@ -653,14 +655,14 @@ def test_package_manager_add_item_dependency_support_mock(fetch_mock):
 
     # no deps
     with tempfile.TemporaryDirectory() as tmpdir:
-        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager = PackageManagerV1(Path(tmpdir), author=TEST_SKILL_ID.author)
         with mock.patch.object(package_manager, "calculate_hash_from_package_id"):
             package_manager.add_package(TEST_SKILL_ID)
             assert len(package_manager.dev_packages) == 1
 
     # deps loading
     with tempfile.TemporaryDirectory() as tmpdir:
-        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager = PackageManagerV1(Path(tmpdir), author=TEST_SKILL_ID.author)
         with mock.patch.object(
             package_manager, "calculate_hash_from_package_id"
         ), mock.patch.object(
@@ -688,7 +690,7 @@ def test_package_manager_add_package_already_installed(fetch_mock: mock.Mock):
     """Test package already installed."""
     # version already installed
     with tempfile.TemporaryDirectory() as tmpdir:
-        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager = PackageManagerV1(Path(tmpdir), author=TEST_SKILL_ID.author)
         with mock.patch.object(
             package_manager, "get_package_version_with_hash", return_value=TEST_SKILL_ID
         ), mock.patch.object(
@@ -711,7 +713,7 @@ def test_package_manager_add_package_can_be_updated(fetch_mock: mock.Mock):
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        package_manager = PackageManagerV1(Path(tmpdir))
+        package_manager = PackageManagerV1(Path(tmpdir), author=TEST_SKILL_ID.author)
         with mock.patch.object(
             package_manager, "get_package_version_with_hash", return_value=OLDER_VERSION
         ), mock.patch.object(
