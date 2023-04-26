@@ -436,8 +436,11 @@ the MultiAgentManager instance.
 
 ```python
 @property
-def last_start_status() -> Tuple[bool, Dict[PublicId, List[Dict]], List[Tuple[
-    PublicId, List[Dict], Exception]], ]
+def last_start_status() -> Tuple[
+    bool,
+    Dict[PublicId, List[Dict]],
+    List[Tuple[PublicId, List[Dict], Exception]],
+]
 ```
 
 Get status of the last agents start loading state.
