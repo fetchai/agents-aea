@@ -394,7 +394,7 @@ class TestPackageTestByPathWithCov(BaseAEATestCommand):
 
 def test_get_packages_list() -> None:
     """Test get packages list function."""
-    package_manager = PackageManagerV1(Path("some"), author="author")
+    package_manager = PackageManagerV1(Path("some"))
     dev_package = PackageId(
         package_type=PackageType.CONNECTION,
         public_id=PublicId(author="test", name="third", version="1.0.0"),

@@ -23,7 +23,7 @@
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional
 from typing import OrderedDict as OrderedDictType
 from unittest import mock
 
@@ -123,7 +123,7 @@ class DummyPackageManager(BasePackageManager):
     ) -> "BasePackageManager":
         """Perorm sync."""
 
-    def update_package_hashes(self) -> "BasePackageManager":  # type: ignore[empty-body]
+    def update_package_hashes(self, selector_prompt: Callable[[], str]) -> "BasePackageManager":  # type: ignore[empty-body]
         """Update package hashes."""
 
     def verify(  # type: ignore[empty-body]
