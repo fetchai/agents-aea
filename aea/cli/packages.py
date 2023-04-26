@@ -161,8 +161,13 @@ def sync(
     is_flag=True,
     help="Check packages.json",
 )
+@click.option(
+    "--skip-missing",
+    is_flag=True,
+    help="Skip packages missing from the `packages.json` file.",
+)
 @pass_ctx
-def lock_packages(ctx: Context, check: bool) -> None:
+def lock_packages(ctx: Context, check: bool, skip_missing: bool) -> None:
     """Lock packages. Updates hashes in packages.json so that they match the local packages."""
 
     packages_dir = Path(ctx.registry_path)
@@ -180,7 +185,7 @@ def lock_packages(ctx: Context, check: bool) -> None:
 
         click.echo("Updating hashes")
         get_package_manager(packages_dir).update_package_hashes(
-            selector_prompt=package_type_selector_prompt
+            selector_prompt=package_type_selector_prompt, skip_missing=skip_missing
         ).dump()
 
         click.echo("Done")

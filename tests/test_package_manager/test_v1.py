@@ -39,6 +39,7 @@ from aea.package_manager.base import (
     DepedencyMismatchErrors,
     PackageFileNotValid,
     PackageHashDoesNotMatch,
+    PackageNotValid,
     PackagesSourceNotValid,
 )
 from aea.package_manager.v1 import PackageManagerV1
@@ -436,6 +437,64 @@ class TestHashUpdateDev(BaseAEATestCase):
 
         assert pm.get_package_hash(package_id=package) == EXAMPLE_PACKAGE_HASH
         assert pm.dev_packages[package.without_hash()] == EXAMPLE_PACKAGE_HASH
+
+    def test_add_new_package_failures(self) -> None:
+        """Test adding new package."""
+        package = PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+
+        pm = PackageManagerV1.from_dir(self.packages_dir_path)
+        with mock.patch.object(
+            pm, "iter_dependency_tree", return_value=[package]
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "update_fingerprints",
+        ), mock.patch.object(
+            pm,
+            "update_dependencies",
+        ):
+
+            with pytest.raises(
+                PackageNotValid,
+                match="Found a package which is not listed in the `packages.json`",
+            ):
+                pm.update_package_hashes()
+
+    def test_skip_missing_package(self) -> None:
+        """Test adding new package."""
+        package = PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+
+        pm = PackageManagerV1.from_dir(self.packages_dir_path)
+        with mock.patch.object(
+            pm, "iter_dependency_tree", return_value=[package]
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "update_fingerprints",
+        ), mock.patch.object(
+            pm,
+            "update_dependencies",
+        ):
+            pm.update_package_hashes(skip_missing=True)
+
+        assert pm.get_package_hash(package_id=package) is None
+        assert package.without_hash() not in pm.dev_packages
 
 
 class TestHashUpdateThirdParty(BaseAEATestCase):

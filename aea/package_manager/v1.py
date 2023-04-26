@@ -43,6 +43,7 @@ from aea.package_manager.base import (
     PACKAGE_SOURCE_RE,
     PackageFileNotValid,
     PackageIdToHashMapping,
+    PackageNotValid,
     PackagesSourceNotValid,
     load_configuration,
 )
@@ -272,7 +273,9 @@ class PackageManagerV1(BasePackageManager):
         return self
 
     def update_package_hashes(
-        self, selector_prompt: Callable[[], str]
+        self,
+        selector_prompt: Optional[Callable[[], str]] = None,
+        skip_missing: bool = False,
     ) -> "PackageManagerV1":
         """Update package.json file."""
 
@@ -301,6 +304,14 @@ class PackageManagerV1(BasePackageManager):
                     f"\n\tPackage: {package_id}"
                     f"\n\tCalculated hash: {package_hash}"
                     f"\n\tExpected hash: {self._third_party_packages[package_id]}"
+                )
+
+            if skip_missing:
+                continue
+
+            if selector_prompt is None:
+                raise PackageNotValid(
+                    f"Found a package which is not listed in the `packages.json` with package id {package_id}"
                 )
 
             self._logger.info(f"A new package found with package ID {package_id}")

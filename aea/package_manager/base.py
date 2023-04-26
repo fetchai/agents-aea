@@ -432,7 +432,9 @@ class BasePackageManager(ABC):
 
     @abstractmethod
     def update_package_hashes(
-        self, selector_prompt: Callable[[], str]
+        self,
+        selector_prompt: Optional[Callable[[], str]] = None,
+        skip_missing: bool = False,
     ) -> "BasePackageManager":
         """Update package.json file."""
 
@@ -469,6 +471,10 @@ class PackageHashDoesNotMatch(Exception):
 
 class PackageUpdateError(Exception):
     """Package update error."""
+
+
+class PackageNotValid(Exception):
+    """Package not valid."""
 
 
 class PackageFileNotValid(Exception):

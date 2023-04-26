@@ -244,8 +244,8 @@ Sync local packages to the remote registry.
 
 ```python
 @abstractmethod
-def update_package_hashes(
-        selector_prompt: Callable[[], str]) -> "BasePackageManager"
+def update_package_hashes(selector_prompt: Optional[Callable[[], str]] = None,
+                          skip_missing: bool = False) -> "BasePackageManager"
 ```
 
 Update package.json file.
@@ -318,6 +318,16 @@ class PackageUpdateError(Exception)
 ```
 
 Package update error.
+
+<a id="aea.package_manager.base.PackageNotValid"></a>
+
+## PackageNotValid Objects
+
+```python
+class PackageNotValid(Exception)
+```
+
+Package not valid.
 
 <a id="aea.package_manager.base.PackageFileNotValid"></a>
 

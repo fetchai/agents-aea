@@ -106,7 +106,9 @@ class PackageManagerV0(BasePackageManager):
         return self
 
     def update_package_hashes(
-        self, selector_prompt: Callable[[], str]
+        self,
+        selector_prompt: Optional[Callable[[], str]] = None,
+        skip_missing: bool = False,
     ) -> "BasePackageManager":
         """Update packages.json file."""
 
