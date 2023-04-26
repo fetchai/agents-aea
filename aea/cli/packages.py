@@ -28,7 +28,6 @@ from warnings import warn
 import click
 
 from aea.cli.utils.click_utils import PackagesSource
-from aea.cli.utils.config import get_default_author_from_cli_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.configurations.constants import PACKAGES
@@ -47,6 +46,19 @@ class SyncTypes:  # pylint: disable=too-few-public-methods
     DEV = "dev"
     THIRD_PARTY = "third_party"
     ALL = "all"
+
+
+def package_type_selector_prompt() -> str:
+    """Selector prompt for local package type."""
+    return click.prompt(
+        "Select package type",
+        type=click.Choice(
+            (
+                PackageManagerV1.PackageType.DEV.value,
+                PackageManagerV1.PackageType.THIRD_PARTY.value,
+            )
+        ),
+    )
 
 
 @click.group("packages")
@@ -167,7 +179,10 @@ def lock_packages(ctx: Context, check: bool) -> None:
             sys.exit(return_code)
 
         click.echo("Updating hashes")
-        get_package_manager(packages_dir).update_package_hashes().dump()
+        get_package_manager(packages_dir).update_package_hashes(
+            selector_prompt=package_type_selector_prompt
+        ).dump()
+
         click.echo("Done")
     except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e)) from e
@@ -184,10 +199,7 @@ def _init_packages_repo() -> None:
         )
 
     packages_dir.mkdir()
-    PackageManagerV1(
-        path=packages_dir,
-        author=get_default_author_from_cli_config(),
-    ).dump()
+    PackageManagerV1(path=packages_dir).dump()
     click.echo(f"Initialized packages repository @ {packages_dir}")
 
 
@@ -195,10 +207,7 @@ def get_package_manager(package_dir: Path) -> BasePackageManager:
     """Get package manager."""
 
     try:
-        return PackageManagerV1.from_dir(
-            package_dir,
-            author=get_default_author_from_cli_config(),
-        )
+        return PackageManagerV1.from_dir(package_dir)
     except PackageFileNotValid:
         warn(
             "The provided `packages.json` still follows an older format which will be deprecated on v2.0.0",

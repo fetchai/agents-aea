@@ -23,7 +23,7 @@ import json
 import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
 
 from aea.configurations.data_types import PackageId
@@ -105,7 +105,9 @@ class PackageManagerV0(BasePackageManager):
 
         return self
 
-    def update_package_hashes(self) -> "BasePackageManager":
+    def update_package_hashes(
+        self, selector_prompt: Callable[[], str]
+    ) -> "BasePackageManager":
         """Update packages.json file."""
 
         for package_id in self.iter_dependency_tree():

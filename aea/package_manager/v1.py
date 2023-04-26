@@ -23,9 +23,10 @@ import copy
 import json
 import traceback
 from collections import OrderedDict
+from enum import Enum
 from itertools import chain
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 from typing import OrderedDict as OrderedDictType
 from typing import Union, cast
 
@@ -59,10 +60,15 @@ class PackageManagerV1(BasePackageManager):
     _third_party_packages: PackageIdToHashMapping
     _dev_packages: PackageIdToHashMapping
 
+    class PackageType(Enum):
+        """Local package types."""
+
+        DEV = "dev"
+        THIRD_PARTY = "third_party"
+
     def __init__(
         self,
         path: Path,
-        author: Optional[str] = None,
         dev_packages: Optional[PackageIdToHashMapping] = None,
         third_party_packages: Optional[PackageIdToHashMapping] = None,
         config_loader: ConfigLoaderCallableType = load_configuration,
@@ -72,12 +78,6 @@ class PackageManagerV1(BasePackageManager):
 
         self._dev_packages = dev_packages or OrderedDict()
         self._third_party_packages = third_party_packages or OrderedDict()
-
-        if author is None:
-            package, *_ = self._dev_packages.keys()
-            author = package.author
-
-        self.author = author
 
     @property
     def dev_packages(
@@ -271,7 +271,9 @@ class PackageManagerV1(BasePackageManager):
 
         return self
 
-    def update_package_hashes(self) -> "PackageManagerV1":
+    def update_package_hashes(
+        self, selector_prompt: Callable[[], str]
+    ) -> "PackageManagerV1":
         """Update package.json file."""
 
         for package_id in self.iter_dependency_tree():
@@ -302,14 +304,12 @@ class PackageManagerV1(BasePackageManager):
                 )
 
             self._logger.info(f"A new package found with package ID {package_id}")
-            if package_id.author == self.author:
+            package_type = self.PackageType(selector_prompt())
+            if package_type == self.PackageType.DEV:
                 self._logger.info("Adding package to dev packages")
                 self._dev_packages[package_id] = package_hash
             else:
-                self._logger.info(
-                    "Adding package to third party packages "
-                    "since the author name of the package is different from default author"
-                )
+                self._logger.info("Adding package to third party packages")
                 self._third_party_packages[package_id] = package_hash
 
         return self
@@ -403,7 +403,6 @@ class PackageManagerV1(BasePackageManager):
         packages: Dict[str, Dict[str, str]],
         packages_dir: Optional[Path] = None,
         config_loader: ConfigLoaderCallableType = load_configuration,
-        author: Optional[str] = None,
     ) -> "PackageManagerV1":
         """Initialize from json object"""
 
@@ -430,7 +429,6 @@ class PackageManagerV1(BasePackageManager):
             dev_packages=dev_packages,
             third_party_packages=third_party_packages,
             config_loader=config_loader,
-            author=author,
         )
 
     @classmethod
@@ -438,7 +436,6 @@ class PackageManagerV1(BasePackageManager):
         cls,
         packages_dir: Path,
         config_loader: ConfigLoaderCallableType = load_configuration,
-        author: Optional[str] = None,
     ) -> "PackageManagerV1":
         """Initialize from packages directory."""
         packages_file = packages_dir / PACKAGES_FILE
@@ -447,5 +444,4 @@ class PackageManagerV1(BasePackageManager):
             packages=packages,
             packages_dir=packages_dir,
             config_loader=config_loader,
-            author=author,
         )
