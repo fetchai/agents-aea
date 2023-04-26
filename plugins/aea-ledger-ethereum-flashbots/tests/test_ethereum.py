@@ -255,3 +255,22 @@ def test_send_bundle_with_failed_simulation_and_raise(ethereum_flashbot_api) -> 
         ethereum_flashbot_api.send_bundle(
             MagicMock(), target_blocks, raise_on_failed_simulation
         )
+
+
+def test_send_bundle_with_bad_target_block(ethereum_flashbot_api) -> None:
+    """Test send bundle with an old target block should return None."""
+    # mock
+    response_mock = MagicMock()
+    response_mock.wait = MagicMock()
+    response_mock.bundle_hash = MagicMock()
+    response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(return_value=1)
+    ethereum_flashbot_api.simulate = MagicMock(return_value=True)
+    raise_on_failed_simulation = True
+    target_blocks = [0]
+
+    # run
+    res = ethereum_flashbot_api.send_bundle(
+        MagicMock(), target_blocks, raise_on_failed_simulation
+    )
+    assert res is None, "Should return None if target block is old"
