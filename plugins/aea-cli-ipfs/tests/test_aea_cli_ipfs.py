@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ import ipfshttpclient  # type: ignore
 import pytest
 from aea_cli_ipfs.ipfs_utils import addr_to_url, resolve_addr
 from click.testing import CliRunner
-from urllib3.exceptions import NewConnectionError
+from ipfshttpclient.exceptions import ConnectionError
 
 from aea.cli.core import cli
 from aea.test_tools.click_testing import CliTest
@@ -150,10 +150,9 @@ def test_node_not_alive_can_not_be_started():
     ), patch(
         "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
     ):
-
         env = os.environ.copy()
         env["OPEN_AEA_IPFS_ADDR"] = "/ip4/127.0.0.1/tcp/5001"
-        with pytest.raises(NewConnectionError):
+        with pytest.raises(ConnectionError):
             runner.invoke(
                 cli,
                 ["ipfs", "add", "-p"],
