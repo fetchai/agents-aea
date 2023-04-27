@@ -38,6 +38,7 @@ WHITELIST = {
     "tomte",
     "memory-profiler",
     "apduboy",
+    "matplotlib",
 }
 
 
