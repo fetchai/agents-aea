@@ -431,7 +431,11 @@ class BasePackageManager(ABC):
         """Sync local packages to the remote registry."""
 
     @abstractmethod
-    def update_package_hashes(self) -> "BasePackageManager":
+    def update_package_hashes(
+        self,
+        selector_prompt: Optional[Callable[[], str]] = None,
+        skip_missing: bool = False,
+    ) -> "BasePackageManager":
         """Update package.json file."""
 
     @abstractmethod

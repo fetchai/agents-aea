@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ from unittest import mock
 
 import pytest
 
+from aea.cli.packages import package_type_selector_prompt
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -155,7 +156,7 @@ class TestPackageManagerV0(BaseAEATestCase):
                     in caplog.text
                 )
 
-            pm.update_package_hashes()
+            pm.update_package_hashes(selector_prompt=package_type_selector_prompt)
             assert pm.verify() == 0
 
 
@@ -179,7 +180,7 @@ class TestHashUpdate(BaseAEATestCase):
         packages_json_file.write_text(json.dumps(obj=packages))
         pm = PackageManagerV0.from_dir(self.packages_dir_path)
 
-        pm.update_package_hashes().dump()
+        pm.update_package_hashes(selector_prompt=package_type_selector_prompt).dump()
 
         packages_v1_updated = json.loads(packages_json_file.read_text(encoding="utf-8"))
 
