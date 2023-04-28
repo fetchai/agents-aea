@@ -677,7 +677,7 @@ def test_package_manager_add_item_dependency_support():
     with tempfile.TemporaryDirectory() as tmpdir:
         package_manager = PackageManagerV1(Path(tmpdir))
         package_manager.add_package(TEST_SKILL_ID)
-        assert len(package_manager.dev_packages) == 1
+        assert len(package_manager.third_party_packages) == 1
         package_manager.dump()
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -686,9 +686,9 @@ def test_package_manager_add_item_dependency_support():
             TEST_SKILL_ID,
             with_dependencies=True,
         )
-        assert len(package_manager.dev_packages) > 1
+        assert len(package_manager.third_party_packages) > 1
 
-        str_packages = str(package_manager.dev_packages)
+        str_packages = str(package_manager.third_party_packages)
         # check some  deps
         assert "protocol, valory/abci" in str_packages
         assert "skill, valory/abstract_round_abci" in str_packages
@@ -714,7 +714,7 @@ def test_package_manager_add_item_dependency_support_mock(fetch_mock):
         package_manager = PackageManagerV1(Path(tmpdir))
         with mock.patch.object(package_manager, "calculate_hash_from_package_id"):
             package_manager.add_package(TEST_SKILL_ID)
-            assert len(package_manager.dev_packages) == 1
+            assert len(package_manager.third_party_packages) == 1
 
     # deps loading
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -738,7 +738,7 @@ def test_package_manager_add_item_dependency_support_mock(fetch_mock):
                 TEST_SKILL_ID,
                 with_dependencies=True,
             )
-            assert len(package_manager.dev_packages) == 4
+            assert len(package_manager.third_party_packages) == 4
 
 
 @mock.patch("aea.package_manager.base.fetch_ipfs")

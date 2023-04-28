@@ -132,7 +132,9 @@ class PackageManagerV1(BasePackageManager):
             with_dependencies=with_dependencies,
             allow_update=allow_update,
         )
-        self._dev_packages[package_id] = self.calculate_hash_from_package_id(package_id)
+        self._third_party_packages[package_id] = self.calculate_hash_from_package_id(
+            package_id
+        )
         return self
 
     @staticmethod
