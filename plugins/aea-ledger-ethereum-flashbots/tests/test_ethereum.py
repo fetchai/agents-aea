@@ -104,12 +104,16 @@ def test_simulate_with_failed_simulation(ethereum_flashbot_api) -> None:
 
 def test_send_bundle_with_successful_transaction(ethereum_flashbot_api) -> None:
     """Test send bundle with successful transaction."""
+    current_block = 122
     send_bundle = [FlashbotsBundleRawTx(signed_transaction=HexBytes("0x1234"))]
     res_bundle = [{"hash": b"0x1234"}]
     response_mock = MagicMock()
     response_mock.wait = MagicMock()
     response_mock.receipts = MagicMock(return_value=[TxReceipt(blockNumber=1)])
     response_mock.bundle = res_bundle
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(
+        return_value=current_block
+    )
     ethereum_flashbot_api.flashbots.simulate = MagicMock(return_value=True)
     ethereum_flashbot_api.flashbots.send_bundle = MagicMock(return_value=response_mock)
 
@@ -118,9 +122,11 @@ def test_send_bundle_with_successful_transaction(ethereum_flashbot_api) -> None:
     tx_hashes = ethereum_flashbot_api.send_bundle(send_bundle, target_blocks)
 
     # check
-    ethereum_flashbot_api.flashbots.simulate.assert_called_once_with(send_bundle, 123)
+    ethereum_flashbot_api.flashbots.simulate.assert_called_once_with(
+        send_bundle, current_block
+    )
     ethereum_flashbot_api.flashbots.send_bundle.assert_called_once_with(
-        send_bundle, 123, opts={"replacementUuid": ANY}
+        send_bundle, target_blocks[0], opts={"replacementUuid": ANY}
     )
     assert response_mock.wait.called
     assert tx_hashes == [tx["hash"].hex() for tx in response_mock.bundle]
@@ -157,6 +163,7 @@ def test_bundle_and_send_with_successful_transaction(ethereum_flashbot_api) -> N
     )
     response_mock.bundle = [{"hash": b"0x1234"}, {"hash": b"0x5678"}]
     ethereum_flashbot_api._get_next_blocks = MagicMock(return_value=1)
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(return_value=1)
     ethereum_flashbot_api.flashbots.simulate = MagicMock(return_value=True)
     ethereum_flashbot_api.flashbots.send_bundle = MagicMock(return_value=response_mock)
 
@@ -186,6 +193,7 @@ def test_bundle_and_send_with_failed_simulation(ethereum_flashbot_api) -> None:
     response_mock.bundle_hash = MagicMock()
     response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
     ethereum_flashbot_api._get_next_blocks = MagicMock(return_value=1)
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(return_value=1)
     ethereum_flashbot_api.flashbots.simulate = MagicMock(return_value=True)
     ethereum_flashbot_api.flashbots.send_bundle = MagicMock(return_value=response_mock)
     ethereum_flashbot_api.flashbots.cancel_bundles = MagicMock()
@@ -219,6 +227,7 @@ def test_send_bundle_with_failed_simulation(ethereum_flashbot_api) -> None:
     response_mock.wait = MagicMock()
     response_mock.bundle_hash = MagicMock()
     response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(return_value=1)
     ethereum_flashbot_api.simulate = MagicMock(return_value=False)
     target_blocks = [0]
 
@@ -236,12 +245,32 @@ def test_send_bundle_with_failed_simulation_and_raise(ethereum_flashbot_api) -> 
     response_mock.wait = MagicMock()
     response_mock.bundle_hash = MagicMock()
     response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(return_value=0)
     ethereum_flashbot_api.simulate = MagicMock(return_value=False)
     raise_on_failed_simulation = True
-    target_blocks = [0]
+    target_blocks = [1]
 
     # run
     with pytest.raises(ValueError):
         ethereum_flashbot_api.send_bundle(
             MagicMock(), target_blocks, raise_on_failed_simulation
         )
+
+
+def test_send_bundle_with_bad_target_block(ethereum_flashbot_api) -> None:
+    """Test send bundle with an old target block should return None."""
+    # mock
+    response_mock = MagicMock()
+    response_mock.wait = MagicMock()
+    response_mock.bundle_hash = MagicMock()
+    response_mock.receipts = MagicMock(side_effect=TransactionNotFound)
+    ethereum_flashbot_api.api.eth.get_block_number = MagicMock(return_value=1)
+    ethereum_flashbot_api.simulate = MagicMock(return_value=True)
+    raise_on_failed_simulation = True
+    target_blocks = [0]
+
+    # run
+    res = ethereum_flashbot_api.send_bundle(
+        MagicMock(), target_blocks, raise_on_failed_simulation
+    )
+    assert res is None, "Should return None if target block is old"

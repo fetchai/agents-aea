@@ -109,7 +109,10 @@ class EthereumFlashbotApi(EthereumApi):
         """
         _default_logger.debug(f"Simulating bundle: {bundle}")
         try:
-            self.flashbots.simulate(bundle, target_block)
+            simulation_response = self.flashbots.simulate(bundle, target_block)
+            _default_logger.info(
+                f"Flashbots simulation response: {simulation_response}"
+            )
             _default_logger.debug(f"Simulation successful for bundle {bundle}.")
             return True
         except Exception as e:  # pylint: disable=broad-except
@@ -137,8 +140,16 @@ class EthereumFlashbotApi(EthereumApi):
         :return: the transaction digest if the transaction went through, None otherwise.
         """
         for target_block in target_blocks:
-            if not self.simulate(bundle, target_block):
-                msg = f"Simulation failed for bundle {bundle} targeting block {target_block}."
+            current_block = self.api.eth.blockNumber
+            if current_block >= target_block:
+                # we can only target future blocks
+                _default_logger.debug(
+                    f"Current block {current_block} >= target block {target_block}"
+                )
+                continue
+            # we simulate the bundle against the current block
+            if not self.simulate(bundle, current_block):
+                msg = f"Simulation failed for bundle {bundle} on block {current_block}."
                 if raise_on_failed_simulation:
                     raise ValueError(msg)
                 _default_logger.warning(msg)
@@ -148,6 +159,7 @@ class EthereumFlashbotApi(EthereumApi):
             _default_logger.debug(
                 f"Sending bundle {bundle} with replacement_uuid {replacement_uuid} targeting block {target_block}"
             )
+            # we try to send the bundle on the target block, which MUST be greater than the current block
             response = self.flashbots.send_bundle(
                 bundle, target_block, opts={"replacementUuid": replacement_uuid}
             )
