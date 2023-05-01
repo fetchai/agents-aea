@@ -40,6 +40,7 @@ from aea_cli_ipfs.exceptions import (
 )
 
 
+DEFAULT_IPFS_URI_BASE = str(os.environ.get("OPEN_AEA_IPFS_ADDR_BASE", "api/v0"))
 DEFAULT_IPFS_URL = "/dns/registry.autonolas.tech/tcp/443/https"
 DEFAULT_IPFS_URL_LOCAL = "/ip4/127.0.0.1/tcp/5001"
 ALLOWED_CONNECTION_TYPES = ("tcp",)
@@ -210,11 +211,16 @@ class IPFSTool:
 
     _addr: Optional[str] = None
 
-    def __init__(self, addr: Optional[str] = None):
+    def __init__(
+        self,
+        addr: Optional[str] = None,
+        base: str = DEFAULT_IPFS_URI_BASE,
+    ):
         """
         Init tool.
 
         :param addr: multiaddr string for IPFS client.
+        :param base: API base for IPFS client.
         """
 
         if addr is None:
@@ -224,7 +230,7 @@ class IPFSTool:
 
         self._addr = addr
         self.is_remote = is_remote_addr(host)
-        self.client = ipfshttpclient.Client(addr=self.addr)
+        self.client = ipfshttpclient.Client(addr=self.addr, base=base)
         self.daemon = IPFSDaemon(
             node_url=addr_to_url(self.addr), is_remote=self.is_remote
         )

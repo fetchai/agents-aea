@@ -295,6 +295,7 @@ class PackageManagerV1(BasePackageManager):
 
                 self._logger.info(f"Updating hash for {package_id}")
                 self._dev_packages[package_id] = package_hash
+                continue
 
             if is_third_party_package:
                 if self._third_party_packages[package_id] == package_hash:
@@ -307,6 +308,7 @@ class PackageManagerV1(BasePackageManager):
                     f"\n\tCalculated hash: {package_hash}"
                     f"\n\tExpected hash: {self._third_party_packages[package_id]}"
                 )
+                continue
 
             if skip_missing:
                 continue
