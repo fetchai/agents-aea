@@ -1,5 +1,21 @@
 # Release History - open AEA
 
+## 1.33.0 (2023-05-02)
+
+AEA:
+- Updates package manager to add newly found packages to the `packages.json` instead of raising error #622
+- Updates the package manager to add new packages to third party #627
+
+Packages:
+- Fixes ACN slow queue issue #624
+
+Plugin:
+- Attaches the plugin loggers to the correct namespace #620
+- Adds logic on the `flashbots` plugin to check that we are simulating against the current block, and we are targeting a future block when sending a bundle #625
+- Adds support for specifying base URI for the IPFS client on the IPFS cli plugin #628
+
+Chores:
+- Update release flow parameters to use kebab case to avoid deprecation warnings #623
 
 ## 1.32.0 (2023-04-10)
 
