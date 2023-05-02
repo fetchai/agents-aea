@@ -244,7 +244,8 @@ Sync local packages to the remote registry.
 
 ```python
 @abstractmethod
-def update_package_hashes() -> "BasePackageManager"
+def update_package_hashes(selector_prompt: Optional[Callable[[], str]] = None,
+                          skip_missing: bool = False) -> "BasePackageManager"
 ```
 
 Update package.json file.

@@ -151,7 +151,7 @@ IPFS tool to add, publish, remove, download directories.
 #### `__`init`__`
 
 ```python
-def __init__(addr: Optional[str] = None)
+def __init__(addr: Optional[str] = None, base: str = DEFAULT_IPFS_URI_BASE)
 ```
 
 Init tool.
@@ -159,6 +159,7 @@ Init tool.
 **Arguments**:
 
 - `addr`: multiaddr string for IPFS client.
+- `base`: API base for IPFS client.
 
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.addr"></a>
 

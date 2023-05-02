@@ -48,6 +48,19 @@ class SyncTypes:  # pylint: disable=too-few-public-methods
     ALL = "all"
 
 
+def package_type_selector_prompt() -> str:
+    """Selector prompt for local package type."""
+    return click.prompt(
+        "Select package type",
+        type=click.Choice(
+            (
+                PackageManagerV1.PackageType.DEV.value,
+                PackageManagerV1.PackageType.THIRD_PARTY.value,
+            )
+        ),
+    )
+
+
 @click.group("packages")
 @click.pass_context
 def package_manager(
@@ -148,8 +161,13 @@ def sync(
     is_flag=True,
     help="Check packages.json",
 )
+@click.option(
+    "--skip-missing",
+    is_flag=True,
+    help="Skip packages missing from the `packages.json` file.",
+)
 @pass_ctx
-def lock_packages(ctx: Context, check: bool) -> None:
+def lock_packages(ctx: Context, check: bool, skip_missing: bool) -> None:
     """Lock packages. Updates hashes in packages.json so that they match the local packages."""
 
     packages_dir = Path(ctx.registry_path)
@@ -166,7 +184,10 @@ def lock_packages(ctx: Context, check: bool) -> None:
             sys.exit(return_code)
 
         click.echo("Updating hashes")
-        get_package_manager(packages_dir).update_package_hashes().dump()
+        get_package_manager(packages_dir).update_package_hashes(
+            selector_prompt=package_type_selector_prompt, skip_missing=skip_missing
+        ).dump()
+
         click.echo("Done")
     except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e)) from e

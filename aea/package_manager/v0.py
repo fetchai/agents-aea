@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2022-2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import json
 import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
 
 from aea.configurations.data_types import PackageId
@@ -105,7 +105,11 @@ class PackageManagerV0(BasePackageManager):
 
         return self
 
-    def update_package_hashes(self) -> "BasePackageManager":
+    def update_package_hashes(
+        self,
+        selector_prompt: Optional[Callable[[], str]] = None,
+        skip_missing: bool = False,
+    ) -> "BasePackageManager":
         """Update packages.json file."""
 
         for package_id in self.iter_dependency_tree():

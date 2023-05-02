@@ -31,6 +31,7 @@ from unittest import mock
 
 import pytest
 
+from aea.cli.packages import package_type_selector_prompt
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -360,7 +361,7 @@ class TestPackageManagerV1UpdateFingerprint(TestPackageManagerV1):
                     in caplog.text
                 )
 
-            pm.update_package_hashes()
+            pm.update_package_hashes(selector_prompt=lambda: "dev")
             assert pm.verify() == 0
 
 
@@ -382,9 +383,7 @@ class TestHashUpdateDev(BaseAEATestCase):
         packages_json_file = self.packages_dir_path / "packages.json"
         packages_json_file.write_text(json.dumps(obj=packages_v1))
         pm = PackageManagerV1.from_dir(self.packages_dir_path)
-
-        pm.update_package_hashes().dump()
-
+        pm.update_package_hashes(selector_prompt=lambda: "dev").dump()
         packages_v1_updated = json.loads(packages_json_file.read_text(encoding="utf-8"))
 
         assert pm.dev_packages[EXAMPLE_PACKAGE_ID] == original_hash
@@ -408,17 +407,94 @@ class TestHashUpdateDev(BaseAEATestCase):
             pm._logger, "warning"
         ) as mock_warning:
             pm._third_party_packages[EXAMPLE_PACKAGE_ID] = EXAMPLE_PACKAGE_HASH
-            pm.update_package_hashes()
+            pm.update_package_hashes(selector_prompt=package_type_selector_prompt)
             mock_warning.assert_not_called()
 
+    def test_add_new_package(self) -> None:
+        """Test adding new package."""
+        package = PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+
+        pm = PackageManagerV1.from_dir(self.packages_dir_path)
         with mock.patch.object(
-            pm, "iter_dependency_tree", return_value=[TEST_SKILL_ID]
+            pm, "iter_dependency_tree", return_value=[package]
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "update_fingerprints",
+        ), mock.patch.object(
+            pm,
+            "update_dependencies",
         ):
+            pm.update_package_hashes(selector_prompt=lambda: "dev")
+
+        assert pm.get_package_hash(package_id=package) == EXAMPLE_PACKAGE_HASH
+        assert pm.dev_packages[package.without_hash()] == EXAMPLE_PACKAGE_HASH
+
+    def test_add_new_package_failures(self) -> None:
+        """Test adding new package."""
+        package = PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+
+        pm = PackageManagerV1.from_dir(self.packages_dir_path)
+        with mock.patch.object(
+            pm, "iter_dependency_tree", return_value=[package]
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "update_fingerprints",
+        ), mock.patch.object(
+            pm,
+            "update_dependencies",
+        ):
+
             with pytest.raises(
                 PackageNotValid,
                 match="Found a package which is not listed in the `packages.json`",
             ):
                 pm.update_package_hashes()
+
+    def test_skip_missing_package(self) -> None:
+        """Test adding new package."""
+        package = PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+
+        pm = PackageManagerV1.from_dir(self.packages_dir_path)
+        with mock.patch.object(
+            pm, "iter_dependency_tree", return_value=[package]
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "update_fingerprints",
+        ), mock.patch.object(
+            pm,
+            "update_dependencies",
+        ):
+            pm.update_package_hashes(skip_missing=True)
+
+        assert pm.get_package_hash(package_id=package) is None
+        assert package.without_hash() not in pm.dev_packages
 
 
 class TestHashUpdateThirdParty(BaseAEATestCase):
@@ -438,7 +514,7 @@ class TestHashUpdateThirdParty(BaseAEATestCase):
         pm = PackageManagerV1.from_dir(self.packages_dir_path)
 
         with caplog.at_level(logging.WARNING):
-            pm.update_package_hashes().dump()
+            pm.update_package_hashes(selector_prompt=lambda: "third_party").dump()
             packages_v1_updated = json.loads(
                 packages_json_file.read_text(encoding="utf-8")
             )
@@ -566,6 +642,34 @@ class TestVerifyFailure(BaseAEATestCase):
             assert pm.verify() == 1
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
 
+    def test_add_new_package_third_party(self) -> None:
+        """Test adding new package."""
+        package = PackageId(
+            package_type=PackageType.SKILL,
+            public_id=PublicId.from_str(
+                "valory/abstract_round_abci:0.1.0:bafybeifh4qtjurq5637ykxexzexca5l4n6t4ujw26tpnern2swajanvhny"
+            ),
+        )
+
+        pm = PackageManagerV1.from_dir(self.packages_dir_path)
+        with mock.patch.object(
+            pm, "iter_dependency_tree", return_value=[package]
+        ), mock.patch.object(
+            pm,
+            "calculate_hash_from_package_id",
+            return_value=EXAMPLE_PACKAGE_HASH,
+        ), mock.patch.object(
+            pm,
+            "update_fingerprints",
+        ), mock.patch.object(
+            pm,
+            "update_dependencies",
+        ):
+            pm.update_package_hashes(selector_prompt=lambda: "third_party")
+
+        assert pm.get_package_hash(package_id=package) == EXAMPLE_PACKAGE_HASH
+        assert pm.third_party_packages[package.without_hash()] == EXAMPLE_PACKAGE_HASH
+
 
 @pytest.mark.integration
 def test_package_manager_add_item_dependency_support():
@@ -573,7 +677,7 @@ def test_package_manager_add_item_dependency_support():
     with tempfile.TemporaryDirectory() as tmpdir:
         package_manager = PackageManagerV1(Path(tmpdir))
         package_manager.add_package(TEST_SKILL_ID)
-        assert len(package_manager.dev_packages) == 1
+        assert len(package_manager.third_party_packages) == 1
         package_manager.dump()
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -582,9 +686,9 @@ def test_package_manager_add_item_dependency_support():
             TEST_SKILL_ID,
             with_dependencies=True,
         )
-        assert len(package_manager.dev_packages) > 1
+        assert len(package_manager.third_party_packages) > 1
 
-        str_packages = str(package_manager.dev_packages)
+        str_packages = str(package_manager.third_party_packages)
         # check some  deps
         assert "protocol, valory/abci" in str_packages
         assert "skill, valory/abstract_round_abci" in str_packages
@@ -610,7 +714,7 @@ def test_package_manager_add_item_dependency_support_mock(fetch_mock):
         package_manager = PackageManagerV1(Path(tmpdir))
         with mock.patch.object(package_manager, "calculate_hash_from_package_id"):
             package_manager.add_package(TEST_SKILL_ID)
-            assert len(package_manager.dev_packages) == 1
+            assert len(package_manager.third_party_packages) == 1
 
     # deps loading
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -634,7 +738,7 @@ def test_package_manager_add_item_dependency_support_mock(fetch_mock):
                 TEST_SKILL_ID,
                 with_dependencies=True,
             )
-            assert len(package_manager.dev_packages) == 4
+            assert len(package_manager.third_party_packages) == 4
 
 
 @mock.patch("aea.package_manager.base.fetch_ipfs")
