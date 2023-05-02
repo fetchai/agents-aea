@@ -9,6 +9,16 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ### Upgrade guide
 
+## `v1.32.0` to `v1.33.0`
+
+- No backwards incompatible changes
+
+## `v1.31.0` to `v1.32.0`
+
+- No backwards incompatible changes
+
+You will have to generate the protocols again since protocol generator will use `double` to represent float values.
+
 ## `v1.30.0` to `v1.31.0`
 
 - No backwards incompatible changes
