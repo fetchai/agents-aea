@@ -945,7 +945,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		linfo().Str(
 			"addr",
 			addr,
-		).Msgf(
+		).Msg(
 			"got envelope from delegate connection",
 		)
 		if envel.Sender != addr {
@@ -1169,9 +1169,17 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			routeCount.Dec()
 
 			if !dhtPeer.isClosing {
-				lerror(err).Str("op", "route").Str("addr", target).
-					Msg("while rooting and looking up address on the DHT. moving it to she slow queue")
-				dhtPeer.slow_queue <- envel
+				if len(dhtPeer.slow_queue) >= SlowQueueSize-1 {
+					lerror(err).Str("op", "route").Str("addr", target).
+						Msg("slow queue is full: drop envelope")
+
+				} else {
+					lerror(err).Str("op", "route").Str("addr", target).
+						Msg("while rooting and looking up address on the DHT. moving it to she slow queue.")
+					dhtPeer.slow_queue <- envel
+					linfo().Str("op", "route").Msgf("Len of the slow_queue is: %d\n", len(dhtPeer.slow_queue))
+				}
+
 			} else {
 				lerror(err).Str("op", "route").Str("addr", target).
 					Msg("while rooting and looking up address on the DHT. dht peer is closing. message dropped")
@@ -1203,7 +1211,6 @@ func (dhtPeer *DHTPeer) slowEnvelopeSendLoop() {
 		} else {
 			ldebug().Str("addr", envel.To).Msgf("sent slow envelope: %s", envel.String())
 		}
-
 	}
 }
 
@@ -1320,7 +1327,7 @@ func (dhtPeer *DHTPeer) _routeEnvelopeWithNewStream(
 	return nil
 }
 
-/// TOFIX(LR) should return (*dhtnode)
+// / TOFIX(LR) should return (*dhtnode)
 func (dhtPeer *DHTPeer) lookupAddressDHT(
 	ctx context.Context,
 	address string,
