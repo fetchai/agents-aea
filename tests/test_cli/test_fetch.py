@@ -21,6 +21,7 @@
 import os
 import shutil
 from abc import ABC
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase, mock
 
@@ -381,7 +382,9 @@ class TestFetchIPFS(BaseAEATestCase):
             / "my_first_aea",
         ), mock.patch(
             "aea.cli.fetch._fetch_agent_deps"
-        ) as dep_patch:
+        ) as dep_patch, cd(
+            self.t
+        ):
             result = self.run_cli_command(
                 "fetch",
                 self.dummy_id,
@@ -391,12 +394,24 @@ class TestFetchIPFS(BaseAEATestCase):
             assert result.exit_code == 0
             dep_patch.assert_called_once()
 
+
+class TestFetchIPFSFailures(BaseAEATestCase):
+    """Test fetching package from the IPFS registry."""
+
+    dummy_id = (
+        "valory/dummy_agent:bafybeic6plxxhcbokxlce3grbgsm247rgvcb5arwwslm5yv6pt46byr22a"
+    )
+
     def test_download_failure(self) -> None:
         """Test run."""
 
         with mock.patch(
             "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
-        ), mock.patch.object(IPFSTool, "download", side_effect=DownloadError):
+        ), mock.patch.object(
+            IPFSTool, "download", side_effect=DownloadError
+        ), mock.patch.object(
+            Path, "exists", return_value=False
+        ):
 
             with pytest.raises(
                 click.ClickException,
@@ -427,16 +442,16 @@ class TestFetchIPFS(BaseAEATestCase):
     def test_not_an_agent_error(self) -> None:
         """Test run."""
 
-        with mock.patch(
-            "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
-        ), mock.patch.object(IPFSTool, "download", return_value="."):
-
-            with pytest.raises(ClickException, match="is not an agent package"):
-                self.run_cli_command(
-                    "fetch",
-                    self.dummy_id,
-                    "--remote",
-                )
+        with TemporaryDirectory() as temp_dir:
+            with mock.patch(
+                "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
+            ), mock.patch.object(IPFSTool, "download", return_value=temp_dir):
+                with pytest.raises(ClickException, match="is not an agent package"):
+                    self.run_cli_command(
+                        "fetch",
+                        self.dummy_id,
+                        "--remote",
+                    )
 
 
 class TestFetchIPFSAlias(BaseAEATestCase):

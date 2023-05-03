@@ -20,6 +20,7 @@
 """Implementation of the 'aea fetch' subcommand."""
 import os
 import shutil
+import tempfile
 from distutils.dir_util import copy_tree  # pylint: disable=deprecated-module
 from pathlib import Path
 from typing import Optional, Union, cast
@@ -159,19 +160,18 @@ def fetch_agent_ipfs(
 
     if target_dir is None:
         target_dir = Path(ctx.cwd).absolute()
+        target_dir = target_dir / (alias or public_id.name)
+
+    target_dir = cast(Path, target_dir)
+    if target_dir.exists():
+        raise click.ClickException(f"Package already exists at {target_dir}")
 
     ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
 
     try:
-        agent_path = ipfs_tool.download(public_id.hash, str(target_dir))
-        ctx.clean_paths.append(agent_path)
-        if alias is not None:
-            target_dir = cast(Path, target_dir) / alias
-            if target_dir.exists():
-                raise click.ClickException(f"{alias} already exists at {target_dir}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            agent_path = ipfs_tool.download(public_id.hash, str(temp_dir))
             shutil.move(agent_path, target_dir)
-        else:
-            target_dir = Path(agent_path)
     except DownloadError as e:
         raise click.ClickException(
             f"Error occured while downloading agent {public_id}"
@@ -179,9 +179,7 @@ def fetch_agent_ipfs(
     except shutil.Error as e:
         raise click.ClickException(str(e)) from e
 
-    ctx.clean_paths.append(target_dir)
     ctx.cwd = str(target_dir)
-
     if not Path(target_dir, DEFAULT_AEA_CONFIG_FILE).exists():
         raise NotAnAgentPackage(
             f"Downloaded packages at {target_dir} is not an agent package, please check hash"
