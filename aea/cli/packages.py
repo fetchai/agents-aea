@@ -54,8 +54,8 @@ def package_type_selector_prompt() -> str:
         "Select package type",
         type=click.Choice(
             (
-                PackageManagerV1.PackageType.DEV.value,
-                PackageManagerV1.PackageType.THIRD_PARTY.value,
+                PackageManagerV1.LocalPackageType.DEV.value,
+                PackageManagerV1.LocalPackageType.THIRD_PARTY.value,
             )
         ),
     )

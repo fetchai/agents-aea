@@ -26,9 +26,10 @@ from pathlib import Path
 from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
 
-from aea.configurations.data_types import PackageId
+from aea.configurations.data_types import PackageId, PackageType
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.base import (
     BasePackageManager,
     ConfigLoaderCallableType,
@@ -67,6 +68,17 @@ class PackageManagerV0(BasePackageManager):
         """Get package hash."""
 
         return self._packages.get(package_id.without_hash())
+
+    def register(
+        self, package_path: Path, package_type: Optional[PackageType] = None
+    ) -> "PackageManagerV0":
+        """Add package to the index."""
+        package_type = package_type or PackageType(package_path.parent.name[:-1])
+        package_config = self.config_loader(package_type, package_path)
+        self._packages[package_config.package_id] = IPFSHashOnly.hash_directory(
+            dir_path=str(package_path)
+        )
+        return self
 
     def sync(
         self,

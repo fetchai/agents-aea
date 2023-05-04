@@ -33,7 +33,7 @@ from typing import Union, cast
 from requests import get as r_get
 
 from aea.configurations.constants import PACKAGES
-from aea.configurations.data_types import PackageId
+from aea.configurations.data_types import PackageId, PackageType
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.base import (
@@ -61,7 +61,7 @@ class PackageManagerV1(BasePackageManager):
     _third_party_packages: PackageIdToHashMapping
     _dev_packages: PackageIdToHashMapping
 
-    class PackageType(Enum):
+    class LocalPackageType(Enum):
         """Local package types."""
 
         DEV = "dev"
@@ -198,6 +198,18 @@ class PackageManagerV1(BasePackageManager):
         self._third_party_packages = _updated_third_party_packages
         self.dump(file=self._packages_file)
 
+    def register(
+        self, package_path: Path, package_type: Optional[PackageType] = None
+    ) -> "PackageManagerV1":
+        """Add package to the index."""
+        package_type = package_type or PackageType(package_path.parent.name[:-1])
+        package_config = self.config_loader(package_type, package_path)
+        self.update_fingerprints(package_id=package_config.package_id)
+        self._dev_packages[package_config.package_id] = IPFSHashOnly.hash_directory(
+            dir_path=str(package_path)
+        )
+        return self
+
     def sync(
         self,
         dev: bool = False,
@@ -319,8 +331,8 @@ class PackageManagerV1(BasePackageManager):
                 )
 
             self._logger.info(f"A new package found with package ID {package_id}")
-            package_type = self.PackageType(selector_prompt())
-            if package_type == self.PackageType.DEV:
+            package_type = self.LocalPackageType(selector_prompt())
+            if package_type == self.LocalPackageType.DEV:
                 self._logger.info("Adding package to dev packages")
                 self._dev_packages[package_id] = package_hash
             else:

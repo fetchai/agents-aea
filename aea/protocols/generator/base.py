@@ -34,7 +34,7 @@ from aea.configurations.constants import (
     PROTOCOL_LANGUAGE_PYTHON,
     SUPPORTED_PROTOCOL_LANGUAGES,
 )
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import PackageType, PublicId
 from aea.protocols import PROTOCOL_GENERATOR_VERSION
 from aea.protocols.generator.common import (
     CUSTOM_TYPES_DOT_PY_FILE_NAME,
@@ -146,14 +146,16 @@ class ProtocolGenerator:
     def __init__(
         self,
         path_to_protocol_specification: str,
-        output_path: str = ".",
+        project_dir: Optional[str] = None,
+        to_local_registry: bool = False,
         dotted_path_to_protocol_package: Optional[str] = None,
     ) -> None:
         """
         Instantiate a protocol generator.
 
         :param path_to_protocol_specification: path to protocol specification file
-        :param output_path: the path to the location in which the protocol module is to be generated.
+        :param project_dir: the path to the project location in which the protocol module is to be generated.
+        :param to_local_registry: to generate the protocol in the local registry or not
         :param dotted_path_to_protocol_package: the path to the protocol package
 
         :raises FileNotFoundError: if any prerequisite application is not installed
@@ -185,6 +187,17 @@ class ProtocolGenerator:
         self.protocol_specification_in_camel_case = _to_camel_case(
             self.protocol_specification.name
         )
+        project_dir = str(project_dir or Path.cwd())
+        output_path = (
+            os.path.join(
+                project_dir,
+                self.protocol_specification.author,
+                PackageType.PROTOCOL.to_plural(),
+            )
+            if to_local_registry
+            else os.path.join(project_dir, PackageType.PROTOCOL.to_plural())
+        )
+        os.makedirs(output_path, exist_ok=True)
         self.path_to_generated_protocol_package = os.path.join(
             output_path, self.protocol_specification.name
         )
