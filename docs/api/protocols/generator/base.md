@@ -20,7 +20,8 @@ This class generates a protocol_verification package from a ProtocolTemplate obj
 
 ```python
 def __init__(path_to_protocol_specification: str,
-             output_path: str = ".",
+             project_dir: Optional[str] = None,
+             to_local_registry: bool = False,
              dotted_path_to_protocol_package: Optional[str] = None) -> None
 ```
 
@@ -29,7 +30,8 @@ Instantiate a protocol generator.
 **Arguments**:
 
 - `path_to_protocol_specification`: path to protocol specification file
-- `output_path`: the path to the location in which the protocol module is to be generated.
+- `project_dir`: the path to the project location in which the protocol module is to be generated.
+- `to_local_registry`: to generate the protocol in the local registry or not
 - `dotted_path_to_protocol_package`: the path to the protocol package
 
 **Raises**:

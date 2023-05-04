@@ -213,6 +213,19 @@ def update_package(package_id: PackageId) -> "BasePackageManager"
 
 Update package.
 
+<a id="aea.package_manager.base.BasePackageManager.register"></a>
+
+#### register
+
+```python
+@abstractmethod
+def register(
+        package_path: Path,
+        package_type: Optional[PackageType] = None) -> "BasePackageManager"
+```
+
+Add package to the index.
+
 <a id="aea.package_manager.base.BasePackageManager.get_package_hash"></a>
 
 #### get`_`package`_`hash
