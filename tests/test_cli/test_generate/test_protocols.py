@@ -34,6 +34,7 @@ from jsonschema import Draft4Validator, ValidationError
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
+from aea.package_manager.v1 import PackageId, PackageManagerV1
 
 from tests.conftest import (
     AUTHOR,
@@ -562,3 +563,88 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestGenerateProtocolToLocalRegistry:
+    """Test generate protocol using `-tlr` flag"""
+
+    cwd: str
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = Path(tempfile.mkdtemp())
+
+        cls.packages_dir = cls.t / "packages"
+        cls.packages_dir.mkdir()
+
+        package_manager = PackageManagerV1(path=cls.packages_dir)
+        package_manager.dump()
+        cls.spec_file = Path(CUR_PATH, "data", "sample_specification.yaml")
+
+        cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
+        )
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        os.chdir(cls.t)
+
+        cls.result = cls.runner.invoke(
+            cli,
+            [
+                "generate",
+                "-tlr",
+                "protocol",
+                str(cls.spec_file),
+            ],
+            standalone_mode=False,
+        )
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when generating a protocol."""
+        assert self.result.exit_code == 0, self.result.stdout
+
+    def test_package_manager(self):
+        """Test package manager."""
+        package_manager = PackageManagerV1.from_dir(self.packages_dir)
+        package_id = PackageId.from_uri_path("protocol/fetchai/t_protocol/0.1.0")
+        assert package_manager.is_dev_package(package_id=package_id)
+
+        protocol_config = (
+            package_manager.package_path_from_package_id(package_id=package_id)
+            / DEFAULT_PROTOCOL_CONFIG_FILE
+        )
+        assert protocol_config.exists()
+
+        config_file = yaml.safe_load(protocol_config.open(encoding="utf-8"))
+        self.validator.validate(instance=config_file)
+
+    def test_protocol_already_exists(self):
+        """Test protocol already exists."""
+        result = self.runner.invoke(
+            cli,
+            [
+                "generate",
+                "-tlr",
+                "protocol",
+                str(self.spec_file),
+            ],
+            standalone_mode=False,
+        )
+
+        assert result.exit_code == 1, result.output
+        assert (
+            "Protocol is NOT generated. The following error happened while generating the protocol:"
+            "\nA directory with name 't_protocol' already exists. Aborting..."
+            in result.exception.message
+        )
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown class."""
+        os.chdir(cls.cwd)

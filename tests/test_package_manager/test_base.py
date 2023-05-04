@@ -135,6 +135,12 @@ class DummyPackageManager(BasePackageManager):
     ) -> int:
         """Verify hashes."""
 
+    def register(
+        self, package_path: Path, package_type: Optional[PackageType] = None
+    ) -> "DummyPackageManager":
+        """Register package"""
+        return self
+
 
 class TestBaseManager(BaseAEATestCase):
     """Test base implementation."""
