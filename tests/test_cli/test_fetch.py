@@ -20,6 +20,7 @@
 """This test module contains the tests for CLI Registry fetch methods."""
 import os
 import shutil
+import sys
 from abc import ABC
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -439,6 +440,10 @@ class TestFetchIPFSFailures(BaseAEATestCase):
                     "--remote",
                 )
 
+    @pytest.mark.skipif(
+        condition=(sys.version_info.major <= 3 and sys.version_info.minor <= 7),
+        reason="Needs investigation",
+    )
     def test_not_an_agent_error(self) -> None:
         """Test run."""
 

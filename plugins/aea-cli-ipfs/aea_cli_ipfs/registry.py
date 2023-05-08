@@ -98,7 +98,7 @@ def load_local_registry(registry_path: str = LOCAL_REGISTRY_PATH) -> LocalRegist
 
     local_registry_path = Path(registry_path)
     if not local_registry_path.is_file():
-        write_local_registry(LOCAL_REGISTRY_DEFAULT)
+        write_local_registry(LOCAL_REGISTRY_DEFAULT, registry_path=registry_path)
         return LOCAL_REGISTRY_DEFAULT
 
     with open(local_registry_path, mode="r", encoding="utf-8") as fp:
