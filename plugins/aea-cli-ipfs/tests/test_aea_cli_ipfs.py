@@ -31,7 +31,7 @@ import ipfshttpclient  # type: ignore
 import pytest
 from aea_cli_ipfs.ipfs_utils import addr_to_url, resolve_addr
 from click.testing import CliRunner
-from ipfshttpclient.exceptions import ConnectionError
+from urllib3.exceptions import NewConnectionError as ConnectionError
 
 from aea.cli.core import cli
 from aea.test_tools.click_testing import CliTest

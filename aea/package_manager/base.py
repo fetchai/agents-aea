@@ -417,6 +417,12 @@ class BasePackageManager(ABC):
         return self
 
     @abstractmethod
+    def register(
+        self, package_path: Path, package_type: Optional[PackageType] = None
+    ) -> "BasePackageManager":
+        """Add package to the index."""
+
+    @abstractmethod
     def get_package_hash(self, package_id: PackageId) -> Optional[str]:
         """Return hash for the given package id."""
 

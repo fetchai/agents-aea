@@ -1341,10 +1341,12 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode()
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         path_to_protobuf_python_implementation = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + "_pb2.py"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + "_pb2.py",
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_python_implementation).exists()
@@ -1355,13 +1357,16 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode(language="cpp")
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         path_to_protobuf_cpp_headers = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".pb.h"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".pb.h",
         )
         path_to_protobuf_cpp_implementation = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".pb.cc"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".pb.cc",
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_cpp_headers).exists()
@@ -1372,12 +1377,15 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode(language="java")
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         assert Path(path_to_protobuf_schema_file).exists()
 
         java_implementation_exists = False
-        for _, _, files in os.walk(os.path.join(self.t, T_PROTOCOL_NAME)):
+        for _, _, files in os.walk(
+            protocol_generator.path_to_generated_protocol_package
+        ):
             for file in files:  # loops through directories and files
                 if file == _to_camel_case(T_PROTOCOL_NAME) + ".java":
                     java_implementation_exists = True
@@ -1390,10 +1398,12 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode(language="csharp")
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         path_to_protobuf_csharp_implementation = os.path.join(
-            self.t, T_PROTOCOL_NAME, _to_camel_case(T_PROTOCOL_NAME) + ".cs"
+            protocol_generator.path_to_generated_protocol_package,
+            _to_camel_case(T_PROTOCOL_NAME) + ".cs",
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_csharp_implementation).exists()
@@ -1403,10 +1413,12 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode(language="ruby")
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         path_to_protobuf_ruby_implementation = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + "_pb.rb"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + "_pb.rb",
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_ruby_implementation).exists()
@@ -1416,13 +1428,16 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode(language="objc")
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         path_to_protobuf_objc_headers = os.path.join(
-            self.t, T_PROTOCOL_NAME, _to_camel_case(T_PROTOCOL_NAME) + ".pbobjc.h"
+            protocol_generator.path_to_generated_protocol_package,
+            _to_camel_case(T_PROTOCOL_NAME) + ".pbobjc.h",
         )
         path_to_protobuf_objc_implementation = os.path.join(
-            self.t, T_PROTOCOL_NAME, _to_camel_case(T_PROTOCOL_NAME) + ".pbobjc.m"
+            protocol_generator.path_to_generated_protocol_package,
+            _to_camel_case(T_PROTOCOL_NAME) + ".pbobjc.m",
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_objc_headers).exists()
@@ -1433,10 +1448,12 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode(language="js")
         path_to_protobuf_schema_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         path_to_protobuf_js_implementation = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + "_pb.js"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + "_pb.js",
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_js_implementation).exists()
@@ -1468,7 +1485,8 @@ class ProtocolGeneratorTestCase(TestCase):
             assert str(cm.exception) == expected_msg
 
         path_to_protobuf_file = os.path.join(
-            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+            protocol_generator.path_to_generated_protocol_package,
+            T_PROTOCOL_NAME + ".proto",
         )
         assert not Path(path_to_protobuf_file).exists()
 
