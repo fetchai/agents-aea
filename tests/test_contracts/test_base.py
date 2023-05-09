@@ -22,11 +22,10 @@
 import logging
 import os
 import platform
-import shutil
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from tempfile import mkdtemp
 from typing import cast
 from unittest import mock
 from unittest.mock import MagicMock
@@ -51,6 +50,7 @@ from aea.contracts.scaffold.contract import MyScaffoldContract
 from aea.crypto.ledger_apis import ETHEREUM_DEFAULT_ADDRESS, FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
+from aea.package_manager.v1 import PackageManagerV1
 
 from tests.conftest import ROOT_DIR, make_uri
 
@@ -222,30 +222,31 @@ def test_scaffold():
 def test_scaffolded_contract_method_call():
     """Tests a contract method call."""
 
-    # Mock the CLI context
-    td = mkdtemp()
-
     @dataclass
     class AgentConfig:
         author = "dummy_author"
         contracts = ()
         agent_name = "dummy_agent"
 
-    ctx = Context(cwd=td, verbosity="DEBUG", registry_path=td)
-    ctx.agent_config = AgentConfig()
-    ctx.config["to_local_registry"] = True
-    ctx.agent_config.directory = td
+    with tempfile.TemporaryDirectory() as temp_dir:
+        packages_dir = Path(temp_dir, "packages")
+        packages_dir.mkdir()
+        PackageManagerV1(path=packages_dir).dump()
 
-    contract_name = "i_uniswap_v2erc20"
-    contract_abi_path = Path("tests", "test_contracts", "IUniswapV2ERC20.json")
+        ctx = Context(cwd=temp_dir, verbosity="DEBUG", registry_path=str(packages_dir))
+        ctx.agent_config = AgentConfig()
+        ctx.agent_config.directory = packages_dir / "dummy_author"
+        ctx.config["to_local_registry"] = True
 
-    try:
+        contract_name = "i_uniswap_v2erc20"
+        contract_abi_path = Path("tests", "test_contracts", "IUniswapV2ERC20.json")
+
         # Scaffold a new contract
         scaffold_item(ctx, CONTRACT, contract_name)
         add_contract_abi(ctx, contract_name, contract_abi_path)
 
         # Load the new contract
-        contract_path = Path(td, CONTRACTS, contract_name)
+        contract_path = Path(packages_dir, "dummy_author", CONTRACTS, contract_name)
         contract = Contract.from_dir(str(contract_path))
         ledger_api = ledger_apis_registry.make(
             EthereumCrypto.identifier,
@@ -265,9 +266,6 @@ def test_scaffolded_contract_method_call():
             )
 
         assert res == 0
-
-    finally:
-        shutil.rmtree(td)
 
 
 def test_contract_method_call():

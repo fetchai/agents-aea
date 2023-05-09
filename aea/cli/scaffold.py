@@ -229,7 +229,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         )
         dest = Path(item_type_plural)
 
-    dest.mkdir(exist_ok=True)
+    dest.mkdir(exist_ok=True, parents=True)
     dest = dest / item_name
 
     if os.path.exists(dest):
@@ -275,7 +275,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
         # fingerprint item.
         if to_local_registry:
-            ctx.cwd = str(ctx.agent_config.directory)
+            ctx.cwd = str(registry_path / author_name)
             fingerprint_item(ctx, item_type, new_public_id)
         else:
             fingerprint_item(ctx, item_type, new_public_id)
@@ -424,4 +424,11 @@ def add_contract_abi(ctx: Context, contract_name: str, contract_abi_path: Path) 
 
     if to_local_registry:
         ctx.cwd = str(ctx.agent_config.directory)
+        get_package_manager(
+            package_dir=cast(Path, ctx.agent_config.directory).parent
+        ).register(
+            contract_dir,
+            package_type=PackageType.CONTRACT,
+        ).dump()
+
     fingerprint_item(ctx, CONTRACT, new_public_id)
