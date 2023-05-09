@@ -219,9 +219,9 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         )
 
     # create the item folder
-    registry_path = Path(ctx.registry_path)
     if to_local_registry:
         click.echo(f"Adding {item_type} scaffold '{item_name}' to local registry...")
+        registry_path = Path(ctx.registry_path)
         dest = registry_path / ctx.agent_config.author / item_type_plural
     else:
         click.echo(
