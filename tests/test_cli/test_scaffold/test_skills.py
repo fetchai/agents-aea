@@ -27,6 +27,7 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
+from typing import cast
 
 import jsonschema
 import yaml
@@ -34,8 +35,11 @@ from jsonschema import Draft4Validator, ValidationError
 
 from aea import AEA_DIR
 from aea.cli import cli
+from aea.cli.packages import get_package_manager
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_VERSION
+from aea.configurations.data_types import PackageId
 from aea.configurations.loader import make_jsonschema_base_uri
+from aea.package_manager.v1 import PackageManagerV1
 
 from tests.conftest import (
     AUTHOR,
@@ -245,6 +249,23 @@ class TestScaffoldSkillToRegistry:
             re.MULTILINE,
         )
         assert len(matches) == 1
+
+    def test_the_package_is_registered(self):
+        """Test that the package is already registered."""
+        pm = cast(
+            PackageManagerV1,
+            get_package_manager(
+                package_dir=Path(
+                    self.t,
+                    "packages",
+                )
+            ),
+        )
+        assert pm.is_dev_package(
+            package_id=PackageId.from_uri_path(
+                f"skill/{AUTHOR}/{self.resource_name}/0.1.0"
+            )
+        )
 
     @classmethod
     def teardown_class(cls):
