@@ -31,6 +31,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.fingerprint import fingerprint_item
+from aea.cli.packages import get_package_manager
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
@@ -217,15 +218,14 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             f"A {item_type} with name '{item_name}' already exists. Aborting..."
         )
 
-    agent_name = ctx.agent_config.agent_name
-
     # create the item folder
+    registry_path = Path(ctx.registry_path)
     if to_local_registry:
         click.echo(f"Adding {item_type} scaffold '{item_name}' to local registry...")
-        dest = Path(str(ctx.agent_config.directory)) / Path(item_type_plural)
+        dest = registry_path / ctx.agent_config.author / item_type_plural
     else:
         click.echo(
-            f"Adding {item_type} scaffold '{item_name}' to the agent '{agent_name}'..."
+            f"Adding {item_type} scaffold '{item_name}' to the agent '{ctx.agent_config.agent_name}'..."
         )
         dest = Path(item_type_plural)
 
@@ -284,7 +284,12 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         new_public_id_with_hash = PublicId(
             author_name, item_name, DEFAULT_VERSION, package_hash
         )
-        if not to_local_registry:
+        if to_local_registry:
+            get_package_manager(package_dir=registry_path).register(
+                dest,
+                package_type=PackageType(item_type),
+            ).dump()
+        else:
             logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
             existing_ids.add(new_public_id_with_hash)
             with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
