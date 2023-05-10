@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG
+#   Copyright 2021-2023 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.fingerprint import fingerprint_item
+from aea.cli.packages import get_package_manager
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
@@ -217,19 +218,18 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             f"A {item_type} with name '{item_name}' already exists. Aborting..."
         )
 
-    agent_name = ctx.agent_config.agent_name
-
     # create the item folder
     if to_local_registry:
         click.echo(f"Adding {item_type} scaffold '{item_name}' to local registry...")
-        dest = Path(str(ctx.agent_config.directory)) / Path(item_type_plural)
+        registry_path = Path(ctx.registry_path)
+        dest = registry_path / ctx.agent_config.author / item_type_plural
     else:
         click.echo(
-            f"Adding {item_type} scaffold '{item_name}' to the agent '{agent_name}'..."
+            f"Adding {item_type} scaffold '{item_name}' to the agent '{ctx.agent_config.agent_name}'..."
         )
         dest = Path(item_type_plural)
 
-    dest.mkdir(exist_ok=True)
+    dest.mkdir(exist_ok=True, parents=True)
     dest = dest / item_name
 
     if os.path.exists(dest):
@@ -275,7 +275,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
         # fingerprint item.
         if to_local_registry:
-            ctx.cwd = str(ctx.agent_config.directory)
+            ctx.cwd = str(registry_path / author_name)
             fingerprint_item(ctx, item_type, new_public_id)
         else:
             fingerprint_item(ctx, item_type, new_public_id)
@@ -284,7 +284,12 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         new_public_id_with_hash = PublicId(
             author_name, item_name, DEFAULT_VERSION, package_hash
         )
-        if not to_local_registry:
+        if to_local_registry:
+            get_package_manager(package_dir=registry_path).register(
+                dest,
+                package_type=PackageType(item_type),
+            ).dump()
+        else:
             logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
             existing_ids.add(new_public_id_with_hash)
             with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
@@ -419,4 +424,11 @@ def add_contract_abi(ctx: Context, contract_name: str, contract_abi_path: Path) 
 
     if to_local_registry:
         ctx.cwd = str(ctx.agent_config.directory)
+        get_package_manager(
+            package_dir=cast(Path, ctx.agent_config.directory).parent
+        ).register(
+            contract_dir,
+            package_type=PackageType.CONTRACT,
+        ).dump()
+
     fingerprint_item(ctx, CONTRACT, new_public_id)
