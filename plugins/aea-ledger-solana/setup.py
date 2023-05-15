@@ -37,9 +37,9 @@ setup(
         "open-aea>=1.0.0, <2.0.0",
         "cryptography",
         "PyNaCl==1.5.0",
-        "solana==0.28.1",
-        "solders==0.10.0",
-        "anchorpy==0.14.0",
+        "solders>=0.14.0",
+        "solana>=0.29.0",
+        "anchorpy>=0.17.0",
     ],
     tests_require=["pytest"],
     entry_points={
