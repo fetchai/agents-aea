@@ -4,11 +4,11 @@
 
 AEA:
 - Fixes a bug on `aea fetch` command which caused issue when using the `--alias` flag if the package with original name already existed in the working directory #630
-- Remove the need for intermediate agent for generating protocols #632
+- Removes the need for intermediate agent for generating protocols #632
   - Adds `-tlr` flag on the aea generate command group
   - Adds support for registering packages to local registry on the package manager
   - Updates the `ProtocolGenerator` implementation to work with the local registry project structure
-- Fix `IPFS` local registry loader #634
+- Fixes `IPFS` local registry loader #634
 - Updates the `scaffold` tool to register the newly scaffolded packages to `packages.json` to the local registry #635
 - Sets the apply environment variables to true on `aea build` command #636
 
