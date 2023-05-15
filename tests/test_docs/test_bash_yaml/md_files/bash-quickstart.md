@@ -44,7 +44,7 @@ pip install open-aea[all]
 pip install open-aea-cli-ipfs
 ```
 ```
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.33.0/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.34.0/packages packages
 ```
 
 ``` bash
