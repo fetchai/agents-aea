@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 # pylint: disable=redefined-outer-name,import-error,protected-access
+# flake8: noqa: B009
 
 """Tests for the aea_ledger_ethereum_flashbots package."""
 from typing import Tuple
@@ -31,10 +32,17 @@ from web3.exceptions import TransactionNotFound
 from web3.types import TxReceipt
 
 
+_DUMMY_FLASHBOTS_BUILDERS = [
+    ["dummy", "dummy_uri1"],
+    ["builder0x69", "dummy_uri2"],
+]
+
+
 @pytest.fixture
 def ethereum_flashbot_api() -> EthereumFlashbotApi:
     """Get the ethereum flashbot API."""
-    return EthereumFlashbotApi()
+
+    return EthereumFlashbotApi(flashbots_builders=_DUMMY_FLASHBOTS_BUILDERS)
 
 
 def test_init_with_signature_private_key() -> None:
@@ -43,7 +51,10 @@ def test_init_with_signature_private_key() -> None:
     with patch.object(
         Account, "from_key", side_effect=lambda private_key: MagicMock()
     ) as account_from_key_mock:
-        EthereumFlashbotApi(signature_private_key=signature_private_key)
+        EthereumFlashbotApi(
+            signature_private_key=signature_private_key,
+            flashbots_builders=_DUMMY_FLASHBOTS_BUILDERS,
+        )
         assert account_from_key_mock.called_once_with(signature_private_key)
 
 
@@ -52,7 +63,7 @@ def test_init_without_signature_private_key() -> None:
     with patch.object(
         Account, "create", side_effect=MagicMock()
     ) as account_create_mock:
-        EthereumFlashbotApi()
+        EthereumFlashbotApi(flashbots_builders=_DUMMY_FLASHBOTS_BUILDERS)
         assert account_create_mock.called_once_with()
 
 
@@ -70,20 +81,24 @@ def test_bundle_transactions(ethereum_flashbot_api, signed_txs: Tuple[str]) -> N
     assert expected_bundle == actual_bundle
 
 
-def test_simulate_with_successful_simulation(ethereum_flashbot_api) -> None:
+def test_simulate_with_successful_simulation(
+    ethereum_flashbot_api,
+) -> None:
     """Test simulate with successful simulation."""
     # mock
     response_mock = MagicMock()
-    ethereum_flashbot_api._api.flashbots.simulate = MagicMock(
-        return_value=response_mock
+    default_builder = _DUMMY_FLASHBOTS_BUILDERS[0][0]
+    flashbots_module = getattr(
+        ethereum_flashbot_api._builder_to_web3[default_builder], "flashbots"
     )
+    flashbots_module.simulate = MagicMock(return_value=response_mock)
 
     # run
     bundle = [FlashbotsBundleRawTx(signed_transaction=HexBytes("0x1234"))]
     success = ethereum_flashbot_api.simulate(bundle, 123)
 
     # check
-    ethereum_flashbot_api._api.flashbots.simulate.assert_called_once_with(bundle, 123)
+    flashbots_module.simulate.assert_called_once_with(bundle, 123)
     assert success
 
 
