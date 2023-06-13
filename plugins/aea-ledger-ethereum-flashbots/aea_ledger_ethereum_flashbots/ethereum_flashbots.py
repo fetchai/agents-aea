@@ -25,14 +25,14 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from uuid import uuid4
 
-from aea_ledger_ethereum import EthereumApi, EthereumCrypto
+from aea_ledger_ethereum import DEFAULT_ADDRESS, EthereumApi, EthereumCrypto
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 from flashbots import FlashbotProvider, Flashbots, construct_flashbots_middleware
 from flashbots.flashbots import FlashbotsBundleResponse
 from flashbots.types import FlashbotsBundleRawTx, FlashbotsBundleTx
 from hexbytes import HexBytes
-from web3 import Web3
+from web3 import HTTPProvider, Web3
 from web3._utils.module import attach_modules
 from web3.exceptions import TransactionNotFound
 
@@ -56,12 +56,13 @@ _USE_ALL_BUILDERS = "use_all_builders"
 def multiple_flashbots_builders(
     signature_account: LocalAccount,
     builders: List[Tuple[str, str]],
+    rpc_endpoint: str = DEFAULT_ADDRESS,
 ) -> Dict[str, Web3]:
     """Setup multiple flashbots providers."""
     builder_to_instance = {}
     for builder_name, endpoint_uri in builders:
         flashbots_provider = FlashbotProvider(signature_account, endpoint_uri)
-        w3 = Web3(flashbots_provider)
+        w3 = Web3(HTTPProvider(endpoint_uri=rpc_endpoint))
         flash_middleware = construct_flashbots_middleware(flashbots_provider)
         w3.middleware_onion.add(flash_middleware)
         # attach modules to add the new namespace commands
@@ -81,6 +82,7 @@ class EthereumFlashbotApi(EthereumApi):
 
         :param kwargs: the keyword arguments.
         """
+        rpc_endpoint = kwargs.get("address", DEFAULT_ADDRESS)
         super().__init__(**kwargs)
         authentication_private_key = kwargs.pop("authentication_private_key", None)
         authentication_account = (
@@ -102,7 +104,9 @@ class EthereumFlashbotApi(EthereumApi):
         # use the first builder as default
         self._default_flashbots_builder_name = flashbots_builders[0][0]
         self._builder_to_web3 = multiple_flashbots_builders(
-            authentication_account, flashbots_builders
+            authentication_account,
+            flashbots_builders,
+            rpc_endpoint,
         )
 
     @property
@@ -119,7 +123,12 @@ class EthereumFlashbotApi(EthereumApi):
             )
         return cast(Flashbots, flashbots_module)
 
-    def send_to_all_builders(self) -> Dict[str, FlashbotsBundleResponse]:
+    def send_to_all_builders(
+        self,
+        bundle: List[FlashbotsBundleRawTx],
+        target_block: int,
+        opts: Dict[str, Any],
+    ) -> Dict[str, FlashbotsBundleResponse]:
         """Send the transaction to multiple builders."""
         builder_to_response = {}
         for builder_name, web3 in self._builder_to_web3.items():
@@ -128,9 +137,11 @@ class EthereumFlashbotApi(EthereumApi):
                 raise ValueError(
                     f"Flashbots {builder_name} have not been registered as a Web3 module."
                 )
-            builder_to_response[builder_name] = flashbots_module.send_bundle(
-                builder_name
+            response = flashbots_module.send_bundle(bundle, target_block, opts=opts)
+            _default_logger.info(
+                f"Flashbots-{builder_name} send_bundle response: {response}"
             )
+            builder_to_response[builder_name] = response
         return builder_to_response
 
     @staticmethod
@@ -217,7 +228,9 @@ class EthereumFlashbotApi(EthereumApi):
             # we try to send the bundle on the target block, which MUST be greater than the current block
             builder_to_response = {}
             if use_all_builders:
-                builder_to_response = self.send_to_all_builders()
+                builder_to_response = self.send_to_all_builders(
+                    bundle, target_block, opts={"replacementUuid": replacement_uuid}
+                )
             else:
                 response = self.flashbots.send_bundle(
                     bundle, target_block, opts={"replacementUuid": replacement_uuid}

@@ -11,7 +11,8 @@ Python package extending the default open-aea ethereum ledger plugin to add supp
 ```python
 def multiple_flashbots_builders(
         signature_account: LocalAccount,
-        builders: List[Tuple[str, str]]) -> Dict[str, Web3]
+        builders: List[Tuple[str, str]],
+        rpc_endpoint: str = DEFAULT_ADDRESS) -> Dict[str, Web3]
 ```
 
 Setup multiple flashbots providers.
@@ -56,7 +57,9 @@ Get the flashbots Web3 module.
 #### send`_`to`_`all`_`builders
 
 ```python
-def send_to_all_builders() -> Dict[str, FlashbotsBundleResponse]
+def send_to_all_builders(
+        bundle: List[FlashbotsBundleRawTx], target_block: int,
+        opts: Dict[str, Any]) -> Dict[str, FlashbotsBundleResponse]
 ```
 
 Send the transaction to multiple builders.
