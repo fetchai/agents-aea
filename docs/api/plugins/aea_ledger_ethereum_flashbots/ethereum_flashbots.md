@@ -4,6 +4,19 @@
 
 Python package extending the default open-aea ethereum ledger plugin to add support for flashbots.
 
+<a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.multiple_flashbots_builders"></a>
+
+#### multiple`_`flashbots`_`builders
+
+```python
+def multiple_flashbots_builders(
+        signature_account: LocalAccount,
+        builders: List[Tuple[str, str]],
+        rpc_endpoint: str = DEFAULT_ADDRESS) -> Dict[str, Web3]
+```
+
+Setup multiple flashbots providers.
+
 <a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.EthereumFlashbotApi"></a>
 
 ## EthereumFlashbotApi Objects
@@ -38,6 +51,18 @@ def flashbots() -> Flashbots
 ```
 
 Get the flashbots Web3 module.
+
+<a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.EthereumFlashbotApi.send_to_all_builders"></a>
+
+#### send`_`to`_`all`_`builders
+
+```python
+def send_to_all_builders(
+        bundle: List[FlashbotsBundleRawTx], target_block: int,
+        opts: Dict[str, Any]) -> Dict[str, FlashbotsBundleResponse]
+```
+
+Send the transaction to multiple builders.
 
 <a id="plugins.aea-ledger-ethereum-flashbots.aea_ledger_ethereum_flashbots.ethereum_flashbots.EthereumFlashbotApi.bundle_transactions"></a>
 
@@ -79,10 +104,10 @@ True if the simulation went through, False otherwise.
 #### send`_`bundle
 
 ```python
-def send_bundle(
-        bundle: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
-        target_blocks: List[int],
-        raise_on_failed_simulation: bool = False) -> Optional[List[str]]
+def send_bundle(bundle: List[Union[FlashbotsBundleTx, FlashbotsBundleRawTx]],
+                target_blocks: List[int],
+                raise_on_failed_simulation: bool = False,
+                use_all_builders: bool = False) -> Optional[List[str]]
 ```
 
 Send a bundle.
@@ -98,6 +123,7 @@ Send a bundle.
 - `bundle`: the signed transactions to bundle together and send.
 - `target_blocks`: the target blocks for the transactions.
 - `raise_on_failed_simulation`: whether to raise an exception if the simulation fails.
+- `use_all_builders`: whether to send the bundle to all builders.
 
 **Returns**:
 
