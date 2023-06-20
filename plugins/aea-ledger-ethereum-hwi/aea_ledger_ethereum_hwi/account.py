@@ -52,7 +52,6 @@ from eth_typing.evm import ChecksumAddress
 from eth_utils.curried import keccak
 from ledgerwallet.client import CommException, LedgerClient
 from ledgerwallet.transport import enumerate_devices
-from ledgerwallet.transport.device import Device
 
 from aea.common import JSONLike
 
@@ -195,7 +194,7 @@ class HWIAccount:
         self.default_account = None
 
     @property
-    def devices(self) -> List[Device]:
+    def devices(self) -> List[Any]:
         """Returns the list of available devices."""
         devices = enumerate_devices()
         if len(devices) == 0:
