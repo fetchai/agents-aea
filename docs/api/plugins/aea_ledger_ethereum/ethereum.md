@@ -949,47 +949,27 @@ Get wealth from the faucet for the provided address.
 - `address`: the address.
 - `url`: the url
 
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper"></a>
 
-## LruLockWrapper Objects
+## SessionCacheLockWrapper Objects
 
 ```python
-class LruLockWrapper()
+class SessionCacheLockWrapper()
 ```
 
-Wrapper for LRU with threading.Lock.
+Wrapper for session_cache with threading.Lock.
 
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__init__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper.__init__"></a>
 
 #### `__`init`__`
 
 ```python
-def __init__(lru: LRU) -> None
+def __init__(session_cache: SessionCache) -> None
 ```
 
 Init wrapper.
 
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__getitem__"></a>
-
-#### `__`getitem`__`
-
-```python
-def __getitem__(*args: Any, **kwargs: Any) -> Any
-```
-
-Get item
-
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__setitem__"></a>
-
-#### `__`setitem`__`
-
-```python
-def __setitem__(*args: Any, **kwargs: Any) -> Any
-```
-
-Set item.
-
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__contains__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper.__contains__"></a>
 
 #### `__`contains`__`
 
@@ -999,15 +979,45 @@ def __contains__(*args: Any, **kwargs: Any) -> Any
 
 Contain item.
 
-<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__delitem__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper.__len__"></a>
 
-#### `__`delitem`__`
+#### `__`len`__`
 
 ```python
-def __delitem__(*args: Any, **kwargs: Any) -> Any
+def __len__() -> int
 ```
 
-Del item.
+Length of the cache
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper.cache"></a>
+
+#### cache
+
+```python
+def cache(key: str, value: Any) -> Dict[str, Any]
+```
+
+session_cache Cache.
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper.get_cache_entry"></a>
+
+#### get`_`cache`_`entry
+
+```python
+def get_cache_entry(key: str) -> Any
+```
+
+Get cache entry.
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SessionCacheLockWrapper.clear"></a>
+
+#### clear
+
+```python
+def clear() -> None
+```
+
+Clear cache entries.
 
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.set_wrapper_for_web3py_session_cache"></a>
 

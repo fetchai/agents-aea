@@ -41,9 +41,9 @@ from eth_account.signers.local import LocalAccount
 from eth_keys import keys
 from eth_typing import HexStr
 from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
-from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from requests import HTTPError
 from web3 import HTTPProvider, Web3
+from web3._utils.request import SessionCache
 from web3.datastructures import AttributeDict
 from web3.exceptions import ContractLogicError, SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
@@ -1587,40 +1587,43 @@ class EthereumFaucetApi(FaucetApi):
             )
 
 
-class LruLockWrapper:
-    """Wrapper for LRU with threading.Lock."""
+class SessionCacheLockWrapper:
+    """Wrapper for session_cache with threading.Lock."""
 
-    def __init__(self, lru: LRU) -> None:
+    def __init__(self, session_cache: SessionCache) -> None:
         """Init wrapper."""
-        self.lru = lru
+        self.session_cache = session_cache
         self.lock = threading.Lock()
-
-    def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
-        """Get item"""
-        with self.lock:
-            return self.lru.__getitem__(*args, **kwargs)
-
-    def __setitem__(self, *args: Any, **kwargs: Any) -> Any:
-        """Set item."""
-        with self.lock:
-            return self.lru.__setitem__(*args, **kwargs)
 
     def __contains__(self, *args: Any, **kwargs: Any) -> Any:
         """Contain item."""
         with self.lock:
-            return self.lru.__contains__(*args, **kwargs)
+            return self.session_cache.__contains__(*args, **kwargs)
 
-    def __delitem__(self, *args: Any, **kwargs: Any) -> Any:
-        """Del item."""
+    def __len__(self) -> int:
+        """Length of the cache"""
+        return len(self.session_cache)
+
+    def cache(self, key: str, value: Any) -> Dict[str, Any]:
+        """session_cache Cache."""
+        return self.session_cache.cache(key=key, value=value)
+
+    def get_cache_entry(self, key: str) -> Any:
+        """Get cache entry."""
         with self.lock:
-            return self.lru.__delitem__(*args, **kwargs)
+            return self.session_cache.get_cache_entry(key)
+
+    def clear(self) -> None:
+        """Clear cache entries."""
+        with self.lock:
+            self.session_cache.clear()
 
 
 def set_wrapper_for_web3py_session_cache() -> None:
     """Wrap web3py session cache with threading.Lock."""
 
     # pylint: disable=protected-access
-    web3._utils.request._session_cache = LruLockWrapper(
+    web3._utils.request._session_cache = SessionCacheLockWrapper(
         web3._utils.request._session_cache
     )
 
