@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ethereum module."""
 
+import copy
 import hashlib
 import logging
 import math
@@ -898,6 +899,9 @@ def test_try_get_gas_pricing(
         gas_price[param] > 0 and isinstance(gas_price[param], int)
         for param in strategy["params"]
     )
+    expteced_reprice = {
+        param: math.ceil(value * TIP_INCREASE) for param, value in gas_price.items()
+    }
 
     # test gas repricing
     gas_reprice = ethereum_api.try_get_gas_pricing(
@@ -907,10 +911,7 @@ def test_try_get_gas_pricing(
         gas_reprice[param] > 0 and isinstance(gas_reprice[param], int)
         for param in strategy["params"]
     )
-    assert gas_reprice == {
-        gas_price_param: math.ceil(gas_price[gas_price_param] * TIP_INCREASE)
-        for gas_price_param in strategy["params"]
-    }, "The repricing was performed incorrectly!"
+    assert gas_reprice == expteced_reprice, "The repricing was performed incorrectly!"
 
 
 @pytest.mark.parametrize(
@@ -933,19 +934,19 @@ def test_try_get_gas_pricing_poa(
         gas_price[param] > 0 and isinstance(gas_price[param], int)
         for param in strategy["params"]
     )
+    expteced_reprice = {
+        param: math.ceil(value * TIP_INCREASE) for param, value in gas_price.items()
+    }
 
     # test gas repricing
     gas_reprice = ethereum_api.try_get_gas_pricing(
-        gas_price_strategy=strategy["name"], old_price=gas_price
+        gas_price_strategy=strategy["name"], old_price=copy.deepcopy(gas_price)
     )
     assert all(
         gas_reprice[param] > 0 and isinstance(gas_reprice[param], int)
         for param in strategy["params"]
     )
-    assert gas_reprice == {
-        gas_price_param: math.ceil(gas_price[gas_price_param] * TIP_INCREASE)
-        for gas_price_param in strategy["params"]
-    }, "The repricing was performed incorrectly!"
+    assert gas_reprice == expteced_reprice, "The repricing was performed incorrectly!"
 
 
 @pytest.mark.parametrize("mock_exception", (True, False))
