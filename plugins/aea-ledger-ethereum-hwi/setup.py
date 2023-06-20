@@ -39,12 +39,13 @@ setup(
     },
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
-        "web3==5.25.0",
+        "web3==5.31.4",
         "ipfshttpclient==0.8.0a2",
-        "eth-account==0.5.6",
+        "eth-account>=0.5.9,<0.6.0",
         "open-aea-ledger-ethereum~=1.34.0",
         "apduboy>=0.5.0",
-        "protobuf>=3.20,<4",
+        "protobuf==3.19.5",
+        "construct<=2.10.61",
     ],
     tests_require=["pytest"],
     entry_points={
