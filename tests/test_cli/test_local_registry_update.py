@@ -23,6 +23,8 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
+
 from aea.cli.core import cli
 from aea.cli.local_registry_sync import enlist_packages
 from aea.cli.registry.add import fetch_package
@@ -34,6 +36,7 @@ from aea.test_tools.click_testing import CliRunner
 from tests.conftest import TEST_IPFS_REGISTRY_CONFIG
 
 
+@pytest.mark.skip(reason="https://agents-registry.prod.fetch-ai.com/ is down")
 @mock.patch("aea.cli.publish.RemoteRegistry.check_item_present")
 @mock.patch(
     "aea.cli.registry.utils.get_or_create_cli_config",
