@@ -123,7 +123,7 @@ Initialize object.
 
 ```python
 @property
-def devices() -> List[Device]
+def devices() -> List[Any]
 ```
 
 Returns the list of available devices.
