@@ -26,7 +26,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="open-aea-ledger-ethereum",
-    version="1.34.0",
+    version="1.35.0",
     author="Valory AG",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
@@ -41,9 +41,9 @@ setup(
     },
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
-        "web3==5.25.0",
+        "web3==5.31.4",
         "ipfshttpclient==0.8.0a2",
-        "eth-account==0.5.6",
+        "eth-account>=0.5.9,<0.6.0",
     ],
     tests_require=["pytest"],
     entry_points={

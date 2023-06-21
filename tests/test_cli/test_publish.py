@@ -197,6 +197,10 @@ class TestPublishHTTPdMode(AEATestCaseEmpty):
     return_value=REMOTE_HTTP,
 )
 @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_HTTP)
+@mock.patch(
+    "aea.cli.registry.utils.request_api",
+    side_effect=click.ClickException("Not found in Registry."),
+)
 def test_negative_check_is_item_in_remote_registry(*_):
     """Test the utility function (negative) to check if an item is in the remote registry"""
     with pytest.raises(click.ClickException, match="Not found in Registry."):
@@ -220,6 +224,7 @@ def test_negative_check_is_item_in_registry_mixed():
         )
 
 
+@pytest.mark.skip(reason="https://agents-registry.prod.fetch-ai.com/ is down")
 @mock.patch(
     "aea.cli.registry.utils.get_or_create_cli_config",
     return_value=TEST_IPFS_REGISTRY_CONFIG,

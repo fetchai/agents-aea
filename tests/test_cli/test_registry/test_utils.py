@@ -381,6 +381,7 @@ def test_clean_tarfiles_error():
             assert not tarfile_path.exists()
 
 
+@pytest.mark.skip(reason="https://agents-registry.prod.fetch-ai.com/ is down")
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @mock.patch(

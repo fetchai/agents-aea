@@ -185,6 +185,7 @@ class IsVersionCorrectTestCase(TestCase):
         self.assertFalse(result)
 
 
+@pytest.mark.skip(reason="https://agents-registry.prod.fetch-ai.com/ is down")
 class TestFetchFromRemoteRegistryHTTP(AEATestCaseManyFlaky):
     """Test case for fetch agent command from Registry."""
 

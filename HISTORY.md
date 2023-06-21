@@ -1,5 +1,15 @@
 # Release History - open AEA
 
+## 1.35.0 (2023-06-20)
+
+Plugins:
+- Adds support for multiple transaction builders on `flashbots` ledger plugin
+- Pins
+  - `eth-account`to `>=0.5.9,<0.6.0`
+  - `protobuf` to `==3.19.5`
+  - `web3` to `==5.31.4`
+  - `construct` to `<=2.10.61`
+
 ## 1.34.0 (2023-05-15)
 
 AEA:
