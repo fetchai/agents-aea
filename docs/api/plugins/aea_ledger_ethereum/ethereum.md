@@ -4,6 +4,18 @@
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SPEED_FAST"></a>
+
+#### SPEED`_`FAST
+
+safeLow, standard, fast
+
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.PRIORITY_FEE_INCREASE_BOUNDARY"></a>
+
+#### PRIORITY`_`FEE`_`INCREASE`_`BOUNDARY
+
+percentage
+
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.wei_to_gwei"></a>
 
 #### wei`_`to`_`gwei

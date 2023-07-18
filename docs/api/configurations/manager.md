@@ -4,6 +4,12 @@
 
 Implementation of the AgentConfigManager.
 
+<a id="aea.configurations.manager.RESOURCE_TYPE_TO_CONFIG_FILE"></a>
+
+#### RESOURCE`_`TYPE`_`TO`_`CONFIG`_`FILE
+
+type: Dict[str, str]
+
 <a id="aea.configurations.manager.VariableDoesNotExist"></a>
 
 ## VariableDoesNotExist Objects

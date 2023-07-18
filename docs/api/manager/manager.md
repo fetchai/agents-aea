@@ -257,6 +257,18 @@ class AgentRunProcessTask(BaseAgentRunTask)
 
 Subprocess wrapper to run agent.
 
+<a id="aea.manager.manager.AgentRunProcessTask.PROCESS_JOIN_TIMEOUT"></a>
+
+#### PROCESS`_`JOIN`_`TIMEOUT
+
+in seconds
+
+<a id="aea.manager.manager.AgentRunProcessTask.PROCESS_ALIVE_SLEEP_TIME"></a>
+
+#### PROCESS`_`ALIVE`_`SLEEP`_`TIME
+
+in seconds
+
 <a id="aea.manager.manager.AgentRunProcessTask.__init__"></a>
 
 #### `__`init`__`

@@ -33,7 +33,7 @@ def get_all_extras() -> Dict:
 
     cli_deps = [
         "click==8.0.2",
-        "pyyaml>=4.2b1,<6.0",
+        "pyyaml==6.0.1",
         "jsonschema>=3.0.0,<4.0.0",
         "packaging>=20.3,<22.0",
         "pytest>=7.0.0,<7.3.0",
@@ -60,7 +60,7 @@ base_deps = [
     "packaging>=20.3,<22.0",
     "protobuf>=3.19.0,<4.0.0",
     "pymultihash==0.8.2",
-    "pyyaml>=4.2b1,<6.0",
+    "pyyaml==6.0.1",
     "requests>=2.22.0,<3.0.0",
     "python-dotenv>=0.14.0,<0.18.0",
     "ecdsa>=0.15,<0.17.0",

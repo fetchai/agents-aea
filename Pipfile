@@ -52,6 +52,7 @@ docspec-python = "==2.0.2"
 hexbytes = "==0.3.0"
 apduboy = ">=0.5.0"
 construct = "<=2.10.61"
+poetry = "*"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
