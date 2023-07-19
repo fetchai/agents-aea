@@ -221,6 +221,7 @@ def make_handler_cls_from_funcion(func: Callable) -> Type[Handler]:
     :param func: function or callable to be called from Handler.handle method
     :return: Handler class
     """
+
     # pydocstyle: ignore # case conflicts with black # noqa: E800
     class TestHandler(Handler):
         SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
@@ -243,6 +244,7 @@ def make_behaviour_cls_from_funcion(func: Callable) -> Type[Behaviour]:
     :param func: function or callable to be called from Behaviour.act method
     :return: Behaviour class
     """
+
     # pydocstyle: ignore # case conflicts with black # noqa: E800
     class TestBehaviour(Behaviour):
         def act(self) -> None:
@@ -267,6 +269,7 @@ def run_in_root_dir(fn) -> Callable:
 
     :return: wrapped function
     """
+
     # pydocstyle: ignore # case conflicts with black # noqa: E800
     @wraps(fn)
     def wrap(*args, **kwargs) -> Any:

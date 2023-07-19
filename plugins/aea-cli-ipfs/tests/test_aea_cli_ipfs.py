@@ -176,7 +176,6 @@ def test_version_did_not_match():
     ), patch(
         "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
     ):
-
         with pytest.raises(
             Exception,
             match="Please ensure you have version 0.6.0 of IPFS daemon installed.",

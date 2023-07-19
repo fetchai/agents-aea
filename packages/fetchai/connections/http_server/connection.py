@@ -213,7 +213,6 @@ class Response(web.Response):
         :return: the response
         """
         if http_message.performative == HttpMessage.Performative.RESPONSE:
-
             if http_message.is_set("headers") and http_message.headers:
                 headers: Optional[dict] = dict(
                     email.message_from_string(http_message.headers).items()

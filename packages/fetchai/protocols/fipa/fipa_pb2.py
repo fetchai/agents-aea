@@ -205,7 +205,6 @@ _sym_db.RegisterMessage(FipaMessage.Match_Accept_Performative)
 _sym_db.RegisterMessage(FipaMessage.End_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = None
     _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._serialized_options = b"8\001"

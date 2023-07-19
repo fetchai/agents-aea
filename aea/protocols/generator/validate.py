@@ -410,7 +410,6 @@ def _validate_speech_acts_section(
         performative,
         speech_act_content_config,
     ) in protocol_specification.speech_acts.read_all():
-
         # Validate performative name
         (
             result_performative_validation,
@@ -427,7 +426,6 @@ def _validate_speech_acts_section(
         performatives_set.add(performative)
 
         for content_name, content_type in speech_act_content_config.args.items():
-
             # Validate content name
             (
                 result_content_name_validation,

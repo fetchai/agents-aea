@@ -242,6 +242,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_runnable_async(self):
         """Test runnable async methods."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
@@ -269,6 +270,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_double_start(self):
         """Test runnable async methods."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
@@ -286,6 +288,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_run_in_thread(self):
         """Test runnable in thread mode."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
@@ -303,6 +306,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_timeout(self):
         """Test runnable async methods."""
+
         # for pydocstyle
         class TestRun(Runnable):
             def __init__(
@@ -365,6 +369,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_wait_async_threaded(self):
         """Test runnable async methods."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
@@ -383,6 +388,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_wait_async_threaded_no_exception(self):
         """Test runnable threaded wait completed."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
@@ -395,6 +401,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_double_stop(self):
         """Test runnable double stop."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
@@ -408,6 +415,7 @@ class TestRunnable:
 
     def test_stop_before_run(self):
         """Test stop before run."""
+
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):

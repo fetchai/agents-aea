@@ -112,7 +112,6 @@ def test_config_loader_load_service_config(*_mocks):
     )
 
     class DummyServiceConfig(PackageConfiguration):
-
         package_type = PackageType.SERVICE
         json = property(lambda self: config)
 

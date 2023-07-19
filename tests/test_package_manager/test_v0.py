@@ -225,7 +225,9 @@ class TestVerifyFailure(BaseAEATestCase):
                 in caplog.text
             )
 
-        with mock.patch("traceback.print_exc",) as print_tb, mock.patch(
+        with mock.patch(
+            "traceback.print_exc",
+        ) as print_tb, mock.patch(
             "aea.package_manager.v0.check_fingerprint",
             side_effect=ValueError("expeceted_exception"),
         ):
@@ -255,7 +257,6 @@ class TestVerifyFailure(BaseAEATestCase):
                 EXAMPLE_PACKAGE_ID,
             ],
         ):
-
             assert pm.verify() == 1
             assert (
                 f"Fingerprints does not match for {EXAMPLE_PACKAGE_ID}" in caplog.text
@@ -278,7 +279,6 @@ class TestVerifyFailure(BaseAEATestCase):
                 EXAMPLE_PACKAGE_ID,
             ],
         ):
-
             assert pm.verify() == 1
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
 

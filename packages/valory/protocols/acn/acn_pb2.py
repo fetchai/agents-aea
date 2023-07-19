@@ -121,7 +121,6 @@ _sym_db.RegisterMessage(AcnMessage.Aea_Envelope_Performative)
 _sym_db.RegisterMessage(AcnMessage.Status_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _ACNMESSAGE._serialized_start = 34
     _ACNMESSAGE._serialized_end = 1460

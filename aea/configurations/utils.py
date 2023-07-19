@@ -80,7 +80,6 @@ def _(
     protocol_replacements = replacements.get(ComponentType.PROTOCOL, {})
     connection_replacements = replacements.get(ComponentType.CONNECTION, {})
     for protocol_id, connection_id in list(arg.default_routing.items()):
-
         # update protocol (if replacements provides it)
         new_protocol_id = protocol_replacements.get(protocol_id, protocol_id)
         old_value = arg.default_routing.pop(protocol_id)

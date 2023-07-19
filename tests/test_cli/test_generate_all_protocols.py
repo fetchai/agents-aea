@@ -40,7 +40,6 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 
 def _run_cli_patch(*args: Any, **kwargs: Any) -> None:
-
     if "isort" in args or "black" in args:
         return
 

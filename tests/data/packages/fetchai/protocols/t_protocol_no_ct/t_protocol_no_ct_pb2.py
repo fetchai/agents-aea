@@ -443,7 +443,6 @@ _sym_db.RegisterMessage(
 _sym_db.RegisterMessage(TProtocolNoCtMessage.Performative_Empty_Contents_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY._options = (
         None

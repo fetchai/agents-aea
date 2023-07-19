@@ -97,7 +97,6 @@ _sym_db.RegisterMessage(DefaultMessage.Error_Performative.ErrorDataEntry)
 _sym_db.RegisterMessage(DefaultMessage.End_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY._options = None
     _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY._serialized_options = b"8\001"

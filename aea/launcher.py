@@ -66,7 +66,9 @@ def load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) 
 
 def _set_logger(
     log_level: Optional[str],
-) -> None:  # pragma: nocover # used in spawned process and pytest does not see this code
+) -> (
+    None
+):  # pragma: nocover # used in spawned process and pytest does not see this code
     from aea.cli.utils.loggers import (  # pylint: disable=import-outside-toplevel
         default_logging_config,
     )

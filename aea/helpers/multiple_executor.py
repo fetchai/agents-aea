@@ -218,7 +218,9 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
                 _default_logger.exception("KeyboardInterrupt in task!")
                 if not skip_exceptions:
                     raise
-            except Exception as e:  # pylint: disable=broad-except  # handle any exception with own code.
+            except (
+                Exception
+            ) as e:  # pylint: disable=broad-except  # handle any exception with own code.
                 _default_logger.exception("Exception in task!")
                 if not skip_exceptions:
                     await self._handle_exception(

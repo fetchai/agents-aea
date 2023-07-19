@@ -340,7 +340,6 @@ def parse_command_line():
 
 
 if __name__ == "__main__":
-
     run_args = parse_command_line()
 
     node_config: Optional[AcnNodeConfig] = None

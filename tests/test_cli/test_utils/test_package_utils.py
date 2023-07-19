@@ -55,7 +55,6 @@ def test_verify_private_keys_ctx_fail() -> None:
         "verify_private_keys",
         side_effect=ValueError,
     ):
-
         with pytest.raises(click.ClickException):
             verify_private_keys_ctx(ctx)
 

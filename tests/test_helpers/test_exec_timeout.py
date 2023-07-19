@@ -136,6 +136,7 @@ class TestThreadGuard(BaseTestExecTimeout):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_execution_limit_in_threads(self):
         """Test two threads with different timeouts same time."""
+
         # pydocstyle: ignore # conflict with black # noqa: E800
         def make_test_function(slow_function_time, timeout):
             assert timeout < slow_function_time

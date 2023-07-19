@@ -414,7 +414,6 @@ class TestFetchIPFSFailures(BaseAEATestCase):
         ), mock.patch.object(
             Path, "exists", return_value=False
         ):
-
             with pytest.raises(
                 click.ClickException,
                 match="Error occured while downloading agent",
@@ -431,7 +430,6 @@ class TestFetchIPFSFailures(BaseAEATestCase):
         with mock.patch(
             "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
         ), mock.patch.object(IPFSTool, "download", side_effect=shutil.Error):
-
             with pytest.raises(
                 click.ClickException,
             ):

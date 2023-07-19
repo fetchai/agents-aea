@@ -461,7 +461,6 @@ class TestHashUpdateDev(BaseAEATestCase):
             pm,
             "update_dependencies",
         ):
-
             with pytest.raises(
                 PackageNotValid,
                 match="Found a package which is not listed in the `packages.json`",
@@ -617,7 +616,6 @@ class TestVerifyFailure(BaseAEATestCase):
             "is_third_party_package",
             return_value=True,
         ):
-
             assert pm.verify() == 1
             assert (
                 f"Fingerprints does not match for {EXAMPLE_PACKAGE_ID}" in caplog.text
@@ -638,7 +636,6 @@ class TestVerifyFailure(BaseAEATestCase):
                 EXAMPLE_PACKAGE_ID,
             ],
         ):
-
             assert pm.verify() == 1
             assert f"Cannot find hash for {EXAMPLE_PACKAGE_ID}" in caplog.text
 

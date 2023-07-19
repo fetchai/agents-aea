@@ -95,7 +95,6 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
         """Test envelope send/received by every pair of connection."""
 
         for sending, receiving in itertools.permutations(self.multiplexers, 2):
-
             sender = next(c.address for c in sending.connections)
             to = next(c.address for c in receiving.connections)
             envelope = self.enveloped_default_message(to=to, sender=sender)

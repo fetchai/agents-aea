@@ -273,7 +273,6 @@ class ProxyEnv(gym.Env):
                     gym_msg.performative == GymMessage.Performative.STATUS
                     and gym_msg.content.get("reset", "failure") == "success"
                 ):
-
                     return None
                 raise ValueError(
                     "Unexpected performative or no step_id: {}".format(

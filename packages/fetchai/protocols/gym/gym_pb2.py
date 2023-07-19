@@ -114,7 +114,6 @@ _sym_db.RegisterMessage(GymMessage.Reset_Performative)
 _sym_db.RegisterMessage(GymMessage.Close_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY._options = None
     _GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY._serialized_options = b"8\001"

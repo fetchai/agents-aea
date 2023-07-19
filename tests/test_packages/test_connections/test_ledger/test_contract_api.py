@@ -272,6 +272,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
 @pytest.mark.asyncio
 async def test_run_async():
     """Test run async error handled."""
+
     # for pydocstyle
     def _raise():
         raise Exception("Expected")

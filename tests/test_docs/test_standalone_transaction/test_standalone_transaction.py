@@ -47,7 +47,6 @@ class TestStandaloneTransaction(BaseAEATestCase):
 
     @classmethod
     def _patch_logger(cls):
-
         cls.patch_logger_info = patch.object(logger, "info")
         cls.mocked_logger_info = cls.patch_logger_info.__enter__()
 

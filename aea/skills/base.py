@@ -1083,7 +1083,7 @@ class _SkillComponentLoader:
 
         # populate indexes
         for _path, component_classes in component_classes_by_path.items():
-            for (component_classname, _component_class) in component_classes:
+            for component_classname, _component_class in component_classes:
                 type_ = self._get_skill_component_type(_component_class)
                 class_index.setdefault(component_classname, {}).setdefault(
                     type_, set()

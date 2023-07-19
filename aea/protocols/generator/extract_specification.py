@@ -195,7 +195,6 @@ def extract(
         all_performatives_set.add(performative)
         spec.speech_acts[performative] = {}
         for content_name, content_type in speech_act_content_config.args.items():
-
             # determine necessary imports from typing
             if len(re.findall("pt:set\\[", content_type)) >= 1:
                 spec.typing_imports["FrozenSet"] = True

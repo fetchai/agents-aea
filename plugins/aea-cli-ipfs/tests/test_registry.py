@@ -142,7 +142,6 @@ def test_fetch_ipfs() -> None:
         "aea_cli_ipfs.registry.load_local_registry",
         new=lambda *_, **__: DUMMY_REGISTRY_DATA,
     ), TemporaryDirectory() as dest_path:
-
         with mock.patch("aea_cli_ipfs.ipfs_utils.IPFSTool.download"), mock.patch(
             "aea_cli_ipfs.ipfs_utils.IPFSTool.check_ipfs_node_running"
         ):

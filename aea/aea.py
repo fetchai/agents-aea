@@ -308,7 +308,6 @@ class AEA(Agent):
         protocol: Protocol,
         error_handler: AbstractErrorHandler,
     ) -> Tuple[Optional[Message], List[Handler]]:
-
         handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.to_as_public_id
         )
@@ -330,7 +329,9 @@ class AEA(Agent):
             msg.sender = envelope.sender
             msg.to = envelope.to
             return msg, handlers
-        except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
+        except (
+            Exception
+        ) as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             error_handler.send_decoding_error(envelope, e, self.logger)
             return None, []
 
@@ -425,6 +426,7 @@ class AEA(Agent):
 
         :return: bool, propagate exception if True otherwise skip it.
         """
+
         # docstyle: ignore # noqa: E800
         def log_exception(e: Exception, fn: Callable, is_debug: bool = False) -> None:
             if is_debug:

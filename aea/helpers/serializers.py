@@ -152,7 +152,6 @@ class DictProtobufStructSerializer:
         # protobuf Struct doesn't recursively convert Struct to dict
         need_patch = dictionary.pop(cls.NEED_PATCH, {})
         for key, value in dictionary.items():
-
             # protobuf struct doesn't recursively convert Struct to dict
             if isinstance(value, Struct):
                 dictionary[key] = cls._restore_value(value)

@@ -842,7 +842,6 @@ class P2PLibp2pConnection(Connection):
 
         self.state = ConnectionStates.disconnecting
         try:
-
             if self._receive_from_node_task is not None:
                 self._receive_from_node_task.cancel()
                 self._receive_from_node_task = None

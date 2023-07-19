@@ -55,9 +55,7 @@ def get_group_tree(cmd: Union[click.Group, click.Command]) -> Dict:
     ctx = click.Context(command=cmd)
 
     if isinstance(cmd, click.Group):
-
         for sub_cmd_name in cast(click.Group, cmd).list_commands(ctx=ctx):
-
             # Get the sub-command
             sub_cmd = cast(click.Command, cmd.get_command(ctx, sub_cmd_name))
 
@@ -86,7 +84,6 @@ class CommandValidator:
 
         # Iterate the command parts
         for cmd_part in cmd_parts:
-
             # Subcommands
             if cmd_part in tree["commands"].keys():
                 latest_subcmd = cmd_part

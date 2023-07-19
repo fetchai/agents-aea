@@ -345,7 +345,6 @@ _sym_db.RegisterMessage(TacMessage.Tac_Error_Performative)
 _sym_db.RegisterMessage(TacMessage.Tac_Error_Performative.InfoEntry)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = None
     _TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._serialized_options = (

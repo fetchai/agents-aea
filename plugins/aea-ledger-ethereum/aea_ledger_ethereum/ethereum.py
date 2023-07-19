@@ -280,10 +280,8 @@ def get_gas_price_strategy_eip1559_polygon(
         transaction_params: TxParams,  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         try:
-
             response = requests.get(gas_endpoint)
             if response.status_code == 200:
-
                 data = response.json()[speed]
                 return {
                     "maxFeePerGas": Wei(to_wei(data["maxFee"], "gwei")),

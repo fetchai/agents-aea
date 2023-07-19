@@ -371,7 +371,9 @@ def try_decorator(
         def wrapper(*args: Any, **kwargs: Any) -> Callable:
             try:
                 return fn(*args, **kwargs)
-            except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+            except (
+                Exception
+            ) as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
                 if kwargs.get("raise_on_try", False):
                     raise e
                 if error_message:
@@ -414,7 +416,9 @@ def retry_decorator(
             for retry in range(number_of_retries):
                 try:
                     return fn(*args, **kwargs)
-                except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+                except (
+                    Exception
+                ) as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
                     if error_message:
                         log(error_message.format(retry=retry + 1, error=e))
                     if delay:
@@ -437,7 +441,9 @@ def exception_log_and_reraise(log_method: Callable, message: str) -> Generator:
     """
     try:
         yield
-    except BaseException as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+    except (
+        BaseException
+    ) as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
         log_method(message.format(e))
         raise
 
@@ -518,7 +524,6 @@ def perform_dict_override(
     :param new_configuration: Configuration from which the method will perform the update
     """
     for path in overrides[component_id]:
-
         will_be_updated = updated_configuration[component_id]
         update = new_configuration[component_id]
 
@@ -666,7 +671,9 @@ class cached_property:  # pragma: nocover
             )
         try:
             cache = instance.__dict__
-        except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+        except (
+            AttributeError
+        ):  # not all objects have __dict__ (e.g. class defines slots)
             msg = (
                 f"No '__dict__' attribute on {type(instance).__name__!r} "
                 f"instance to cache {self.attrname!r} property."

@@ -582,7 +582,6 @@ _sym_db.RegisterMessage(
 _sym_db.RegisterMessage(TProtocolMessage.Performative_Empty_Contents_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY._options = None
     _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY._serialized_options = b"8\001"

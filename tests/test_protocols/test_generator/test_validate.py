@@ -1162,7 +1162,10 @@ class TestValidate(TestCase):
         valid_all_content_1 = {"ct:DataModel"}
         mocked_spec.protobuf_snippets = valid_protobuf_snippet_1
 
-        valid_result_1, valid_msg_1, = _validate_protocol_buffer_schema_code_snippets(
+        (
+            valid_result_1,
+            valid_msg_1,
+        ) = _validate_protocol_buffer_schema_code_snippets(
             mocked_spec, valid_all_content_1
         )
         assert valid_result_1 is True
@@ -1172,7 +1175,10 @@ class TestValidate(TestCase):
         valid_all_content_2 = set()
         mocked_spec.protobuf_snippets = valid_protobuf_snippet_2
 
-        valid_result_2, valid_msg_2, = _validate_protocol_buffer_schema_code_snippets(
+        (
+            valid_result_2,
+            valid_msg_2,
+        ) = _validate_protocol_buffer_schema_code_snippets(
             mocked_spec, valid_all_content_2
         )
         assert valid_result_2 is True

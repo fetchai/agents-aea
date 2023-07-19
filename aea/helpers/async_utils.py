@@ -130,6 +130,7 @@ class AsyncState:
     @staticmethod
     def _watcher_result_callback(watcher: Future) -> Callable:
         """Create callback for watcher result."""
+
         # docstyle.
         def _callback(result: Any) -> None:
             if watcher.done():  # pragma: nocover

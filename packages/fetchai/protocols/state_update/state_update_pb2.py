@@ -168,7 +168,6 @@ _sym_db.RegisterMessage(StateUpdateMessage.Apply_Performative.QuantitiesByGoodId
 _sym_db.RegisterMessage(StateUpdateMessage.End_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = (
         None

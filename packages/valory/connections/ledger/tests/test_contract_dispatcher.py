@@ -243,6 +243,7 @@ def test_build_response_fails_on_bad_data_type() -> None:
 @pytest.mark.asyncio
 async def test_run_async() -> None:
     """Test run async error handled."""
+
     # for pydocstyle
     def _raise():  # type: ignore
         raise Exception("Expected")

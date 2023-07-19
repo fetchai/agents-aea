@@ -225,6 +225,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
     @classmethod
     def _supervisor_event_loop(cls) -> None:
         """Start supervisor thread to execute asyncio task controlling execution time."""
+
         # pydocstyle: noqa # cause black reformats with pydocstyle conflict # noqa: E800
         async def wait_stopped() -> None:
             cls._stopped_future = Future()

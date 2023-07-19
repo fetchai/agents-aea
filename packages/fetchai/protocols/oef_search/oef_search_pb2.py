@@ -158,7 +158,6 @@ _sym_db.RegisterMessage(OefSearchMessage.Success_Performative)
 _sym_db.RegisterMessage(OefSearchMessage.Oef_Error_Performative)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     _OEFSEARCHMESSAGE._serialized_start = 52
     _OEFSEARCHMESSAGE._serialized_end = 1725

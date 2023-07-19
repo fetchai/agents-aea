@@ -151,6 +151,7 @@ def test_load_env_file():
 
 def test_reg_exp_not_match():
     """Test regexp checks."""
+
     # for pydocstyle
     class MyReString(RegexConstrainedString):
         REGEX = re.compile(r"[0-9]+")
@@ -162,6 +163,7 @@ def test_reg_exp_not_match():
 @pytest.mark.parametrize("raise_on_try", (True, False))
 def test_try_decorator(raise_on_try: bool):
     """Test try and log decorator."""
+
     # for pydocstyle
     @try_decorator("oops", default_return=lambda _: "failed")
     def fn(**_):

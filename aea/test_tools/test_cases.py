@@ -321,6 +321,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: list of files differing in the projects
         """
+
         # for pydocstyle
         def is_allowed_diff_in_agent_config(
             path_to_fetched_aea: str, path_to_manually_created_aea: str

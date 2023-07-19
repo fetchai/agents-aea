@@ -161,7 +161,9 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 f"Whilst processing the contract api request:\n{message}\nthe following exception occured:\n{str(exception)}"
             )
             response = self.get_error_message(exception, ledger_api, message, dialogue)
-        except Exception as exception:  # pylint: disable=broad-except  # pragma: nocover
+        except (
+            Exception
+        ) as exception:  # pylint: disable=broad-except  # pragma: nocover
             self.logger.debug(
                 f"Whilst processing the contract api request:\n{message}\nthe following error occured:\n{parse_exception(exception)}"
             )

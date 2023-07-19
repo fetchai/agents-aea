@@ -262,7 +262,6 @@ def test_add_key_fails_bad_key():
         with mock.patch.object(
             aea.crypto.helpers._default_logger, "error"
         ) as mock_logger_error:
-
             result = runner.invoke(
                 cli,
                 [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
