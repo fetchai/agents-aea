@@ -11,7 +11,7 @@ fingerprint:
   README.md: bafybeiabkdibf7iv3y33xkaemvuwiuhrjedrlvuklgjgty3gzggkgr5d5q
   __init__.py: bafybeibtknmpggpj77fflwndllcqvvbolpds7doymdp4fjd277metq6oxy
   check_dependencies.py: bafybeiglc4wx26doygocmmaqfy6xgcbbmhaznr5gbngiv4p2e34zhjwrwa
-  connection.py: bafybeid3g43y7wryyngns4dy2vjrx37xum2cmif2ovvsoycclny6mlrt6u
+  connection.py: bafybeicy4xsk32eq7kewpejieoy6wa2mh2wz4nc6yh6psvzwncz3mz6vta
   consts.py: bafybeifpc6on6addr4a3qruevt5ykvxd26ehj2bmfncu2aq3bubrmpmdhe
   libp2p_node/Makefile: bafybeieuy4mut3oz2aqhtgt3dtky23do7g7tjg6fni4e256i3zg2onzmim
   libp2p_node/README.md: bafybeibke3cczx7lh4cmu4w6ofggrkm32mdzj6isjq4xo7isjproqg3y4y
@@ -64,8 +64,8 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4
-- valory/acn:1.1.0:bafybeignmc5uh3vgpuckljcj2tgg7hdqyytkm6m5b6v6mxtazdcvubibva
+- fetchai/default:1.0.0:bafybeiazamq4mogosgmr77ipita5s6sq6rfowubxf5rybfxikc772befxy
+- valory/acn:1.1.0:bafybeiapa5ilsobggnspoqhspftwolrx52udrwmaxdxgrk26heuvl4oooa
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

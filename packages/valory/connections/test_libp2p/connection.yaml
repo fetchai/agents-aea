@@ -21,7 +21,7 @@ fingerprint:
   tests/test_p2p_libp2p/test_communication.py: bafybeihnkle2pokfzfkguegmq4ptatvpcaezxrv564l76atjnuec57b2am
   tests/test_p2p_libp2p/test_errors.py: bafybeifyl3anbjjm22xey73vhgdkosnd3nubyyl7xxr4kxbigsiwdsk25u
   tests/test_p2p_libp2p/test_fault_tolerance.py: bafybeigbzraksxj35q3q6thnkbvgvybixapkow4dz6vyo7jlbgnyulbv4a
-  tests/test_p2p_libp2p/test_integration.py: bafybeicuu7nlyksb6ytipmjyuk5v4jhjt7ossegp74t7u5b2ckmlk5swci
+  tests/test_p2p_libp2p/test_integration.py: bafybeicidfdxwbesfamxtpevhq74udl5ne5xeqt523ggc2v2enam7yenyu
   tests/test_p2p_libp2p/test_slow_queue.py: bafybeihx6dga3bxiy7i67ggf6gnoakygyf5djyzv6prias5tcjpxawlpyy
   tests/test_p2p_libp2p_client/__init__.py: bafybeihjzl7ireo5rbnxcdbghbncykgcgcbh26m4mjjofsseeflauuf6sy
   tests/test_p2p_libp2p_client/test_aea_cli.py: bafybeigcyn7yqcmfsdrrdy4dllqvkyhbdxywkfc3ikofczqqjhz4wsdr4y
@@ -34,12 +34,12 @@ fingerprint:
   tests/test_p2p_libp2p_mailbox/test_mailbox_service.py: bafybeibp3bkwkrw57qahvuysjdlumywtlk3te5gsvusgrvhsc75k7rrk4u
 fingerprint_ignore_patterns: []
 connections:
-- valory/p2p_libp2p:0.1.0:bafybeiesrebjctihckjc4axtyrrmofidtu7ngaxgzaostd4vokevm7nu6q
-- valory/p2p_libp2p_client:0.1.0:bafybeidwcobzb7ut3efegoedad7jfckvt2n6prcmd4g7xnkm6hp6aafrva
-- valory/p2p_libp2p_mailbox:0.1.0:bafybeiczoc27iefca3l5fc66e3bpxqu4ntgf5s4qpncbjsrdy4pf7cazlq
+- valory/p2p_libp2p:0.1.0:bafybeigfvt35r5blb3pp43iads6a56jolquvib5unbndkue7cgysazuxuu
+- valory/p2p_libp2p_client:0.1.0:bafybeihdnfdth3qgltefgrem7xyi4b3ejzaz67xglm2hbma2rfvpl2annq
+- valory/p2p_libp2p_mailbox:0.1.0:bafybeifmmwyfxxb3pbj5nlvk4uj5xb2ot3mfdr6ydkhrqwzvildhbsudae
 protocols:
-- fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4
-- valory/acn:1.1.0:bafybeignmc5uh3vgpuckljcj2tgg7hdqyytkm6m5b6v6mxtazdcvubibva
+- fetchai/default:1.0.0:bafybeiazamq4mogosgmr77ipita5s6sq6rfowubxf5rybfxikc772befxy
+- valory/acn:1.1.0:bafybeiapa5ilsobggnspoqhspftwolrx52udrwmaxdxgrk26heuvl4oooa
 class_name: MyScaffoldAsyncConnection
 config:
   foo: bar

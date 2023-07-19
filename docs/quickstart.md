@@ -168,7 +168,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeihhrlcmu6dibftsg36m47uxi4inltsjvmoip5smvevq3caiwm3oo4 --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeida2z2lk63dq555g72oio6salsgg36k66zndjius6ujlevomby3l4 --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -264,14 +264,14 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.21.0:bafybeiau4vkru44a4gwujp47vjg7kglxcf456dhmcuhi4lsdx2m2ykmv2a --remote
+aea add connection fetchai/stub:0.21.0:bafybeihijtaawc2adyewb3g7kta7hw6jyhyhoi7cotkzgqilves5zz7smm --remote
 ```
 <br>
 <b>Add the echo skill</b>
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.19.0:bafybeidixh2eg4bnuvmdbwwhe2m5zq6e2tc6mfn5rwvzh6eqp6v7vxyopi --remote
+aea add skill fetchai/echo:0.19.0:bafybeibyqdrhpn7ixfxw5tdvu2nwvrupof7sy3eh2ixavri74w24ik4l2i --remote
 ```
 This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
@@ -328,7 +328,7 @@ First, get the needed packages directory from IPFS (execute from the working dir
 ```bash
 mkdir packages
 cd my_first_aea
-aea add protocol fetchai/default:1.0.0:bafybeieqqzgzuappi2ped42upgzad5gt3mxiyjhojwibxm4o367ffsian4 --remote
+aea add protocol fetchai/default:1.0.0:bafybeiazamq4mogosgmr77ipita5s6sq6rfowubxf5rybfxikc772befxy --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea
