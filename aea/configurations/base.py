@@ -81,7 +81,6 @@ from aea.helpers.base import (
     load_module,
     recursive_update,
 )
-from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 # for tests
@@ -1844,6 +1843,10 @@ def _compute_fingerprint(  # pylint: disable=unsubscriptable-object
     is_recursive: bool = True,
     ignore_directories: Optional[Collection[str]] = None,
 ) -> Dict[str, str]:
+    from aea.helpers.ipfs.base import (  # pylint: disable=import-outside-toplevel
+        IPFSHashOnly,
+    )
+
     ignore_patterns = ignore_patterns if ignore_patterns is not None else []
     ignore_directories = ignore_directories if ignore_directories is not None else []
     ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
