@@ -99,6 +99,7 @@ def request_api(
             """You are not authenticated. 'Please sign in with "aea login" command."""
         )
     elif resp.status_code == 500:
+        resp_json = resp_json or {"detail": "empty response"}
         raise click.ClickException(
             "Registry internal server error: {}".format(resp_json["detail"])
         )
