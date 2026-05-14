@@ -56,7 +56,7 @@ config:
       gas_price_strategies:
         gas_station: *id001
         eip1559:
-          max_gas_fast: 1500
+          max_gas_fast: 5
           fee_history_blocks: 10
           fee_history_percentile: 5
           min_allowed_tip: 1
@@ -113,7 +113,7 @@ config:
       gas_price_strategies:
         gas_station: *id001
         eip1559:
-          max_gas_fast: 1500
+          max_gas_fast: 30
           fee_history_blocks: 10
           fee_history_percentile: 5
           min_allowed_tip: 1000000000
@@ -151,7 +151,7 @@ config:
       gas_price_strategies:
         gas_station: *id001
         eip1559:
-          max_gas_fast: 1500
+          max_gas_fast: 100
           fee_history_blocks: 10
           fee_history_percentile: 5
           min_allowed_tip: 1
@@ -170,7 +170,7 @@ config:
       gas_price_strategies:
         gas_station: *id001
         eip1559:
-          max_gas_fast: 1500
+          max_gas_fast: 100
           fee_history_blocks: 10
           fee_history_percentile: 5
           min_allowed_tip: 1
@@ -189,7 +189,7 @@ config:
       gas_price_strategies:
         gas_station: *id001
         eip1559:
-          max_gas_fast: 1500
+          max_gas_fast: 50
           fee_history_blocks: 20
           fee_history_percentile: 5
           min_allowed_tip: 1
@@ -233,7 +233,7 @@ config:
       gas_price_strategies:
         gas_station: *id001
         eip1559:
-          max_gas_fast: 1500
+          max_gas_fast: 50
           fee_history_blocks: 10
           fee_history_percentile: 5
           min_allowed_tip: 1

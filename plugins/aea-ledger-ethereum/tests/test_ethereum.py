@@ -57,12 +57,14 @@ from aea_ledger_ethereum.ethereum import (
     EIP1559,
     EIP1559_POLYGON,
     GAS_STATION,
+    GWEI,
     TIP_INCREASE,
     estimate_priority_fee,
     get_base_fee_multiplier,
     get_gas_price_strategy_eip1559_polygon,
 )
 from eth_typing import BlockNumber
+from eth_utils.currency import to_wei
 from requests import HTTPError
 from web3 import Web3
 from web3.datastructures import AttributeDict
@@ -764,14 +766,14 @@ def test_gas_price_strategy_eip1559_fallback_max_gas_fast() -> None:
 @pytest.mark.parametrize(
     "chain_id,expected_max_fee_gwei,expected_tip_gwei,expected_max_gas_fast",
     [
-        (10, 5, 3, 1500),  # Optimism
-        (8453, 5, 3, 1500),  # Base
-        (34443, 5, 3, 1500),  # Mode
-        (252, 5, 3, 1500),  # Fraxtal (OP-stack)
-        (42161, 2, 1, 1500),  # Arbitrum One — 0.1 gwei floor
+        (10, 5, 3, 100),  # Optimism — 100 gwei ceiling, Worldcoin-era headroom
+        (8453, 5, 3, 100),  # Base — 100 gwei ceiling, Mar 2024 memecoin headroom
+        (34443, 5, 3, 50),  # Mode — 50 gwei defensive ceiling
+        (252, 5, 3, 50),  # Fraxtal — 50 gwei defensive ceiling
+        (42161, 2, 1, 5),  # Arbitrum One — 5 gwei (~250x the 0.02 gwei floor)
         (42220, 50, 25, 1500),  # Celo — 25 gwei network minimum
         (137, 6000, 30, 10000),  # Polygon — tip must clear 25 gwei validator floor
-        (100, 5, 1, 1500),  # Gnosis — tuned: 1 gwei tip matches validator floor
+        (100, 5, 1, 30),  # Gnosis — 30 gwei ceiling, 1 gwei tip matches floor
         (1, 20, 3, 1500),  # Ethereum mainnet — unchanged default
         (56, 20, 3, 1500),  # BNB — unchanged (not in map)
         (324, 20, 3, 1500),  # zkSync — unchanged (not in map)
@@ -788,6 +790,80 @@ def test_get_default_gas_strategy_per_chain_fallbacks(
     assert fallback["maxFeePerGas"] == expected_max_fee_gwei * 10**9
     assert fallback["maxPriorityFeePerGas"] == expected_tip_gwei * 10**9
     assert strategy[EIP1559]["max_gas_fast"] == expected_max_gas_fast
+
+
+def _fallback_test(
+    chain_id: int, base_fee_gwei: int, expect_fallback: bool
+) -> Dict[str, Wei]:
+    """Run the eip1559 strategy for ``chain_id`` against a mocked base fee."""
+    from aea_ledger_ethereum.ethereum import EIP1559, get_default_gas_strategy
+
+    strategy_kwargs = get_default_gas_strategy(chain_id)[EIP1559]
+    callable_ = get_gas_price_strategy_eip1559(**strategy_kwargs)
+    web3 = Web3()
+    base_fee = to_wei(base_fee_gwei, GWEI)
+    get_block_mock = mock.patch.object(
+        web3.eth, "get_block", return_value={"baseFeePerGas": base_fee, "number": 1}
+    )
+    fee_history_mock = mock.patch.object(
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5)
+    )
+    with get_block_mock, fee_history_mock, mock.patch(
+        "aea_ledger_ethereum.ethereum.estimate_priority_fee",
+        new_callable=lambda: lambda *args, **kwargs: to_wei(1, GWEI),
+    ):
+        gas_strategy = callable_(web3, "tx_params")
+
+    fallback = strategy_kwargs["fallback_estimate"]
+    if expect_fallback:
+        assert (
+            gas_strategy == fallback
+        ), f"chain {chain_id}: expected fallback, got {gas_strategy}"
+    else:
+        assert (
+            gas_strategy != fallback
+        ), f"chain {chain_id}: expected computed value, got fallback {fallback}"
+    return gas_strategy
+
+
+def test_gnosis_anomaly_triggers_fallback() -> None:
+    """Gnosis: 150 gwei base fee exceeds the 30 gwei ceiling -> fallback."""
+    gas_strategy = _fallback_test(100, 150, expect_fallback=True)
+    assert gas_strategy["maxFeePerGas"] == to_wei(5, GWEI)
+    assert gas_strategy["maxPriorityFeePerGas"] == to_wei(1, GWEI)
+
+
+def test_gnosis_normal_fee_does_not_trigger_fallback() -> None:
+    """Gnosis: 2 gwei base fee stays well under the 30 gwei ceiling."""
+    gas_strategy = _fallback_test(100, 2, expect_fallback=False)
+    assert gas_strategy["maxFeePerGas"] < to_wei(30, GWEI)
+
+
+def test_base_anomaly_triggers_fallback() -> None:
+    """Base: 200 gwei base fee exceeds the 100 gwei ceiling -> fallback.
+
+    Symmetric to the Gnosis incident: Base inherits the same missing-
+    `max_gas_fast` shape from `CHAIN_EIP1559_OVERRIDES` and is now
+    explicitly capped at 100 gwei -- generous enough for the March 2024
+    Dencun memecoin congestion (sustained ~24 gwei averages with bursts
+    >100 gwei in individual blocks) but blocks oracle anomalies.
+    """
+    gas_strategy = _fallback_test(8453, 200, expect_fallback=True)
+    assert gas_strategy["maxFeePerGas"] == to_wei(5, GWEI)
+    assert gas_strategy["maxPriorityFeePerGas"] == to_wei(3, GWEI)
+
+
+def test_base_normal_fee_does_not_trigger_fallback() -> None:
+    """Base: 0.005 gwei base fee (typical post-Jovian) stays under the cap."""
+    gas_strategy = _fallback_test(8453, 1, expect_fallback=False)
+    assert gas_strategy["maxFeePerGas"] < to_wei(100, GWEI)
+
+
+def test_arbitrum_anomaly_triggers_fallback() -> None:
+    """Arbitrum One: 10 gwei base fee exceeds the 5 gwei ceiling -> fallback."""
+    gas_strategy = _fallback_test(42161, 10, expect_fallback=True)
+    assert gas_strategy["maxFeePerGas"] == to_wei(2, GWEI)
+    assert gas_strategy["maxPriorityFeePerGas"] == to_wei(1, GWEI)
 
 
 def test_get_default_gas_strategy_polygon_applies_to_eip1559_polygon() -> None:

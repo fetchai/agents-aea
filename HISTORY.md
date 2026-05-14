@@ -1,5 +1,15 @@
 # Release History - open AEA
 
+## Unreleased
+
+Plugins:
+
+- `open-aea-ledger-ethereum`: tightens `max_gas_fast` per chain in `CHAIN_EIP1559_OVERRIDES`. Until now low-fee chains (Gnosis, Optimism, Base, Mode, Fraxtal, Arbitrum One) inherited the chain-agnostic 1500 gwei default, so a fee-oracle anomaly could authorise a tx priced 100×+ above the chain's normal range before the cap engaged. A production market-creator deployment on Gnosis submitted a routine multisend at 694 gwei (~700× the validator floor of 1 gwei) on 2026-04-22 ([tx 0x727262d9…](https://gnosisscan.io/tx/0x727262d9238881e72eeaeb01bf88b234b380c6d3d2dc9e60fcb71b07354933bd)), paying 0.637 xDAI — ~45% of the agent's 30-day spend — while the inherited 1500 gwei ceiling did not trigger the fallback. New per-chain ceilings: Gnosis 30 gwei, Optimism / Base 100 gwei, Mode / Fraxtal 50 gwei, Arbitrum One 5 gwei. Sized to preserve operability during legitimate congestion (Base's March 2024 Dencun memecoin frenzy sustained ~24 gwei averages with bursts >100 gwei in individual blocks; Gnosis Tornado-deposit waves briefly hit 5–8 gwei) while bounding fee-oracle anomalies. Polygon (10000 gwei ceiling) and Celo (default 1500 gwei) are unchanged. #909
+
+Packages:
+
+- `valory/ledger` connection: aligns per-chain `max_gas_fast` in `connection.yaml` with the new plugin-level ceilings — Gnosis 30, Optimism / Base 100, Mode / Fraxtal 50, Arbitrum One 5. Self-documenting and defensible if the plugin defaults ever drift. #909
+
 ## 2.2.5 (2026-05-08)
 
 Plugins:
