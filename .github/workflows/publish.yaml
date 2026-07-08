@@ -52,6 +52,14 @@ jobs:
           ./scripts/acn/build_upload_img.sh prod
         fi
 
+    - name: Generate GitHub App token
+      uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ secrets.FETCHAI_DISPATCH_APP_ID }}
+        private-key: ${{ secrets.FETCHAI_DISPATCH_APP_KEY }}
+        repositories: infra-sandbox-london-b-deployment,infra-mainnet-v2-deployment
+
     - name: Repository Dispatch
       env:
         IMAGE_TAG: ${{ steps.vars.outputs.sha_short }}
@@ -59,7 +67,7 @@ jobs:
         if [ ${{ github.ref }} == 'refs/heads/develop' ]
         then
           curl -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Authorization: token ${{ secrets.GH_PAT }}" \
+          -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
           --request POST \
           --data '{"event_type": "agents-dht-testnet", "client_payload": {"image": "gcr.io/fetch-ai-sandbox/acn_node", "tag": "'"$IMAGE_TAG"'"}}' \
           https://api.github.com/repos/fetchai/infra-sandbox-london-b-deployment/dispatches
@@ -68,7 +76,7 @@ jobs:
         if [ ${{ github.ref }} == 'refs/heads/main' ]
         then
           curl -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Authorization: token ${{ secrets.GH_PAT }}" \
+          -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
           --request POST \
           --data '{"event_type": "agents-dht", "client_payload": {"image": "gcr.io/fetch-ai-images/acn_node", "tag": "'"$IMAGE_TAG"'"}}' \
           https://api.github.com/repos/fetchai/infra-mainnet-v2-deployment/dispatches
